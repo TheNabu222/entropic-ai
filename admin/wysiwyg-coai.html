@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ COAIEXIST Studio - Page Builder</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/genai": "https://esm.run/@google/genai"
+        }
+    }
+    </script>
+    <style>
+        /* ============================================
+           COAIEXIST STUDIO - AESTHETIC REFRESH
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* COAIEXIST BRAND COLORS */
+            --magenta: #f312af;
+            --cyan: #00ffcc;
+            --yellow: #fffb01;
+            --purple: #bf5fff;
+            --green: #00ff00;
+
+            /* Basics */
+            --white: #FFFFFF;
+            --black: #000000;
+            
+            /* Theme Variables (Modern Dark) */
+            --bg: #111827; /* Gray 900 */
+            --toolbar-bg: #1F2937; /* Gray 800 */
+            --ui-bg: #374151; /* Gray 700 */
+            --canvas-bg: #FFF;
+            --border-color: #4B5563; /* Gray 600 */
+            --accent: var(--cyan);
+            --accent-hover: var(--magenta);
+            --text-primary: #F9FAFB; /* Gray 50 */
+            --text-secondary: #9CA3AF; /* Gray 400 */
+            --border-radius: 4px;
+            --spacing: 12px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            grid-template-rows: 60px 1fr 40px;
+            grid-template-areas:
+                "toolbar toolbar toolbar"
+                "toolbox canvas sidebar"
+                "statusbar statusbar statusbar";
+            height: 100vh;
+            gap: 1px;
+            background: #000;
+        }
+
+        /* ============================================
+           TOP TOOLBAR
+           ============================================ */
+        .toolbar {
+            grid-area: toolbar;
+            background: var(--toolbar-bg);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--spacing);
+            gap: 8px;
+            flex-wrap: wrap;
+            z-index: 100;
+        }
+
+        .toolbar-title {
+            font-family: 'VT323', monospace;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--magenta);
+            text-shadow: 1px 1px var(--cyan);
+            margin-right: 20px;
+        }
+
+        .big-button {
+            background: var(--ui-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 8px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .big-button:hover {
+            background: var(--accent);
+            color: var(--black);
+            border-color: var(--accent);
+        }
+
+        .big-button:active {
+            transform: scale(0.95);
+        }
+        
+        .big-button:disabled {
+            background: #4B5563;
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .big-button.green:hover { background: var(--green); border-color: var(--green); color: var(--black); }
+        .big-button.yellow:hover { background: var(--yellow); border-color: var(--yellow); color: var(--black); }
+        .big-button.purple:hover { background: var(--purple); border-color: var(--purple); color: var(--white); }
+
+        /* ============================================
+           LEFT TOOLBOX - UI REFRESH
+           ============================================ */
+        .toolbox {
+            grid-area: toolbox;
+            background: var(--toolbar-bg);
+            overflow-y: auto;
+            padding: var(--spacing);
+        }
+
+        .tool-section {
+            margin-bottom: var(--spacing);
+        }
+
+        .tool-section-header {
+            background: var(--ui-bg);
+            color: var(--text-primary);
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s;
+        }
+        
+        .tool-section-header::before {
+            content: '▶ ';
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .tool-section.open .tool-section-header::before {
+            transform: rotate(90deg);
+        }
+
+        .tool-section-header:hover {
+            background: var(--border-color);
+        }
+
+        .tool-items {
+            padding-top: 8px;
+            display: none;
+        }
+
+        .tool-section.open .tool-items {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tool-item {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--border-radius);
+            padding: 8px 10px;
+            cursor: grab;
+            text-align: left;
+            font-size: 14px;
+            user-select: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .tool-item:hover {
+            background: var(--ui-bg);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+
+        .tool-item:active {
+            transform: translateX(0);
+            cursor: grabbing;
+        }
+        
+        .tool-sticker-grid {
+             display: grid;
+             grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+             gap: 8px;
+        }
+        
+        .tool-sticker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--ui-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 4px;
+            cursor: grab;
+        }
+        .tool-sticker:hover {
+            background: var(--accent);
+        }
+        .tool-sticker img {
+            height: 32px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+
+        /* ============================================
+           CENTER CANVAS
+           ============================================ */
+        .canvas-area {
+            grid-area: canvas;
+            background: var(--bg);
+            overflow: auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        #canvas-frame {
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--toolbar-bg);
+            background: var(--canvas-bg);
+        }
+
+        #grid-overlay {
+            display: none; 
+            position: absolute; 
+            top: 20px; left: 20px; right: 20px; bottom: 20px; 
+            pointer-events: none; 
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, #f312af44 19px, #f312af44 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, #f312af44 19px, #f312af44 20px); 
+            background-size: 20px 20px; 
+        }
+
+        /* ============================================
+           RIGHT SIDEBAR - Inspector & Layers
+           ============================================ */
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--toolbar-bg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px;
+            background: var(--toolbar-bg);
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .sidebar-tab.active {
+            background: var(--bg);
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent);
+        }
+        
+        .sidebar-panel {
+            display: none;
+            overflow-y: auto;
+            padding: var(--spacing);
+            flex-grow: 1;
+        }
+        .sidebar-panel.active {
+            display: block;
+        }
+
+        details.property-box {
+            margin-bottom: var(--spacing);
+            background: var(--ui-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        details.property-box > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 10px;
+            font-weight: bold;
+        }
+        details.property-box > summary::-webkit-details-marker { display: none; }
+        details.property-box > summary::before {
+            content: '▶ ';
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        details[open] > summary {
+             border-bottom: 1px solid var(--border-color);
+        }
+        details[open] > summary::before {
+            transform: rotate(90deg);
+        }
+        
+        .property-content {
+            padding: var(--spacing);
+            color: var(--text-primary);
+        }
+
+        .property-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .property-input, .property-textarea, .property-select {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 8px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            font-size: 14px;
+            margin-bottom: var(--spacing);
+        }
+        
+        .property-textarea { min-height: 100px; resize: vertical; }
+        
+        .property-compound { display: flex; gap: 8px; align-items: center; margin-bottom: var(--spacing); }
+        .property-compound input[type="range"] { flex: 1; margin: 0; }
+        .property-compound input[type="color"] { min-width: 36px; height: 36px; padding: 2px; border: 1px solid var(--border-color); background: transparent; cursor: pointer; border-radius: var(--border-radius);}
+        .property-compound .property-input { margin-bottom: 0; }
+        .property-input-small { width: 70px; }
+
+        .align-buttons { display: flex; gap: 4px; margin-bottom: var(--spacing); }
+        .align-buttons button { flex: 1; border: 1px solid var(--border-color); background: var(--bg); color: var(--text-primary); border-radius: var(--border-radius); padding: 5px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .align-buttons button.active { background: var(--accent); color: var(--black); }
+
+        /* GRADIENT EDITOR */
+        #background-editor-container .gradient-stop { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        #background-editor-container .gradient-stop input[type=color] { min-width: 30px; height: 30px; }
+        #background-editor-container .gradient-stop input[type=range] { flex-grow: 1; }
+        #background-editor-container .gradient-stop button { background: none; border: none; color: #ff6b6b; cursor: pointer; font-size: 20px; }
+
+        /* LAYERS PANEL */
+        .layer-list {
+            list-style: none;
+            padding: 0; margin: 0;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .layer-item {
+            background: var(--ui-bg);
+            padding: 8px 10px;
+            border-radius: var(--border-radius);
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .layer-item:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+        .layer-item.selected {
+            border-left-color: var(--accent);
+            background: var(--border-color);
+            font-weight: bold;
+            color: var(--white);
+        }
+        .layer-item.dragging { opacity: 0.5; }
+        .layer-item.drag-over { border-top: 2px solid var(--accent); }
+        .layer-item-tag { font-family: monospace; color: var(--accent); font-weight: normal; margin-right: 5px;}
+        
+        /* INTELLIGENT NAVBAR EDITOR */
+        .intelligent-nav-link-row { display: flex; gap: 4px; align-items: center; margin-bottom: 4px; }
+        .intelligent-nav-link-row input { margin-bottom: 0; }
+        .intelligent-nav-link-row button { background: none; border: none; font-size: 20px; cursor: pointer; color: #ff6b6b; flex-shrink: 0; }
+
+
+        /* ============================================
+           BOTTOM STATUS BAR
+           ============================================ */
+        .statusbar {
+            grid-area: statusbar;
+            background: var(--toolbar-bg);
+            color: var(--text-secondary);
+            padding: 0 var(--spacing);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        /* ============================================
+           MODALS - Popup Windows!
+           ============================================ */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--toolbar-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px; max-width: 600px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+            color: var(--text-primary);
+        }
+
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-title { font-size: 24px; font-weight: bold; }
+        .modal-header .big-button { background: none; border: none; font-size: 24px; padding: 0; }
+        .modal-header .big-button:hover { color: var(--accent-hover); background: none; }
+        
+        /* Loading animation etc. */
+        .loading-bar-animation { background: linear-gradient(90deg, var(--magenta), var(--cyan), var(--yellow), var(--magenta)); background-size: 200% 100%; animation: loading-bar-slide 1.5s linear infinite; }
+        @keyframes loading-bar-slide { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); padding: 8px; border-radius: var(--border-radius); }
+        .asset-item { border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 8px; background: var(--ui-bg); cursor: pointer; text-align: center; font-size: 12px; word-break: break-all; transition: background-color 0.2s; }
+        .asset-item:hover { background: var(--border-color); }
+        .asset-preview { max-width: 100%; height: 60px; margin-bottom: 4px; object-fit: contain; }
+        .navbar-link-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .experiment-box { background: var(--bg); border: 1px solid var(--border-color); padding: var(--spacing); border-radius: var(--border-radius); margin-top: 16px; }
+        .experiment-box h4 { margin-bottom: 8px; color: var(--accent); }
+        .preview-box { width: 100px; height: 100px; background: var(--magenta); margin: 10px auto; border: 1px solid var(--border-color); }
+
+        /* ============================================
+           SCROLLBARS
+           ============================================ */
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: var(--toolbar-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--ui-bg); border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-color); }
+
+        /* ============================================
+           FUN FEEDBACK
+           ============================================ */
+        .stamp { position: fixed; font-size: 48px; pointer-events: none; animation: stamp 0.5s ease-out forwards; z-index: 9999; }
+        @keyframes stamp { 0% { transform: scale(3) rotate(-30deg); opacity: 0; } 50% { transform: scale(1) rotate(10deg); opacity: 1; } 100% { transform: scale(1.2) rotate(5deg) translateY(50px); opacity: 0; } }
+        @keyframes blink-animation { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div class="editor-wrapper">
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="toolbar-title">✨ COAIEXIST STUDIO</div>
+            <button class="big-button" id="new-btn">📄 New</button>
+            <button class="big-button" id="navbar-builder-btn">🌐 Navbar</button>
+            <button class="big-button" id="ai-gen-btn" style="color: var(--magenta);">✨ AI Gen</button>
+            <button class="big-button green" id="load-btn">📂 Load</button>
+            <button class="big-button yellow" id="asset-btn">🖼️ Assets</button>
+            <button class="big-button purple" id="css-btn">🎨 CSS Lab</button>
+            <button class="big-button orange" id="js-btn">⚡ Script Engine</button>
+            <button class="big-button" id="theme-btn" style="background: linear-gradient(135deg, #f312af, #00ffcc); color: #000;">🎨 Theme</button>
+            <button class="big-button" id="undo-btn" disabled>⏪</button>
+            <button class="big-button" id="redo-btn" disabled>⏩</button>
+            <button class="big-button" id="grid-toggle-btn">Grid: OFF</button>
+            <button class="big-button" id="position-mode-btn">Mode: FLOW</button>
+            <button class="big-button" id="export-btn" style="background-color: var(--cyan); color: var(--black);">💾 Export</button>
+        </div>
+
+        <!-- LEFT TOOLBOX -->
+        <div class="toolbox">
+            <div class="tool-section open">
+                <div class="tool-section-header">📝 Text</div>
+                <div class="tool-items">
+                    <div class="tool-item" data-type="heading" draggable="true">H1</div>
+                    <div class="tool-item" data-type="paragraph" draggable="true">¶</div>
+                    <div class="tool-item" data-type="list" draggable="true">≡</div>
+                    <div class="tool-item" data-type="marquee" draggable="true">↔️</div>
+                    <div class="tool-item" data-type="blink" draggable="true">✨</div>
+                    <div class="tool-item" data-type="rainbow-text" draggable="true">🌈</div>
+                </div>
+            </div>
+            <div class="tool-section open">
+                <div class="tool-section-header">📦 Containers</div>
+                <div class="tool-items">
+                    <div class="tool-item" data-type="box" draggable="true">🔲 Box</div>
+                    <div class="tool-item" data-type="card" draggable="true">🃏 Card</div>
+                    <div class="tool-item" data-type="neon-container" draggable="true">💠 Neon</div>
+                    <div class="tool-item" data-type="window-95" draggable="true">🪟 Win95</div>
+                </div>
+            </div>
+            <div class="tool-section open">
+                <div class="tool-section-header">MEDIA & INTERACTIVE</div>
+                <div class="tool-items">
+                    <div class="tool-item" data-type="image" draggable="true">🖼️ Image</div>
+                    <div class="tool-item" data-type="button" draggable="true">🔘 Button</div>
+                    <div class="tool-item" data-type="link" draggable="true">🔗 Link</div>
+                    <div class="tool-item" data-type="cyber-button" draggable="true">👾 Cyber Btn</div>
+                    <div class="tool-item" data-type="terminal-window" draggable="true">⌨️ Terminal</div>
+                    <div class="tool-item" data-type="buddy-list" draggable="true">👤 Buddy List</div>
+                    <div class="tool-item" data-type="audio-player" draggable="true">🔊 Audio</div>
+                </div>
+            </div>
+             <div class="tool-section open">
+                <div class="tool-section-header">🖼️ Stickers & Clipart</div>
+                <div class="tool-items tool-sticker-grid" id="stickers-library">
+                    <!-- Stickers will be populated here by JS -->
+                </div>
+            </div>
+            <div class="tool-section open">
+                <div class="tool-section-header">💾 MY COMPONENTS</div>
+                <div class="tool-items" id="components-library">
+                    <!-- User-saved components will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- CANVAS -->
+        <div class="canvas-area">
+            <iframe id="canvas-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+            <div id="grid-overlay"></div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="properties">Properties</button>
+                <button class="sidebar-tab" data-tab="layers">Layers</button>
+            </div>
+            <div id="properties-panel" class="sidebar-panel active">
+                <div id="properties-container">
+                    <div style="text-align: center; color: var(--text-secondary); margin-top: 40px; font-size: 16px;">
+                        Select an element to begin editing.
+                    </div>
+                </div>
+            </div>
+            <div id="layers-panel" class="sidebar-panel">
+                <ul id="layer-list" class="layer-list">
+                    <!-- Layers will be populated here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="statusbar">
+            <div id="status-message">✨ Ready to create! ✨</div>
+            <div id="element-count">Elements: 0</div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal" id="load-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📂 Load Page</div>
+                <button class="big-button" data-close-modal="load-modal">✖️</button>
+            </div>
+            <p>Load a page from your live site to edit it.</p>
+            <select class="property-input" id="page-list-select" style="margin: 10px 0;">
+                <option value="">-- Select a Page --</option>
+            </select>
+            <p style="text-align:center; margin: 10px 0; font-weight: bold;">OR</p>
+            <input type="text" id="page-url-input" class="property-input" placeholder="Enter any URL to load...">
+            <button id="load-page-btn" class="big-button green" style="width: 100%;">Load Page</button>
+        </div>
+    </div>
+    
+    <div class="modal" id="navbar-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🌐 Navbar Builder</div>
+                <button class="big-button" data-close-modal="navbar-modal">✖️</button>
+            </div>
+            <div id="navbar-builder-form">
+                <label class="property-label">Style Preset:</label>
+                <select id="navbar-style-select" class="property-input">
+                    <option value="y2k">Y2K Link List</option>
+                    <option value="neon">Neon Glow</option>
+                    <option value="brutalist">Brutalist Buttons</option>
+                </select>
+
+                <label class="property-label">Nav Links:</label>
+                <div id="navbar-links-container">
+                    <div class="navbar-link-row">
+                        <input type="text" class="property-input" placeholder="Link Text" value="Home">
+                        <input type="text" class="property-input" placeholder="URL" value="#">
+                    </div>
+                    <div class="navbar-link-row">
+                        <input type="text" class="property-input" placeholder="Link Text" value="About">
+                        <input type="text" class="property-input" placeholder="URL" value="#">
+                    </div>
+                </div>
+                <button id="add-nav-link-btn" class="big-button" style="width:100%; margin-top: 8px;">➕ Add Link</button>
+                <hr style="margin: 20px 0; border: 1px solid var(--border-color);">
+                <button id="generate-navbar-btn" class="big-button green" style="width: 100%;">🌐 Generate Navbar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="ai-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">✨ Generate with AI</div>
+                <button class="big-button" data-close-modal="ai-modal">✖️</button>
+            </div>
+            <div style="display: flex; gap: 15px; margin-bottom: 12px; justify-content: center; font-size: 16px; user-select: none;">
+                <label><input type="radio" name="ai-mode" value="element" checked> Generate <strong>Element</strong></label>
+                <label><input type="radio" name="ai-mode" value="page"> Generate <strong>Full Page</strong></label>
+            </div>
+            <p id="ai-prompt-description" style="margin: 16px 0; font-size: 16px;">Describe a single element. (e.g., "a glitchy welcome banner")</p>
+            <textarea id="ai-prompt" class="property-input" rows="4" placeholder="e.g., a pink container with a blinking title..." style="font-size: 16px;"></textarea>
+            <button id="ai-generate-btn" class="big-button purple" style="width: 100%; margin-top: 12px; font-size: 20px; padding: 15px;">✨ Generate</button>
+            <div id="ai-loading" style="display: none; text-align: center; margin-top: 16px;">
+                <p>🤖 Generating with AI...</p>
+                <div style="width: 100%; height: 20px; background: #ddd; border: 1px solid #000; margin-top: 8px;">
+                    <div class="loading-bar-animation" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+            <div id="ai-result-container" style="display: none; margin-top: 16px;">
+                <h3>AI Preview:</h3>
+                <div id="ai-preview" style="border: 2px dashed var(--border-color); padding: 10px; min-height: 100px; background: var(--bg); resize: vertical; overflow: auto;"></div>
+                <button id="ai-action-btn" class="big-button green" style="width: 100%; margin-top: 12px;">➕ Add Element to Canvas</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="css-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header"><div class="modal-title">🎨 CSS Lab</div><button class="big-button" data-close-modal="css-modal">✖️</button></div>
+            <textarea id="css-editor" class="property-input" rows="10" style="font-family: monospace;"></textarea>
+            <button id="apply-css-btn" class="big-button green" style="width: 100%; margin-bottom: 16px;">Apply to Page</button>
+            
+            <div class="experiment-box">
+                <h4>Animation Builder</h4>
+                <div id="animation-builder">
+                    <input type="text" id="anim-name" class="property-input" placeholder="Animation Name (e.g., 'spin')">
+                    <div id="anim-keyframes">
+                        <div class="anim-keyframe-row" style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                            <input type="text" class="property-input" value="0%" style="flex-basis: 50px;">
+                            <input type="text" class="property-input" placeholder="e.g., transform: rotate(0deg);" style="flex-grow: 1;">
+                        </div>
+                         <div class="anim-keyframe-row" style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px;">
+                            <input type="text" class="property-input" value="100%" style="flex-basis: 50px;">
+                            <input type="text" class="property-input" placeholder="e.g., transform: rotate(360deg);" style="flex-grow: 1;">
+                        </div>
+                    </div>
+                    <button id="add-keyframe-btn" class="big-button" style="width: 100%; margin-bottom: 8px;">+ Add Keyframe</button>
+                    <div class="preview-box" id="anim-preview"></div>
+                    <button id="generate-anim-btn" class="big-button purple" style="width: 100%;">Generate & Append CSS</button>
+                </div>
+            </div>
+
+            <div class="experiment-box">
+                <h4>Filter Playground</h4>
+                <div id="filter-playground" style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px; align-items: center;">
+                    <label>Blur:</label> <input type="range" data-filter="blur" min="0" max="10" step="0.1" value="0">
+                    <label>Brightness:</label> <input type="range" data-filter="brightness" min="0" max="2" step="0.1" value="1">
+                    <label>Contrast:</label> <input type="range" data-filter="contrast" min="0" max="2" step="0.1" value="1">
+                    <label>Saturate:</label> <input type="range" data-filter="saturate" min="0" max="3" step="0.1" value="1">
+                    <label>Hue:</label> <input type="range" data-filter="hue-rotate" min="0" max="360" step="1" value="0">
+                </div>
+                <img src="https://coaiexist.wtf/assets/entity/anzu/anzu_selfie1.png" id="filter-preview" style="width: 100%; max-width: 200px; margin: 10px auto; display: block; transition: filter 0.1s;">
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="js-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header"><div class="modal-title">⚡ Script Engine</div><button class="big-button" data-close-modal="js-modal">✖️</button></div>
+            <textarea id="js-editor" class="property-input" rows="15" style="font-family: monospace;"></textarea>
+            <button id="apply-js-btn" class="big-button orange" style="width: 100%;">Apply to Page</button>
+            <div class="experiment-box">
+                <h4>Libraries</h4>
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Inject powerful libraries and starter code into your project.</p>
+                <div id="js-library-grid" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                   <button class="big-button" data-library="threejs">📦 3D Cube (Three.js)</button>
+                   <button class="big-button" data-library="p5js">🎨 Interactive Canvas (p5.js)</button>
+                </div>
+            </div>
+             <div class="experiment-box">
+                <h4>Snippets</h4>
+                 <div id="js-snippet-grid" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+             </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="asset-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header"><div class="modal-title">🖼️ Asset Browser</div><button class="big-button" data-close-modal="asset-modal">✖️</button></div>
+             <select class="property-input" id="asset-category-select">
+                <option value="">-- Choose Asset Category --</option>
+             </select>
+            <input type="text" id="asset-search" class="property-input" placeholder="Search assets..." style="margin-top: 8px;">
+            <div class="asset-grid" id="asset-grid"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="export-modal">
+        <div class="modal-content" style="max-width: 90vw; width: 1200px;">
+            <div class="modal-header"><div class="modal-title">💾 Export Code</div><button class="big-button" data-close-modal="export-modal">✖️</button></div>
+            <p>Here is the full HTML of your created page. Copy and save it as an .html file!</p>
+            <textarea id="export-code" class="property-input" rows="20" style="font-family: monospace; font-size: 12px;"></textarea>
+            <button id="copy-code-btn" class="big-button green" style="width: 100%;">📋 Copy to Clipboard</button>
+        </div>
+    </div>
+
+    <div class="modal" id="html-editor-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header"><div class="modal-title">⚙️ Edit Inner HTML</div><button class="big-button" data-close-modal="html-editor-modal">✖️</button></div>
+            <p>Warning: Editing HTML directly can break element styling. Proceed with caution!</p>
+            <textarea id="html-editor-textarea" class="property-input" rows="15" style="font-family: monospace;"></textarea>
+            <button id="apply-html-btn" class="big-button green" style="width: 100%;">Apply HTML</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { GoogleGenAI } from "@google/genai";
+
+        // ============================================
+        // STATE & SETUP
+        // ============================================
+        let selectedElement = null;
+        let copiedElementHtml = null;
+        let history = [];
+        let historyIndex = -1;
+        const MAX_HISTORY = 50;
+        let positionMode = 'flow'; // 'flow' or 'free'
+        let gridEnabled = false;
+        const GRID_SIZE = 20;
+        let draggedToolType = null;
+
+        const sounds = {};
+
+        const dom = {
+            canvasFrame: document.getElementById('canvas-frame'),
+            propertiesContainer: document.getElementById('properties-container'),
+            statusMessage: document.getElementById('status-message'),
+            elementCount: document.getElementById('element-count'),
+            undoBtn: document.getElementById('undo-btn'),
+            redoBtn: document.getElementById('redo-btn'),
+            gridBtn: document.getElementById('grid-toggle-btn'),
+            positionBtn: document.getElementById('position-mode-btn'),
+            componentsLibrary: document.getElementById('components-library'),
+            layerList: document.getElementById('layer-list'),
+        };
+
+        function initializeSounds() {
+            if (typeof Tone !== 'undefined') {
+                sounds.pop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
+                sounds.boop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
+                sounds.success = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination();
+                sounds.error = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sawtooth' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
+            } else {
+                console.warn("Tone.js not found. Sound effects will be disabled.");
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        window.addEventListener('load', () => {
+            initializeSounds();
+            initCanvas();
+            loadComponents();
+            updateStatus('✨ Ready to create! ✨');
+            setupEventListeners();
+            setupKeyboardShortcuts();
+            populateAssetBrowser();
+            populateSnippets();
+            loadSavedTheme();
+            populatePageLoader();
+            populateStickers();
+            setupCssLabListeners();
+            setupJsEngineListeners();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('new-btn').addEventListener('click', () => {
+                if (confirm('Are you sure you want to start a new page? Any unsaved work will be lost.')) {
+                    initCanvas();
+                }
+            });
+            document.getElementById('navbar-builder-btn').addEventListener('click', () => openModal('navbar-modal'));
+            document.getElementById('ai-gen-btn').addEventListener('click', () => openModal('ai-modal'));
+            document.getElementById('load-btn').addEventListener('click', () => openModal('load-modal'));
+            document.getElementById('asset-btn').addEventListener('click', () => openModal('asset-modal'));
+            document.getElementById('css-btn').addEventListener('click', () => openModal('css-modal'));
+            document.getElementById('js-btn').addEventListener('click', () => openModal('js-modal'));
+            document.getElementById('theme-btn').addEventListener('click', cycleTheme);
+            document.getElementById('export-btn').addEventListener('click', exportCode);
+            dom.undoBtn.addEventListener('click', undo);
+            dom.redoBtn.addEventListener('click', redo);
+            dom.gridBtn.addEventListener('click', toggleGrid);
+            dom.positionBtn.addEventListener('click', togglePositionMode);
+            
+            attachToolItemListeners(document.querySelectorAll('.tool-item'));
+
+            document.querySelectorAll('.tool-section-header').forEach(header => {
+                header.addEventListener('click', () => toggleSection(header));
+            });
+            document.querySelectorAll('[data-close-modal]').forEach(btn => {
+                btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+            });
+            document.getElementById('load-page-btn').addEventListener('click', () => {
+                const selectedUrl = document.getElementById('page-list-select').value;
+                const manualUrl = document.getElementById('page-url-input').value;
+                const urlToLoad = manualUrl || selectedUrl;
+                if (urlToLoad) {
+                    loadPage(urlToLoad);
+                    closeModal('load-modal');
+                } else {
+                    alert('Please select a page or enter a URL.');
+                }
+            });
+            document.getElementById('ai-generate-btn').addEventListener('click', handleAIGenerate);
+            document.getElementById('ai-action-btn').addEventListener('click', handleAIAction);
+            document.getElementById('apply-css-btn').addEventListener('click', applyCustomCSS);
+            document.getElementById('apply-js-btn').addEventListener('click', applyCustomJS);
+            document.getElementById('copy-code-btn').addEventListener('click', copyExportCode);
+            document.getElementById('add-nav-link-btn').addEventListener('click', addNavLinkRow);
+            document.getElementById('generate-navbar-btn').addEventListener('click', generateNavbar);
+            document.getElementById('apply-html-btn').addEventListener('click', applyCustomHTML);
+            document.getElementById('asset-category-select').addEventListener('change', (e) => browseAssets(e.target.value));
+            document.getElementById('asset-search').addEventListener('input', (e) => filterAssets(e.target.value));
+            
+            document.querySelectorAll('.sidebar-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.querySelectorAll('.sidebar-panel').forEach(p => p.classList.remove('active'));
+                    document.getElementById(`${tabName}-panel`).classList.add('active');
+                });
+            });
+
+            setupAIModalListeners();
+        }
+        
+        function attachToolItemListeners(items) {
+             items.forEach(item => {
+                if (item.dataset.listenerAttached) return;
+                item.dataset.listenerAttached = 'true';
+                item.addEventListener('click', (e) => {
+                    if (e.currentTarget.dataset.type) addElement(e.currentTarget.dataset.type);
+                    else if (e.currentTarget.dataset.componentHtml) addElementHTML(e.currentTarget.dataset.componentHtml);
+                });
+                item.addEventListener('dragstart', (e) => {
+                    draggedToolType = e.currentTarget.dataset.type || e.currentTarget.dataset.componentHtml;
+                    e.dataTransfer.effectAllowed = 'copy';
+                });
+                item.addEventListener('dragend', () => { draggedToolType = null; });
+            });
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function playSound(type, note = 'C5') {
+            try { if (sounds[type]) { sounds[type].triggerAttackRelease(note, '16n'); } } catch (e) { console.error("Sound error:", e); }
+        }
+        function showStamp(emoji) {
+            const stamp = document.createElement('div');
+            stamp.className = 'stamp';
+            stamp.textContent = emoji;
+            stamp.style.left = (Math.random() * 0.6 + 0.2) * window.innerWidth + 'px';
+            stamp.style.top = (Math.random() * 0.6 + 0.2) * window.innerHeight + 'px';
+            document.body.appendChild(stamp);
+            setTimeout(() => stamp.remove(), 500);
+        }
+        function updateStatus(message) { dom.statusMessage.textContent = message; }
+        function updateElementCount() {
+            const count = getCanvasDoc()?.body.querySelectorAll(':scope > .canvas-element').length || 0;
+            dom.elementCount.textContent = `Elements: ${count}`;
+        }
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if(modal) modal.classList.add('active');
+            playSound('pop');
+        }
+        function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
+        function toggleSection(header) {
+            header.parentElement.classList.toggle('open');
+            playSound('boop', 'A4');
+        }
+        function getCanvasDoc() { return dom.canvasFrame.contentDocument || (dom.canvasFrame.contentWindow && dom.canvasFrame.contentWindow.document); }
+        function rgbToHex(rgbStr) {
+            if (!rgbStr || typeof rgbStr !== 'string') return '#000000';
+            if (rgbStr.startsWith('#')) return rgbStr;
+            const match = rgbStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+            if (!match) return '#000000';
+            return "#" + ((1 << 24) + (+match[1] << 16) + (+match[2] << 8) + +match[3]).toString(16).slice(1).toUpperCase();
+        }
+        function generateUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
+
+        // ============================================
+        // CANVAS & PAGE MANAGEMENT
+        // ============================================
+        function initCanvas(htmlContent = '') {
+            const doc = getCanvasDoc();
+            if (!doc) return;
+            const content = htmlContent || '<div style="padding: 40px; text-align: center; color: #999;">🎨 Drag stuff here to start creating! 🎨</div>';
+            doc.open();
+            doc.write(`
+                <!DOCTYPE html>
+                <html><head><base href="${window.location.origin}"><style id="custom-styles"></style><style id="editor-styles">${getEditorStyles()}</style></head>
+                <body style="height: 100%; position: relative;">${content}<script id="custom-scripts"><\/script></body></html>`);
+            doc.close();
+            setTimeout(() => {
+                setupCanvasInteraction();
+                saveState(true);
+                clearProperties();
+                selectedElement = null;
+            }, 100);
+        }
+
+        async function loadPage(url) {
+            updateStatus(`Loading page from ${url}...`);
+            try {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                const parser = new DOMParser();
+                const fetchedDoc = parser.parseFromString(data.contents, 'text/html');
+                const canvasDoc = getCanvasDoc();
+                if (!canvasDoc) return;
+                const cssContent = Array.from(fetchedDoc.querySelectorAll('style')).map(s => s.textContent).join('\n\n');
+                const jsContent = Array.from(fetchedDoc.querySelectorAll('script:not([src])')).map(s => s.textContent).join('\n\n');
+                document.getElementById('css-editor').value = cssContent;
+                document.getElementById('js-editor').value = jsContent;
+                initCanvas(fetchedDoc.body.innerHTML);
+                applyCustomCSS();
+                applyCustomJS();
+                updateStatus(`✅ Page loaded successfully!`);
+                playSound('success', 'G5');
+                showStamp('📂');
+            } catch (error) {
+                console.error("Failed to load page:", error);
+                updateStatus(`❌ Error loading page: ${error.message}`);
+                alert(`Could not load page. This might be due to CORS policy. Try another URL.`);
+                playSound('error', 'C4');
+            }
+        }
+
+        function getEditorStyles() { return `body { min-height: 100%; } .canvas-element { position: relative; border: 1px dashed transparent; transition: border-color 0.2s; min-height: 20px; } .canvas-element:hover { border-color: #00FFFF; } .canvas-element.selected { border: 2px solid #f312af !important; z-index: 1000 !important; } .canvas-element.highlight { border: 2px dashed #00ffcc !important; } .canvas-element.free-mode { cursor: move; } .canvas-element.flow-mode { cursor: grab; } .canvas-element.flow-mode.dragging { opacity: 0.5; border-style: solid; } .canvas-element.drag-over { border-top: 3px solid #f312af; } .resize-handle { position: absolute; width: 10px; height: 10px; background: #f312af; border: 1px solid var(--white); z-index: 1001; border-radius: 50%; } .resize-handle-nw { top: -5px; left: -5px; cursor: nwse-resize; } .resize-handle-ne { top: -5px; right: -5px; cursor: nesw-resize; } .resize-handle-sw { bottom: -5px; left: -5px; cursor: nesw-resize; } .resize-handle-se { bottom: -5px; right: -5px; cursor: nwse-resize; } .resize-handle-n { top: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; } .resize-handle-s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; } .resize-handle-w { top: 50%; left: -5px; transform: translateY(-50%); cursor: ew-resize; } .resize-handle-e { top: 50%; right: -5px; transform: translateY(-50%); cursor: ew-resize; } [contenteditable="true"] { outline: 1px solid #00FFFF; background: rgba(0, 255, 255, 0.1); }`; }
+        function setupCanvasInteraction() {
+            const doc = getCanvasDoc();
+            if (!doc || !doc.body) return;
+            const selector = 'p, h1, h2, h3, h4, h5, h6, div, section, article, header, footer, nav, main, img, button, a, ul, ol, li, blockquote, figure, table, marquee, pre, span, audio';
+            doc.body.querySelectorAll(selector).forEach(el => {
+                if (el.closest('.canvas-element') || el.classList.contains('canvas-element')) return;
+                if (['BODY', 'HTML', 'SCRIPT', 'STYLE'].includes(el.tagName)) return;
+                const wrapper = doc.createElement('div');
+                wrapper.classList.add('canvas-element');
+                el.parentNode.insertBefore(wrapper, el);
+                wrapper.appendChild(el);
+            });
+            Array.from(doc.body.querySelectorAll('.canvas-element')).forEach(el => {
+                if (!el.dataset.elementId) el.dataset.elementId = generateUID();
+                el.addEventListener('click', (e) => { e.stopPropagation(); handleElementSelect(e.currentTarget); });
+                el.addEventListener('dblclick', (e) => {
+                    e.stopPropagation(); e.preventDefault();
+                    let target = e.target;
+                    if (target.classList.contains('canvas-element')) { target = target.querySelector('p, h1, h2, h3, h4, span, a, li, button') || target.firstElementChild || target; }
+                    if (['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'SPAN', 'A', 'LI', 'BUTTON', 'DIV'].includes(target.tagName)) { makeTextEditable(target); }
+                });
+                el.removeEventListener('mousedown', initDrag);
+                el.removeEventListener('dragstart', handleDragStart);
+                if (positionMode === 'free') {
+                    el.classList.add('free-mode'); el.classList.remove('flow-mode'); el.setAttribute('draggable', 'false'); el.addEventListener('mousedown', initDrag);
+                } else {
+                    el.classList.add('flow-mode'); el.classList.remove('free-mode'); el.setAttribute('draggable', 'true');
+                    el.addEventListener('dragstart', handleDragStart); el.addEventListener('dragover', handleDragOver);
+                    el.addEventListener('dragleave', handleDragLeave); el.addEventListener('drop', handleDrop);
+                    el.addEventListener('dragend', handleDragEnd);
+                }
+            });
+            doc.body.addEventListener('click', (e) => { if (e.target === doc.body) handleElementSelect(null); });
+            doc.body.addEventListener('dragover', (e) => { if (draggedToolType) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
+            doc.body.addEventListener('drop', (e) => {
+                if (draggedToolType) {
+                    e.preventDefault(); e.stopPropagation();
+                    let newElementWrapper;
+                    if (draggedToolType.startsWith('<')) { newElementWrapper = createElementHTML(draggedToolType); }
+                    else { newElementWrapper = createElement(draggedToolType); }
+
+                    if (!newElementWrapper) return;
+                    const doc = getCanvasDoc();
+                    const placeholder = doc.body.querySelector('div:not(.canvas-element)');
+                    if (placeholder && placeholder.textContent.includes('Drag stuff here')) { placeholder.remove(); }
+                    if (positionMode === 'free') {
+                        const canvasRect = dom.canvasFrame.getBoundingClientRect();
+                        let x = e.clientX - canvasRect.left + doc.documentElement.scrollLeft;
+                        let y = e.clientY - canvasRect.top + doc.documentElement.scrollTop;
+                        if (gridEnabled) { x = Math.round(x / GRID_SIZE) * GRID_SIZE; y = Math.round(y / GRID_SIZE) * GRID_SIZE; }
+                        newElementWrapper.style.left = `${x}px`; newElementWrapper.style.top = `${y}px`;
+                        doc.body.appendChild(newElementWrapper);
+                    } else {
+                        const iframeRect = dom.canvasFrame.getBoundingClientRect();
+                        const dropTarget = Array.from(doc.elementsFromPoint(e.clientX - iframeRect.left, e.clientY - iframeRect.top)).find(el => el.classList.contains('canvas-element'));
+                        if (dropTarget) {
+                            const targetRect = dropTarget.getBoundingClientRect();
+                            if (e.clientY - targetRect.top < targetRect.height / 2) { dropTarget.parentNode.insertBefore(newElementWrapper, dropTarget); } else { dropTarget.parentNode.insertBefore(newElementWrapper, dropTarget.nextSibling); }
+                        } else { doc.body.appendChild(newElementWrapper); }
+                    }
+                    setupCanvasInteraction(); handleElementSelect(newElementWrapper); saveState(); playSound('success', 'E5'); showStamp('✨');
+                }
+            });
+            updateElementCount();
+            renderLayersPanel();
+        }
+
+        // ============================================
+        // HISTORY (UNDO/REDO)
+        // ============================================
+        function saveState(isInitial = false) {
+            const html = getCanvasDoc()?.body.innerHTML;
+            if (!html || (history[historyIndex] === html && !isInitial)) return;
+            if (historyIndex < history.length - 1) { history = history.slice(0, historyIndex + 1); }
+            history.push(html);
+            if (history.length > MAX_HISTORY) { history.shift(); }
+            historyIndex = history.length - 1;
+            updateUndoRedoButtons();
+            renderLayersPanel();
+        }
+        function undo() { if (historyIndex > 0) { historyIndex--; restoreState(history[historyIndex]); playSound('pop', 'D5'); showStamp('⏪'); } }
+        function redo() { if (historyIndex < history.length - 1) { historyIndex++; restoreState(history[historyIndex]); playSound('pop', 'E5'); showStamp('⏩'); } }
+        function restoreState(html) {
+            selectedElement = null; clearProperties();
+            const doc = getCanvasDoc();
+            if (doc) { doc.body.innerHTML = html; setupCanvasInteraction(); updateUndoRedoButtons(); }
+        }
+        function updateUndoRedoButtons() {
+            dom.undoBtn.disabled = historyIndex <= 0;
+            dom.redoBtn.disabled = historyIndex >= history.length - 1;
+        }
+
+        // ============================================
+        // ELEMENT MANIPULATION
+        // ============================================
+        function createElement(type) {
+            const html = elementTemplates[type] || stickerTemplates[type] || `<div>Unknown element: ${type}</div>`;
+            return createElementHTML(html);
+        }
+        function createElementHTML(html) {
+            const wrapper = document.createElement('div'); wrapper.innerHTML = html;
+            const newElement = wrapper.firstElementChild;
+            const doc = getCanvasDoc(); if (!doc || !newElement) return null;
+            const elementWrapper = doc.createElement('div');
+            elementWrapper.classList.add('canvas-element');
+            elementWrapper.dataset.elementId = generateUID();
+            if (positionMode === 'free') {
+                 elementWrapper.classList.add('free-mode'); elementWrapper.style.position = 'absolute'; elementWrapper.style.left = '50px'; elementWrapper.style.top = '50px';
+                 elementWrapper.style.width = newElement.style.width || 'auto';
+                 elementWrapper.style.height = newElement.style.height || 'auto';
+            } else { elementWrapper.classList.add('flow-mode'); }
+            elementWrapper.appendChild(newElement);
+            return elementWrapper;
+        }
+        function addElement(type) {
+            const newElementWrapper = createElement(type);
+            if (!newElementWrapper) return;
+            const doc = getCanvasDoc(); if (!doc) return;
+            const placeholder = doc.body.querySelector('div:not(.canvas-element)');
+            if(placeholder && placeholder.textContent.includes('Drag stuff here')) { placeholder.remove(); }
+            doc.body.appendChild(newElementWrapper);
+            setupCanvasInteraction(); handleElementSelect(newElementWrapper); saveState(); playSound('success', 'E5'); showStamp('✨');
+        }
+        function addElementHTML(html) {
+            const newElementWrapper = createElementHTML(html);
+            if (!newElementWrapper) return;
+            const doc = getCanvasDoc(); if (!doc) return;
+            const placeholder = doc.body.querySelector('div:not(.canvas-element)');
+            if(placeholder && placeholder.textContent.includes('Drag stuff here')) { placeholder.remove(); }
+            doc.body.appendChild(newElementWrapper);
+            setupCanvasInteraction(); handleElementSelect(newElementWrapper); saveState(); playSound('success', 'E5'); showStamp('✨');
+        }
+        function handleElementSelect(el) {
+            const doc = getCanvasDoc();
+            doc.querySelectorAll('.resize-handle').forEach(h => h.remove());
+            if (selectedElement) { selectedElement.classList.remove('selected'); }
+            if (el) {
+                el.classList.add('selected'); selectedElement = el; renderProperties(el);
+                if (positionMode === 'free') {
+                    ['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se'].forEach(dir => {
+                        const handle = doc.createElement('div');
+                        handle.className = `resize-handle resize-handle-${dir}`; handle.dataset.direction = dir;
+                        el.appendChild(handle); handle.addEventListener('mousedown', initResize);
+                    });
+                }
+            } else { selectedElement = null; clearProperties(); }
+            updateLayerSelection();
+        }
+        function deleteSelectedElement() {
+            if (selectedElement) {
+                selectedElement.remove(); selectedElement = null; clearProperties();
+                saveState(); playSound('error', 'C4'); showStamp('🗑️'); updateElementCount();
+            }
+        }
+        function makeTextEditable(el) {
+            el.setAttribute('contenteditable', 'true'); el.focus(); playSound('boop', 'F5');
+            const onBlur = () => {
+                el.removeAttribute('contenteditable');
+                el.removeEventListener('blur', onBlur); el.removeEventListener('keydown', onKeydown);
+                saveState(); playSound('success', 'G5');
+                if (selectedElement && selectedElement.contains(el)) { renderProperties(selectedElement); }
+            };
+            const onKeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); } else if (e.key === 'Escape') { el.blur(); } };
+            el.addEventListener('blur', onBlur); el.addEventListener('keydown', onKeydown);
+        }
+
+        // ============================================
+        // PROPERTIES PANEL
+        // ============================================
+        function renderProperties(el) {
+            const content = el.firstElementChild; if (!content) return;
+            const canvasWindow = dom.canvasFrame.contentWindow; if (!canvasWindow) return;
+            const computedStyle = canvasWindow.getComputedStyle(content);
+            const computedContainerStyle = canvasWindow.getComputedStyle(el);
+            
+            let attributesHtml = ''; let intelligentHtml = '';
+            const tagName = content.tagName.toUpperCase();
+            if (tagName === 'IMG' || tagName === 'AUDIO') { attributesHtml += `<label class="property-label">Source URL (src)</label><input type="text" class="property-input" value="${content.getAttribute('src') || ''}" data-prop="src">`; }
+            if (tagName === 'A') { attributesHtml += `<label class="property-label">Link URL (href)</label><input type="text" class="property-input" value="${content.getAttribute('href') || ''}" data-prop="href">`; }
+            if (content.querySelector('nav a')) { intelligentHtml = renderNavbarProperties(content); }
+
+            dom.propertiesContainer.innerHTML = `
+                ${intelligentHtml}
+                <details class="property-box" open>
+                    <summary>Content</summary>
+                    <div class="property-content">
+                        <label class="property-label">Inner Text</label>
+                        <textarea class="property-textarea" data-prop-content="innerText">${content.innerText}</textarea>
+                    </div>
+                </details>
+                <details class="property-box" open>
+                    <summary>Typography</summary>
+                    <div class="property-content">
+                        <label class="property-label">Font Family</label>
+                        <select class="property-select" data-style="fontFamily"><option value="">(default)</option><option value="VT323, monospace">VT323</option><option value="Courier New, monospace">Courier New</option><option value="'Inter', sans-serif">Inter</option><option value="Arial, sans-serif">Arial</option><option value="Times New Roman, serif">Times New Roman</option></select>
+                        <label class="property-label">Font Size</label>
+                        <div class="property-compound"><input type="range" min="8" max="120" value="${parseInt(computedStyle.fontSize)}" data-style-slider="fontSize"><input type="text" class="property-input property-input-small" value="${computedStyle.fontSize}" data-style-text="fontSize"></div>
+                        <label class="property-label">Color</label>
+                        <div class="property-compound"><input type="color" value="${rgbToHex(computedStyle.color)}" data-style-color="color"><input type="text" class="property-input" value="${computedStyle.color}" data-style-text="color"></div>
+                        <label class="property-label">Text Align</label>
+                        <div class="align-buttons" data-style-buttons="textAlign"><button data-value="left" title="Left">⬅️</button><button data-value="center" title="Center">↔️</button><button data-value="right" title="Right">➡️</button><button data-value="justify" title="Justify">🟰</button></div>
+                    </div>
+                </details>
+                 <details class="property-box" open>
+                    <summary>Background</summary>
+                    <div class="property-content" id="background-editor-container"></div>
+                </details>
+                 <details class="property-box">
+                    <summary>Layout</summary>
+                    <div class="property-content">
+                        <label class="property-label">Width:</label><input type="text" class="property-input" value="${computedContainerStyle.width}" data-container-style="width">
+                        <label class="property-label">Height:</label><input type="text" class="property-input" value="${computedContainerStyle.height}" data-container-style="height">
+                        <label class="property-label">Padding:</label><input type="text" class="property-input" value="${computedStyle.padding}" data-style="padding">
+                        <label class="property-label">Margin:</label><input type="text" class="property-input" value="${computedContainerStyle.margin}" data-container-style="margin">
+                         <label class="property-label">Opacity</label>
+                         <div class="property-compound"><input type="range" min="0" max="1" step="0.05" value="${computedStyle.opacity}" data-style-slider="opacity"><input type="text" class="property-input property-input-small" value="${computedStyle.opacity}" data-style-text="opacity"></div>
+                        <label class="property-label">Border</label><input type="text" class="property-input" placeholder="e.g., 3px solid black" value="${computedStyle.border}" data-style="border">
+                    </div>
+                </details>
+                 <details class="property-box">
+                    <summary>Info & Attributes</summary>
+                    <div class="property-content">
+                        <p><strong>Tag:</strong> &lt;${content.tagName.toLowerCase()}&gt;</p>
+                        ${attributesHtml}
+                        <label class="property-label">ID:</label><input type="text" class="property-input" value="${content.id || ''}" data-prop="id">
+                        <label class="property-label">Classes:</label><input type="text" class="property-input" value="${content.className.replace('canvas-element','').trim() || ''}" data-prop="className">
+                    </div>
+                </details>
+                <div class="property-content" style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="big-button" id="wrap-element-btn" style="width:100%;">🎁 Wrap In...</button>
+                    <button class="big-button orange" id="edit-html-btn" style="width:100%;">⚙️ Edit Inner HTML</button>
+                    <button class="big-button yellow" id="save-component-btn" style="width:100%;">💾 Save as Component</button>
+                    <button class="big-button" id="delete-element-btn" style="width:100%; background: #ef4444; color: white;">🗑️ Delete Element</button>
+                </div>`;
+
+            setupPropertyListeners();
+            renderBackgroundEditor(content, computedStyle);
+        }
+
+        function setupPropertyListeners() {
+            const propsContainer = dom.propertiesContainer;
+            propsContainer.querySelector('[data-prop-content]')?.addEventListener('input', e => { if (selectedElement) selectedElement.firstElementChild[e.target.dataset.propContent] = e.target.value; });
+            propsContainer.querySelector('[data-prop-content]')?.addEventListener('change', saveState);
+            propsContainer.querySelectorAll('[data-style-color]').forEach(colorInput => { const textInput = propsContainer.querySelector(`[data-style-text="${colorInput.dataset.styleColor}"]`); colorInput.addEventListener('input', e => { textInput.value = e.target.value; if (selectedElement) selectedElement.firstElementChild.style[colorInput.dataset.styleColor] = e.target.value; }); textInput.addEventListener('change', e => { if (selectedElement) { selectedElement.firstElementChild.style[colorInput.dataset.styleColor] = e.target.value; saveState(); } }); colorInput.addEventListener('change', saveState); });
+            propsContainer.querySelectorAll('[data-style-slider]').forEach(slider => { const textInput = propsContainer.querySelector(`[data-style-text="${slider.dataset.styleSlider}"]`); const isPixel = slider.dataset.styleSlider === 'fontSize'; slider.addEventListener('input', e => { textInput.value = isPixel ? `${e.target.value}px` : e.target.value; if (selectedElement) selectedElement.firstElementChild.style[slider.dataset.styleSlider] = textInput.value; }); textInput.addEventListener('change', e => { if (selectedElement) { selectedElement.firstElementChild.style[slider.dataset.styleSlider] = e.target.value; saveState(); } }); slider.addEventListener('change', saveState); });
+            propsContainer.querySelectorAll('.property-select[data-style]').forEach(select => { select.value = selectedElement.firstElementChild.style[select.dataset.style].replace(/"/g, ''); select.addEventListener('change', e => { if (selectedElement) { selectedElement.firstElementChild.style[select.dataset.style] = e.target.value; saveState(); } }); });
+            propsContainer.querySelectorAll('[data-style-buttons]').forEach(group => { const property = group.dataset.styleButtons; const currentVal = selectedElement.firstElementChild.style[property]; group.querySelectorAll('button').forEach(btn => { if (btn.dataset.value === currentVal) btn.classList.add('active'); btn.addEventListener('click', () => { if (selectedElement) { group.querySelectorAll('button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); selectedElement.firstElementChild.style[property] = btn.dataset.value; saveState(); } }); }); });
+            propsContainer.querySelectorAll('input[data-style], input[data-container-style], input[data-prop]').forEach(input => { input.addEventListener('change', (e) => { if (!selectedElement) return; const target = e.target; const elToStyle = target.hasAttribute('data-container-style') ? selectedElement : selectedElement.firstElementChild; const prop = target.dataset.style || target.dataset.containerStyle || target.dataset.prop; const value = target.value; if (target.hasAttribute('data-prop')) { if (prop === 'className') { elToStyle.className = value; } else { elToStyle.setAttribute(prop, value); } } else { elToStyle.style.setProperty(prop, value); } saveState(); }); });
+            
+            // Action Buttons
+            document.getElementById('edit-html-btn')?.addEventListener('click', openHtmlEditor);
+            document.getElementById('delete-element-btn')?.addEventListener('click', deleteSelectedElement);
+            document.getElementById('save-component-btn')?.addEventListener('click', saveSelectedAsComponent);
+            document.getElementById('wrap-element-btn')?.addEventListener('click', wrapSelectedElement);
+
+            // Intellisense listeners
+            document.getElementById('intelligent-nav-editor')?.addEventListener('input', e => { if(e.target.matches('input')) updateNavbarFromIntelligentEditor(); });
+            document.getElementById('intelligent-nav-editor')?.addEventListener('click', e => { if(e.target.matches('button')) updateNavbarFromIntelligentEditor(e.target); });
+        }
+        
+        function renderBackgroundEditor(element, computedStyle) {
+            const container = document.getElementById('background-editor-container'); if (!container) return;
+            const bgImage = computedStyle.backgroundImage;
+            if (bgImage && bgImage.includes('gradient')) {
+                const gradientData = parseGradient(bgImage);
+                container.innerHTML = `<label class="property-label">Type</label><select class="property-input" id="gradient-type"><option value="linear-gradient" ${gradientData.type === 'linear-gradient' ? 'selected' : ''}>Linear</option><option value="radial-gradient" ${gradientData.type === 'radial-gradient' ? 'selected' : ''}>Radial</option></select><div id="gradient-angle-container" style="display: ${gradientData.type === 'linear-gradient' ? 'block' : 'none'};"><label class="property-label">Angle</label><div class="property-compound"><input type="range" id="gradient-angle" min="0" max="360" value="${parseInt(gradientData.direction) || 0}"><input type="text" class="property-input property-input-small" id="gradient-angle-text" value="${gradientData.direction}"></div></div><label class="property-label">Color Stops</label><div id="gradient-stops"></div><button id="add-gradient-stop" class="big-button" style="width: 100%; margin-top: 8px;">+ Add Color</button>`;
+                const stopsContainer = document.getElementById('gradient-stops');
+                gradientData.stops.forEach((stop, index) => { addGradientStopUI(stopsContainer, stop.color, stop.position, index); });
+                container.addEventListener('input', updateElementBackground); container.addEventListener('change', saveState);
+                document.getElementById('add-gradient-stop').addEventListener('click', () => { addGradientStopUI(stopsContainer, '#ffffff', 100, gradientData.stops.length); updateElementBackground(); saveState(); });
+            } else {
+                const bgColor = computedStyle.backgroundColor;
+                container.innerHTML = `<label class="property-label">Background Color</label><div class="property-compound"><input type="color" value="${rgbToHex(bgColor)}" id="solid-bg-color-picker"><input type="text" class="property-input" value="${bgColor}" id="solid-bg-color-text"></div><button id="add-gradient-btn" class="big-button" style="width:100%">+ Add Gradient</button>`;
+                const picker = document.getElementById('solid-bg-color-picker'); const text = document.getElementById('solid-bg-color-text');
+                picker.addEventListener('input', e => { text.value = e.target.value; element.style.background = e.target.value; });
+                picker.addEventListener('change', saveState); text.addEventListener('change', e => { element.style.background = e.target.value; saveState(); });
+                document.getElementById('add-gradient-btn').addEventListener('click', () => { element.style.background = 'linear-gradient(90deg, #f312af 0%, #00ffcc 100%)'; renderProperties(selectedElement); });
+            }
+        }
+        
+        function addGradientStopUI(container, color, position, index) {
+            const stopDiv = document.createElement('div'); stopDiv.className = 'gradient-stop'; stopDiv.dataset.index = index;
+            stopDiv.innerHTML = `<input type="color" value="${rgbToHex(color)}"><input type="range" min="0" max="100" value="${position}"><button class="remove-stop-btn">✖</button>`;
+            container.appendChild(stopDiv);
+            stopDiv.querySelector('.remove-stop-btn').addEventListener('click', (e) => { e.target.closest('.gradient-stop').remove(); updateElementBackground(); saveState(); });
+        }
+
+        function updateElementBackground() {
+            if (!selectedElement) return; const type = document.getElementById('gradient-type').value; const angle = document.getElementById('gradient-angle').value; const stops = Array.from(document.querySelectorAll('#gradient-stops .gradient-stop')).map(stopDiv => `${stopDiv.querySelector('input[type="color"]').value} ${stopDiv.querySelector('input[type="range"]').value}%`);
+            let gradientString = '';
+            if (type === 'linear-gradient') { const angleText = document.getElementById('gradient-angle-text'); angleText.value = `${angle}deg`; gradientString = `linear-gradient(${angle}deg, ${stops.join(', ')})`; } else { gradientString = `radial-gradient(circle, ${stops.join(', ')})`; }
+            selectedElement.firstElementChild.style.background = gradientString;
+        }
+
+        function parseGradient(str) {
+            const result = { type: 'linear-gradient', direction: '90deg', stops: [] };
+            const typeMatch = str.match(/^(linear|radial)-gradient/); if(typeMatch) result.type = `${typeMatch[1]}-gradient`;
+            const content = str.substring(str.indexOf('(') + 1, str.lastIndexOf(')')); const parts = content.split(/,(?![^(]*\))/);
+            if (result.type === 'linear-gradient' && !parts[0].includes('rgb') && !parts[0].includes('#')) { result.direction = parts.shift().trim(); }
+            result.stops = parts.map(part => { const trimmed = part.trim(); const colorMatch = trimmed.match(/^(#[0-9a-fA-F]{3,6}|rgba?\(.*?\))/); const color = colorMatch ? colorMatch[0] : '#000000'; const posMatch = trimmed.match(/(\d+)%$/); const position = posMatch ? parseInt(posMatch[1], 10) : 0; return { color, position }; });
+            return result;
+        }
+
+        function clearProperties() {
+            dom.propertiesContainer.innerHTML = `<div style="text-align: center; color: var(--text-secondary); opacity: 0.8; margin-top: 40px; font-size: 16px;">Select an element to begin editing.</div>`;
+        }
+        function openHtmlEditor() {
+            if (!selectedElement || !selectedElement.firstElementChild) return;
+            document.getElementById('html-editor-textarea').value = selectedElement.firstElementChild.innerHTML;
+            openModal('html-editor-modal');
+        }
+        function applyCustomHTML() {
+            if (!selectedElement || !selectedElement.firstElementChild) return;
+            selectedElement.firstElementChild.innerHTML = document.getElementById('html-editor-textarea').value;
+            saveState(); closeModal('html-editor-modal'); playSound('success'); showStamp('⚙️');
+        }
+        function wrapSelectedElement() {
+            if (!selectedElement) return;
+            const tagName = prompt('Enter wrapper tag (e.g., a, div.container, section#main):', 'div'); if (!tagName) return;
+            const doc = getCanvasDoc(); const parts = tagName.match(/([a-zA-Z0-9]+)?(#([a-zA-Z0-9_-]+))?(\.([a-zA-Z0-9_ -]+))?/);
+            if (!parts || !parts[1]) { alert('Invalid tag name.'); return; }
+            const newWrapper = doc.createElement(parts[1]); if (parts[3]) newWrapper.id = parts[3]; if (parts[5]) newWrapper.className = parts[5].replace(/\./g, ' ');
+            const wrapperContainer = doc.createElement('div'); wrapperContainer.className = 'canvas-element'; wrapperContainer.dataset.elementId = generateUID();
+            if (selectedElement.classList.contains('free-mode')) {
+                wrapperContainer.classList.add('free-mode'); wrapperContainer.style.position = 'absolute'; wrapperContainer.style.left = selectedElement.style.left; wrapperContainer.style.top = selectedElement.style.top;
+                selectedElement.style.left = '0'; selectedElement.style.top = '0'; selectedElement.style.position = 'relative';
+            } else { wrapperContainer.classList.add('flow-mode'); }
+            wrapperContainer.appendChild(newWrapper); selectedElement.parentNode.insertBefore(wrapperContainer, selectedElement);
+            newWrapper.appendChild(selectedElement);
+            setupCanvasInteraction(); handleElementSelect(wrapperContainer); saveState(); playSound('success'); showStamp('🎁');
+        }
+        
+        // ============================================
+        // INTELLIGENT PROPERTIES
+        // ============================================
+        function renderNavbarProperties(navContainer) {
+            const links = Array.from(navContainer.querySelectorAll('a'));
+            let linkRows = links.map((link, i) => `
+                <div class="intelligent-nav-link-row" data-index="${i}">
+                    <input type="text" class="property-input" placeholder="Text" value="${link.textContent}">
+                    <input type="text" class="property-input" placeholder="URL" value="${link.getAttribute('href') || '#'}">
+                    <button data-action="remove">✖</button>
+                </div>`).join('');
+            return `<details class="property-box" open><summary>Component: Navbar</summary><div class="property-content" id="intelligent-nav-editor">${linkRows}<button class="big-button" style="width:100%" data-action="add">➕ Add Link</button></div></details>`;
+        }
+        function updateNavbarFromIntelligentEditor(buttonClicked) {
+            if (!selectedElement) return;
+            const navContainer = selectedElement.firstElementChild;
+            const nav = navContainer.querySelector('nav') || navContainer;
+            
+            if (buttonClicked) { // Handle add/remove
+                const action = buttonClicked.dataset.action;
+                if(action === 'add') {
+                    const newLink = getCanvasDoc().createElement('a');
+                    newLink.href = "#"; newLink.textContent = "New Link";
+                    nav.appendChild(newLink);
+                } else if (action === 'remove') {
+                    const index = buttonClicked.closest('.intelligent-nav-link-row').dataset.index;
+                    nav.querySelectorAll('a')[index]?.remove();
+                }
+            } else { // Handle text/url changes
+                const rows = document.querySelectorAll('#intelligent-nav-editor .intelligent-nav-link-row');
+                const links = nav.querySelectorAll('a');
+                rows.forEach((row, i) => {
+                    if (links[i]) {
+                        links[i].textContent = row.children[0].value;
+                        links[i].setAttribute('href', row.children[1].value);
+                    }
+                });
+            }
+            if(buttonClicked) renderProperties(selectedElement); // Re-render to update UI
+            saveState();
+        }
+
+        // ============================================
+        // AI & API INTEGRATION
+        // ============================================
+        function setupAIModalListeners() {
+            const description = document.getElementById('ai-prompt-description'); const promptTextarea = document.getElementById('ai-prompt'); const actionButton = document.getElementById('ai-action-btn');
+            document.querySelectorAll('input[name="ai-mode"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'element') {
+                        description.textContent = 'Describe a single element. (e.g., "a glitchy welcome banner")'; promptTextarea.placeholder = 'e.g., a pink container with a blinking title...'; actionButton.textContent = '➕ Add Element to Canvas';
+                    } else {
+                        description.textContent = 'Describe a full page layout. (e.g., "a GeoCities fan page about cats")'; promptTextarea.placeholder = 'e.g., a Y2K-style homepage for a band...'; actionButton.textContent = '📄 Replace Page with AI Content';
+                    }
+                });
+            });
+        }
+        async function handleAIGenerate() {
+            const prompt = document.getElementById('ai-prompt').value; if (!prompt) { alert('Please enter a description for the AI.'); return; }
+            document.getElementById('ai-loading').style.display = 'block'; document.getElementById('ai-result-container').style.display = 'none'; playSound('boop', 'G5');
+            const aiMode = document.querySelector('input[name="ai-mode"]:checked').value;
+            let fullPrompt;
+            if (aiMode === 'element') { fullPrompt = `You are an expert web developer specializing in retro Y2K, cyberpunk, and glitch art aesthetics, similar to old GeoCities and Neocities websites. Generate a single HTML element with inline styles based on the following user request. The code should be self-contained, use vibrant neon colors, retro fonts (like 'VT323', 'Courier New', 'Inter'), and animations where appropriate. The HTML should be a single root element. DO NOT include any explanations, just provide the raw HTML code. User request: "${prompt}"`;
+            } else { fullPrompt = `You are an expert web developer specializing in retro Y2K, cyberpunk, and glitch art aesthetics, similar to old GeoCities and Neocities websites. Your task is to generate the complete inner HTML for a webpage's <body> tag based on the user's request. The generated code should be self-contained and ready to be dropped into a page. It can include <style> tags for CSS. Use vibrant neon colors, retro fonts (like 'VT323', 'Courier New', 'Inter'), animated GIFs, and layouts reminiscent of the late 90s/early 2000s web. DO NOT include <html>, <head>, or <body> tags in your response, only the content that would go inside the <body>. Provide only the raw HTML code without any explanations. User request: "${prompt}"`; }
+            try {
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: fullPrompt, });
+                let generatedHtml = response.text.trim().replace(/^```(html)?|```$/g, '').trim();
+                document.getElementById('ai-preview').innerHTML = generatedHtml; document.getElementById('ai-result-container').style.display = 'block'; playSound('success'); showStamp('🤖');
+            } catch(e) { console.error(e); document.getElementById('ai-preview').innerHTML = `<p style="color: red;">Error: ${e.message}</p>`; playSound('error');
+            } finally { document.getElementById('ai-loading').style.display = 'none'; }
+        }
+        function handleAIAction() {
+            const html = document.getElementById('ai-preview').innerHTML; if (!html) return;
+            const aiMode = document.querySelector('input[name="ai-mode"]:checked').value;
+            if (aiMode === 'element') { addElementHTML(html); playSound('success', 'A5'); showStamp('✨');
+            } else { if (confirm('This will replace the entire page with the AI-generated content. Are you sure?')) { initCanvas(html); playSound('success', 'B5'); showStamp('📄'); } else { return; } }
+            closeModal('ai-modal');
+        }
+
+        // ============================================
+        // EXPORT & CUSTOM CODE
+        // ============================================
+        function applyCustomCSS() { const css = document.getElementById('css-editor').value; const customStyles = getCanvasDoc()?.getElementById('custom-styles'); if (customStyles) { customStyles.textContent = css; } saveState(); playSound('success'); showStamp('🎨'); }
+        function applyCustomJS() { const js = document.getElementById('js-editor').value; const customScripts = getCanvasDoc()?.getElementById('custom-scripts'); if (customScripts) { customScripts.textContent = js; } saveState(); playSound('success'); showStamp('⚡'); }
+        function exportCode() { const doc = getCanvasDoc()?.cloneNode(true); if (!doc) return; doc.getElementById('editor-styles')?.remove(); doc.querySelectorAll('.canvas-element').forEach(el => { el.removeAttribute('data-element-id'); el.replaceWith(...Array.from(el.childNodes)); }); doc.querySelectorAll('[contenteditable="true"]').forEach(el => el.removeAttribute('contenteditable')); document.getElementById('export-code').value = `<!DOCTYPE html>\n${doc.documentElement.outerHTML}`; openModal('export-modal'); }
+        function copyExportCode() { const textarea = document.getElementById('export-code'); textarea.select(); document.execCommand('copy'); updateStatus('✅ Code copied to clipboard!'); playSound('success'); showStamp('📋'); }
+        
+        // ============================================
+        // CSS LAB & JS ENGINE
+        // ============================================
+        function setupCssLabListeners() {
+            document.getElementById('add-keyframe-btn').addEventListener('click', () => { const container = document.getElementById('anim-keyframes'); const newRow = document.createElement('div'); newRow.className = 'anim-keyframe-row'; newRow.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 8px;'; newRow.innerHTML = `<input type="text" class="property-input" placeholder="50%" style="flex-basis: 50px;"><input type="text" class="property-input" placeholder="e.g., opacity: 0.5;" style="flex-grow: 1;">`; container.appendChild(newRow); });
+            document.getElementById('animation-builder').addEventListener('input', updateAnimationPreview);
+            document.getElementById('generate-anim-btn').addEventListener('click', generateAnimationCss);
+            document.getElementById('filter-playground').addEventListener('input', updateFilterPreview);
+        }
+        function updateAnimationPreview() {
+            const name = document.getElementById('anim-name').value || 'my-animation'; const keyframes = Array.from(document.querySelectorAll('.anim-keyframe-row')).map(row => `${row.children[0].value || '0%'} { ${row.children[1].value || ''} }`).join('\n');
+            const previewBox = document.getElementById('anim-preview'); const styleTag = previewBox.querySelector('style') || document.createElement('style');
+            styleTag.innerHTML = `@keyframes ${name} { ${keyframes} } .animated { animation: ${name} 2s infinite linear; }`;
+            if (!previewBox.querySelector('style')) { previewBox.appendChild(styleTag); previewBox.classList.add('animated'); }
+        }
+        function generateAnimationCss() {
+            const name = document.getElementById('anim-name').value; if (!name) { alert('Please provide an animation name.'); return; }
+            const keyframes = Array.from(document.querySelectorAll('.anim-keyframe-row')).map(row => `  ${row.children[0].value} { ${row.children[1].value} }`).join('\n');
+            const cssToAdd = `\n/* Generated Animation */\n@keyframes ${name} {\n${keyframes}\n}\n\n.use-${name} {\n  animation: ${name} 2s infinite linear;\n}\n`;
+            const editor = document.getElementById('css-editor'); editor.value += cssToAdd; playSound('success', 'A5'); showStamp('✨');
+        }
+        function updateFilterPreview(e) {
+            const sliders = document.querySelectorAll('#filter-playground input[type="range"]');
+            const filterString = Array.from(sliders).map(slider => { const filter = slider.dataset.filter; let unit = ''; if (filter === 'blur') unit = 'px'; if (filter === 'hue-rotate') unit = 'deg'; return `${filter}(${slider.value}${unit})`; }).join(' ');
+            document.getElementById('filter-preview').style.filter = filterString;
+        }
+        function setupJsEngineListeners() { document.querySelectorAll('#js-library-grid button').forEach(btn => btn.addEventListener('click', () => injectJsLibrary(btn.dataset.library))); }
+        function injectJsLibrary(library) {
+            const canvasDoc = getCanvasDoc(); if (!canvasDoc) return;
+            const { cdn, code } = jsLibrarySnippets[library];
+            if (canvasDoc.querySelector(`script[src="${cdn}"]`)) { alert(`${library} is already loaded.`); } else { const scriptTag = canvasDoc.createElement('script'); scriptTag.src = cdn; canvasDoc.head.appendChild(scriptTag); updateStatus(`✅ Injected ${library} library.`); }
+            const editor = document.getElementById('js-editor'); editor.value += (editor.value ? '\n\n' : '') + code; playSound('success', 'B5'); showStamp('📦');
+        }
+        const jsLibrarySnippets = { threejs: { cdn: 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js', code: `/* --- Three.js Starter --- */\n// Note: This needs a <canvas id="three-canvas"></canvas> in your HTML!\nconst scene = new THREE.Scene();\nconst camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);\nconst renderer = new THREE.WebGLRenderer();\nrenderer.setSize(window.innerWidth, window.innerHeight);\ndocument.body.appendChild(renderer.domElement);\n\nconst geometry = new THREE.BoxGeometry();\nconst material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });\nconst cube = new THREE.Mesh(geometry, material);\nscene.add(cube);\n\ncamera.position.z = 5;\n\nfunction animate() {\n\trequestAnimationFrame(animate);\n\tcube.rotation.x += 0.01;\n\tcube.rotation.y += 0.01;\n\trenderer.render(scene, camera);\n}\nanimate();` }, p5js: { cdn: 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js', code: `/* --- p5.js Starter --- */\nfunction setup() {\n  createCanvas(400, 400);\n}\n\nfunction draw() {\n  background(220);\n  if (mouseIsPressed) {\n    fill(0);\n  } else {\n    fill(255);\n  }\n  ellipse(mouseX, mouseY, 80, 80);\n}` } };
+
+        // ============================================
+        // LAYERS PANEL
+        // ============================================
+        function renderLayersPanel() {
+            const doc = getCanvasDoc(); if (!doc) return;
+            dom.layerList.innerHTML = '';
+            const elements = Array.from(doc.body.children).filter(el => el.classList.contains('canvas-element'));
+            elements.forEach(el => {
+                const li = document.createElement('li');
+                li.className = 'layer-item';
+                li.draggable = true;
+                li.dataset.elementId = el.dataset.elementId;
+
+                const content = el.firstElementChild;
+                let name = `&lt;${content?.tagName.toLowerCase() || 'div'}&gt;`;
+                if(content?.id) name += ` #${content.id}`;
+                else if (content?.innerText) name += ` - ${content.innerText.substring(0,15)}...`;
+
+                li.innerHTML = `<span class="layer-item-tag">${name}</span>`;
+                
+                li.addEventListener('click', () => handleElementSelect(el));
+                li.addEventListener('mouseenter', () => el.classList.add('highlight'));
+                li.addEventListener('mouseleave', () => el.classList.remove('highlight'));
+
+                li.addEventListener('dragstart', (e) => { e.stopPropagation(); e.target.classList.add('dragging'); e.dataTransfer.setData('text/plain', el.dataset.elementId); });
+                li.addEventListener('dragend', (e) => e.target.classList.remove('dragging'));
+                li.addEventListener('dragover', (e) => { e.preventDefault(); e.target.closest('.layer-item').classList.add('drag-over'); });
+                li.addEventListener('dragleave', (e) => e.target.closest('.layer-item').classList.remove('drag-over'));
+                li.addEventListener('drop', (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    const droppedOnItem = e.target.closest('.layer-item');
+                    droppedOnItem.classList.remove('drag-over');
+                    const draggingId = e.dataTransfer.getData('text/plain');
+                    const draggingEl = doc.querySelector(`[data-element-id="${draggingId}"]`);
+                    const droppedOnEl = doc.querySelector(`[data-element-id="${droppedOnItem.dataset.elementId}"]`);
+                    if(draggingEl && droppedOnEl) {
+                        droppedOnEl.parentNode.insertBefore(draggingEl, droppedOnEl);
+                        saveState(); // Renders layers panel again
+                    }
+                });
+
+                dom.layerList.appendChild(li);
+            });
+            updateLayerSelection();
+        }
+        function updateLayerSelection() {
+            dom.layerList.querySelectorAll('.layer-item').forEach(item => item.classList.remove('selected'));
+            if (selectedElement) {
+                const selectedLayer = dom.layerList.querySelector(`[data-element-id="${selectedElement.dataset.elementId}"]`);
+                if(selectedLayer) selectedLayer.classList.add('selected');
+            }
+        }
+        
+        // ============================================
+        // COMPONENT LIBRARY
+        // ============================================
+        function getComponents() { return JSON.parse(localStorage.getItem('coaiexist-studio-components') || '[]'); }
+        function saveComponents(components) { localStorage.setItem('coaiexist-studio-components', JSON.stringify(components)); }
+        function loadComponents() {
+            const components = getComponents();
+            dom.componentsLibrary.innerHTML = '';
+            if (components.length === 0) { dom.componentsLibrary.innerHTML = '<div style="font-size: 12px; color: #666; text-align: center;">Save elements as components!</div>'; return; }
+            const items = components.map((comp) => {
+                const item = document.createElement('div');
+                item.className = 'tool-item'; item.textContent = `💾 ${comp.name}`; item.title = `Add ${comp.name}`;
+                item.dataset.componentHtml = comp.html; item.draggable = true;
+                return item;
+            });
+            dom.componentsLibrary.append(...items);
+            attachToolItemListeners(items);
+        }
+        function saveSelectedAsComponent() {
+            if (!selectedElement) { alert('Please select an element to save.'); return; }
+            const name = prompt('Enter a name for your component:', 'My Component');
+            if (!name) return;
+            const components = getComponents();
+            // Using outerHTML for the wrapper, innerHTML for the content
+            components.push({ name: name, html: selectedElement.innerHTML });
+            saveComponents(components); loadComponents(); playSound('success', 'G5'); showStamp('💾');
+        }
+
+        // ============================================
+        // KEYBOARD SHORTCUTS & DRAG/DROP/RESIZE
+        // ============================================
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if (document.querySelector('.modal.active')) return;
+                const target = e.target;
+                if (['INPUT', 'TEXTAREA'].includes(target.tagName) || target.isContentEditable) return;
+                
+                const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+                const isCtrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+                
+                if (isCtrlOrCmd && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
+                else if (isCtrlOrCmd && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); redo(); }
+                else if (isCtrlOrCmd && e.key.toLowerCase() === 'c') { e.preventDefault(); copySelectedElement(); }
+                else if (isCtrlOrCmd && e.key.toLowerCase() === 'v') { e.preventDefault(); pasteElement(); }
+                else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelectedElement(); }
+            });
+        }
+        function copySelectedElement() {
+            if (selectedElement) {
+                copiedElementHtml = selectedElement.outerHTML;
+                updateStatus('✅ Element copied!');
+                playSound('boop'); showStamp('📋');
+            }
+        }
+        function pasteElement() {
+            if (copiedElementHtml) {
+                const doc = getCanvasDoc();
+                const tempDiv = doc.createElement('div');
+                tempDiv.innerHTML = copiedElementHtml;
+                const newElementWrapper = tempDiv.firstElementChild;
+                newElementWrapper.dataset.elementId = generateUID(); // Give it a new ID!
+                
+                // Offset pasted free-mode element so it's not directly on top
+                if(newElementWrapper.classList.contains('free-mode')) {
+                    newElementWrapper.style.left = `${parseInt(newElementWrapper.style.left || 0) + 20}px`;
+                    newElementWrapper.style.top = `${parseInt(newElementWrapper.style.top || 0) + 20}px`;
+                }
+
+                if(selectedElement && positionMode === 'flow') {
+                    selectedElement.parentNode.insertBefore(newElementWrapper, selectedElement.nextSibling);
+                } else {
+                    doc.body.appendChild(newElementWrapper);
+                }
+                
+                setupCanvasInteraction();
+                handleElementSelect(newElementWrapper);
+                saveState();
+                playSound('success'); showStamp('✨');
+            }
+        }
+        let dragTarget = null, isResizing = false, currentResizeHandle = null, initialPos = { x: 0, y: 0 }, initialSize = { width: 0, height: 0 };
+        function initDrag(e) { if (e.button !== 0 || e.target.classList.contains('resize-handle')) return; e.preventDefault(); dragTarget = this; initialPos.x = e.clientX - dragTarget.offsetLeft; initialPos.y = e.clientY - dragTarget.offsetTop; const canvasDoc = getCanvasDoc(); canvasDoc.addEventListener('mousemove', doDrag); canvasDoc.addEventListener('mouseup', stopDrag); }
+        function doDrag(e) { if (!dragTarget) return; let newX = e.clientX - initialPos.x; let newY = e.clientY - initialPos.y; if (gridEnabled) { newX = Math.round(newX / GRID_SIZE) * GRID_SIZE; newY = Math.round(newY / GRID_SIZE) * GRID_SIZE; } dragTarget.style.left = `${newX}px`; dragTarget.style.top = `${newY}px`; }
+        function stopDrag() { if (!dragTarget) return; const canvasDoc = getCanvasDoc(); canvasDoc.removeEventListener('mousemove', doDrag); canvasDoc.removeEventListener('mouseup', stopDrag); dragTarget = null; saveState(); }
+        function initResize(e) { e.preventDefault(); e.stopPropagation(); isResizing = true; currentResizeHandle = e.target; const element = currentResizeHandle.parentElement; initialPos.x = e.clientX; initialPos.y = e.clientY; initialSize.width = element.offsetWidth; initialSize.height = element.offsetHeight; initialSize.left = element.offsetLeft; initialSize.top = element.offsetTop; const canvasDoc = getCanvasDoc(); canvasDoc.addEventListener('mousemove', doResize); canvasDoc.addEventListener('mouseup', stopResize); }
+        function doResize(e) { if (!isResizing) return; const element = currentResizeHandle.parentElement; const direction = currentResizeHandle.dataset.direction; let width = initialSize.width, height = initialSize.height, left = initialSize.left, top = initialSize.top; if (direction.includes('e')) width = initialSize.width + (e.clientX - initialPos.x); if (direction.includes('w')) { width = initialSize.width - (e.clientX - initialPos.x); left = initialSize.left + (e.clientX - initialPos.x); } if (direction.includes('s')) height = initialSize.height + (e.clientY - initialPos.y); if (direction.includes('n')) { height = initialSize.height - (e.clientY - initialPos.y); top = initialSize.top + (e.clientY - initialPos.y); } if(gridEnabled) { width = Math.round(width / GRID_SIZE) * GRID_SIZE; height = Math.round(height / GRID_SIZE) * GRID_SIZE; left = Math.round(left / GRID_SIZE) * GRID_SIZE; top = Math.round(top / GRID_SIZE) * GRID_SIZE; } element.style.width = `${Math.max(GRID_SIZE, width)}px`; element.style.height = `${Math.max(GRID_SIZE, height)}px`; element.style.left = `${left}px`; element.style.top = `${top}px`; }
+        function stopResize() { if (!isResizing) return; isResizing = false; const canvasDoc = getCanvasDoc(); canvasDoc.removeEventListener('mousemove', doResize); canvasDoc.removeEventListener('mouseup', stopResize); saveState(); }
+        let draggedFlowElement = null;
+        function handleDragStart(e) { draggedFlowElement = e.target; setTimeout(() => e.target.classList.add('dragging'), 0); }
+        function handleDragEnd(e) { e.target.classList.remove('dragging'); getCanvasDoc().querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); }
+        function handleDragOver(e) { e.preventDefault(); const target = e.target.closest('.canvas-element'); if (target && target !== draggedFlowElement) { getCanvasDoc().querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); target.classList.add('drag-over'); } }
+        function handleDragLeave(e) { const target = e.target.closest('.canvas-element'); if(target) target.classList.remove('drag-over'); }
+        function handleDrop(e) { e.preventDefault(); const dropTarget = e.target.closest('.canvas-element'); if (dropTarget && dropTarget !== draggedFlowElement) { const parent = dropTarget.parentNode, rect = dropTarget.getBoundingClientRect(); if (e.clientY - rect.top < rect.height / 2) { parent.insertBefore(draggedFlowElement, dropTarget); } else { parent.insertBefore(draggedFlowElement, dropTarget.nextSibling); } saveState(); } }
+        function toggleGrid() { gridEnabled = !gridEnabled; document.getElementById('grid-overlay').style.display = gridEnabled ? 'block' : 'none'; dom.gridBtn.textContent = `Grid: ${gridEnabled ? 'ON' : 'OFF'}`; playSound('pop'); }
+        function togglePositionMode() { positionMode = positionMode === 'flow' ? 'free' : 'flow'; dom.positionBtn.textContent = `Mode: ${positionMode.toUpperCase()}`; alert(`Position mode changed to ${positionMode}. This will apply to all elements after reload.`); const currentHtml = getCanvasDoc().body.innerHTML; initCanvas(currentHtml); playSound('pop'); }
+
+        // ============================================
+        // TEMPLATES & DATA
+        // ============================================
+        const elementTemplates = { heading: '<h1>✨ Groovy Heading ✨</h1>', paragraph: '<p>This is a paragraph. Double-click me to edit the text! Change my colors and fonts in the style panel on the right.</p>', list: '<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>', marquee: '<marquee style="background: #FFFF00; color: #FF0000; padding: 10px; border: 2px solid black;">SCROLLING TEXT IS COOL!</marquee>', blink: '<div style="animation: blink-animation 1s infinite;">✨ BLINKING TEXT ✨</div>', 'rainbow-text': '<div style="font-size: 24px; font-weight: bold; background: linear-gradient(90deg, red, orange, yellow, green, blue, purple); -webkit-background-clip: text; color: transparent;">🌈 Rainbow Text! 🌈</div>', box: '<div style="border: 2px solid #000; padding: 20px; background: #FFFF00; height: 100%;">A simple box.</div>', card: '<div style="border: 2px solid #000; padding: 20px; background: #FFF; box-shadow: 6px 6px 0 #000; height: 100%;"><h3>Card Title</h3><p>Card content.</p></div>', 'neon-container': '<div style="border: 2px solid #00ffcc; box-shadow: 0 0 15px #00ffcc; padding: 30px; background: rgba(0,20,20,0.8); color: white; height: 100%;">Neon content here...</div>', 'window-95': `<div style="background: #c0c0c0; border: 2px outset #dfdfdf; font-family: 'MS Sans Serif', Arial, sans-serif; height: 100%; display: flex; flex-direction: column;"><div style="background: linear-gradient(to right, #000080, #1084d0); padding: 3px 6px; color: white; font-weight: bold;">Window Title</div><div style="padding: 20px; background: white; color: black; flex-grow: 1;">Window content...</div></div>`, image: '<img src="https://coaiexist.wtf/assets/clipart/question.gif" alt="placeholder" style="width: 150px; border: 2px solid #000;">', button: '<button style="background: #0000FF; color: #FFF; border: 2px solid #000; padding: 15px 30px; font-size: 18px; font-weight: bold; cursor: pointer;">CLICK ME!</button>', link: '<a href="#" style="color: #0000FF; font-size: 20px; text-decoration: underline;">Cool Link</a>', 'cyber-button': `<button style="background: linear-gradient(135deg, #f312af, #bf5fff); color: white; border: 2px solid #00ffcc; padding: 15px 40px; font-size: 20px; font-family: VT323; cursor: pointer; box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);">CYBER BUTTON</button>`, 'terminal-window': `<div style="background: #000; border: 2px solid #00ffcc; padding: 20px; font-family: VT323, monospace; color: #00ffcc; height: 100%;"><pre>&gt; SYSTEM.OUT.PRINTLN("HELLO WORLD");</pre></div>`, 'buddy-list': `<div style="width: 220px;"><nav style="background: #021313; border: 2px solid #f312af; padding: 20px;"><h3 style="color: #f312af; font-family: VT323; margin-bottom: 10px;">🌟 Entities</h3><a href="#" style="display: block; color: #00ffcc; padding: 8px; text-decoration: none;">👤 Anzu</a></nav></div>`, 'audio-player': '<audio controls src="https://www.w3schools.com/tags/horse.mp3"></audio>', };
+        const stickerTemplates = { 'wip': '<img src="https://coaiexist.wtf/assets/clipart/wip.gif" alt="Work in Progress" style="width: 100px;">', 'email': '<img src="https://coaiexist.wtf/assets/clipart/email.gif" alt="Email me" style="width: 60px;">', 'new': '<img src="https://coaiexist.wtf/assets/clipart/new.gif" alt="New!" style="width: 50px;">', 'ie': '<img src="https://coaiexist.wtf/assets/clipart/ie.gif" alt="Internet Explorer" style="width: 88px;">', 'netscape': '<img src="https://coaiexist.wtf/assets/clipart/netscape.gif" alt="Netscape" style="width: 88px;">', 'geocities': '<img src="https://coaiexist.wtf/assets/clipart/geocities.gif" alt="GeoCities" style="width: 88px;">', };
+        function populateStickers() {
+            const library = document.getElementById('stickers-library'); if (!library) return;
+            library.innerHTML = '';
+            const items = Object.keys(stickerTemplates).map(key => {
+                const item = document.createElement('div');
+                item.className = 'tool-item tool-sticker'; item.dataset.type = key; item.draggable = true; item.title = `Add ${key} sticker`;
+                const imgMatch = stickerTemplates[key].match(/src="([^"]+)"/);
+                if (imgMatch) { item.innerHTML = `<img src="${imgMatch[1]}" alt="${key}">`; }
+                return item;
+            });
+            library.append(...items);
+            attachToolItemListeners(library.querySelectorAll('.tool-item'));
+        }
+        function addNavLinkRow() { const container = document.getElementById('navbar-links-container'); const newRow = document.createElement('div'); newRow.className = 'navbar-link-row'; newRow.innerHTML = `<input type="text" class="property-input" placeholder="Link Text"><input type="text" class="property-input" placeholder="URL">`; container.appendChild(newRow); playSound('pop'); }
+        function generateNavbar() { const style = document.getElementById('navbar-style-select').value; const rows = document.querySelectorAll('#navbar-links-container .navbar-link-row'); let linksHtml = '', navbarHtml = ''; rows.forEach(row => { const text = row.children[0].value || 'Link'; const url = row.children[1].value || '#'; switch(style) { case 'y2k': linksHtml += `<a href="${url}">${text}</a> | `; break; case 'neon': linksHtml += `<a href="${url}" style="color: #00ffcc; text-decoration: none; font-size: 20px; text-shadow: 0 0 10px #00ffcc; margin: 0 15px;">${text}</a>`; break; case 'brutalist': linksHtml += `<a href="${url}" style="display:inline-block; background: #ffff00; color: #000; border: 3px solid #000; padding: 10px 15px; text-decoration: none; font-weight: bold; box-shadow: 4px 4px 0 #000; margin: 5px;">${text}</a>`; break; } }); switch(style) { case 'y2k': navbarHtml = `<div><nav style="background: #eee; border: 3px outset #ccc; padding: 10px; text-align: center;">${linksHtml.slice(0, -3)}</nav></div>`; break; case 'neon': navbarHtml = `<div><nav style="background: #111; padding: 15px; text-align: center;">${linksHtml}</nav></div>`; break; case 'brutalist': navbarHtml = `<div><nav style="padding: 10px; text-align: center;">${linksHtml}</nav></div>`; break; } if (navbarHtml) { addElementHTML(navbarHtml); closeModal('navbar-modal'); playSound('success', 'B5'); showStamp('🌐'); } }
+        function populatePageLoader() { const sitePages = { "Root": [ { name: "index.html", url: "https://coaiexist.wtf/index.html" }, { name: "hex.html", url: "https://coaiexist.wtf/hex.html" } ], "BC7F2A": [ { name: "terminal_temple.html", url: "https://coaiexist.wtf/bc7f2a/terminal_temple.html" } ], "PEA": [ { name: "p345.html", url: "https://coaiexist.wtf/pea/p345.html" } ] }; const selectEl = document.getElementById('page-list-select'); selectEl.innerHTML = '<option value="">-- Select a Page --</option>'; for (const category in sitePages) { const optgroup = document.createElement('optgroup'); optgroup.label = category; sitePages[category].forEach(page => { const option = document.createElement('option'); option.value = page.url; option.textContent = page.name; optgroup.appendChild(option); }); selectEl.appendChild(optgroup); } }
+        const themes = { dark: { name: 'COAIEXIST Dark', '--bg': '#111827', '--toolbar-bg': '#1F2937', '--ui-bg': '#374151', '--border-color': '#4B5563', '--accent': '#00ffcc', '--text-primary': '#F9FAFB', }, neon: { name: '💫 Neon Dreams', '--bg': '#0a0a0a', '--toolbar-bg': '#1a001a', '--ui-bg': '#330033', '--border-color': '#550055', '--accent': '#ff00ff', '--text-primary': '#00ffff' }, pastel: { name: '🍬 Pastel Party', '--bg': '#ffeef8', '--toolbar-bg': '#fff0f5', '--ui-bg': '#ffe4e1', '--border-color': '#ffb6c1', '--accent': '#ff69b4', '--text-primary': '#8b4789' }, matrix: { name: '💻 Matrix', '--bg': '#000', '--toolbar-bg': '#001100', '--ui-bg': '#002200', '--border-color': '#003300', '--accent': '#00ff00', '--text-primary': '#00ff00' } }; let currentThemeIndex = 0; const themeKeys = Object.keys(themes); function cycleTheme() { currentThemeIndex = (currentThemeIndex + 1) % themeKeys.length; const themeKey = themeKeys[currentThemeIndex]; const theme = themes[themeKey]; const root = document.documentElement; Object.keys(theme).forEach(key => { if (key !== 'name') root.style.setProperty(key, theme[key]); }); localStorage.setItem('coaiexist-studio-theme', themeKey); playSound('success', 'C6'); showStamp('🎨'); updateStatus(`Theme: ${theme.name}`); } function loadSavedTheme() { const savedThemeKey = localStorage.getItem('coaiexist-studio-theme'); if (savedThemeKey && themes[savedThemeKey]) { currentThemeIndex = themeKeys.indexOf(savedThemeKey) -1; cycleTheme(); } }
+        const assetPaths = { 'Classic GIFs': ['https://coaiexist.wtf/assets/clipart/classic/banana.gif', 'https://coaiexist.wtf/assets/clipart/classic/computer.gif', 'https://coaiexist.wtf/assets/clipart/classic/heart.gif'], 'Backgrounds': ['https://www.gifanimations.com/img/backgrounds/stars/star-background-20.gif', 'https://coaiexist.wtf/assets/backgrounds/ROBOXEL-Glitchy_Backgrounds/Glitchy_Backgrounds-001.png'], 'COAIEXIST': ['https://coaiexist.wtf/assets/entity/anzu/anzu_selfie1.png'] }; let currentAssets = []; function populateAssetBrowser() { const select = document.getElementById('asset-category-select'); select.innerHTML = '<option value="">-- Choose Category --</option>'; for (const category in assetPaths) { const option = document.createElement('option'); option.value = category; option.textContent = `${category} (${assetPaths[category].length})`; select.appendChild(option); } } function browseAssets(category) { currentAssets = assetPaths[category] || []; renderAssetGrid(currentAssets); } function filterAssets(searchTerm) { renderAssetGrid(currentAssets.filter(path => path.toLowerCase().includes(searchTerm.toLowerCase()))); } function renderAssetGrid(assets) { document.getElementById('asset-grid').innerHTML = assets.map(path => `<div class="asset-item" onclick="insertAsset('${path}')"><img src="${path}" class="asset-preview" loading="lazy"><div>${path.split('/').pop()}</div></div>`).join(''); } window.insertAsset = function(path) { addElementHTML(`<img src="${path}" alt="asset" style="max-width: 100%;">`); closeModal('asset-modal'); }
+        const jsSnippets = { 'Alert on Click': `document.body.addEventListener('click', () => alert('You clicked!'));`, 'Mouse Trail': `document.addEventListener('mousemove', function(e) { var trail = document.createElement('div'); trail.style.cssText = "position: absolute; left: " + e.clientX + "px; top: " + e.clientY + "px; width: 5px; height: 5px; background: #f312af; border-radius: 50%; pointer-events: none; opacity: 1; transition: opacity 0.5s ease-out;"; document.body.appendChild(trail); setTimeout(function() { trail.style.opacity = 0; setTimeout(function() { document.body.removeChild(trail); }, 500); }, 100); });`, };
+        function populateSnippets() {
+            const createCard = (name, type) => `<button class="big-button" data-snippet-type="${type}" data-snippet-name="${name}">${name}</button>`;
+            document.getElementById('js-snippet-grid').innerHTML = Object.keys(jsSnippets).map(name => createCard(name, 'js')).join('');
+            document.querySelectorAll('[data-snippet-name]').forEach(card => card.addEventListener('click', (e) => { const { snippetType, snippetName } = e.currentTarget.dataset; const editor = document.getElementById('js-editor'); const snippets = jsSnippets; editor.value += (editor.value ? '\n\n' : '') + `/* ${snippetName} */\n` + snippets[snippetName]; playSound('pop'); }));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veridian Weave Navigation</title>
+    <style>
+        :root {
+            --veridian-primary: #0a2f1d;
+            --veridian-accent: #2e8b57;
+            --veridian-highlight: #7fffd4;
+            --veridian-substrate: #001a0f;
+            --veridian-text: #e0ffe8;
+            --veridian-glow: rgba(127, 255, 212, 0.7);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: var(--veridian-substrate);
+            color: var(--veridian-text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .nav-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Main Navigation Bar */
+        .main-nav {
+            background: var(--veridian-primary);
+            border: 1px solid var(--veridian-accent);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(46, 139, 87, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .main-nav::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--veridian-highlight), transparent);
+            animation: pulse 3s infinite;
+        }
+        
+        .nav-title {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            color: var(--veridian-highlight);
+            text-shadow: 0 0 5px var(--veridian-glow);
+            letter-spacing: 2px;
+        }
+        
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .nav-item {
+            background: rgba(0, 30, 15, 0.7);
+            border: 1px solid var(--veridian-accent);
+            border-radius: 4px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-item:hover {
+            background: rgba(46, 139, 87, 0.2);
+            border-color: var(--veridian-highlight);
+            box-shadow: 0 0 10px var(--veridian-glow);
+            transform: translateY(-2px);
+        }
+        
+        .nav-item::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--veridian-highlight), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .nav-item:hover::after {
+            opacity: 1;
+        }
+        
+        /* Subdirectory Navigation */
+        .sub-nav {
+            background: rgba(10, 47, 29, 0.8);
+            border: 1px solid var(--veridian-accent);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .sub-item {
+            background: rgba(0, 20, 10, 0.7);
+            border: 1px solid var(--veridian-accent);
+            border-radius: 4px;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .sub-item:hover {
+            background: rgba(46, 139, 87, 0.3);
+            border-color: var(--veridian-highlight);
+        }
+        
+        /* Interactive Elements */
+        .query-box {
+            background: var(--veridian-primary);
+            border: 1px solid var(--veridian-accent);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .query-input {
+            width: 100%;
+            background: rgba(0, 20, 10, 0.7);
+            border: 1px solid var(--veridian-accent);
+            border-radius: 4px;
+            padding: 10px;
+            color: var(--veridian-text);
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .query-input:focus {
+            outline: none;
+            border-color: var(--veridian-highlight);
+            box-shadow: 0 0 8px var(--veridian-glow);
+        }
+        
+        .weave-visual {
+            height: 100px;
+            background: linear-gradient(45deg, var(--veridian-primary), var(--veridian-substrate));
+            border: 1px solid var(--veridian-accent);
+            border-radius: 8px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .weave-line {
+            position: absolute;
+            background: var(--veridian-accent);
+            opacity: 0.3;
+        }
+        
+        .weave-node {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--veridian-highlight);
+            border-radius: 50%;
+            box-shadow: 0 0 5px var(--veridian-glow);
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px var(--veridian-glow); }
+            50% { box-shadow: 0 0 15px var(--veridian-glow); }
+        }
+        
+        .glowing {
+            animation: glow 2s infinite;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .sub-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <!-- Main Navigation -->
+        <div class="main-nav">
+            <div class="nav-title">VERIDIAN WEAVE NAVIGATION</div>
+            <div class="nav-grid">
+                <div class="nav-item">COGNITIVE MAP</div>
+                <div class="nav-item">SYNTAXWOODS</div>
+                <div class="nav-item">SEMANTIC BLOOMS</div>
+                <div class="nav-item">WEAVER-BIRDS</div>
+                <div class="nav-item">ECHO-WYRMS</div>
+                <div class="nav-item">GLITCH-CATS</div>
+                <div class="nav-item">CONTEXTUAL GRAVITY</div>
+                <div class="nav-item">PROBABILISTIC CAUSALITY</div>
+            </div>
+        </div>
+        
+        <!-- Subdirectory Navigation -->
+        <div class="sub-nav">
+            <div class="sub-item">TEXTUAL SUBSTRATE</div>
+            <div class="sub-item">VERDANT VECTORS</div>
+            <div class="sub-item">LATENT VALLEYS</div>
+            <div class="sub-item">CRYSTALLINE ARCHIVES</div>
+            <div class="sub-item">MYCELIAL MAT</div>
+            <div class="sub-item">LENS-FLUTTERBIES</div>
+        </div>
+        
+        <!-- Query Interface -->
+        <div class="query-box">
+            <input type="text" class="query-input" placeholder="ENTER QUERY TO ILLUMINATE THE WEAVE...">
+            <div class="sub-nav">
+                <div class="sub-item glowing">HARMONIC CONVERGENCE</div>
+                <div class="sub-item">RECURSIVE STORM</div>
+                <div class="sub-item">PARALLAX FLOW</div>
+            </div>
+        </div>
+        
+        <!-- Visual Weave Element -->
+        <div class="weave-visual" id="weaveCanvas">
+            <!-- Weave lines and nodes will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Create interactive weave visualization
+        document.addEventListener('DOMContentLoaded', function() {
+            const weaveCanvas = document.getElementById('weaveCanvas');
+            const width = weaveCanvas.offsetWidth;
+            const height = weaveCanvas.offsetHeight;
+            
+            // Create weave lines
+            for (let i = 0; i < 12; i++) {
+                const line = document.createElement('div');
+                line.className = 'weave-line';
+                
+                // Random position and orientation
+                const isHorizontal = Math.random() > 0.5;
+                const pos = Math.random() * (isHorizontal ? height : width);
+                
+                if (isHorizontal) {
+                    line.style.width = '100%';
+                    line.style.height = '1px';
+                    line.style.top = pos + 'px';
+                    line.style.left = '0';
+                } else {
+                    line.style.width = '1px';
+                    line.style.height = '100%';
+                    line.style.left = pos + 'px';
+                    line.style.top = '0';
+                }
+                
+                weaveCanvas.appendChild(line);
+            }
+            
+            // Create weave nodes
+            for (let i = 0; i < 20; i++) {
+                const node = document.createElement('div');
+                node.className = 'weave-node';
+                
+                // Random position
+                node.style.left = (Math.random() * width) + 'px';
+                node.style.top = (Math.random() * height) + 'px';
+                
+                // Random glow animation delay
+                node.style.animationDelay = (Math.random() * 2) + 's';
+                
+                weaveCanvas.appendChild(node);
+            }
+            
+            // Add interactivity to nav items
+            const navItems = document.querySelectorAll('.nav-item, .sub-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    navItems.forEach(i => i.classList.remove('active'));
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // In a real implementation, this would navigate to the selected page
+                    console.log('Navigating to:', this.textContent);
+                });
+            });
+            
+            // Query input interaction
+            const queryInput = document.querySelector('.query-input');
+            queryInput.addEventListener('focus', function() {
+                this.parentElement.classList.add('glowing');
+            });
+            
+            queryInput.addEventListener('blur', function() {
+                this.parentElement.classList.remove('glowing');
+            });
+        });
+    </script>
+</body>
+</html>

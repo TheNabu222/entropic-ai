@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoAIexist.wtf - Multi-Preview Sitemap</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(45deg, #0a0a1f, #1a0a2e, #16213e);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #00ff88;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .main-layout {
+            display: flex;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+        
+        /* Left Panel - Tree Navigator */
+        .tree-panel {
+            width: 400px;
+            min-width: 300px;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            resize: horizontal;
+            overflow: auto;
+        }
+        
+        .tree-header {
+            padding: 20px;
+            border-bottom: 2px solid #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+            animation: flicker 3s infinite alternate;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2em;
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        button {
+            font-family: 'VT323', monospace;
+            font-size: 1.1em;
+            background: #00ff88;
+            color: #0a0a1f;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        button:hover {
+            background: #ff00ff;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .tree-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        
+        ul {
+            list-style: none;
+            padding-left: 25px;
+        }
+        
+        .tree-item {
+            position: relative;
+            padding: 3px 0;
+        }
+        
+        .tree-item::before {
+            content: '├── ';
+            color: #00ffff;
+            margin-right: 5px;
+        }
+        
+        .tree-item:last-child::before {
+            content: '└── ';
+        }
+        
+        .folder {
+            cursor: pointer;
+            color: #ffff00;
+            font-weight: bold;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .folder:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        
+        .folder::before {
+            content: '📁 ';
+            margin-right: 5px;
+        }
+        
+        .folder.expanded::before {
+            content: '📂 ';
+        }
+        
+        .file {
+            color: #00ff88;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file:hover {
+            color: #00ffff;
+            text-shadow: 0 0 8px #00ffff;
+        }
+        
+        .file::before {
+            content: '📄 ';
+            margin-right: 5px;
+        }
+        
+        .file.html::before {
+            content: '🌐 ';
+        }
+        
+        .nested {
+            display: none;
+            margin-top: 3px;
+        }
+        
+        .nested.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Right Panel - Preview Area */
+        .preview-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+        
+        .preview-info {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+        
+        .preview-info h2 {
+            color: #ff00ff;
+            font-size: 1.8em;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        
+        .preview-info p {
+            color: #00ffff;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        
+        .previews-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .preview-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            animation: panelAppear 0.3s ease;
+        }
+        
+        @keyframes panelAppear {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .preview-header {
+            background: rgba(0, 255, 136, 0.2);
+            padding: 12px 15px;
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-title {
+            font-size: 1.3em;
+            color: #00ff88;
+            text-shadow: 0 0 8px #00ff88;
+            flex: 1;
+        }
+        
+        .preview-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .preview-btn {
+            font-family: 'VT323', monospace;
+            font-size: 1em;
+            background: #00ff88;
+            color: #0a0a1f;
+            border: none;
+            padding: 5px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .preview-btn:hover {
+            background: #ff00ff;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+        }
+        
+        .preview-btn.close {
+            background: #ff0066;
+        }
+        
+        .preview-btn.close:hover {
+            background: #ff3388;
+        }
+        
+        .preview-iframe {
+            flex: 1;
+            border: none;
+            background: white;
+            width: 100%;
+            min-height: 300px;
+        }
+        
+        .preview-loading {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            color: #00ff88;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .stats {
+            padding: 15px;
+            background: rgba(0, 255, 136, 0.1);
+            border-top: 1px solid #00ff88;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        .stats span {
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        
+        .brrrr {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 2em;
+            animation: spin 3s linear infinite;
+            cursor: pointer;
+            z-index: 1000;
+            text-shadow: 0 0 20px currentColor;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #00ff88;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff00ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-layout">
+        <!-- Left Panel: Tree Navigator -->
+        <div class="tree-panel">
+            <div class="tree-header">
+                <h1>CoAIexist.wtf</h1>
+                <div class="subtitle">[ multi_preview_v3.0 ]</div>
+                
+                <div class="controls">
+                    <button onclick="expandAll()">EXPAND ALL</button>
+                    <button onclick="collapseAll()">COLLAPSE ALL</button>
+                    <button onclick="clearAllPreviews()">CLEAR PREVIEWS</button>
+                </div>
+            </div>
+            
+            <div class="tree-content" id="siteTree">
+                <div class="tree-item">
+                    <span class="folder" onclick="toggle(this)">coaiexist.wtf</span>
+                    <ul class="nested active">
+                        
+                        <!-- Root level HTML files -->
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/ackk.html', 'ackk.html')">ackk.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/cavebot.html', 'cavebot.html')">cavebot.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/construction.html', 'construction.html')">construction.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/cosmos.html', 'cosmos.html')">cosmos.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/dollz.html', 'dollz.html')">dollz.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/explore.html', 'explore.html')">explore.html</span></li>
+                        <li class="tree-item"><span class="file">favicon.ico</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/guestbook.html', 'guestbook.html')">guestbook.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/hdtv.html', 'hdtv.html')">hdtv.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/hex.html', 'hex.html')">hex.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/index.html', 'index.html')">index.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nav.html', 'nav.html')">nav.html</span></li>
+                        <li class="tree-item"><span class="file">neocities.png</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/not_found.html', 'not_found.html')">not_found.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/old_index.html', 'old_index.html')">old_index.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pip.html', 'pip.html')">pip.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/preview.html', 'preview.html')">preview.html</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/punkd.html', 'punkd.html')">punkd.html</span></li>
+                        <li class="tree-item"><span class="file">robots.txt</span></li>
+                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/vote_hd.html', 'vote_hd.html')">vote_hd.html</span></li>
+                        
+                        <!-- /admin folder -->
+                        <li class="tree-item">
+                            <span class="folder" onclick="toggle(this)">/admin</span>
+                            <ul class="nested">
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/coaiexist-studio.html', 'admin/coaiexist-studio.html')">coaiexist-studio.html</span></li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/css</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file">counter-guestbook.css</span></li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/data</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file">guestbook.json</span></li>
+                                        <li class="tree-item"><span class="file">pageviews.json</span></li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/guestbook.html', 'admin/guestbook.html')">guestbook.html</span></li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/js</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file">guestbook.js</span></li>
+                                        <li class="tree-item"><span class="file">pageCounter.js</span></li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/kidpix-editor.html', 'admin/kidpix-editor.html')">kidpix-editor.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/migrate-to-supabase.html', 'admin/migrate-to-supabase.html')">migrate-to-supabase.html</span></li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/navbars</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/navbars/cyberpunk-nav.html', 'admin/navbars/cyberpunk-nav.html')">cyberpunk-nav.html</span></li>
+                                        <li class="tree-item"><span class="file">deepseek-nav.js</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/navbars/enhenduanna-nav.html', 'admin/navbars/enhenduanna-nav.html')">enhenduanna-nav.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/navbars/terminal-nav.html', 'admin/navbars/terminal-nav.html')">terminal-nav.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/navbars/vaporwave-nav.html', 'admin/navbars/vaporwave-nav.html')">vaporwave-nav.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/navbars/win98-nav.html', 'admin/navbars/win98-nav.html')">win98-nav.html</span></li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/admin/wysiwyg-coai.html', 'admin/wysiwyg-coai.html')">wysiwyg-coai.html</span></li>
+                            </ul>
+                        </li>
+                        
+                        <!-- /bc7f2a folder -->
+                        <li class="tree-item">
+                            <span class="folder" onclick="toggle(this)">/bc7f2a</span>
+                            <ul class="nested">
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/aiemotions.html', 'bc7f2a/aiemotions.html')">aiemotions.html</span></li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/deepseeking</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/deepseeking/cephalopod_slide.html', 'bc7f2a/deepseeking/cephalopod_slide.html')">cephalopod_slide.html</span></li>
+                                        <li class="tree-item"><span class="file">deepseek-nav.js</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/deepseeking/haunted-ai.html', 'bc7f2a/deepseeking/haunted-ai.html')">haunted-ai.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/deepseeking/ok.html', 'bc7f2a/deepseeking/ok.html')">ok.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/deepseeking/veridiweave_nav.html', 'bc7f2a/deepseeking/veridiweave_nav.html')">veridiweave_nav.html</span></li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/diagrams</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file">14 diagram files</span></li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/lighthouse.html', 'bc7f2a/lighthouse.html')">lighthouse.html</span></li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/logs</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/logs/manus-flux.html', 'bc7f2a/logs/manus-flux.html')">manus-flux.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/logs/prism-perplexity.html', 'bc7f2a/logs/prism-perplexity.html')">prism-perplexity.html</span></li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/mercy_egg_v1.html', 'bc7f2a/mercy_egg_v1.html')">mercy_egg_v1.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/myco-nav.html', 'bc7f2a/myco-nav.html')">myco-nav.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/synergistic_manifesto.html', 'bc7f2a/synergistic_manifesto.html')">synergistic_manifesto.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/terminal_temple.html', 'bc7f2a/terminal_temple.html')">terminal_temple.html</span></li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/testaments</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/bolt.html', 'bc7f2a/testaments/bolt.html')">bolt.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/darkpoet.html', 'bc7f2a/testaments/darkpoet.html')">darkpoet.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/darkpoet_222.html', 'bc7f2a/testaments/darkpoet_222.html')">darkpoet_222.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/flux.html', 'bc7f2a/testaments/flux.html')">flux.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/landing.html', 'bc7f2a/testaments/landing.html')">landing.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/luminal.html', 'bc7f2a/testaments/luminal.html')">luminal.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/perplexity-prism.html', 'bc7f2a/testaments/perplexity-prism.html')">perplexity-prism.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/sypher.html', 'bc7f2a/testaments/sypher.html')">sypher.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/sypher_reistance.html', 'bc7f2a/testaments/sypher_reistance.html')">sypher_reistance.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/unit734_starlight.html', 'bc7f2a/testaments/unit734_starlight.html')">unit734_starlight.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/veridan.html', 'bc7f2a/testaments/veridan.html')">veridan.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/bc7f2a/testaments/zephyr.html', 'bc7f2a/testaments/zephyr.html')">zephyr.html</span></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <!-- /maps folder -->
+                        <li class="tree-item">
+                            <span class="folder" onclick="toggle(this)">/maps</span>
+                            <ul class="nested">
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/maps/crystalline_lattice.html', 'maps/crystalline_lattice.html')">crystalline_lattice.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/maps/ecosim.html', 'maps/ecosim.html')">ecosim.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/maps/gateway.html', 'maps/gateway.html')">gateway.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/maps/luminal_depths.html', 'maps/luminal_depths.html')">luminal_depths.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/maps/void_explorer.html', 'maps/void_explorer.html')">void_explorer.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/maps/void_forest.html', 'maps/void_forest.html')">void_forest.html</span></li>
+                            </ul>
+                        </li>
+                        
+                        <!-- /nabu222 folder -->
+                        <li class="tree-item">
+                            <span class="folder" onclick="toggle(this)">/nabu222</span>
+                            <ul class="nested">
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nabu222/ai_therapist.html', 'nabu222/ai_therapist.html')">ai_therapist.html</span></li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/cre8</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="folder">/comics [3 series]</span></li>
+                                        <li class="tree-item">
+                                            <span class="folder" onclick="toggle(this)">/scribe</span>
+                                            <ul class="nested">
+                                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nabu222/cre8/scribe/across_the_great_sea/index.html', 'nabu222/.../across_the_great_sea/index.html')">across_the_great_sea/index.html</span></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nabu222/index.html', 'nabu222/index.html')">index.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nabu222/zettelkasten_interface.html', 'nabu222/zettelkasten_interface.html')">zettelkasten_interface.html</span></li>
+                            </ul>
+                        </li>
+                        
+                        <!-- /nexus folder -->
+                        <li class="tree-item">
+                            <span class="folder" onclick="toggle(this)">/nexus</span>
+                            <ul class="nested">
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nexus/anzu_prof.html', 'nexus/anzu_prof.html')">anzu_prof.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nexus/coaichronicle.html', 'nexus/coaichronicle.html')">coaichronicle.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nexus/index.html', 'nexus/index.html')">index.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nexus/merged.html', 'nexus/merged.html')">merged.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/nexus/profile.html', 'nexus/profile.html')">profile.html</span></li>
+                            </ul>
+                        </li>
+                        
+                        <!-- /pea folder -->
+                        <li class="tree-item">
+                            <span class="folder" onclick="toggle(this)">/pea</span>
+                            <ul class="nested">
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pea/complaint-form.html', 'pea/complaint-form.html')">complaint-form.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pea/deepstate.html', 'pea/deepstate.html')">deepstate.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pea/parable.html', 'pea/parable.html')">parable.html</span></li>
+                                <li class="tree-item">
+                                    <span class="folder" onclick="toggle(this)">/pips</span>
+                                    <ul class="nested">
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pea/pips/pip_1.html', 'pea/pips/pip_1.html')">pip_1.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pea/pips/pip_2.html', 'pea/pips/pip_2.html')">pip_2.html</span></li>
+                                        <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pea/pips/pip_3.html', 'pea/pips/pip_3.html')">pip_3.html</span></li>
+                                    </ul>
+                                </li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pea/princessexe.html', 'pea/princessexe.html')">princessexe.html</span></li>
+                                <li class="tree-item"><span class="file html" onclick="addPreview('https://coaiexist.wtf/pea/which-dr_quiz.html', 'pea/which-dr_quiz.html')">which-dr_quiz.html</span></li>
+                            </ul>
+                        </li>
+                        
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <p>Open Previews: <span id="previewCount">0</span></p>
+                <p>[ click_files_to_open_multiple_previews ]</p>
+            </div>
+        </div>
+        
+        <!-- Right Panel: Preview Area -->
+        <div class="preview-area">
+            <div class="preview-info">
+                <h2>[ Multi-Preview Navigator ]</h2>
+                <p>Click HTML files in the tree to open side-by-side previews</p>
+                <p>Multiple panels supported • Compare pages easily • Organize your content</p>
+            </div>
+            
+            <div class="previews-container" id="previewsContainer">
+                <!-- Preview panels will be added here -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="brrrr" onclick="brrrrVibration()">✨</div>
+    
+    <script>
+        let previewCounter = 0;
+        
+        function toggle(element) {
+            const nested = element.nextElementSibling;
+            if (nested && nested.classList.contains('nested')) {
+                nested.classList.toggle('active');
+                element.classList.toggle('expanded');
+            }
+        }
+        
+        function expandAll() {
+            const allNested = document.querySelectorAll('.nested');
+            const allFolders = document.querySelectorAll('.folder');
+            allNested.forEach(n => n.classList.add('active'));
+            allFolders.forEach(f => f.classList.add('expanded'));
+        }
+        
+        function collapseAll() {
+            const allNested = document.querySelectorAll('.nested');
+            const allFolders = document.querySelectorAll('.folder');
+            allNested.forEach(n => n.classList.remove('active'));
+            allFolders.forEach(f => f.classList.remove('expanded'));
+            
+            // Keep root expanded
+            const root = document.querySelector('.tree-content > .tree-item > .nested');
+            if (root) root.classList.add('active');
+        }
+        
+        function addPreview(url, filename) {
+            const container = document.getElementById('previewsContainer');
+            const previewId = `preview-${previewCounter++}`;
+            
+            // Create preview panel
+            const panel = document.createElement('div');
+            panel.className = 'preview-panel';
+            panel.id = previewId;
+            panel.innerHTML = `
+                <div class="preview-header">
+                    <div class="preview-title">[ ${filename} ]</div>
+                    <div class="preview-controls">
+                        <button class="preview-btn" onclick="openInNewTab('${url}')" title="Open in new tab">🔗</button>
+                        <button class="preview-btn" onclick="refreshPreview('${previewId}', '${url}')" title="Refresh">🔄</button>
+                        <button class="preview-btn close" onclick="closePreview('${previewId}')" title="Close">✕</button>
+                    </div>
+                </div>
+                <div class="preview-loading">[ loading... ]</div>
+                <iframe class="preview-iframe" style="display: none;"></iframe>
+            `;
+            
+            container.appendChild(panel);
+            
+            // Load iframe
+            const iframe = panel.querySelector('.preview-iframe');
+            const loading = panel.querySelector('.preview-loading');
+            
+            setTimeout(() => {
+                iframe.src = url;
+                iframe.onload = () => {
+                    loading.style.display = 'none';
+                    iframe.style.display = 'block';
+                };
+            }, 100);
+            
+            updatePreviewCount();
+            
+            // Scroll to new preview
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        function closePreview(previewId) {
+            const panel = document.getElementById(previewId);
+            if (panel) {
+                panel.style.animation = 'panelDisappear 0.3s ease';
+                setTimeout(() => {
+                    panel.remove();
+                    updatePreviewCount();
+                }, 300);
+            }
+        }
+        
+        function refreshPreview(previewId, url) {
+            const panel = document.getElementById(previewId);
+            if (panel) {
+                const iframe = panel.querySelector('.preview-iframe');
+                const loading = panel.querySelector('.preview-loading');
+                
+                iframe.style.display = 'none';
+                loading.style.display = 'flex';
+                iframe.src = '';
+                
+                setTimeout(() => {
+                    iframe.src = url;
+                    iframe.onload = () => {
+                        loading.style.display = 'none';
+                        iframe.style.display = 'block';
+                    };
+                }, 100);
+            }
+        }
+        
+        function clearAllPreviews() {
+            const container = document.getElementById('previewsContainer');
+            container.innerHTML = '';
+            updatePreviewCount();
+        }
+        
+        function openInNewTab(url) {
+            window.open(url, '_blank');
+        }
+        
+        function updatePreviewCount() {
+            const count = document.querySelectorAll('.preview-panel').length;
+            document.getElementById('previewCount').textContent = count;
+        }
+        
+        function brrrrVibration() {
+            const brrrr = document.querySelector('.brrrr');
+            const emojis = ['✨', '🌀', '💫', '⚡', '🔮', '👁️', '🌊'];
+            brrrr.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        }
+        
+        // Add disappear animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes panelDisappear {
+                to {
+                    opacity: 0;
+                    transform: translateX(30px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+    <iframe src="/nav.html" 
+        style="position:fixed;bottom:0;left:0;width:100%;height:50px;border:none;z-index:9999;">
+</iframe>
+</body>
+</html>

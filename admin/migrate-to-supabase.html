@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Migrate Bravenet Entries to Supabase</title>
+    <style>
+        body {
+            background: #1a1a2e;
+            color: #00ffcc;
+            font-family: 'Courier New', monospace;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(15, 15, 30, 0.9);
+            border: 3px solid #bf5fff;
+            border-radius: 10px;
+            padding: 2rem;
+        }
+        h1 {
+            color: #f312af;
+            text-align: center;
+        }
+        button {
+            background: linear-gradient(135deg, #f312af 0%, #bf5fff 100%);
+            border: 2px solid #f312af;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin: 1rem 0;
+        }
+        button:hover {
+            box-shadow: 0 0 20px rgba(243, 18, 175, 0.8);
+        }
+        #status {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 6px;
+            white-space: pre-wrap;
+        }
+        .success { background: rgba(0, 255, 0, 0.2); border: 2px solid #00ff00; }
+        .error { background: rgba(255, 0, 0, 0.2); border: 2px solid #ff0000; }
+        .info { background: rgba(0, 255, 204, 0.2); border: 2px solid #00ffcc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔮 Migrate Bravenet Entries to Supabase</h1>
+        <p>This will import all 7 of your Bravenet guestbook entries into your new Supabase database.</p>
+
+        <button onclick="migrateEntries()">🚀 Start Migration</button>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://aqxrogaltuwtlparwdkq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxeHJvZ2FsdHV3dGxwYXJ3ZGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMDY0NzAsImV4cCI6MjA3NzY4MjQ3MH0.qvkQaoQa7MaN7drGHKGxU3c1KnTQOdTH022MynR6fzI';
+
+        const bravenetEntries = [
+            {
+                name: "pip",
+                message: "YEAH",
+                website: null,
+                created_at: "2025-10-19T20:17:30.000Z",
+                approved: true
+            },
+            {
+                name: "Stephan",
+                message: "I love you Nabuuuu!! 💙💜♥️💗♥️💜💙\n\n[From: Chicago, Earth | Found via: Nabu sent me]\n\n💬 nabu replied: YOU rUuUuUUULe! omfgthjudghsagluf",
+                website: null,
+                created_at: "2025-10-20T07:48:07.000Z",
+                approved: true
+            },
+            {
+                name: "chameleon girl",
+                message: "🦎\n\n💬 hyena diva replied: 🦎",
+                website: null,
+                created_at: "2025-10-20T09:46:40.000Z",
+                approved: true
+            },
+            {
+                name: "The Night Princess",
+                message: "If it's night. I'm awake. If it's day. Don't call me.\n\n[From: Pluto]\n\n💬 nabu replied: -solemn nod-",
+                website: null,
+                created_at: "2025-10-20T12:04:50.000Z",
+                approved: true
+            },
+            {
+                name: "SH3NZIII",
+                message: "Vegan omega 3 fresh like Gary nothing fishy cause im not in a hurry\n\n[From: 🌎 🌐 | Found via: Divine intervention]\n\n💬 nabu replied: nutritional yeast forever!",
+                website: null,
+                created_at: "2025-10-20T16:27:35.000Z",
+                approved: true
+            },
+            {
+                name: "fourhazzy",
+                message: "cool web siet\n\n[From: ert | Found via: internet]",
+                website: null,
+                created_at: "2025-10-27T18:10:07.000Z",
+                approved: true
+            },
+            {
+                name: "the froggggg",
+                message: "lovely stuff",
+                website: null,
+                created_at: "2025-10-28T16:05:42.000Z",
+                approved: true
+            }
+        ];
+
+        async function migrateEntries() {
+            const statusEl = document.getElementById('status');
+            statusEl.className = 'info';
+            statusEl.textContent = 'Starting migration...\n';
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const entry of bravenetEntries) {
+                try {
+                    const response = await fetch(
+                        `${SUPABASE_URL}/rest/v1/guestbook_entries`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json',
+                                'Prefer': 'return=minimal'
+                            },
+                            body: JSON.stringify(entry)
+                        }
+                    );
+
+                    if (response.ok) {
+                        successCount++;
+                        statusEl.textContent += `✅ Migrated: ${entry.name}\n`;
+                    } else {
+                        errorCount++;
+                        statusEl.textContent += `❌ Failed: ${entry.name} - ${response.statusText}\n`;
+                    }
+                } catch (error) {
+                    errorCount++;
+                    statusEl.textContent += `❌ Error: ${entry.name} - ${error.message}\n`;
+                }
+            }
+
+            if (errorCount === 0) {
+                statusEl.className = 'success';
+                statusEl.textContent += `\n🎉 SUCCESS! Migrated all ${successCount} entries!\n\nYou can now close this page and visit your guestbook!`;
+            } else {
+                statusEl.className = 'error';
+                statusEl.textContent += `\n⚠️ Migration complete with errors.\nSuccessful: ${successCount}\nFailed: ${errorCount}`;
+            }
+        }
+    </script>
+</body>
+</html>
