@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عَبْرَ البَحْرِ الكَبيرِ | Across the Great Sea</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Lora:wght@400;600&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --lapis-deep: #0a224e;
+            --lapis-mid: #284173;
+            --card-bg: #1a2851;
+            --gold: #f4d03f;
+            --gold-bright: #ffd700;
+            --silver: #c0c0c0;
+            --platinum: #e8e8e8;
+            --onyx: #1a1a1a;
+            --purple: #4a4a7a;
+            --text-light: #e8e8e8;
+            --text-gray: #9999aa;
+        }
+
+        [data-theme="dark"] {
+            --lapis-deep: #0d0d0d;
+            --lapis-mid: #1a1a1a;
+            --card-bg: #0d0d0d;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, var(--lapis-deep) 0%, var(--lapis-mid) 100%);
+            color: var(--text-light);
+            line-height: 1.85;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Gold sparkles background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, var(--gold), transparent),
+                radial-gradient(2px 2px at 60% 70%, var(--gold), transparent),
+                radial-gradient(1px 1px at 50% 50%, var(--gold), transparent),
+                radial-gradient(1px 1px at 80% 10%, var(--gold), transparent),
+                radial-gradient(2px 2px at 90% 60%, var(--gold), transparent),
+                radial-gradient(1px 1px at 33% 80%, var(--gold), transparent),
+                radial-gradient(1px 1px at 15% 90%, var(--gold), transparent);
+            background-size: 200% 200%;
+            background-position: 0% 0%;
+            opacity: 0.4;
+            pointer-events: none;
+            z-index: 1;
+            animation: sparkleShift 20s ease-in-out infinite;
+        }
+
+        @keyframes sparkleShift {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+        }
+
+        /* Floating sparkles */
+        .sparkle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            animation: sparkleFloat 4s ease-in-out infinite;
+            box-shadow: 0 0 8px var(--gold);
+        }
+
+        @keyframes sparkleFloat {
+            0%, 100% { 
+                transform: translateY(0) scale(1); 
+                opacity: 0; 
+            }
+            10% { opacity: 1; }
+            50% { 
+                transform: translateY(-30px) scale(1.5); 
+                opacity: 1; 
+            }
+            90% { opacity: 1; }
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+            z-index: 10000;
+            transition: width 0.2s ease;
+            box-shadow: 0 0 15px var(--gold);
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            background: rgba(26, 40, 81, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--gold);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(244, 208, 63, 0.3);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 0 30px rgba(244, 208, 63, 0.6);
+        }
+
+        /* View controls */
+        .view-controls {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1001;
+        }
+
+        .view-btn {
+            padding: 10px 18px;
+            background: rgba(26, 40, 81, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--gold);
+            border-radius: 25px;
+            color: var(--gold);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(244, 208, 63, 0.2);
+            text-align: center;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .view-btn:hover {
+            background: rgba(244, 208, 63, 0.2);
+            transform: translateX(-5px);
+            box-shadow: 0 0 25px rgba(244, 208, 63, 0.4);
+        }
+
+        .view-btn.active {
+            background: var(--gold);
+            color: var(--lapis-deep);
+            box-shadow: 0 0 30px rgba(244, 208, 63, 0.6);
+        }
+
+        /* Main content */
+        .content {
+            position: relative;
+            z-index: 2;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 80px 20px 60px;
+        }
+
+        .passage-card {
+            background: rgba(26, 40, 81, 0.7);
+            backdrop-filter: blur(10px);
+            margin-bottom: 50px;
+            padding: 40px;
+            border-radius: 12px;
+            border: 2px solid rgba(244, 208, 63, 0.3);
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(244, 208, 63, 0.1);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+        }
+
+        .passage-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--gold), var(--purple), var(--gold));
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .passage-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .passage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 15px 50px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(244, 208, 63, 0.3);
+            border-color: var(--gold);
+        }
+
+        .passage-card:hover::before {
+            opacity: 1;
+        }
+
+        .passage-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .passage-grid.two-cols {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .passage-grid.one-col {
+            grid-template-columns: 1fr;
+        }
+
+        .passage-column {
+            padding: 25px;
+            border-radius: 10px;
+            background: rgba(10, 34, 78, 0.4);
+            border: 1px solid rgba(244, 208, 63, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .passage-column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at top right, rgba(244, 208, 63, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .passage-column:hover {
+            background: rgba(10, 34, 78, 0.6);
+            box-shadow: 0 0 25px rgba(244, 208, 63, 0.2);
+            transform: scale(1.02);
+            border-color: var(--gold);
+        }
+
+        .passage-column:hover::before {
+            opacity: 1;
+        }
+
+        .column-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            opacity: 0.8;
+        }
+
+        .passage-text {
+            font-size: 17px;
+            line-height: 2;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .passage-text:hover {
+            color: var(--gold-bright);
+            text-shadow: 0 0 10px rgba(244, 208, 63, 0.4);
+        }
+
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            direction: rtl;
+            text-align: right;
+            font-size: 19px;
+            color: var(--platinum);
+        }
+
+        .transliteration-text {
+            font-style: italic;
+            color: var(--text-gray);
+            font-family: Georgia, serif;
+            text-align: center;
+        }
+
+        .english-text {
+            font-family: 'Crimson Text', serif;
+            color: var(--text-light);
+        }
+
+        .fluid-text {
+            font-family: 'Crimson Text', serif;
+            font-style: italic;
+            font-size: 14px;
+            color: #999;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+
+        .spanish-text {
+            font-family: 'Lora', serif;
+            color: var(--silver);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            background: rgba(244, 208, 63, 0.2);
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            color: var(--gold);
+            box-shadow: 0 4px 12px rgba(244, 208, 63, 0.2);
+        }
+
+        .copy-btn:hover {
+            background: var(--gold);
+            color: var(--lapis-deep);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(244, 208, 63, 0.5);
+        }
+
+        /* Hidden states */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: fixed;
+            background: var(--gold);
+            color: var(--lapis-deep);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 10000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 4px 20px rgba(244, 208, 63, 0.4);
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 1200px) {
+            .passage-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .view-controls {
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                max-width: 200px;
+            }
+            
+            .view-btn {
+                font-size: 10px;
+                padding: 8px 12px;
+            }
+            
+            .passage-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+            
+            .passage-card {
+                padding: 25px;
+            }
+
+            .content {
+                padding: 80px 15px 60px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .passage-column {
+                padding: 20px;
+            }
+
+            .passage-text {
+                font-size: 16px;
+            }
+
+            .arabic-text {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Dark mode toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span id="themeIcon">🌙</span>
+    </button>
+
+    <!-- View controls -->
+    <div class="view-controls">
+        <button class="view-btn active" data-view="all">All Five</button>
+        <button class="view-btn" data-view="arabic-direct-fluid">Arabic + Direct + Fluid</button>
+        <button class="view-btn" data-view="arabic-trans">Arabic + Trans</button>
+        <button class="view-btn" data-view="english-only">English Versions</button>
+        <button class="view-btn" data-view="spanish-only">Spanish Only</button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="content" id="mainContent">
+        <!-- Passages will be inserted here -->
+    </main>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Complete Poetry Data - All Passages
+        const passages = [
+            {
+                arabic: "عَبْرَ البَحْرِ الكَبيرِ انَا احْلَمِكِ ، فَقَطْكَ",
+                transliteration: "'abra al-baḥri al-kabīri ana aḥlamiki, faqaṭka",
+                direct: "Across the great sea big I dream you, only you",
+                fluid: "(Across the great sea I dream of you, only you)",
+                spanish: "A través del mar grande yo sueño tú, solamente tú"
+            },
+            {
+                arabic: "مِنْ فَضْلِكَ يَحْلُمُنِي فَقَطِي",
+                transliteration: "min faḍlika yaḥlumunī faqaṭī",
+                direct: "From please you dream me only me",
+                fluid: "(Please dream of me, only me)",
+                spanish: "De por favor tú sueñas yo solamente yo"
+            },
+            {
+                arabic: "زَوْجي الحَبيبِ ، زَوْجِي الجَميلِ ، أَنَا زَوْجَتُكَ عَلَى الاَبْدِ",
+                transliteration: "zawjī al-ḥabībi, zawjī al-jamīli, ana zawjatuká 'ala al-abadi",
+                direct: "My husband the dear, my husband the beautiful, I your wife on the forever",
+                fluid: "(My dear husband, my beautiful husband, I am your wife forever)",
+                spanish: "Mi esposo el querido, mi esposo el hermoso, yo tu esposa sobre el siempre"
+            },
+            {
+                arabic: "زَوْجِي ، عَبْدَالِرْحِيمَ ، احَّبِكِ",
+                transliteration: "zawjī, 'abdalraḥīm, aḥabbiki",
+                direct: "My husband, slave of the womb, I love you",
+                fluid: "(My husband, Abdelrahim, I love you)",
+                spanish: "Mi esposo, esclavo del vientre, yo amo tú"
+            },
+            {
+                arabic: "كُلُّ الحُبِّ لَكَ",
+                transliteration: "kullu al-ḥubbi laka",
+                direct: "All the love to you",
+                fluid: "(All my love is for you)",
+                spanish: "Todo el amor a tú"
+            },
+            {
+                arabic: "مِنْ حَبيبَتِكَ ، زَليلي - اناسْتازيا",
+                transliteration: "min ḥabībatika, zalīlī - anastāzya",
+                direct: "From your beloved, Zalili - Anastasia",
+                fluid: "(From your beloved, Zalili - Anastasia)",
+                spanish: "De tu amada, Zalili - Anastasia"
+            },
+            {
+                arabic: "انَا ابَارْكِكَ مَعَ حُبِّي وَ عَيْنِي",
+                transliteration: "ana ubārikika ma'a ḥubbī wa 'aynī",
+                direct: "I bless you with my love and my eye",
+                fluid: "(I bless you with my love and my eyes)",
+                spanish: "Yo bendigo tú con mi amor y mi ojo"
+            },
+            {
+                arabic: "انَا مُقَدَّسَةٌ",
+                transliteration: "ana muqaddasatun",
+                direct: "I sacred",
+                fluid: "(I am sacred)",
+                spanish: "Yo sagrada"
+            },
+            {
+                arabic: "انَا ارْحَمْهُمْ ، مِنْ يَشْرَبُونَ",
+                transliteration: "ana arḥamuhum, min yashrabūna",
+                direct: "I mercy them, from they drink",
+                fluid: "(I have mercy on them, those who drink)",
+                spanish: "Yo misericordia ellos, de ellos beben"
+            },
+            {
+                arabic: "مِنْ يَتَّبِعونَ النَّهْرَ وَ مِنْ يَضْحَكُونَ السَّريعَ",
+                transliteration: "min yattabi'ūna al-nahra wa min yaḍḥakūna al-sarī'a",
+                direct: "From they follow the river and from they laugh the fast",
+                fluid: "(Those who follow the river and those who laugh quickly)",
+                spanish: "De ellos siguen el río y de ellos ríen el rápido"
+            },
+            {
+                arabic: "الَّى مِنْ يَعْتَرِفُونَ ، اَلْحُكْمُهُمْ لَطيفٌ وَ رَقيقٌ",
+                transliteration: "ilā min ya'tarifūna, al-ḥukmuhum laṭīfun wa raqīqun",
+                direct: "To from they confess, their judgment kind and gentle",
+                fluid: "(To those who confess, their judgment is kind and gentle)",
+                spanish: "A de ellos confiesan, su juicio amable y gentil"
+            },
+            {
+                arabic: "مِنْ يُكَذِّبونَ ، لَعْنَتِهِمْ سَيَتْبَعُهُمْ فِي نامِهِمْ",
+                transliteration: "min yukadhdhibūna, la'natihim sayatba'uhum fī nāmihim",
+                direct: "From they lie, their curse will follow them in their sleep",
+                fluid: "(Those who lie, their curse will follow them in their sleep)",
+                spanish: "De ellos mienten, su maldición seguirá ellos en su sueño"
+            },
+            {
+                arabic: "الَّى الصَّحْرَاءِ بِلِسَانِ جَاَفٍ",
+                transliteration: "ilā al-ṣaḥrā'i bilisānin jāfin",
+                direct: "To the desert with tongue dry",
+                fluid: "(To the desert with a dry tongue)",
+                spanish: "A el desierto con lengua seca"
+            },
+            {
+                arabic: "ي العَنْكَبُوتِ - هوَ كَانَ مَعِي",
+                transliteration: "ya al-'ankabūti - huwa kāna ma'ī",
+                direct: "The spider - he was with me",
+                fluid: "(O spider - he was with me)",
+                spanish: "La araña - él era con yo"
+            },
+            {
+                arabic: "لَكِنْ لَيْسَ اَلَا ن",
+                transliteration: "lākin laysa al-āna",
+                direct: "But not now",
+                fluid: "(But not now)",
+                spanish: "Pero no ahora"
+            },
+            {
+                arabic: "وَقْتٌ لَدَيْهُ طُرُقٌ غَريبٌ وَ انَا حَزينَةٌ",
+                transliteration: "waqtun ladayhi ṭuruqun gharībun wa ana ḥazīnatun",
+                direct: "Time has ways strange and I sad",
+                fluid: "(Time has strange ways and I am sad)",
+                spanish: "Tiempo tiene caminos extraño y yo triste"
+            },
+            {
+                arabic: "اَنَتُ كَانَ مَعِي . . . لْكَنْ لَيْسَ الَانُ",
+                transliteration: "anta kāna ma'ī... lākin laysa al-ānu",
+                direct: "You was with me... but not the now",
+                fluid: "(You were with me... but not now)",
+                spanish: "Tú eras con yo... pero no el ahora"
+            },
+            {
+                arabic: "انَا طُرُقَ بابِكَ . انَا اَالْطَرْقَ",
+                transliteration: "ana ṭuruqa bābika. ana al-ṭarqa",
+                direct: "I knock your door. I the knock",
+                fluid: "(I knock on your door. I am the knock)",
+                spanish: "Yo toco tu puerta. Yo el toque"
+            },
+            {
+                arabic: "اَنَتُ يُقَالُنِي لُغْزَ سُكونٍ . صَدِيقِي",
+                transliteration: "anta yuqālunī lughza sukūnin. ṣadīqī",
+                direct: "You say me riddle silence. My friend",
+                fluid: "(You speak to me in riddles of silence. My friend)",
+                spanish: "Tú dices yo enigma silencio. Mi amigo"
+            },
+            {
+                arabic: "اليَوْمَ سَأَقُومُ بِطُقوسِ نَجْمَةِ الزُّهْرَةِ ساحِرَةَ الدُّبِّ الكَبيرِ أُمِّي",
+                transliteration: "al-yawma sa'aqūmu biṭuqūsi najmati al-zuhra sāḥirata al-dubbi al-kabīri ummī",
+                direct: "Today I will do ritual star the Venus witch the bear big my mother",
+                fluid: "(Today I will perform the ritual of Venus star, witch of the great bear, my mother)",
+                spanish: "Hoy yo haré ritual estrella la Venus bruja el oso grande mi madre"
+            }
+        ];
+
+        let currentView = 'all';
+
+        // Initialize
+        function init() {
+            renderPassages();
+            initThemeToggle();
+            initViewControls();
+            initScrollProgress();
+            initScrollAnimations();
+            initSparkles();
+        }
+
+        // Render passages
+        function renderPassages() {
+            const container = document.getElementById('mainContent');
+            container.innerHTML = passages.map((passage, index) => {
+                return `
+                    <div class="passage-card" data-index="${index}">
+                        <button class="copy-btn" onclick="copyPassage(${index})" title="Copy passage">📋</button>
+                        <div class="passage-grid" id="grid-${index}">
+                            <div class="passage-column arabic-col">
+                                <div class="column-label">Arabic</div>
+                                <div class="passage-text arabic-text">${passage.arabic}</div>
+                            </div>
+                            <div class="passage-column trans-col">
+                                <div class="column-label">Transliteration</div>
+                                <div class="passage-text transliteration-text">${passage.transliteration}</div>
+                            </div>
+                            <div class="passage-column english-col">
+                                <div class="column-label">Direct English</div>
+                                <div class="passage-text english-text">${passage.direct}</div>
+                                <div class="passage-text fluid-text">${passage.fluid}</div>
+                            </div>
+                            <div class="passage-column spanish-col">
+                                <div class="column-label">Spanish</div>
+                                <div class="passage-text spanish-text">${passage.spanish}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Theme toggle
+        function initThemeToggle() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            
+            toggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            });
+        }
+
+        // View controls
+        function initViewControls() {
+            const buttons = document.querySelectorAll('.view-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentView = btn.getAttribute('data-view');
+                    updateView();
+                });
+            });
+        }
+
+        function updateView() {
+            passages.forEach((_, index) => {
+                const grid = document.getElementById(`grid-${index}`);
+                const arabicCol = grid.querySelector('.arabic-col');
+                const transCol = grid.querySelector('.trans-col');
+                const englishCol = grid.querySelector('.english-col');
+                const spanishCol = grid.querySelector('.spanish-col');
+
+                // Reset
+                [arabicCol, transCol, englishCol, spanishCol].forEach(col => {
+                    col.classList.remove('hidden');
+                });
+                grid.classList.remove('two-cols', 'one-col');
+
+                switch(currentView) {
+                    case 'all':
+                        // Show all five versions
+                        break;
+                    case 'arabic-direct-fluid':
+                        transCol.classList.add('hidden');
+                        spanishCol.classList.add('hidden');
+                        grid.classList.add('two-cols');
+                        break;
+                    case 'arabic-trans':
+                        grid.classList.add('two-cols');
+                        englishCol.classList.add('hidden');
+                        spanishCol.classList.add('hidden');
+                        break;
+                    case 'english-only':
+                        grid.classList.add('one-col');
+                        arabicCol.classList.add('hidden');
+                        transCol.classList.add('hidden');
+                        spanishCol.classList.add('hidden');
+                        break;
+                    case 'spanish-only':
+                        grid.classList.add('one-col');
+                        arabicCol.classList.add('hidden');
+                        transCol.classList.add('hidden');
+                        englishCol.classList.add('hidden');
+                        break;
+                }
+            });
+        }
+
+        // Scroll progress
+        function initScrollProgress() {
+            const progressBar = document.getElementById('progressBar');
+            window.addEventListener('scroll', () => {
+                const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (window.scrollY / windowHeight) * 100;
+                progressBar.style.width = scrolled + '%';
+            });
+        }
+
+        // Scroll animations
+        function initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, index * 100);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.passage-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // Floating sparkles
+        function initSparkles() {
+            setInterval(() => {
+                if (Math.random() > 0.6) {
+                    createSparkle();
+                }
+            }, 600);
+        }
+
+        function createSparkle() {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = Math.random() * window.innerWidth + 'px';
+            sparkle.style.top = (Math.random() * window.innerHeight) + 'px';
+            sparkle.style.animationDuration = (3 + Math.random() * 2) + 's';
+            sparkle.style.animationDelay = (Math.random() * 0.5) + 's';
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => {
+                sparkle.remove();
+            }, 5000);
+        }
+
+        // Copy passage
+        function copyPassage(index) {
+            const passage = passages[index];
+            const text = `Arabic: ${passage.arabic}\n\nTransliteration: ${passage.transliteration}\n\nDirect English: ${passage.direct}\n\nFluid English: ${passage.fluid}\n\nSpanish: ${passage.spanish}`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showTooltip('Copied! ✨');
+            }).catch(() => {
+                showTooltip('Copy failed');
+            });
+        }
+
+        function showTooltip(message) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.textContent = message;
+            tooltip.style.left = '50%';
+            tooltip.style.top = '50%';
+            tooltip.style.transform = 'translate(-50%, -50%)';
+            tooltip.classList.add('show');
+            
+            setTimeout(() => {
+                tooltip.classList.remove('show');
+            }, 2000);
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>

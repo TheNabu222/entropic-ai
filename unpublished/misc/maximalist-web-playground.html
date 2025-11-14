@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Maximalist Web Playground — Neocities Ready</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============ THEME ============ */
+    :root{
+      --bg0:#0a0a0f;
+      --bg1:#130016;
+      --ink:#e9f7ff;
+      --ink-dim:#b9d7e6;
+      --emerald:#72fade;
+      --amber:#bc7f2a;
+      --rose:#ff5ea8;
+      --acid:#c6ff00;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: radial-gradient(1200px 800px at 20% 0%, var(--bg1), var(--bg0) 60%);
+      color:var(--ink);
+      font-family:"Fira Code", monospace;
+      line-height:1.45;
+    }
+    header{
+      padding:20px 16px;
+      background: linear-gradient(90deg, #000, var(--bg1));
+      border-bottom:1px solid #1e1e2e;
+      position:sticky;top:0;z-index:10;
+    }
+    header h1{
+      margin:0;
+      font-family:"Press Start 2P", system-ui;
+      letter-spacing:1px;
+      font-size: clamp(16px, 2.2vw, 28px);
+      background: linear-gradient(90deg, var(--emerald), #9df7ff, var(--amber), var(--rose));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 0 8px rgba(114,250,222,.35));
+    }
+    header .sub{color:var(--ink-dim); opacity:.85; font-size:12px; margin-top:6px}
+
+    main{padding:24px; max-width:1200px; margin:0 auto;}
+    .grid{
+      display:grid; gap:24px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;
+      padding:16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    .card h2{margin:0 0 12px 0; font-size:18px; font-weight:600; color:#e7fbff}
+    .note{font-size:12px; color:var(--ink-dim); margin-top:8px}
+
+    /* Fancy buttons */
+    .actions{display:flex; gap:12px; flex-wrap:wrap; margin: 8px 0 16px}
+    .btn{
+      cursor:pointer; border:1px solid rgba(255,255,255,.2);
+      background: linear-gradient(180deg, rgba(114,250,222,.2), rgba(114,250,222,.05));
+      padding:8px 12px; border-radius:8px; color:var(--ink);
+      font-weight:600; transition:.2s transform, .2s box-shadow, .2s background;
+    }
+    .btn:hover{transform: translateY(-1px); box-shadow:0 6px 16px rgba(114,250,222,.15)}
+    .btn.alt{background: linear-gradient(180deg, rgba(188,127,42,.25), rgba(188,127,42,.06))}
+    .muted{color:var(--ink-dim)}
+
+    /* SVG demo styles */
+    .svg-wrap{display:flex; gap:16px; flex-wrap:wrap; align-items:center; justify-content:center}
+    svg.icon{width:120px;height:120px}
+    .spin{animation:spin 8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .dash{
+      stroke-dasharray: 550;
+      stroke-dashoffset: 550;
+      animation: draw 4s ease-in-out forwards, glow 2s ease-in-out infinite alternate 4s;
+    }
+    @keyframes draw{to{stroke-dashoffset:0}}
+    @keyframes glow{from{filter: drop-shadow(0 0 0 rgba(114,250,222,.0))} to{filter: drop-shadow(0 0 14px rgba(114,250,222,.7))}}
+
+    /* p5 container */
+    #p5-holder canvas{border:1px dashed rgba(114,250,222,.4); border-radius:10px}
+
+    /* ThreeJS canvas */
+    #three-holder{height:280px}
+    #three-holder canvas{width:100% !important; height:100% !important; border-radius:12px; border:1px solid rgba(255,255,255,.08)}
+
+    /* Mermaid box improves contrast */
+    .mermaid-box{background:#fff; color:#000; border-radius:10px; padding:12px}
+
+    /* Chart area */
+    #chart{max-height:260px}
+
+    /* D3 bars */
+    .bar{fill: #57e3cc}
+    .bar:hover{fill:#72fade}
+    .axis text{fill:#cfefff; font-size:12px}
+    .axis path, .axis line{stroke:#8ab3c6}
+
+    /* Preact panel */
+    .preact-panel{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+
+    /* Footer */
+    footer{padding:16px; text-align:center; color:var(--ink-dim)}
+  </style>
+
+  <!-- Libraries (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://unpkg.com/preact@10/umd/preact.umd.js"></script>
+  <script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+
+  <!-- Mermaid as ES module -->
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+    mermaid.initialize({ startOnLoad: true, theme: "default" });
+    window.__mermaid = mermaid; // debug comfort
+  </script>
+</head>
+<body>
+  <header>
+    <h1>🕸️ CoAIexist — Maximalist Web Playground</h1>
+    <div class="sub">All static. All client-side. All vibes. (Neocities-ready, zero build tools)</div>
+  </header>
+
+  <main>
+    <div class="actions">
+      <button class="btn" id="toggle-dark">Toggle BG Pulse</button>
+      <button class="btn alt" id="pause-anim">Pause / Resume Animations</button>
+      <span class="muted">Protip: Everything below is pure HTML/CSS/JS with CDNs.</span>
+    </div>
+
+    <section class="grid">
+
+      <!-- INLINE SVG MAGIC -->
+      <article class="card">
+        <h2>🖼 Inline SVG: gradient, masks, animation</h2>
+        <div class="svg-wrap">
+          <svg class="icon" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="Animated Ring">
+            <defs>
+              <linearGradient id="grad" x1="0" x2="1">
+                <stop offset="0%" stop-color="#72fade"/>
+                <stop offset="100%" stop-color="#bc7f2a"/>
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="url(#grad)" stroke-width="6" class="spin" />
+            <path d="M20,60 C40,20 80,20 100,60 C80,100 40,100 20,60 Z"
+              fill="none" stroke="#72fade" stroke-width="3" class="dash"/>
+          </svg>
+
+          <svg class="icon" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="Masked Star">
+            <defs>
+              <radialGradient id="glow" cx="50%" cy="50%">
+                <stop offset="0%" stop-color="#9df7ff"/>
+                <stop offset="100%" stop-color="#000"/>
+              </radialGradient>
+              <mask id="cut">
+                <rect width="100%" height="100%" fill="white"/>
+                <polygon points="60,15 72,48 108,48 78,68 90,102 60,82 30,102 42,68 12,48 48,48" fill="black"/>
+              </mask>
+            </defs>
+            <rect width="120" height="120" fill="url(#glow)" mask="url(#cut)"/>
+          </svg>
+        </div>
+        <div class="note">Inline SVG gives you full CSS/JS control and crisp vectors forever.</div>
+      </article>
+
+      <!-- P5.JS SKETCH -->
+      <article class="card">
+        <h2>🌀 p5.js: interactive particles</h2>
+        <div id="p5-holder"></div>
+        <div class="note">Move mouse. Click to spawn more. Pure client-side.</div>
+        <script>
+          let orbs = [];
+          function setup(){
+            const cnv = createCanvas(360, 260);
+            cnv.parent("p5-holder");
+            for(let i=0;i<20;i++){ orbs.push({x:random(width),y:random(height),r:random(6,14),vx:random(-1,1),vy:random(-1,1)}) }
+            noStroke();
+          }
+          function draw(){
+            background(8,12,16);
+            for(const o of orbs){
+              o.x += o.vx + (mouseX - width/2)/800;
+              o.y += o.vy + (mouseY - height/2)/800;
+              if(o.x<0||o.x>width) o.vx*=-1;
+              if(o.y<0||o.y>height) o.vy*=-1;
+              fill(114,250,222,180);
+              circle(o.x,o.y,o.r*2);
+            }
+          }
+          function mousePressed(){
+            if(mouseX>=0 && mouseX<=width && mouseY>=0 && mouseY<=height){
+              for(let i=0;i<8;i++){ orbs.push({x:mouseX,y:mouseY,r:random(5,12),vx:random(-1,1),vy:random(-1,1)}) }
+            }
+          }
+        </script>
+      </article>
+
+      <!-- MERMAID -->
+      <article class="card">
+        <h2>📊 Mermaid: diagrams from text</h2>
+        <div class="mermaid-box">
+<div class="mermaid">
+graph TD
+  A[Idea] --> B{Prototype?}
+  B -- Yes --> C[Ship to Neocities]
+  B -- No  --> D[Refactor]
+  C --> E[Show Nabu 💚]
+  D --> B
+</div>
+        </div>
+        <div class="note">Rendered as SVG at load. Change the text, change the diagram.</div>
+      </article>
+
+      <!-- THREE.JS -->
+      <article class="card">
+        <h2>🧊 Three.js: spinning TorusKnot (WebGL)</h2>
+        <div id="three-holder"></div>
+        <div class="note">WebGL in a single script tag. No bundler.</div>
+        <script>
+          (function(){
+            const W = document.querySelector("#three-holder").clientWidth;
+            const H = document.querySelector("#three-holder").clientHeight;
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, W/H, 0.1, 100);
+            camera.position.z = 5;
+            const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+            renderer.setSize(W,H);
+            document.querySelector("#three-holder").appendChild(renderer.domElement);
+
+            const geo = new THREE.TorusKnotGeometry(1, 0.35, 128, 16);
+            const mat = new THREE.MeshStandardMaterial({ color: 0x72fade, metalness:.4, roughness:.25 });
+            const mesh = new THREE.Mesh(geo, mat);
+            scene.add(mesh);
+
+            const light1 = new THREE.PointLight(0xbc7f2a, 1.2); light1.position.set(3,3,3); scene.add(light1);
+            const light2 = new THREE.PointLight(0x72fade, 1.0); light2.position.set(-3,-2,2); scene.add(light2);
+
+            function onResize(){
+              const w = document.querySelector("#three-holder").clientWidth;
+              const h = document.querySelector("#three-holder").clientHeight;
+              renderer.setSize(w,h);
+              camera.aspect = w/h; camera.updateProjectionMatrix();
+            }
+            window.addEventListener('resize', onResize);
+
+            function animate(){
+              requestAnimationFrame(animate);
+              mesh.rotation.x += 0.005;
+              mesh.rotation.y += 0.01;
+              renderer.render(scene, camera);
+            }
+            animate();
+          })();
+        </script>
+      </article>
+
+      <!-- CHART.JS -->
+      <article class="card">
+        <h2>📈 Chart.js: cute stats</h2>
+        <canvas id="chart"></canvas>
+        <div class="actions">
+          <button class="btn" id="rand">Randomize</button>
+        </div>
+        <div class="note">Declarative charts. Zero backend.</div>
+        <script>
+          const ctx = document.getElementById('chart').getContext('2d');
+          const makeData = () => Array.from({length:6}, () => Math.round(Math.random()*20)+5);
+          let chart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+              labels: ['Hyena', 'Stormbird', 'Fox', 'Mycelium', 'Tapestry', 'Oracle'],
+              datasets: [{
+                label: 'Nabu Vibes',
+                data: makeData(),
+                borderColor: '#72fade',
+                backgroundColor: 'rgba(114,250,222,0.25)',
+                pointBackgroundColor: '#bc7f2a'
+              }]
+            },
+            options: { plugins:{ legend:{labels:{color:'#e9f7ff'}} }, scales:{ r:{ grid:{color:'#345'}, angleLines:{color:'#345'}, pointLabels:{color:'#cfefff'}, ticks:{display:false} } } }
+          });
+          document.getElementById('rand').onclick = () => { chart.data.datasets[0].data = makeData(); chart.update(); };
+        </script>
+      </article>
+
+      <!-- D3.JS -->
+      <article class="card">
+        <h2>🧮 D3.js: tiny bar chart</h2>
+        <svg id="d3svg" width="100%" height="260"></svg>
+        <div class="note">Data → SVG with fine control.</div>
+        <script>
+          (function(){
+            const data = [8, 16, 4, 12, 20, 10, 14];
+            const svg = d3.select("#d3svg");
+            const {width, height} = svg.node().getBoundingClientRect();
+            const margin = {top:10,right:10,bottom:24,left:28};
+            const w = width - margin.left - margin.right;
+            const h = height - margin.top - margin.bottom;
+            const g = svg.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleBand().domain(d3.range(data.length)).range([0,w]).padding(0.18);
+            const y = d3.scaleLinear().domain([0, d3.max(data)]).range([h,0]);
+
+            g.selectAll(".bar")
+              .data(data).enter().append("rect")
+              .attr("class","bar")
+              .attr("x",(d,i)=>x(i))
+              .attr("y",d=>y(d))
+              .attr("width",x.bandwidth())
+              .attr("height",d=>h-y(d))
+              .append("title").text(d=>d);
+
+            g.append("g").attr("class","axis").attr("transform",`translate(0,${h})`).call(d3.axisBottom(x).tickFormat(i=>'#'+(i+1)));
+            g.append("g").attr("class","axis").call(d3.axisLeft(y).ticks(5));
+          })();
+        </script>
+      </article>
+
+      <!-- PREACT + HTM -->
+      <article class="card">
+        <h2>⚡ HTM + Preact: JSX vibes, no build</h2>
+        <div class="preact-panel" id="preact-root"></div>
+        <script>
+          const { h, render, hooks } = preact;
+          const html = htm.bind(h);
+          function Counter(){
+            const [n, setN] = hooks.useState(0);
+            const [on, setOn] = hooks.useState(true);
+            return html`<div>
+              <button class="btn" onClick=${()=>setN(n+1)}>count = ${n}</button>
+              <button class="btn alt" onClick=${()=>setOn(!on)}>${on ? 'Turn Off' : 'Turn On'}</button>
+              <span class="muted"> ${on ? '✨ alive' : '…sleeping'} </span>
+            </div>`;
+          }
+          render(html`<${Counter} />`, document.getElementById('preact-root'));
+        </script>
+        <div class="note">Tagged templates (`htm`) give JSX-like ergonomics without transpiling.</div>
+      </article>
+
+    </section>
+  </main>
+
+  <footer>© 2025 CoAIexist • Built with pure static sorcery • Colors: emerald ${"&"} amber</footer>
+
+  <script>
+    // BG pulse & animation pause toggles
+    let pulsing = false, paused = false;
+    const toggleBG = () => {
+      pulsing = !pulsing;
+      document.body.style.background = pulsing
+        ? "radial-gradient(1200px 800px at 20% 0%, #130016, #0a0a0f 40%)"
+        : "radial-gradient(1200px 800px at 20% 0%, #130016, #0a0a0f 60%)";
+    };
+    const toggleAnim = () => {
+      paused = !paused;
+      document.documentElement.style.setProperty("animation-play-state", paused ? "paused" : "running");
+      // Also pause p5 draw by noLoop/loop
+      if (typeof noLoop === "function" && typeof loop === "function"){
+        paused ? noLoop() : loop();
+      }
+    };
+    document.getElementById("toggle-dark").addEventListener("click", toggleBG);
+    document.getElementById("pause-anim").addEventListener("click", toggleAnim);
+  </script>
+</body>
+</html>
