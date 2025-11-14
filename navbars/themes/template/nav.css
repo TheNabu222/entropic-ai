@@ -1,0 +1,208 @@
+/* TEMPLATE NAVIGATION BAR STYLES
+ * Copy this file and customize the variables below to create your own theme!
+ */
+
+/* ========== THEME VARIABLES (CUSTOMIZE THESE!) ========== */
+:root {
+    /* Color Scheme */
+    --nav-bg-start: #c0c0c0;
+    --nav-bg-end: #808080;
+    --nav-border-color: #ffffff;
+    --nav-text-color: #000000;
+
+    /* Button Colors */
+    --button-bg-start: #dfdfdf;
+    --button-bg-end: #c0c0c0;
+    --button-hover-start: #e0e0e0;
+    --button-hover-end: #d0d0d0;
+    --button-active-bg: #c0c0c0;
+    --button-text: #000000;
+
+    /* Start Button Colors */
+    --start-bg-start: #008080;
+    --start-bg-end: #0000ff;
+    --start-text: #ffffff;
+
+    /* Accent Colors */
+    --accent-color: #000000;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+
+    /* Fonts */
+    --nav-font: "MS Sans Serif", Arial, sans-serif;
+    --nav-font-size: 11px;
+
+    /* Dimensions */
+    --nav-height: 40px;
+    --button-padding: 4px 8px;
+}
+
+/* ========== BASE STYLES (USUALLY DON'T NEED TO CHANGE) ========== */
+body {
+    padding-bottom: calc(var(--nav-height) + 10px);
+}
+
+.custom-navbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--nav-height);
+    z-index: 9999;
+    background: linear-gradient(to bottom, var(--nav-bg-start), var(--nav-bg-end));
+    border-top: 2px solid var(--nav-border-color);
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    font-family: var(--nav-font);
+    font-size: var(--nav-font-size);
+    box-shadow: 0 -2px 4px var(--shadow-color);
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+/* Buttons */
+.nav-button {
+    background: linear-gradient(to bottom, var(--button-bg-start), var(--button-bg-end));
+    border: 2px outset var(--nav-border-color);
+    padding: var(--button-padding);
+    margin: 0 2px;
+    cursor: pointer;
+    color: var(--button-text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: bold;
+    transition: 0.1s;
+    white-space: nowrap;
+}
+
+.nav-button:hover {
+    background: linear-gradient(to bottom, var(--button-hover-start), var(--button-hover-end));
+}
+
+.nav-button:active {
+    border-style: inset;
+    background: var(--button-active-bg);
+}
+
+/* Active page indicator */
+.nav-button.active {
+    outline: 2px solid var(--accent-color);
+    box-shadow: inset 0 0 0 2px var(--nav-border-color);
+}
+
+/* Start Button */
+.start-button {
+    background: linear-gradient(to right, var(--start-bg-start), var(--start-bg-end));
+    color: var(--start-text);
+    font-weight: bold;
+    padding: 4px 12px;
+    margin-right: 8px;
+    border: 2px outset var(--nav-border-color);
+}
+
+/* Separator */
+.nav-separator {
+    width: 2px;
+    height: 30px;
+    background: #808080;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+/* Title Badge */
+.nav-title {
+    background: var(--accent-color);
+    color: var(--nav-border-color);
+    padding: 4px 12px;
+    font-weight: bold;
+    border: 2px outset var(--nav-border-color);
+    margin: 0 4px;
+    white-space: nowrap;
+}
+
+/* Back Button */
+.back-button {
+    background: linear-gradient(135deg, #d8e4f0, #8fabcf);
+    color: #1f2d4f;
+    font-weight: bold;
+}
+
+/* Extra Links (different style) */
+.extra-button {
+    background: linear-gradient(135deg, #d3edb7, #9dc76a);
+    color: #2d4f1f;
+}
+
+/* Start Menu Popup */
+.start-menu {
+    display: none;
+    position: fixed;
+    bottom: calc(var(--nav-height) + 4px);
+    left: 4px;
+    width: 280px;
+    background: linear-gradient(135deg, var(--button-bg-start), var(--button-bg-end));
+    border: 3px ridge var(--nav-border-color);
+    box-shadow: 6px 6px 16px var(--shadow-color);
+    z-index: 999999;
+    padding: 8px;
+    font-family: var(--nav-font);
+}
+
+.start-menu.open {
+    display: block;
+}
+
+.start-menu-title {
+    background: linear-gradient(90deg, var(--start-bg-start), var(--start-bg-end));
+    color: var(--start-text);
+    padding: 6px 12px;
+    font-weight: bold;
+    margin: -8px -8px 8px -8px;
+    border-bottom: 2px solid var(--nav-border-color);
+}
+
+.start-menu-item {
+    background: var(--button-bg-start);
+    border: 1px solid transparent;
+    padding: 6px 12px;
+    margin: 2px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 3px;
+    transition: all 0.15s;
+}
+
+.start-menu-item:hover {
+    background: var(--start-bg-start);
+    color: var(--start-text);
+    border: 1px solid var(--nav-border-color);
+}
+
+.start-menu-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #808080 50%, transparent 100%);
+    margin: 6px 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .custom-navbar {
+        justify-content: center;
+    }
+
+    .nav-button {
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+}
+
+@media (max-width: 600px) {
+    .nav-title {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+}

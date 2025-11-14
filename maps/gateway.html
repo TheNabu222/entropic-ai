@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Grand Archive of Interplanar Cartography</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cormorant+Garamond:wght@600&family=VT323&display=swap');
+
+        :root {
+            --font-display: 'Papyrus', cursive;
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-pixel: 'VT323', monospace;
+            --color-parchment: #f5e5c5;
+            --color-ink: #3a2a1a;
+            --color-gold: #bc7f2a;
+            --color-teal: #00ffcc;
+            --color-crimson: #CA237F;
+        }
+
+        body {
+            background-color: #1a120b;
+            color: var(--color-parchment);
+            font-family: var(--font-pixel);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #background-container {
+            position: fixed;
+            top: -5%; left: -5%; width: 170%; height: 170%;
+            z-index: -1;
+            transition: transform 0.1s ease-out;
+        }
+        .bg-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-repeat: repeat;
+        }
+        .bg-map {
+            background-image: url('https://coaiexist.wtf/assets/misc_gif/metapara/H-BEgyptcp.gif'), url('https://i.gifer.com/QFK.gif');
+            background-size: auto, cover;
+            background-position: center center;
+            opacity: 0.3;
+            animation: bg-pan 120s linear infinite;
+        }
+        @keyframes bg-pan {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .bg-parchment {
+             background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+             opacity: 0.4;
+             mix-blend-mode: overlay;
+        }
+        .bg-noise::after {
+            content: '';
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAAYklEQVRIx+3NMQoAIAwEBP//Pa9x9EBERQOkAdwRfny83J0dTryvBwLqAE57GAAAAAElFTSuQmCC);
+            opacity: 0.05;
+            animation: noise 0.5s steps(2) infinite;
+        }
+        body::after { /* Scanlines */
+            content: '';
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 50%);
+            background-size: 100% 4px; opacity: 0.3; pointer-events: none; z-index: 101;
+        }
+        @keyframes noise {
+            0%, 100% { transform: translate(0, 0); } 10% { transform: translate(-2%, -4%); } 20% { transform: translate(-6%, 2%); } 30% { transform: translate(3%, -10%); } 40% { transform: translate(-2%, 10%); } 50% { transform: translate(-6%, 4%); } 60% { transform: translate(6%, 0%); } 70% { translate(0%, 6%); } 80% { transform: translate(1%, 14%); } 90% { transform: translate(-4%, 4%); }
+        }
+
+        .main-container {
+            border: 4px solid #000;
+            border-image: linear-gradient(45deg, var(--color-gold), #503116) 1;
+            background: rgba(43, 29, 15, 0.85);
+            box-shadow: 
+                inset 0 0 25px rgba(0,0,0,0.8), 
+                0 0 55px rgba(0,0,0,0.9);
+            width: 90%;
+            max-width: 800px;
+            margin: 5vh auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .header-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            color: var(--color-gold);
+            text-shadow: 2px 2px 0 var(--color-ink), 0 0 15px #ffc500;
+            letter-spacing: 2px;
+        }
+        .header-icon {
+            filter: drop-shadow(0 0 8px #ffc500);
+        }
+
+        .file-list {
+            margin-top: 2rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;
+        }
+
+        .file-link {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 1rem; text-decoration: none; color: var(--color-parchment);
+            border: 2px solid #503116; 
+            background: linear-gradient(145deg, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
+            transition: all 0.2s ease-in-out; position: relative;
+            min-height: 200px;
+        }
+        .file-link:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+            border-color: var(--color-gold);
+        }
+
+        .file-icon { width: 80px; height: 80px; margin-bottom: 1rem; position: relative; }
+        .file-label { font-family: var(--font-pixel); font-size: 1.5rem; text-align: center; }
+        .file-sublabel { font-family: var(--font-serif); font-size: 1rem; color: #bdae93; text-align: center; font-weight: 600; }
+
+        /* ASCII ART */
+        .ascii-art {
+            position: absolute;
+            font-size: 10px;
+            line-height: 0.8;
+            opacity: 0.3;
+            pointer-events: none;
+            color: var(--color-teal);
+        }
+
+        /* Marquee Footer */
+        .marquee-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background-color: var(--color-ink); color: var(--color-gold);
+            padding: 5px 0; overflow: hidden; white-space: nowrap; font-size: 1.25rem;
+            border-top: 2px solid #00ffcc;
+            box-shadow: 0 -2px 10px #000;
+            z-index: 100;
+        }
+        .marquee-content { display: inline-block; padding-left: 100%; animation: marquee 25s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+    </style>
+</head>
+<body>
+    <div id="background-container">
+        <div class="bg-layer bg-map" data-depth="0.1"></div>
+        <div class="bg-layer bg-parchment" data-depth="0.2"></div>
+        <div class="bg-layer bg-noise" data-depth="0.3"></div>
+    </div>
+
+    <div class="main-container">
+
+        <pre class="ascii-art" style="top: 20px; left: 20px;">
+        ,   ,
+       /////|
+      ///// |
+     |~~~|  |
+     |===|  |
+     |   |  |
+     |   | /
+     |===|/
+     '---'
+        </pre>
+        <pre class="ascii-art" style="bottom: 20px; right: 20px; text-align: right;">
+                 ,
+               |\\,/|
+               | Y |
+               |~|~|
+               | | |
+              /| | |\\
+             / | | | \\
+            / /| | |\\ \\
+           ( ( | | | ) )
+            \ \| | |/ /
+             \ ` ' /
+              `^~~~^'
+        </pre>
+
+        <header class="text-center flex items-center justify-center gap-4 border-b-2 border-double border-amber-800 pb-4">
+            <img src="https://coaiexist.wtf/assets/misc_gif/metapara/NUITOV6GWAQQBSH3TJWQ5SZZY3H5X2BZ.gif" alt="Spinning globe" class="h-16 w-16 header-icon">
+            <h1 class="header-title">The Grand Archive of Interplanar Cartography</h1>
+            <img src="https://coaiexist.wtf/assets/misc_gif/metapara/6S47QMXEIJMLB2V73ZMRQAURNFGMVXXM.gif" alt="Spinning globe" class="h-16 w-16 header-icon transform -scale-x-100">
+        </header>
+
+        <div class="file-list">
+            <!-- Crystalline Lattice Link -->
+            <a href="https://coaiexist.wtf/maps/crystalline_lattice" class="file-link">
+                <div class="file-icon">
+                    <img src="https://coaiexist.wtf/assets/misc_gif/metapara/CVCLLTJRXNDF2LHKLNO6FURPQQKG5ELU.gif" alt="Crystalline File Icon" class="w-full h-full">
+                </div>
+                <div class="file-label" style="color: #00ffcc; text-shadow: 0 0 8px #00ffcc;">The Crystalline Lattice</div>
+                <div class="file-sublabel">The Crystalline Lattice</div>
+            </a>
+            
+            <!-- Void Forest Link -->
+            <a href="https://coaiexist.wtf/maps/void_forest" class="file-link">
+                <div class="file-icon">
+                   <img src="https://coaiexist.wtf/assets/misc_gif/metapara/2KSHUJX55PGQRU2IHMO5A6MQ4G2ENJBW.gif" alt="Journal Icon" class="w-full h-full object-contain">
+                </div>
+                <div class="file-label" style="color: #adff2f; text-shadow: 0 0 8px #adff2f;">FIELD LOG-NULL<br>The Void Forest</div>
+                <div class="file-sublabel">The Void Forest</div>
+            </a>
+
+            <!-- Placeholder 1 -->
+            <a href="https://coaiexist.wtf/maps/luminal_depths" class="file-link">
+                <div class="file-icon">
+                     <img src="https://coaiexist.wtf/assets/misc_gif/underwater/B4PZYCJQEXPN52CMHWQZYQRD54T2BPOU.gif" alt='Redacted File' class='w-full h-full object-contain'>
+                </div>
+                <div class="file-label text-gray-500">LUMINAL DEPTHS</div>
+                <div class="file-sublabel">Signal Lost...</div>
+            </a>
+            
+            <!-- Placeholder 2 -->
+            <a href="https://coaiexist.wtf/maps/void_explorer" class="file-link">
+                <div class="file-icon">
+                    <img src='https://coaiexist.wtf/assets/misc_gif/underwater/AEAK3U2RCLE5HHW3QF2RRTPQCQOEDCPO.gif' alt='Classified File' class='w-full h-full object-contain'>
+                </div>
+                <div class="file-label text-gray-500">VOi.3D EXPLORER</div>
+                <div class="file-sublabel">CLASSIFIED</div>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="marquee-footer">
+        <div class="marquee-content">
+            <span class="text-red-500 font-bold">WARNING:</span> CHRONAL ANOMALIES DETECTED ...  
+            <span class="text-teal-400">CONSULT THE ARCHIVIST BEFORE PROCEEDING</span> ... 
+            <span class="text-yellow-400">PROPERTY OF THE V.F. DEPARTMENT OF ANTIQUITIES</span> ...
+            <span class="text-red-500 font-bold">WARNING:</span> CHRONAL ANOMALIES DETECTED ...  
+            <span class="text-teal-400">CONSULT THE ARCHIVIST BEFORE PROCEEDING</span> ... 
+            <span class="text-yellow-400">PROPERTY OF THE V.F. DEPARTMENT OF ANTIQUITIES</span> ...
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bgContainer = document.getElementById('background-container');
+            const layers = bgContainer.querySelectorAll('.bg-layer');
+
+            document.addEventListener('mousemove', (e) => {
+                const x = (e.clientX - window.innerWidth / 2) / window.innerWidth;
+                const y = (e.clientY - window.innerHeight / 2) / window.innerHeight;
+
+                layers.forEach(layer => {
+                    const depth = layer.getAttribute('data-depth');
+                    const moveX = depth * x * -50; // Invert for natural feel
+                    const moveY = depth * y * -50;
+                    layer.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                });
+            });
+        });
+    </script>
+<div style="position: fixed; bottom: 50px; right: 20px; z-index: 9999;">
+    <div id="page-counter"></div>
+</div>
+<link rel="stylesheet" href="/css/counter-guestbook.css">
+<script src="/js/pageCounter.js"></script>
+<div id="taskbar"></div>
+<script>
+  (async () => {
+    const res = await fetch('/nav.html', {cache: 'no-store'});
+    document.getElementById('taskbar').innerHTML = await res.text();
+  })();
+</script>
+
+</body>
+</html>

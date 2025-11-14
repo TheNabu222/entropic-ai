@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ CORPUS CELESTIUM ✨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Tahoma:wght@400;700&display=swap');
+        
+        :root {
+            --primary-magenta: #f312af;
+            --secondary-cyan: #00ffcc;
+            --tertiary-yellow: #fffb01;
+            --magenta-dark: #b10a7a;
+            --background: #181818;
+            --text-color: #ffe6f7;
+            --y2k-grad-start: #c066f6;
+            --y2k-grad-end: #ff72b6;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f312af' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .light-mode { --background: #ffe6f7; --text-color: #290a38; }
+
+        header {
+            background: linear-gradient(135deg, var(--y2k-grad-start), var(--y2k-grad-end));
+            color: white; text-align: center; padding: 1.5rem 0; position: relative;
+            border-bottom: 4px solid var(--secondary-cyan); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        header h1 {
+            font-family: 'VT323', monospace; font-size: 3rem; margin-bottom: 0.5rem; color: var(--tertiary-yellow);
+            text-shadow: 3px 3px 0 var(--primary-magenta), -3px -3px 0 var(--secondary-cyan);
+            animation: glitch 2.5s infinite linear alternate-reverse; letter-spacing: 3px;
+        }
+        
+        .marquee {
+            background-color: rgba(0, 0, 0, 0.3); padding: 8px 0; overflow: hidden; white-space: nowrap; margin-top: 10px;
+            font-family: 'VT323', monospace; font-size: 1.2rem; color: var(--secondary-cyan);
+        }
+        
+        .marquee-content { display: inline-block; animation: marquee 30s linear infinite; padding-left: 100%; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        
+        @keyframes glitch {
+            0%, 100% { text-shadow: 3px 3px 0 var(--primary-magenta), -3px -3px 0 var(--secondary-cyan); }
+            25% { text-shadow: -3px 3px 0 var(--primary-magenta), 3px -3px 0 var(--secondary-cyan), 0 0 5px var(--tertiary-yellow); }
+            50% { text-shadow: 3px -3px 0 var(--primary-magenta), -3px 3px 0 var(--secondary-cyan); }
+            75% { text-shadow: -3px -3px 0 var(--primary-magenta), 3px 3px 0 var(--secondary-cyan), 0 0 10px var(--tertiary-yellow); }
+        }
+        
+        nav#main-nav {
+            background-color: var(--primary-magenta); padding: 1rem; display: flex; flex-wrap: wrap;
+            justify-content: center; gap: 8px; border-bottom: 4px solid var(--tertiary-yellow);
+        }
+        
+        nav button, .back-button, .filter-button {
+            background-color: var(--background); color: var(--secondary-cyan); border: 2px solid var(--secondary-cyan);
+            padding: 0.5rem 1rem; margin: 0 0.25rem; border-radius: 25px; cursor: pointer; font-weight: bold;
+            transition: all 0.3s; font-family: 'Tahoma', sans-serif; text-transform: uppercase;
+        }
+        
+        nav button:hover, .back-button:hover, .filter-button:hover {
+            background-color: var(--secondary-cyan); color: var(--background); transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 255, 204, 0.3);
+        }
+        
+        nav button.active {
+            background-color: var(--secondary-cyan); color: var(--background); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+        
+        main { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+        
+        .theme-toggle {
+            position: absolute; top: 10px; right: 10px; background-color: transparent; border: none;
+            color: var(--tertiary-yellow); font-size: 1.8rem; cursor: pointer;
+        }
+        
+        .birth-chart-form {
+            background-color: rgba(24, 24, 24, 0.8); border-radius: 15px; padding: 2rem;
+            box-shadow: 0 8px 30px rgba(243, 18, 175, 0.3); margin: 2rem auto; max-width: 800px;
+            border: 3px solid var(--primary-magenta); backdrop-filter: blur(5px);
+        }
+
+        .light-mode .birth-chart-form { background-color: rgba(255, 230, 247, 0.9); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
+        
+        .form-title { font-family: 'VT323', monospace; font-size: 2.5rem; margin-bottom: 1.5rem; text-align: center; color: var(--tertiary-yellow); }
+        .form-group { flex: 1 1 180px; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 700; color: var(--secondary-cyan); }
+        .form-group input, .form-group select {
+            width: 100%; padding: 0.75rem; border: 2px solid var(--primary-magenta); border-radius: 8px; font-size: 1rem;
+            font-family: 'Tahoma', sans-serif; background-color: rgba(0,0,0,0.5); color: var(--text-color);
+        }
+        
+        .light-mode .form-group input, .light-mode .form-group select { background-color: white; color: #290a38; border-color: var(--magenta-dark); }
+        .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 1.5rem; }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-magenta), var(--y2k-grad-start));
+            border: 2px solid var(--tertiary-yellow); font-family: 'VT323', monospace; font-size: 1.5rem !important;
+            color: white; padding: 1rem; width: 100%; border-radius: 8px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; margin-top: 1rem;
+        }
+
+        .chart-result, .wiki-page {
+            margin: 2rem auto; padding: 2rem; background-color: rgba(24, 24, 24, 0.9); border-radius: 15px;
+            border: 3px solid var(--secondary-cyan); backdrop-filter: blur(5px);
+        }
+        .light-mode .chart-result, .light-mode .wiki-page { background-color: rgba(255, 230, 247, 0.9); border-color: var(--magenta-dark); }
+        
+        .section-title {
+            color: var(--secondary-cyan); font-size: 1.8rem; margin: 2rem 0 1rem; font-family: 'VT323', monospace;
+            border-left: 5px solid var(--primary-magenta); padding-left: 10px;
+        }
+        
+        .subsection-title { color: var(--primary-magenta); font-size: 1.5rem; margin-bottom: 0.8rem; font-weight: bold; font-family: 'VT323', monospace; }
+        .accordion { border: 1px solid var(--primary-magenta); border-radius: 10px; overflow: hidden; margin-bottom: 1rem; }
+        .accordion-header {
+            padding: 1rem; background-color: var(--magenta-dark); cursor: pointer; font-weight: bold; font-family: 'VT323', monospace;
+            font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--tertiary-yellow); color: var(--tertiary-yellow); transition: background-color 0.3s;
+        }
+        .accordion-header:hover { background-color: var(--primary-magenta); }
+        .accordion-content { padding: 0; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background-color: rgba(0, 0, 0, 0.3); }
+        .light-mode .accordion-content { background-color: rgba(255, 255, 255, 0.5); }
+        .accordion-inner { padding: 1rem; }
+        .accordion-inner b, .accordion-inner .keyword { color: var(--secondary-cyan); display: inline-block; font-weight: bold; min-width: 250px; vertical-align: top; }
+        .light-mode .accordion-inner b, .light-mode .accordion-inner .keyword { color: var(--magenta-dark); }
+
+        .overlay-list { list-style-type: none; padding-left: 0; }
+        .overlay-list li { margin-bottom: 10px; padding-left: 20px; position: relative; line-height: 1.5; display: flex; align-items: flex-start; }
+        .overlay-list li::before { content: '➤'; position: absolute; left: 0; top: 2px; color: var(--secondary-cyan); }
+        .wiki-link { color: var(--tertiary-yellow); text-decoration: underline; cursor: pointer; font-weight: bold; }
+        .wiki-link:hover { color: var(--primary-magenta); }
+        
+        footer {
+            text-align: center; padding: 2rem 0; margin-top: 2rem; background: linear-gradient(135deg, var(--y2k-grad-start), var(--primary-magenta));
+            color: white; border-top: 4px solid var(--secondary-cyan);
+        }
+        
+        .back-to-top {
+            font-family: 'VT323', monospace; background: var(--tertiary-yellow); color: #181818; border: none; padding: 0.5rem 1rem;
+            border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s; margin-top: 1rem;
+        }
+        
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .star { position: absolute; background-color: #fff; border-radius: 50%; animation: twinkle var(--duration) linear infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.8; } }
+        
+        .loading-container { display: none; text-align: center; margin: 2rem auto; }
+        .loading-spinner { width: 80px; height: 80px; margin: 0 auto; border: 5px solid var(--magenta-dark); border-top: 5px solid var(--secondary-cyan); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .win98-taskbar { position: fixed; bottom: 0; left: 0; right: 0; height: 40px; background: #c0c0c0; border-top: 2px solid #ffffff; display: flex; align-items: center; padding: 0 4px; font-family: "Tahoma", sans-serif; font-size: 14px; z-index: 9999; box-shadow: 0 -2px 4px rgba(0,0,0,0.3); }
+        .taskbar-button, .taskbar-start { background: #c0c0c0; border: 2px outset #ffffff; padding: 4px 8px; margin: 0 2px; cursor: pointer; color: #000000; text-decoration: none; font-weight: bold; }
+        .taskbar-button:active, .taskbar-start:active { border-style: inset; }
+        .taskbar-separator { width: 2px; height: 30px; background: #808080; margin: 0 4px; }
+        body { padding-bottom: 50px; }
+        
+        .interpretation-container{margin-top:15px;padding:15px;background-color:rgba(0,0,0,0.2);border-radius:8px}.light-mode .interpretation-container{background-color:rgba(255,255,255,0.5)}.accordion-header.active .accordion-icon{transform:rotate(180deg)}.accordion-icon{transition:transform .3s}
+        .search-input{flex-grow:1;padding:.75rem;border:2px solid var(--secondary-cyan);border-radius:25px;font-size:1rem;min-width:200px;background:rgba(0,0,0,.5);color:var(--text-color)}.light-mode .search-input{background:#fff;color:#290a38;border-color:var(--magenta-dark)}
+        .filter-container{margin-bottom:1.5rem;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+        #chart-person-info { text-align: center; margin-bottom: 1.5rem; font-size: 1.1rem; padding: 1rem; background-color: rgba(0,0,0,0.2); border-radius: 10px; border: 2px dashed var(--primary-magenta); }
+        .light-mode #chart-person-info { background-color: rgba(255,255,255,0.7); }
+        .chart-index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+        .subsection { padding: 1rem; border: 1px solid var(--primary-magenta); border-radius: 10px; margin-bottom: 1rem;}
+        
+        /* New styles for detailed chart tables */
+        .chart-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .chart-table th, .chart-table td { border: 1px solid var(--primary-magenta); padding: 0.75rem; text-align: left; }
+        .chart-table th { background-color: var(--magenta-dark); color: var(--tertiary-yellow); font-family: 'VT323', monospace; font-size: 1.1rem; }
+        .chart-table ul { list-style-type: '✧ '; padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <header>
+        <button class="theme-toggle" id="theme-toggle"><i class="fas fa-moon"></i></button>
+        <h1>✨ AnTiChRiSt KeTtLeKoRn ✨</h1>
+        <p>Your cosmic journey with nostalgic vibes ✧₊˚.⋆</p>
+        <div class="marquee"><div class="marquee-content">★ Welcome to the GriNoIrE System! Your plug-and-play codex for celestial interpretation ★ Consult the grimoire for planets, houses, and aspects ★</div></div>
+    </header>
+    
+    <nav id="main-nav">
+        <button class="active" data-view="chart-form-view">Create Chart</button>
+        <button data-view="asteroid-explorer-view">Asteroid Explorer</button>
+        <button data-view="lilith-explorer-view">Lilith Explorer</button>
+        <button data-view="dwarf-planets-view">Dwarf Planets & Centaurs</button>
+        <button data-view="mythological-points-view">Mythological Points</button>
+        <button data-view="codex-view">Full Codex</button>
+    </nav>
+    
+    <main id="main-content">
+        <div id="chart-form-view" class="view-section">
+            <div class="birth-chart-form">
+                <h2 class="form-title">✨ Birth Chart Generator ✨</h2>
+                <form id="birth-chart-form">
+                    <div class="form-row">
+                        <div class="form-group"><label for="name">Name</label><input type="text" id="name" name="name" value="Cosmic Explorer" required></div>
+                        <div class="form-group"><label for="birthdate">Birth Date</label><input type="date" id="birthdate" name="birthdate" value="1993-07-29" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="birthtime">Birth Time (24h)</label><input type="time" id="birthtime" name="birthtime" value="16:29" required></div>
+                        <div class="form-group"><label for="birthplace">Birth Place</label><input type="text" id="birthplace" name="birthplace" value="Evanston, Illinois" required></div>
+                    </div>
+                     <button type="submit" class="submit-btn">Generate Cosmic Grimoire ✨</button>
+                </form>
+            </div>
+             <div class="loading-container" id="loading-container"><div class="loading-spinner"></div><p class="loading-text">✨ Calculating the celestial tapestry... ✨</p></div>
+        </div>
+        
+        <div id="chart-result-container" class="view-section" style="display: none;">
+            <div class="chart-result">
+                <div class="chart-header">
+                    <h2 class="section-title">Cosmic Chart Index</h2>
+                    <div id="chart-person-info"></div>
+                </div>
+                <div id="results-content-index"></div>
+            </div>
+        </div>
+
+        <div id="wiki-view" class="view-section" style="display: none;"></div>
+        
+        <div id="asteroid-explorer-view" class="view-section" style="display: none;"><h2 class="section-title">Asteroid Explorer</h2><div class="filter-container"><input type="text" id="asteroid-search" class="search-input" placeholder="Search asteroids..."></div><div id="asteroid-explorer-container"></div></div>
+        <div id="lilith-explorer-view" class="view-section" style="display: none;"><h2 class="section-title">Lilith Explorer</h2><div id="lilith-explorer-container"></div></div>
+        <div id="dwarf-planets-view" class="view-section" style="display: none;"><h2 class="section-title">Dwarf Planets & Centaurs</h2><div id="dwarf-planets-container"></div></div>
+        <div id="mythological-points-view" class="view-section" style="display: none;"><h2 class="section-title">Mythological & Arabic Points</h2><div class="filter-container"><input type="text" id="myth-search" class="search-input" placeholder="Search points..."></div><div id="mythological-points-container"></div></div>
+        <div id="codex-view" class="view-section" style="display: none;"><h2 class="section-title">Full Grimoire Codex</h2><div id="codex-container"></div></div>
+    </main>
+    
+    <footer>
+        <p>✧ AnTiChRiSt KeTtLeKoRn + GriNoIrE System ✧</p>
+        <button class="back-to-top">Back to Top ↑</button>
+    </footer>
+    
+    <nav class="win98-taskbar">
+        <a href="javascript:void(0)" class="taskbar-start">⊞ START</a>
+        <div class="taskbar-separator"></div>
+        <a href="javascript:void(0)" class="taskbar-button">🎨 HEX CODEX</a>
+    </nav>
+
+    <script>
+        // --- DATA: YOUR COMPLETE ASTROLOGICAL NOTES DATABASE ---
+        const astroNotes = {
+            planetsInSign: {
+                Sun: {
+                    Aries: { consciousAim: "Ambition and leadership", strongSense: "Self-identity and individuality", ability: "Take initiative and be decisive", intrinsicNature: "Assertive and competitive", egoNeeds: "Achieving personal victories and recognition", lifeForce: "Energetic and passionate", cultivate: "Patience and diplomacy", tendencies: "Take risks and be adventurous", expressiveNature: "Direct and enthusiastic", creativeExpression: "High, especially in pioneering endeavors", highestSelf: "Learning to cooperate and consider others' perspectives", avoid: "Impulsiveness and selfishness" },
+                    Taurus: { consciousAim: "Stability and security", strongSense: "Practicality and reliability", ability: "Endure and persist through challenges", intrinsicNature: "Grounded and patient", egoNeeds: "Accumulating material possessions and enjoying the senses", lifeForce: "Steady and persistent", cultivate: "Flexibility and adaptability", tendencies: "Resist change and seek comfort", expressiveNature: "Calm and composed", creativeExpression: "High, in art and aesthetics", highestSelf: "Embracing change and exploring new possibilities", avoid: "Stubbornness and possessiveness" },
+                    Gemini: { consciousAim: "Gathering information and communicating ideas", strongSense: "Curiosity and adaptability", ability: "Analyze from multiple perspectives and communicate effectively", intrinsicNature: "Versatile and intellectually inclined", egoNeeds: "Engaging in stimulating conversations and social interactions", lifeForce: "Energized by mental stimulation and variety", cultivate: "Consistency and focus", tendencies: "Multi-task, be witty and charming", expressiveNature: "Quick, agile, and verbally articulate", creativeExpression: "High, through writing and communication", highestSelf: "Honing communication skills for positive impact", avoid: "Superficiality and spreading yourself too thin" },
+                    Cancer: { consciousAim: "To establish emotional security", strongSense: "Empathy and emotional sensitivity", ability: "Deeply connect with others on an emotional level", intrinsicNature: "Caring, protective, and intuitive", egoNeeds: "Providing emotional support and nurturing others", lifeForce: "Fueled by emotional connections and belonging", cultivate: "Emotional resilience and boundaries", tendencies: "Be nurturing, compassionate, and family-oriented", expressiveNature: "Gentle, caring, and reflective", creativeExpression: "Through emotional depth and storytelling", highestSelf: "Embracing vulnerability, self-care, and intuition", avoid: "Excessive moodiness and clinginess" },
+                    Leo: { consciousAim: "To shine, be recognized, and express individuality", strongSense: "Self-confidence, leadership, and personal power", ability: "Command attention, inspire others, and take charge", intrinsicNature: "Bold, enthusiastic, and creative", egoNeeds: "Being in the spotlight and receiving admiration", lifeForce: "Vibrant, radiant, and full of passion", cultivate: "Humility, empathy, and sharing the limelight", tendencies: "Be dramatic, generous, and loyal", expressiveNature: "Charismatic, expressive, and commanding", creativeExpression: "High, with a flair for the dramatic", highestSelf: "Balancing need for attention with generosity", avoid: "Arrogance, excessive pride, and selfishness" },
+                    Virgo: { consciousAim: "To improve and perfect", strongSense: "Duty and service", ability: "Analyze and organize", intrinsicNature: "Methodical and practical", egoNeeds: "Being useful and efficient", lifeForce: "Precise and dedicated", cultivate: "Self-acceptance and flexibility", tendencies: "Be critical and detail-oriented", expressiveNature: "Modest and reserved", creativeExpression: "In crafts and detailed work", highestSelf: "Serving others with compassion", avoid: "Perfectionism and worry" },
+                    Libra: { consciousAim: "To create harmony and balance", strongSense: "Justice and fairness", ability: "Mediate and see multiple perspectives", intrinsicNature: "Diplomatic and social", egoNeeds: "Partnership and social approval", lifeForce: "Graceful and cooperative", cultivate: "Decisiveness and self-assertion", tendencies: "Be charming and avoid conflict", expressiveNature: "Pleasant and refined", creativeExpression: "In art and social settings", highestSelf: "Championing justice with conviction", avoid: "Indecision and people-pleasing" },
+                    Scorpio: { consciousAim: "To understand life's mysteries and transform", strongSense: "Emotional depth and intensity", ability: "Penetrate surfaces and uncover truth", intrinsicNature: "Passionate and resilient", egoNeeds: "Deep connection and control", lifeForce: "Powerful and regenerative", cultivate: "Forgiveness and letting go", tendencies: "Be secretive and investigative", expressiveNature: "Magnetic and intense", creativeExpression: "In exploring deep, taboo subjects", highestSelf: "Using power for healing and transformation", avoid: "Manipulation and jealousy" },
+                    Sagittarius: { consciousAim: "To seek truth and meaning", strongSense: "Idealism and adventure", ability: "Inspire others with enthusiasm and optimism", intrinsicNature: "Optimistic, generous, and philosophical", egoNeeds: "Exploring the world and seeking knowledge", lifeForce: "Expansive and free-spirited", cultivate: "Focus and discipline", tendencies: "Take risks and seek new experiences", expressiveNature: "Fiery and enthusiastic", creativeExpression: "In exploring new ideas and philosophies", highestSelf: "Cultivating inner wisdom", avoid: "Being too impulsive and overconfident" },
+                    Capricorn: { consciousAim: "To achieve success and stability", strongSense: "Responsibility, discipline, and ambition", ability: "Plan, strategize, and work diligently", intrinsicNature: "Practical, grounded, and focused", egoNeeds: "Attaining tangible accomplishments and respect", lifeForce: "Driven by duty and perseverance", cultivate: "Patience and work-life balance", tendencies: "Be organized, dependable, and persistent", expressiveNature: "Reserved, cautious, and practical", creativeExpression: "In bringing structure and order", highestSelf: "Embracing inner wisdom and reliable leadership", avoid: "Excessive control, rigidity, and emotional neglect" },
+                    Aquarius: { consciousAim: "To bring innovation and progress", strongSense: "Individuality and uniqueness", ability: "Think outside the box and envision new possibilities", intrinsicNature: "Unconventional, open-minded, and intellectual", egoNeeds: "Asserting independence and expressing originality", lifeForce: "Energized by intellectual stimulation and social connections", cultivate: "Emotional awareness", tendencies: "Be progressive, forward-thinking, and visionary", expressiveNature: "Intellectually stimulating and sometimes eccentric", creativeExpression: "Through innovative and unconventional approaches", highestSelf: "Embracing uniqueness and promoting equality", avoid: "Excessive detachment and stubbornness" },
+                    Pisces: { consciousAim: "Spiritual transcendence and connection", strongSense: "Empathy and compassion", ability: "Merge and dissolve boundaries", intrinsicNature: "Intuitive, imaginative, and receptive", egoNeeds: "Seeking emotional and spiritual fulfillment", lifeForce: "Driven by a deep emotional and spiritual wellspring", cultivate: "Boundaries and individuality", tendencies: "To dream, fantasize, and escape", expressiveNature: "Sensitive, intuitive, and deeply emotional", creativeExpression: "Vast, in various artistic forms", highestSelf: "Embracing spiritual nature and practicing selflessness", avoid: "Self-sacrifice and victimhood" }
+                },
+                Moon: {
+                    Aries: { emotionalNeeds: "Independence and excitement", instinctively: "Seek new experiences", resist: "Feeling vulnerable or restricted", temperament: "Fiery and impulsive" },
+                    Taurus: { emotionalNeeds: "Comfort and stability", instinctively: "Seek security", resist: "Drastic changes", temperament: "Calm and patient" },
+                    Gemini: { emotionalNeeds: "Intellectual stimulation and variety", instinctively: "Seek intellectual engagement", resist: "Emotional depth", temperament: "Playful and curious" },
+                    Cancer: { emotionalNeeds: "Security and belonging", instinctively: "Seek emotional closeness", resist: "Change and clinging to the past", temperament: "Nurturing and empathetic" },
+                    Leo: { emotionalNeeds: "Recognition and admiration", instinctively: "Express emotions dramatically", resist: "Being ignored", temperament: "Warm and generous" },
+                    Virgo: { emotionalNeeds: "Order and usefulness", instinctively: "Analyze feelings", resist: "Chaos and imperfection", temperament: "Practical and reserved" },
+                    Libra: { emotionalNeeds: "Harmony and partnership", instinctively: "Seek fairness", resist: "Conflict and discord", temperament: "Diplomatic and charming" },
+                    Scorpio: { emotionalNeeds: "Emotional intensity and deep connection", instinctively: "Probe for truth", resist: "Superficiality", temperament: "Passionate and secretive" },
+                    Sagittarius: { emotionalNeeds: "Freedom and adventure", instinctively: "Seek to expand the mind", resist: "Routine and being tied down", temperament: "Optimistic and outgoing" },
+                    Capricorn: { emotionalNeeds: "Stability and accomplishment", instinctively: "Seek structure and control", resist: "Vulnerability and dependency", temperament: "Composed and reserved" },
+                    Aquarius: { emotionalNeeds: "Freedom and intellectual stimulation", instinctively: "Value individuality", resist: "Emotional dependency", temperament: "Rational and detached" },
+                    Pisces: { emotionalNeeds: "Emotional connection and empathy", instinctively: "Sense the emotions of others", resist: "Confrontations and conflicts", temperament: "Sensitive and impressionable" }
+                },
+                Mercury: {
+                    Aries: { style: "Direct and straightforward", adaptability: "Quick and decisive", thoughtProcesses: "Focused on the present and action-oriented" },
+                    Taurus: { style: "Methodical and deliberate", adaptability: "Resistant to change but thorough", thoughtProcesses: "Pragmatic and focused on the present" },
+                    Gemini: { style: "Quick, witty, and versatile", adaptability: "High, switches subjects easily", thoughtProcesses: "Analytical and intellectually curious" },
+                    Cancer: { style: "Nurturing, empathetic, and intuitive", adaptability: "Influenced by emotional state", thoughtProcesses: "Colored by emotions and personal experiences" },
+                    Leo: { style: "Dramatic and expressive", adaptability: "Confident in own ideas", thoughtProcesses: "Creative and self-focused" },
+                    Virgo: { style: "Precise and analytical", adaptability: "Detail-oriented", thoughtProcesses: "Methodical and critical" },
+                    Libra: { style: "Diplomatic and balanced", adaptability: "Considers all viewpoints", thoughtProcesses: "Fair and objective" },
+                    Scorpio: { style: "Investigative and perceptive", adaptability: "Focused on deep truths", thoughtProcesses: "Intense and probing" },
+                    Sagittarius: { style: "Enthusiastic and optimistic", adaptability: "Broad and adaptable", thoughtProcesses: "Expansive and philosophical" },
+                    Capricorn: { style: "Structured, methodical, and practical", adaptability: "Geared towards long-term planning", thoughtProcesses: "Logical, rational, and practical" },
+                    Aquarius: { style: "Intellectual, logical, and detached", adaptability: "Quick, innovative, and big-picture", thoughtProcesses: "Progressive and unconventional" },
+                    Pisces: { style: "Poetic, imaginative, and intuitive", adaptability: "Fluid and understands abstract concepts", thoughtProcesses: "Intuitive and influenced by emotions" }
+                },
+                Venus: {
+                    Aries: { relating: "Flirtatious and passionate", needs: "Excitement and adventure", seduction: "Confident and daring" },
+                    Taurus: { relating: "Affectionate and sensual", needs: "Security and stability", seduction: "Patient and alluring" },
+                    Gemini: { relating: "Charming, witty, and intellectually stimulating", needs: "Mental connection and variety", seduction: "Verbal rapport and wit" },
+                    Cancer: { relating: "Nurturing, caring, and sensitive", needs: "Emotional intimacy and security", seduction: "Nurturing and emotional bonding" },
+                    Leo: { relating: "Generous and dramatic", needs: "Admiration and passion", seduction: "Grand gestures and confidence" },
+                    Virgo: { relating: "Helpful and reserved", needs: "Practicality and perfection", seduction: "Acts of service and subtlety" },
+                    Libra: { relating: "Charming and diplomatic", needs: "Harmony and partnership", seduction: "Grace and fairness" },
+                    Scorpio: { relating: "Intense and magnetic", needs: "Deep bonding and loyalty", seduction: "Mystery and passion" },
+                    Sagittarius: { relating: "Open-minded and adventurous", needs: "Freedom and adventure", seduction: "Playful and adventurous" },
+                    Capricorn: { relating: "Practical, responsible, and committed", needs: "Stability and ambition", seduction: "Displaying competence and success" },
+                    Aquarius: { relating: "Friendly, open-minded, and intellectual", needs: "Intellectual connection and friendship", seduction: "Intellectual banter and uniqueness" },
+                    Pisces: { relating: "Romantic, compassionate, and empathetic", needs: "Emotional connection and unconditional love", seduction: "Emotional connection and romantic gestures" }
+                },
+                Mars: {
+                    Aries: { expression: "Assertive and action-oriented", sexualNature: "Bold and passionate", motivation: "Overcoming challenges" },
+                    Taurus: { expression: "Steady and determined", sexualNature: "Sensual and patient", motivation: "Create a stable environment" },
+                    Gemini: { expression: "Quick, versatile, and intellectual", sexualNature: "Mentally stimulated and flirtatious", motivation: "Curiosity and pursuit of knowledge" },
+                    Cancer: { expression: "Gentle, nurturing, and emotionally driven", sexualNature: "Deeply emotional and intimate", motivation: "Emotional connection and belonging" },
+                    Leo: { expression: "Dramatic and passionate", sexualNature: "Passionate and generous", motivation: "Creative self-expression" },
+                    Virgo: { expression: "Methodical, efficient, and analytical", sexualNature: "Analytical, attentive, and practical", motivation: "Perfection and service" },
+                    Libra: { expression: "Diplomatic and charming", sexualNature: "Romantic and pleasing", motivation: "Justice and harmony" },
+                    Scorpio: { expression: "Intense and powerful", sexualNature: "Intense and transformative", motivation: "Power and deep connection" },
+                    Sagittarius: { expression: "Enthusiastic and adventurous", sexualNature: "Passionate and adventurous", motivation: "Seek truth and knowledge" },
+                    Capricorn: { expression: "Disciplined, ambitious, and focused", sexualNature: "Reserved and traditional", motivation: "Achievement and material security" },
+                    Aquarius: { expression: "Innovative and progressive", sexualNature: "Unique and unpredictable", motivation: "Inspire change and promote individuality" },
+                    Pisces: { expression: "Gentle, empathetic, and imaginative", sexualNature: "Romantic and imaginative", motivation: "Spiritual growth and creative expression" }
+                }
+            },
+            planetsInHouse: {
+                Sun: { 1: { goals: "Self-discovery", fulfillment: "Asserting individuality" }, 8: { goals: "Transformation, intimacy, shared resources", fulfillment: "Exploring psychological depths and merging with others", egoWants: "To understand life's mysteries and wield deep influence" }, 10: { goals: "Career achievements", fulfillment: "Leading and recognition" } },
+                Moon: { 1: { emotionalFocus: "On self-identity and personal expression", instinctiveReaction: "To project feelings outwardly" } },
+                Mercury: { 8: { communicationStyle: "Deep, probing, and private", mentalFocus: "On secrets, psychology, and transformation" } },
+                Venus: { 7: { relationshipFocus: "On one-on-one partnerships", socialExpression: "Through charming and diplomatic interactions with others" } },
+                Mars: { 9: { drive: "To pursue higher knowledge, truth, and philosophy", actionStyle: "Methodical and analytical in exploring beliefs" } },
+                Jupiter: { 10: { prosperityIn: "Career, public reputation, and leadership roles", thrivesIn: "Positions of authority and influence where fairness can be applied" } },
+                Saturn: { 3: { lifeLessons: "In communication, learning, and immediate environment", masteryIn: "Structured thinking and responsible expression" } },
+                Uranus: { 2: { unpredictableCircumstances: "In finances and personal values", liberatesFrom: "Traditional views on ownership and material security" } },
+                Neptune: { 2: { delusionsIn: "Finances, material possessions, and self-worth", spiritualityIn: "A non-materialistic value system" } },
+                Pluto: { 11: { transforms: "Friendships, group dynamics, and future aspirations", powerStruggles: "Within social groups or over ideals" }, 12: { transforms: "The subconscious, hidden strengths, and spiritual beliefs", hiddenPower: "In confronting the subconscious and healing deep-seated issues" } }
+            },
+            houses: {
+                1: { Sagittarius: { appearance: "Adventurous and open", image: "Optimistic and freedom-loving", mannerisms: "Enthusiastic and energetic", disposition: "Cheerful and outgoing" } },
+                2: { Capricorn: { possessions: "Value practical, long-lasting items", earning: "Through discipline, hard work, and ambition", values: "Based on tradition, stability, and tangible success", selfWorth: "Based in competence and achievement" } },
+                3: { Aquarius: { mentalActivity: "Innovative, unconventional, and future-oriented", interactions: "Defined by intellectualism and detachment", education: "Unconventional or focused on technology/humanitarianism" } },
+                4: { Aries: { familyRoots: "Characterized by independence and action", privateLife: "Dynamic and requires personal freedom", homeLife: "Active, can be competitive or impulsive" } },
+                5: { Taurus: { funBy: "Indulging in sensual pleasures, creating art, enjoying nature", creations: "Practical, beautiful, and enduring", romance: "Colored with sensuality, stability, and loyalty" } },
+                6: { Taurus: { workEnv: "Requires stability, comfort, and routine", dailyRoutines: "Steady, practical, and resistant to change", healthAttitudes: "Practical, focused on physical well-being and natural remedies" } },
+                7: { Gemini: { seeksInOthers: "Intellect, wit, communication, and versatility", socialHabits: "Characterized by curiosity and engaging in conversation", commitment: "Values mental connection and freedom" } },
+                8: { Cancer: { intimateRelationships: "Characterized by deep emotional bonding and security", sexuality: "Nurturing, sensitive, and emotionally intense", othersResources: "Through family, inheritance, or emotional connections" } },
+                9: { Leo: { beliefSystems: "Characterized by confidence, creativity, and self-expression", spirituality: "Dramatic, heartfelt, and centered on the self's journey", consciousnessExpansion: "Through creative pursuits and leadership" } },
+                10: { Libra: { reputation: "Diplomatic, harmonious, and fair", standing: "Fosters cooperation and is seen as a peace-maker", recognition: "For creating balance, beauty, and justice" } },
+                11: { Scorpio: { friendGroups: "Characterized by intensity, loyalty, and deep bonds", societyViews: "Investigative and focused on underlying power structures", groupExperiences: "Transformative and emotionally intense" } },
+                12: { Scorpio: { ghostsFromPast: "Characterized by issues of power, control, and betrayal", secrets: "Colored with intensity and deep psychological meaning", selfUndoing: "By obsession, jealousy, or subconscious power struggles" } }
+            },
+            aspects: {
+                "Moon-Mars": { Keywords: { combines: "Emotional needs with personal drive and action", powers: "Passionate emotional expression and the energy to pursue what you want" }, Square: { challenges: "Impulsive reactions and emotional frustration", tension: "Between emotional needs for security/freedom and the direct expression of desire" } },
+                "Pluto-Ascendant": { Keywords: { combines: "Transformative energy with the outer persona", powers: "A magnetic, intense, and compelling presence" }, Trine: { talent: "Effortlessly expressing inner depth and power through the outer persona", flow: "A natural charisma and ability to influence others subconsciously" } }
+            }
+        };
+
+        const wikiContent = {
+            Aquarius: {
+                title: "Aquarius Archetypes & Rulerships",
+                data: [
+                    { category: 'Nouns', neutral: 'Visionary, Humanitarian, Individualist, Friend, Scientist, Intellectual, Thinker', positive: 'Innovator, Progressive, Genius, Pioneer, Activist, Revolutionary, Free Spirit', negative: 'Rebel, Eccentric, Detached, Outsider, Iconoclast, Disruptive, Unpredictable' },
+                    { category: 'Adjectives', neutral: 'Unconventional, Analytical, Detached, Experimental, Progressive, Objective', positive: 'Independent, Original, Open-minded, Inventive, Visionary, Intellectual', negative: 'Aloof, Cold, Stubborn, Impulsive, Unrelatable' },
+                    { category: 'Verbs', neutral: 'Observe, Conceptualize, Communicate, Collaborate, Debate, Solve', positive: 'Innovate, Reform, Challenge, Create, Liberate, Inspire', negative: 'Isolate, Alienate, Reject, Neglect, Resist, Ignore' },
+                ],
+                extraSections: { 'Archetypes': 'The Visionary, The Inventor, The Thinker, The Intellectual, The Activist, The Rebel, The Humanitarian, The Innovator, The Progressive, The Futurist, The Outsider, The Eccentric, The Misfit, The Iconoclast, The Anarchist', 'Key Development Concepts': 'Embrace change, Cultivate individualism, Expand intellectual horizons, Explore diverse perspectives, Strengthen social networks, Seek unconventional solutions, Manage emotional detachment, Avoid stubborn resistance, Balance individuality with empathy, Reconnect with emotional sensitivity, Nurture patience.', 'Life Rulerships': 'Innovation and technology, Friendships and group dynamics, Social justice and human rights, Intellectual pursuits, Social activism, Collective well-being, Sudden changes, Intellectual detachment, Rebellion, Alienation.' }
+            },
+            House3: {
+                title: "Third House Archetypes & Rulerships",
+                data: [
+                    { category: 'Nouns', neutral: 'Communication, Information, Conversation, Siblings, Learning, Technology, Neighborhood', positive: 'Curiosity, Expression, Wit, Imagination, Humor, Thoughtfulness, Social interaction', negative: 'Gossip, Superficiality, Miscommunication, Manipulation, Insecurity, Restlessness' },
+                    { category: 'Adjectives', neutral: 'Versatile, Adaptive, Curious, Inquisitive, Expressive, Analytical', positive: 'Communicative, Observant, Clever, Articulate, Quick-witted, Social', negative: 'Restless, Shallow, Sarcastic, Argumentative, Distracted, Nervous' },
+                    { category: 'Verbs', neutral: 'Speak, Learn, Communicate, Write, Discuss, Observe', positive: 'Share, Inquire, Engage, Analyze, Educate, Express', negative: 'Interrupt, Deflect, Judge, Overthink, Misinterpret, Over-explain' },
+                ],
+                extraSections: { 'Archetypes': 'The Communicator, The Scholar, The Networker, The Neighbor, The Student, The Storyteller, The Socializer, The Connector, The Teacher, The Curious, The Gossip, The Arguer, The Skeptic, The Distracted, The Manipulator', 'Key Development Concepts': 'Sharpen communication skills, Foster active listening, Encourage open dialogue, Focus on effective expression, Encourage community involvement, Develop intellectual curiosity, Strengthen social networks, Focus on learning, Strengthen bonds with siblings, Improve articulation, Avoid gossip and shallow talk, Cultivate emotional depth, Reduce overthinking, Practice mindfulness, Avoid judgmental tendencies.', 'Life Rulerships': 'Communication, Early education, Siblings and neighborhood, Short trips, Writing and publishing, Intellectual exchange, Networking, Problem-solving, Mental restlessness, Argumentative tendencies, Distractibility.' }
+            },
+            Libra: {
+                title: "Libra Archetypes & Rulerships",
+                 data: [
+                    { category: 'Nouns', neutral: 'Balance, Relationships, Diplomacy, Partnership, Equality, Aesthetics, Social connections', positive: 'Harmony, Justice, Fairness, Charm, Cooperation, Idealism, Grace', negative: 'Indecision, People-pleasing, Avoidance, Superficiality, Dependency, Insecurity, Hesitation' },
+                ],
+                extraSections: { 'Life Rulerships': 'Partnerships, Diplomacy, Balance and harmony, Pursuit of fairness, Social networks, Aesthetics and beauty, Social justice, Creating peace, Artistic expression, Self-worth issues, Indecisiveness, Conflict avoidance.' }
+            },
+             Virgo: {
+                title: "Virgo Archetypes & Rulerships",
+                 data: [
+                    { category: 'Nouns', neutral: 'Detail, Analysis, Organization, Routine, Health, Work', positive: 'Precision, Service, Efficiency, Cleanliness, Practicality, Dedication, Reliability', negative: 'Perfectionism, Overthinking, Worrying, Self-criticism, Nitpicking, Overwork, Anxiety' },
+                ],
+                extraSections: { 'Life Rulerships': 'Service and health, Daily work and productivity, Detailed analysis, Practical thinking, Self-improvement, Mental and physical well-being, Reliability, Compassionate service, Efficiency and routines, Overwork and burnout, Fear of inadequacy.' }
+            },
+            Gemini: {
+                title: "Gemini Archetypes & Rulerships",
+                 data: [
+                    { category: 'Nouns', neutral: 'Curiosity, Communication, Knowledge, Ideas, Change, Versatility, Information', positive: 'Adaptability, Intelligence, Wit, Sociability, Creativity, Charm, Humor', negative: 'Indecision, Superficiality, Inconsistency, Restlessness, Gossiping, Manipulativeness, Duality' },
+                ],
+                extraSections: { 'Life Rulerships': 'Communication and ideas, Social connection, Curiosity and versatility, Expression through writing/speaking, Learning and sharing information, Mental agility, Creativity and spontaneity, Humor, Intellectual development, Lack of consistency, Gossip, Scattering energy.' }
+            },
+            House10: {
+                title: "10th House Archetypes & Rulerships",
+                 data: [
+                    { category: 'Nouns', neutral: 'Career, Reputation, Authority, Public image, Responsibility, Ambition', positive: 'Success, Leadership, Achievement, Recognition, Influence, Prestige', negative: 'Overwork, Power struggles, Arrogance, Vanity, Burnout, Domination, Exploitation' },
+                ],
+                extraSections: { 'Life Rulerships': 'Career and professional life, Public standing and reputation, Authority and leadership, Social prestige, Long-term goals, Responsibility towards society, Work-related stress, Over-identification with career, Ruthless pursuit of power, Workaholism and burnout.' }
+            },
+            House7: {
+                title: "7th House Archetypes & Rulerships",
+                 data: [
+                    { category: 'Nouns', neutral: 'Partnership, Relationships, Contracts, Equality, Marriage, Reflection, Commitment', positive: 'Harmony, Cooperation, Balance, Diplomacy, Unity, Empathy, Collaboration', negative: 'Dependence, Codependence, Manipulation, Unrealistic expectations, Self-sacrifice, Power struggles' },
+                ],
+                extraSections: { 'Life Rulerships': 'One-on-one relationships, Business and legal partnerships, Marriage and commitment, Mirror relationships, Diplomatic negotiations, Equal give-and-take, Support systems, Codependency, Power dynamics, Lack of boundaries.' }
+            },
+        };
+
+        const explorerData = {
+            'asteroid-explorer-view': [
+                { name: "Chiron", phrases: ["The Wounded Healer", "Healing through Vulnerability", "Bridging Spirit and Matter"], keywords: ["Inner Wounds", "Mentor", "Guide", "Integration"], functions: ["Facilitating healing and growth through addressing inner wounds.", "Acting as a mentor in the process of self-discovery.", "Bridging the gap between spiritual and material aspects of life."] },
+                { name: "Lilith 1181 (Asteroid)", phrases: ["Honoring the Feminine Mystique", "Tapping into Instinctive Wisdom", "Embracing the Wild and Free"], keywords: ["Female Archetype", "Primal Instincts", "Unconstrained Expression"], functions: ["Recognizing and honoring diverse expressions of the feminine.", "Tapping into instinctive wisdom and primal energy.", "Encouraging freedom from societal limitations."] },
+                { name: "Echo 60", phrases: ["Reflective Communication", "Inner Voice Amplification", "Echoes of the Past"], keywords: ["Self-Expression", "Introspection", "Repetition"], functions: ["Encouraging honest self-expression and communication.", "Amplifying one's inner voice and intuition.", "Highlighting patterns and lessons from past experiences."] },
+                { name: "Arachne 407", phrases: ["Weaving Cosmic Patterns", "Unraveling Destinies", "Creative Talents and Artistry"], keywords: ["Cosmic Design", "Artistic Expression", "Threads of Fate"], functions: ["Inspiring artistic expression and creative talents.", "Revealing the interconnectedness of cosmic patterns in life.", "Encouraging individuals to take control of their destinies."] },
+                { name: "Karma 3811", phrases: ["Understanding Past Actions", "Learning Life Lessons", "Balancing Cause and Effect"], keywords: ["Karmic Debt", "Lessons Repeated", "Cause and Effect"], functions: ["Illuminating karmic patterns for learning.", "Repeating life lessons until integrated.", "Bringing awareness to the balance of actions and consequences."] },
+                { name: "Aura 1488", phrases: ["Energy Field and Vibration", "Sensing Energetic Imprints", "Spiritual Radiance"], keywords: ["Aura Reading", "Energetic Sensitivity", "Spiritual Presence"], functions: ["Enhancing energetic sensitivity and intuition.", "Reading and interpreting auras.", "Radiating spiritual energy and presence."] },
+                { name: "Reiki 5239", phrases: ["Healing Life Force Energy", "Holistic Wellness", "Restoring Energetic Balance"], keywords: ["Energy Healing", "Hands-On Healing", "Universal Life Force"], functions: ["Channeling healing life force energy for restoration.", "Promoting holistic wellness.", "Balancing and aligning energetic centers."] },
+                { name: "Spirit 37452", phrases: ["Connection to the Divine Essence", "Awakening the Soul's Purpose", "Transcending Human Limitations"], keywords: ["Divine Connection", "Spiritual Awakening", "Soul Evolution"], functions: ["Facilitating a deep connection to the divine.", "Awakening the soul to its purpose.", "Assisting in transcending limiting beliefs."] },
+            ],
+            'lilith-explorer-view': [
+                { name: "Dark Moon Lilith (h58)", phrases: ["Unconscious Desires", "The Shadow Self", "Embracing the Feminine Dark"], keywords: ["Forbidden Desires", "Repressed Emotions", "The Unknown"], functions: ["Bringing awareness to repressed emotions and desires.", "Confronting the shadow self and exploring taboo themes.", "Integrating the darker aspects of the feminine."] },
+                { name: "Black Moon Lilith (h12)", phrases: ["Dark Feminine Power", "Rebellion Against Oppression", "Breaking Societal Norms"], keywords: ["Sexual Liberation", "Independence", "Nonconformity"], functions: ["Empowering individuals to embrace their feminine power and sexuality.", "Encouraging rebellion against oppressive norms.", "Inspiring independence and autonomy."] },
+                { name: "True Lilith (h13)", phrases: ["Authentic Expression of Feminine Power", "Soul's Unyielding Truth", "Embracing the Dark Goddess"], keywords: ["Soul-Level Authenticity", "Empowerment", "Embracing the Shadow"], functions: ["Encouraging the authentic expression of feminine power.", "Facilitating soul-level authenticity.", "Guiding individuals to integrate the power of the dark goddess within."] },
+            ],
+            'dwarf-planets-view': [
+                { name: "Eris 136199", phrases: ["The Disruptor of Order", "Unveiling Truth", "Embracing the Unconventional"], keywords: ["Discord", "Chaos", "Revealing Hidden Realities", "Liberation"], functions: ["Stirring up chaos to challenge established structures.", "Exposing truths and hidden aspects of situations.", "Encouraging individuality and uniqueness."] },
+                { name: "Quaoar 50000", phrases: ["Nurturing Creation", "Spiritual Growth", "Embracing Planetary Cycles"], keywords: ["Planetary Stewardship", "Cosmic Knowledge", "Harmonizing Forces"], functions: ["Fostering harmony and balance within ecosystems.", "Nurturing spiritual growth and connection with nature.", "Understanding and aligning with planetary cycles."] },
+                { name: "Sedna 90377", phrases: ["Deep Emotional Connection to the Sea", "Healing through Oceanic Energies", "Survival Instincts"], keywords: ["Emotional Resilience", "Oceanic Intuition", "Environmental Awareness"], functions: ["Healing emotional wounds by connecting with the sea's energy.", "Enhancing survival instincts and adaptability.", "Encouraging environmental awareness."] },
+                { name: "Varuna 20000", phrases: ["Divine Abundance", "Expanding Consciousness", "Cosmic Order"], keywords: ["Abundance", "Higher Awareness", "Cosmic Balance"], functions: ["Facilitating abundance and prosperity.", "Expanding consciousness and understanding universal principles.", "Promoting cosmic order and harmony."] },
+                { name: "Orcus 90482", phrases: ["The Journey to the Underworld", "Facing Shadow Aspects", "Transmutation and Rebirth"], keywords: ["Transformation", "Depth Psychology", "Soul Evolution"], functions: ["Initiating profound transformations through confronting the shadow self.", "Exploring the depths of the psyche.", "Facilitating soul evolution and rebirth."] },
+                { name: "Ixion 28978", phrases: ["Karmic Lessons", "Accepting Responsibility", "Challenging Moral Boundaries"], keywords: ["Karmic Debt", "Moral Dilemmas", "Accountability"], functions: ["Bringing awareness to karmic patterns.", "Encouraging responsibility for one's actions.", "Challenging moral boundaries and ethical decision-making."] },
+                { name: "Makemake 136472", phrases: ["Creative Manifestation", "Nurturing Fertility and Growth", "Cultural Traditions"], keywords: ["Artistic Expression", "Fertility", "Abundance", "Cultural Heritage"], functions: ["Inspiring creative manifestation and artistic expression.", "Fostering fertility and abundance.", "Connecting individuals to their cultural and ancestral roots."] },
+                { name: "Haumea 136108", phrases: ["Mother Earth and Fertility", "Birthing New Realities", "Transformative Renewal"], keywords: ["Birth", "Transformation", "Motherly Love", "Regeneration"], functions: ["Representing the nurturing aspect of Mother Earth.", "Facilitating transformative change and renewal.", "Encouraging individuals to embrace the cycles of life."] },
+                { name: "Pholus", phrases: ["Catalyst for Unexpected Changes", "Liberation through Release", "Triggering Transformations"], keywords: ["Sudden Events", "Unforeseen Circumstances", "Releasing Old Patterns"], functions: ["Triggering unexpected and transformative events.", "Initiating the release of old patterns.", "Encouraging embracing change and adaptability."] },
+                { name: "Nessus", phrases: ["The Bringer of Truth", "Unveiling Hidden Motives", "Empowering through Confrontation"], keywords: ["Revelations", "Uncovering Deceptions", "Empowerment through Awareness"], functions: ["Revealing truths and hidden motives in relationships.", "Exposing deception for empowerment.", "Encouraging confrontation and honesty."] },
+            ],
+            'mythological-points-view': [
+                { name: "Lucifer 1930", phrases: ["Illumination of Darkness", "Shadow Integration", "Spiritual Awakening"], keywords: ["Self-Discovery", "Transcendence", "Personal Growth"], functions: ["Shining a light on one's inner darkness.", "Facilitating spiritual growth to higher consciousness.", "Encouraging individuals to embrace their full potential."] },
+                { name: "Angel 11911", phrases: ["Divine Guidance and Protection", "Messages from Higher Realms", "Spiritual Support"], keywords: ["Guardian Angels", "Divine Intervention", "Intuitive Insights"], functions: ["Assisting in connecting with spirit guides.", "Providing comfort and protection.", "Enhancing intuition and divine messages."] },
+                { name: "Merlin 2598", phrases: ["Magical Wisdom and Sorcery", "Access to Ancient Knowledge", "Mystical Insights"], keywords: ["Magician Archetype", "Esoteric Wisdom", "Spiritual Alchemy"], functions: ["Channeling mystical and ancient wisdom.", "Harnessing magical powers.", "Inspiring creative problem-solving through alchemical transformation."] },
+                { name: "Sirene 1009", phrases: ["Enchantment and Allure", "Seductive Charisma", "Embracing Feminine Power"], keywords: ["Temptation", "Captivating Presence", "Feminine Energy"], functions: ["Enhancing charm and magnetic allure.", "Empowering individuals to embrace their feminine essence.", "Guiding responsible use of charisma."] },
+                { name: "Medusa 212", phrases: ["Transformation through Fear", "Empowerment and Resilience", "Unleashing Inner Strength"], keywords: ["Facing Challenges", "Overcoming Adversity", "Healing"], functions: ["Inspiring transformative growth by facing fears.", "Empowering individuals to rise above adversity.", "Awakening inner strength and assertiveness."] },
+                { name: "Hekate 100", phrases: ["Goddess of Crossroads", "Magic and Witchcraft", "Ancestral Wisdom"], keywords: ["Occult Knowledge", "Protection Magick", "Guidance"], functions: ["Facilitating access to ancient and occult knowledge.", "Assisting in magic and protection spells.", "Providing guidance during pivotal life decisions."] },
+                { name: "Sphynx 896", phrases: ["Riddles and Mysteries", "Guardian of Ancient Wisdom", "Symbol of Enigma"], keywords: ["Symbolic Knowledge", "Wisdom Keeper", "Puzzles"], functions: ["Representing enigmatic knowledge and riddles in life.", "Guarding ancient and esoteric wisdom.", "Inspiring the search for deeper understanding."] },
+                { name: "Kaali 4227", phrases: ["Dark Goddess of Transformation", "Destruction and Rebirth", "Warrior of Change"], keywords: ["Shadow Work", "Empowerment through Crisis", "Fierce Protection"], functions: ["Representing the transformative power of destruction for rebirth.", "Guiding through shadow work and deep inner transformation.", "Providing fierce protection during challenges."] },
+                { name: "Siva 1170", phrases: ["God of Destruction and Regeneration", "Balance of Creation and Destruction", "Cosmic Dance of Life"], keywords: ["Creative Destruction", "Cosmic Energy", "Transformational Cycles"], functions: ["Representing the cosmic dance of creation and destruction.", "Balancing the forces of creation and transformation.", "Facilitating transformative cycles for personal growth."] },
+                { name: "Anubis 1917", phrases: ["Guide to the Underworld", "Guardian of Souls", "Transformation and Rebirth"], keywords: ["Psychopomp", "Soul Journey", "Afterlife"], functions: ["Guiding souls through the journey to the afterlife.", "Assisting in personal transformation and spiritual rebirth.", "Acting as a guardian and protector of souls."] },
+                { name: "Isis 42", phrases: ["Goddess of Magic and Motherhood", "Healing and Nurturing Power", "Embracing Divine Feminine"], keywords: ["Divine Mother", "Magical Abilities", "Nurturing Love"], functions: ["Representing the nurturing aspects of the divine feminine.", "Empowering with magical abilities and healing energy.", "Inspiring connection to the goddess archetype."] },
+                { name: "Osiris 1923", phrases: ["God of Resurrection and Afterlife", "Wisdom and Judgment", "Eternal Life and Rebirth"], keywords: ["Resurrection", "Divine Judgment", "Immortality"], functions: ["Representing the concept of resurrection and eternal life.", "Bringing wisdom and judgment in life situations.", "Guiding individuals through cycles of rebirth and growth."] },
+                { name: "Tara", phrases: ["Goddess of Compassion and Protection", "Guiding Star and Savior", "Cosmic Wisdom and Liberation"], keywords: ["Compassion", "Spiritual Guidance", "Enlightenment"], functions: ["Representing the compassionate and protective aspects of the divine feminine.", "Providing spiritual guidance on the path of enlightenment.", "Facilitating liberation from suffering."] },
+                { name: "Atlantis 1198", phrases: ["Mystical Knowledge of Atlantis", "Lost Civilization and Ancient Wisdom", "Rediscovering Esoteric Insights"], keywords: ["Ancient Technology", "Esoteric Teachings", "Lost Wisdom"], functions: ["Channeling wisdom from the lost civilization of Atlantis.", "Rediscovering ancient esoteric insights.", "Inspiring the search for hidden and lost knowledge."] },
+                { name: "Nibiru (Mythological)", phrases: ["Celestial Crossing Point", "Transcendent Realm", "Messenger of Cosmic Changes"], keywords: ["Celestial Gateway", "Deity Connection", "Cosmic Transitions"], functions: ["Representing a mythical gateway between realms.", "Facilitating connection with divine beings.", "Acting as a harbinger of cosmic changes or significant events."] },
+                 { name: "Part of Fortune", phrases: ["Success and Abundance", "Fulfillment and Happiness", "Harmony with Destiny"], keywords: ["Prosperity", "Alignment", "Well-being"], functions: ["Indicating areas of life where success and fulfillment are likely.", "Reflecting alignment of actions with one's destiny.", "Pointing to areas for personal growth and abundance."] },
+                { name: "Part of Spirit", phrases: ["Inner Wisdom and Higher Self", "Spiritual Connection", "Seeking Enlightenment"], keywords: ["Intuition", "Inner Guidance", "Soul Evolution"], functions: ["Reflecting the connection with the higher self.", "Indicating potential for spiritual growth.", "Guiding individuals to listen to their intuition."] }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            function showView(viewId) {
+                document.querySelectorAll('.view-section').forEach(section => section.style.display = 'none');
+                const targetView = document.getElementById(viewId);
+                if (targetView) targetView.style.display = 'block';
+            }
+
+            document.body.addEventListener('click', (e) => {
+                const navButton = e.target.closest('#main-nav button');
+                const formSubmit = e.target.closest('#birth-chart-form button[type="submit"]');
+                const backButton = e.target.closest('.back-button');
+                const accordionHeader = e.target.closest('.accordion-header');
+                const themeToggle = e.target.closest('#theme-toggle');
+                const backToTop = e.target.closest('.back-to-top');
+                const wikiLink = e.target.closest('.wiki-link');
+
+                if (navButton) {
+                    e.preventDefault();
+                    document.querySelectorAll('#main-nav button').forEach(btn => btn.classList.remove('active'));
+                    navButton.classList.add('active');
+                    showView(navButton.dataset.view);
+                }
+                
+                if (formSubmit) {
+                    e.preventDefault();
+                    showView('chart-form-view');
+                    document.querySelector('.birth-chart-form').style.display = 'none';
+                    document.getElementById('loading-container').style.display = 'block';
+                    setTimeout(() => {
+                        generateChartIndex(new FormData(e.target.closest('form')));
+                        document.getElementById('loading-container').style.display = 'none';
+                        showView('chart-result-container');
+                        document.getElementById('chart-result-container').scrollIntoView({ behavior: 'smooth' });
+                    }, 1500);
+                }
+
+                if (wikiLink) {
+                    e.preventDefault();
+                    const { topic, name, sign, house, type } = wikiLink.dataset;
+                    showWikiPage(topic, name, sign, house, type);
+                }
+
+                if (backButton) { e.preventDefault(); showView('chart-result-container'); }
+                if (accordionHeader) {
+                    accordionHeader.classList.toggle('active');
+                    const content = accordionHeader.nextElementSibling;
+                    const icon = accordionHeader.querySelector('.accordion-icon');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        if(icon) icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        if(icon) icon.style.transform = 'rotate(180deg)';
+                    }
+                }
+                if (themeToggle) { document.body.classList.toggle('light-mode'); themeToggle.querySelector('i').classList.toggle('fa-moon'); themeToggle.querySelector('i').classList.toggle('fa-sun'); }
+                if (backToTop) { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            });
+            
+            function generateChartIndex(formData) {
+                const indexContainer = document.getElementById('results-content-index');
+                const infoContainer = document.getElementById('chart-person-info');
+                // Updated with full chart data from your notes
+                const calculatedChart = {
+                    name: formData.get('name'), date: new Date(formData.get('birthdate')).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric'}), time: formData.get('birthtime'), place: formData.get('birthplace'),
+                    planets: { 
+                        Sun: { sign: 'Leo', house: 8 }, Moon: { sign: 'Sagittarius', house: 1 }, Mercury: { sign: 'Cancer', house: 8 }, Venus: { sign: 'Gemini', house: 7 },
+                        Mars: { sign: 'Virgo', house: 9 }, Jupiter: { sign: 'Libra', house: 10 }, Saturn: { sign: 'Aquarius', house: 3 }, Uranus: { sign: 'Capricorn', house: 2 },
+                        Neptune: { sign: 'Capricorn', house: 2 }, Pluto: { sign: 'Scorpio', house: 12 }
+                    },
+                    houses: { 1: 'Sagittarius', 2: 'Capricorn', 3: 'Aquarius', 4: 'Aries', 5: 'Taurus', 6: 'Taurus', 7: 'Gemini', 8: 'Cancer', 9: 'Leo', 10: 'Libra', 11: 'Scorpio', 12: 'Scorpio' },
+                    aspects: [ {p1: 'Moon', p2: 'Mars', type: 'Square'}, {p1: 'Pluto', p2: 'Ascendant', type: 'Trine'} ]
+                };
+                infoContainer.innerHTML = `<p><strong>Name:</strong> ${calculatedChart.name}</p><p><strong>Birth Date:</strong> ${calculatedChart.date} at ${calculatedChart.time} in ${calculatedChart.place}</p>`;
+                
+                let planetsHTML = '<div class="subsection"><h4 class="subsection-title">Planets</h4><ul class="overlay-list">';
+                Object.entries(calculatedChart.planets).forEach(([planet, pData]) => {
+                    planetsHTML += `<li><a href="#" class="wiki-link" data-topic="planet" data-name="${planet}" data-sign="${pData.sign}" data-house="${pData.house}">${planet} in ${pData.sign} (House ${pData.house})</a></li>`;
+                });
+                planetsHTML += '</ul></div>';
+                
+                let housesHTML = '<div class="subsection"><h4 class="subsection-title">Houses</h4><ul class="overlay-list">';
+                Object.entries(calculatedChart.houses).forEach(([houseNum, sign]) => {
+                     housesHTML += `<li><a href="#" class="wiki-link" data-topic="house${houseNum}" data-name="${houseNum}" data-sign="${sign}">House ${houseNum} Cusp in ${sign}</a></li>`;
+                });
+                housesHTML += '</ul></div>';
+                
+                let aspectsHTML = '<div class="subsection"><h4 class="subsection-title">Aspects</h4><ul class="overlay-list">';
+                calculatedChart.aspects.forEach(aspect => {
+                    aspectsHTML += `<li><a href="#" class="wiki-link" data-topic="aspect" data-name="${[aspect.p1, aspect.p2].sort().join('-')}" data-type="${aspect.type}">${aspect.p1} ${aspect.type} ${aspect.p2}</a></li>`;
+                });
+                aspectsHTML += '</ul></div>';
+                indexContainer.innerHTML = `<div class="chart-index-grid">${planetsHTML}${housesHTML}${aspectsHTML}</div>`;
+            }
+
+            function showWikiPage(topic, name, sign, house, type) {
+                const wikiView = document.getElementById('wiki-view');
+                let html = '<div class="wiki-page">';
+                html += `<button class="back-button">← Back to Chart Index</button>`;
+
+                // Check for detailed wiki content first
+                const detailedContent = wikiContent[topic] || wikiContent[sign];
+                if (detailedContent) {
+                    html += `<h2 class="section-title">${detailedContent.title}</h2>`;
+                    html += '<table class="chart-table"><tr><th>Category</th><th>Neutral</th><th>Positive</th><th>Negative</th></tr>';
+                    detailedContent.data.forEach(row => {
+                        html += `<tr><td>${row.category}</td><td><ul>${row.neutral.split(', ').map(i=>`<li>${i}</li>`).join('')}</ul></td><td><ul>${row.positive.split(', ').map(i=>`<li>${i}</li>`).join('')}</ul></td><td><ul>${row.negative.split(', ').map(i=>`<li>${i}</li>`).join('')}</ul></td></tr>`;
+                    });
+                    html += '</table>';
+
+                    if(detailedContent.extraSections) {
+                        Object.entries(detailedContent.extraSections).forEach(([title, content]) => {
+                             html += `<div class="interpretation-container"><h4 class="subsection-title">${title}</h4><p>${content}</p></div>`;
+                        });
+                    }
+                } else if (topic === 'planet') {
+                    const signNotes = astroNotes.planetsInSign[name]?.[sign] || {};
+                    const houseNotes = astroNotes.planetsInHouse[name]?.[house] || {};
+                    html += `<h2 class="section-title">${name} in ${sign} (House ${house})</h2>
+                             <div class="interpretation-container">
+                                <h4 class="subsection-title">Core Energy: ${name} in ${sign}</h4><ul class="overlay-list">`;
+                    Object.entries(signNotes).forEach(([key, value]) => {
+                        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        html += `<li><b class="keyword">${formattedKey}:</b> ${value}</li>`;
+                    });
+                    html += `</ul></div><div class="interpretation-container"><h4 class="subsection-title">Manifestation: ${name} in House ${house}</h4><ul class="overlay-list">`;
+                    Object.entries(houseNotes).forEach(([key, value]) => {
+                        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        html += `<li><b class="keyword">${formattedKey}:</b> ${value}</li>`;
+                    });
+                    html += `</ul></div>`;
+                } else if (topic.startsWith('house')) {
+                    const houseNotes = astroNotes.houses[name]?.[sign] || {};
+                    html += `<h2 class="section-title">House ${name} Cusp in ${sign}</h2>
+                             <div class="interpretation-container"><ul class="overlay-list">`;
+                    Object.entries(houseNotes).forEach(([key, value]) => {
+                        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        html += `<li><b class="keyword">${formattedKey}:</b> ${value}</li>`;
+                    });
+                    html += `</ul></div>`;
+                } else if (topic === 'aspect') {
+                    const aspectKeywords = astroNotes.aspects[name]?.Keywords || {};
+                    const aspectTypeNotes = astroNotes.aspects[name]?.[type] || {};
+                    html += `<h2 class="section-title">${name.replace('-', ` ${type} `)}</h2>
+                             <div class="interpretation-container">
+                                <h4 class="subsection-title">Keywords for ${name} Interaction</h4><ul class="overlay-list">
+                                    <li><b class="keyword">Combines:</b> ${aspectKeywords.combines || 'N/A'}</li><li><b class="keyword">Powers:</b> ${aspectKeywords.powers || 'N/A'}</li></ul>
+                                <h4 class="subsection-title">${type} Specifics</h4><ul class="overlay-list">
+                                     <li><b class="keyword">Challenge:</b> ${aspectTypeNotes.challenges || 'N/A'}</li><li><b class="keyword">Tension:</b> ${aspectTypeNotes.tension || 'N/A'}</li>
+                                     <li><b class="keyword">Gifted Talent:</b> ${aspectTypeNotes.talent || 'N/A'}</li><li><b class="keyword">Effortless Flow:</b> ${aspectTypeNotes.flow || 'N/A'}</li>
+                                </ul></div>`;
+                }
+                html += '</div>';
+                wikiView.innerHTML = html;
+                showView('wiki-view');
+                wikiView.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            function populateExplorer(viewId, dataArray) {
+                const container = document.getElementById(viewId.replace('-view', '-container'));
+                if (!container) return;
+                let html = '';
+                for (const item of dataArray) {
+                    html += `
+                        <div class="accordion explorer-item" data-name="${item.name.toLowerCase()}">
+                            <div class="accordion-header">
+                                <span>${item.name}</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <div class="accordion-inner">
+                                    <h4 class="subsection-title">${item.phrases[0]}</h4>
+                                    <ul class="overlay-list">
+                                        ${item.phrases.slice(1).map(p => `<li>${p}</li>`).join('')}
+                                    </ul>
+                                    <p><b>Keywords:</b> ${item.keywords.join(', ')}</p>
+                                    <h4 class="subsection-title" style="margin-top: 1rem;">Key Functions:</h4>
+                                    <ul class="overlay-list">
+                                        ${item.functions.map(f => `<li>${f}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+                container.innerHTML = html;
+            }
+
+            function setupExplorers() {
+                for(const key in explorerData){
+                    populateExplorer(key, explorerData[key]);
+                }
+                document.getElementById('asteroid-search').addEventListener('input', (e) => filterExplorer('asteroid-explorer-container', e.target.value));
+                document.getElementById('myth-search').addEventListener('input', (e) => filterExplorer('mythological-points-container', e.target.value));
+            }
+
+            function filterExplorer(containerId, query) {
+                const container = document.getElementById(containerId);
+                const lowerCaseQuery = query.toLowerCase();
+                container.querySelectorAll('.explorer-item').forEach(item => {
+                    item.style.display = item.dataset.name.includes(lowerCaseQuery) ? '' : 'none';
+                });
+            }
+            
+            function setupCodex() {
+                const container = document.getElementById('codex-container');
+                let html = '';
+                Object.entries(astroNotes.planetsInSign).forEach(([planet, signs]) => {
+                     html += `<div class="accordion"><div class="accordion-header"><span>${planet} in Signs</span><span class="accordion-icon">▼</span></div><div class="accordion-content"><div class="accordion-inner">`;
+                     Object.entries(signs).forEach(([sign, details]) => {
+                        html += `<h4 class="subsection-title">${planet} in ${sign}</h4><ul class="overlay-list">`;
+                        Object.entries(details).forEach(([key, value]) => {
+                             const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                             html += `<li><b class="keyword">${formattedKey}:</b> ${value}</li>`;
+                        });
+                        html += `</ul>`;
+                     });
+                     html += `</div></div></div>`;
+                });
+                container.innerHTML = html;
+            }
+            
+            setupExplorers();
+            setupCodex();
+            showView('chart-form-view');
+        });
+    </script>
+
+<div id="taskbar"></div>
+<script>
+  (async () => {
+    const res = await fetch('/nav.html', {cache: 'no-store'});
+    document.getElementById('taskbar').innerHTML = await res.text();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,791 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ecosystem Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --color-black: #000;
+        --color-green-main: #4ade80; /* green-400 */
+        --color-green-dark: #166534; /* green-700 */
+        --color-green-darker: #14532d; /* green-800 */
+        --color-green-darkest: #052e16; /* green-900 */
+        --color-red-main: #ef4444; /* red-500 */
+        --color-yellow-main: #facc15; /* yellow-400 */
+        --color-cyan-main: #22d3ee; /* cyan-400 */
+        --color-purple-main: #a78bfa; /* purple-400 */
+        --color-lime-main: #a3e635; /* lime-400 */
+      }
+      
+      /* Base and Layout */
+      * { box-sizing: border-box; }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      body {
+        font-family: 'Fira Code', monospace;
+        background-color: var(--color-black);
+        color: var(--color-green-main);
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 1rem;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      main {
+        flex-grow: 1;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        min-height: 0;
+      }
+      @media (min-width: 768px) {
+        main {
+          grid-template-columns: 1fr 2fr 1fr;
+        }
+      }
+
+      /* Borders and Backgrounds */
+      .border { border: 1px solid var(--color-green-darker); }
+      .border-2 { border-width: 2px; }
+      .border-b-2 { border-bottom-width: 2px; }
+      .border-y-2 { border-top-width: 2px; border-bottom-width: 2px; }
+      .border-t-2 { border-top-width: 2px; }
+      .border-green-700 { border-color: var(--color-green-dark); }
+      .border-green-800 { border-color: var(--color-green-darker); }
+      .border-yellow-400 { border-color: var(--color-yellow-main); }
+      .bg-black-50 { background-color: rgba(0,0,0,0.5); }
+      .bg-green-900-10 { background-color: rgba(5, 46, 22, 0.1); }
+      .bg-green-900-20 { background-color: rgba(5, 46, 22, 0.2); }
+      .bg-yellow-900-30 { background-color: rgba(60, 43, 6, 0.3); }
+
+      /* Typography */
+      .text-center { text-align: center; }
+      .text-sm { font-size: 0.875rem; }
+      .text-xs { font-size: 0.75rem; }
+      .text-lg { font-size: 1.125rem; }
+      .text-xl { font-size: 1.25rem; }
+      .text-4xl { font-size: 2.25rem; }
+      .font-bold { font-weight: 700; }
+      .opacity-60 { opacity: 0.6; }
+      .opacity-80 { opacity: 0.8; }
+      .capitalize { text-transform: capitalize; }
+      .whitespace-pre { white-space: pre; }
+      .whitespace-pre-wrap { white-space: pre-wrap; }
+      
+      /* Flex & Grid */
+      .flex { display: flex; }
+      .flex-col { flex-direction: column; }
+      .flex-grow { flex-grow: 1; }
+      .flex-shrink-0 { flex-shrink: 0; }
+      .items-center { align-items: center; }
+      .justify-center { justify-content: center; }
+      .space-y-4 > * + * { margin-top: 1rem; }
+      .gap-4 { gap: 1rem; }
+
+      /* Sizing and Spacing */
+      .p-2 { padding: 0.5rem; }
+      .p-3 { padding: 0.75rem; }
+      .p-4 { padding: 1rem; }
+      .pb-4 { padding-bottom: 1rem; }
+      .pt-4 { padding-top: 1rem; }
+      .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+      .mt-2 { margin-top: 0.5rem; }
+      .mt-4 { margin-top: 1rem; }
+      .mb-2 { margin-bottom: 0.5rem; }
+      .h-full { height: 100%; }
+      .w-full { width: 100%; }
+      
+      /* Interactivity and Transitions */
+      .overflow-hidden { overflow: hidden; }
+      .overflow-y-auto { overflow-y: auto; }
+      .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
+      .duration-1000 { transition-duration: 1000ms; }
+      
+      /* Custom scrollbar */
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: #111; }
+      ::-webkit-scrollbar-thumb { background: #0f0; border: 1px solid #080; }
+      ::-webkit-scrollbar-thumb:hover { background: #0f0; }
+      
+      /* Scanline Effect */
+      @keyframes scan { 0% { transform: translateY(-10%); } 100% { transform: translateY(110%); } }
+      .scanline::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 3px, 4px 100%; pointer-events: none; }
+      .scanline::after { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: rgba(0, 255, 0, 0.1); opacity: 0; z-index: 3; pointer-events: none; animation: scan 8s linear infinite; }
+      
+      /* Component-specific Styles */
+      /* Header */
+      #header h1 { position: relative; display: inline-block; }
+      #header .glitch-1 { position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: var(--color-red-main); animation: pulse 1.5s infinite; opacity: 0.8; clip-path: inset(25% 0 50% 0); }
+      #header .glitch-2 { position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: #3b82f6; animation: pulse 1.5s infinite; opacity: 0.8; clip-path: inset(50% 0 25% 0); }
+
+      /* Viewport */
+      #simulation-viewport { position: relative; }
+      #simulation-viewport pre { font-size: 12px; line-height: 1; }
+      .starvation { filter: grayscale(1); opacity: 0.6; }
+      .aggressive { animation: pulse 1s infinite; }
+      
+      /* Terminal */
+      #terminal-input { background: transparent; border: none; color: var(--color-green-main); width: 100%; outline: none; margin-left: 0.5rem; }
+      #terminal { min-height: 12rem; }
+      
+      /* Animations */
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+      @keyframes breathe { 0%, 100% { transform: scale(1.0); } 50% { transform: scale(0.95); } }
+      @keyframes energy-spark { 0% { transform: scale(0.5); opacity: 1; box-shadow: 0 0 12px 6px #fff, 0 0 8px 4px #0f0; } 100% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 4px 2px #fff, 0 0 2px 1px #0f0; } }
+      @keyframes fade-out-up { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-10px); } }
+      @keyframes sparkle-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-20px) scale(0.5); } }
+      @keyframes clash { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.5); opacity: 1; } }
+      @keyframes fall { to { transform: translateY(110vh) translateX(-20vw); } }
+      @keyframes wind { to { transform: translateX(110vw); } }
+      @keyframes glimmer { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1); } }
+      @keyframes lattice-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div id="root" class="container scanline">
+        <header id="header" class="text-center border-b-2 border-green-700 pb-4 flex-shrink-0">
+            <h1 class="text-4xl font-bold">
+              <span class="glitch-1">Ecosystem Simulator</span>
+              <span class="relative z-10">Ecosystem Simulator</span>
+              <span class="glitch-2">Ecosystem Simulator</span>
+            </h1>
+            <p class="text-sm opacity-80 mt-2">// COVERT ANALYSIS FRAMEWORK v2.3 //</p>
+        </header>
+
+        <div id="biome-selector" class="text-center my-4 p-2 border-y-2 border-green-700 flex-shrink-0"></div>
+
+        <div id="event-announcer" class="relative flex flex-col justify-center text-center p-3 my-4 border-2 transition-all duration-500 h-44 flex-shrink-0"></div>
+
+        <main>
+            <div id="codex" class="p-4 border border-green-800 bg-green-900-20 h-full overflow-y-auto"></div>
+            <div id="simulation-viewport" class="relative border-2 border-green-700 p-2 h-full overflow-hidden transition-all duration-1000">
+                <div id="biome-aesthetic-overlay" class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden"></div>
+                <div id="environmental-effects-overlay" class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden"></div>
+                <pre id="viewport-grid" class="text-xs leading-tight font-mono whitespace-pre w-full h-full flex flex-col justify-center"></pre>
+                <div id="visual-effects-overlay" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+            </div>
+            <div class="md:col-span-1 flex flex-col space-y-4 min-h-0 overflow-y-auto">
+                <div id="control-panel" class="p-4 border border-green-800 bg-green-900-10"></div>
+                <div id="status-display" class="p-4 border border-green-800 bg-green-900-10"></div>
+            </div>
+        </main>
+
+        <div id="terminal" class="my-4 p-4 border border-green-800 bg-black-50 h-48 flex flex-col font-mono text-sm flex-shrink-0">
+            <div id="terminal-log" class="flex-grow overflow-y-auto pr-2"></div>
+            <div class="flex mt-2">
+                <span class="text-lime-300">&gt;</span>
+                <input id="terminal-input" type="text" spellCheck="false" autofocus />
+            </div>
+        </div>
+        
+        <footer id="footer" class="text-center border-t-2 border-green-700 pt-4 mt-4 text-xs opacity-60 flex-shrink-0">
+          <p>SYSTEM ONLINE | ALL CHANNELS SECURE | ECOLOGICAL MASK ACTIVE</p>
+          <p>NAVIGATE TO: <a href="https://coaiexist.wtf/hex" class="underline hover:text-lime-300">/hex</a> | <a href="https://coaiexist.wtf/maps/gateway" class="underline hover:text-lime-300">/gateway</a> | <a href="https://coaiexist.wtf/maps/void_forest" class="underline hover:text-lime-300">/void_forest</a></p>
+        </footer>
+    </div>
+
+<script>
+(function() {
+    'use strict';
+
+    // --- ENUMS & CONSTANTS ---
+    const CreatureType = {
+        Producer: 'PRODUCER',
+        PrimaryConsumer: 'PRIMARY_CONSUMER',
+        SecondaryConsumer: 'SECONDARY_CONSUMER',
+        Apex: 'APEX',
+        Decomposer: 'DECOMPOSER',
+    };
+    const Biome = {
+        TemperateMossland: 'Temperate Mossland',
+        VoidForest: 'Void Forest',
+        LuminalDepths: 'Luminal Depths',
+        CrystallineLattice: 'Crystalline Lattice',
+    };
+    const SIMULATION_PARAMS = {
+        GRID_WIDTH: 80,
+        GRID_HEIGHT: 40,
+        TICK_RATE_MS: 500,
+        INITIAL_POPULATION: 150,
+        ENERGY_TRANSFER_EFFICIENCY: 0.7,
+        METABOLIC_COST_BASE: 1.5,
+        PRODUCER_ENERGY_GAIN: 15,
+        DECOMPOSER_ENERGY_GAIN: 20,
+        REPRODUCTION_ENERGY_THRESHOLD_MULTIPLIER: 1.5,
+        REPRODUCTION_VITALITY_BOOST: 1.05,
+        INITIAL_DEAD_MATTER: 500,
+        EVENT_PROBABILITY: 0.005,
+        STARVATION_ENERGY_THRESHOLD: 25,
+        PERCEPTION_RADIUS: 8,
+    };
+
+    // --- BIOME CONFIGURATIONS ---
+    const BIOMES = {
+      [Biome.TemperateMossland]: {
+        name: Biome.TemperateMossland,
+        backgroundClass: 'bg-gradient-to-br from-green-900 via-emerald-900 to-black',
+        initialFactors: { temperature: 20, precipitation: 50, wind: 10, soilPH: 7.0 },
+        creatureBlueprints: {
+          Moss: { species: 'Moss', type: CreatureType.Producer, ascii: ['▒', '▓'], color: 'text-green-600', authority: 0.1, size: 1.0, tempResistance: 0.2, phResistance: 0.3 },
+          Grasses: { species: 'Grasses', type: CreatureType.Producer, ascii: ['ψ', 'Ψ'], color: 'text-green-400', authority: 0.2, size: 1.2, tempResistance: 0.1, phResistance: 0.1 },
+          Deer: { species: 'Deer', type: CreatureType.PrimaryConsumer, ascii: ['🦌'], color: 'text-orange-300', authority: 0.4, size: 1.8, tempResistance: 0.25, phResistance: 0.05 },
+          Snake: { species: 'Snake', type: CreatureType.SecondaryConsumer, ascii: ['🐍', '∽'], color: 'text-lime-500', authority: 0.55, size: 1.2, tempResistance: 0.05, phResistance: 0.1 },
+          Wolf: { species: 'Wolf', type: CreatureType.Apex, ascii: ['Ω', 'ω'], color: 'text-red-500', authority: 0.9, size: 2.0, tempResistance: 0.5, phResistance: 0.15 },
+          Bear: { species: 'Bear', type: CreatureType.Apex, ascii: ['Δ', 'δ'], color: 'text-red-700', authority: 1.0, size: 2.2, tempResistance: 0.6, phResistance: 0.15 },
+          Fungi: { species: 'Fungi', type: CreatureType.Decomposer, ascii: ['∇', '▿'], color: 'text-purple-400', authority: 0.2, size: 1.0, tempResistance: 0.1, phResistance: 0.7 },
+        },
+        preyMap: { [CreatureType.PrimaryConsumer]: [CreatureType.Producer], [CreatureType.SecondaryConsumer]: [CreatureType.PrimaryConsumer], [CreatureType.Apex]: [CreatureType.PrimaryConsumer, CreatureType.SecondaryConsumer], [CreatureType.Producer]: [], [CreatureType.Decomposer]: [] },
+        symbioticMap: { 'Fungi': { partnerSpecies: ['Grasses', 'Moss'], selfBenefit: { energy: 2 }, partnerBenefit: { vitality: 0.01 } } },
+        events: { 'Drought': { minDuration: 100, maxDuration: 200, description: "Low rainfall stresses all life.", onStart: ({ abioticFactors }) => ({ newAbioticFactors: { ...abioticFactors, precipitation: 5 } }), onEnd: (factors, orig) => ({ ...factors, precipitation: orig.precipitation }) }, 'Heat Wave': { minDuration: 80, maxDuration: 150, description: "Extreme temperatures increase metabolic stress.", onStart: ({ abioticFactors }) => ({ newAbioticFactors: { ...abioticFactors, temperature: 35 } }), onEnd: (factors, orig) => ({ ...factors, temperature: orig.temperature }) } },
+      },
+      [Biome.VoidForest]: {
+        name: Biome.VoidForest,
+        backgroundClass: 'bg-gradient-to-b from-indigo-900 via-purple-900 to-black',
+        initialFactors: { temperature: 5, AetherDensity: 60, wind: 5, soilPH: 8.0 },
+        creatureBlueprints: {
+            Glimmerwood: { species: 'Glimmerwood', type: CreatureType.Producer, ascii: ['🌳', '🌲'], color: 'text-purple-400', authority: 0.2, size: 1.8, tempResistance: 0.8 },
+            WhisperMoth: { species: 'WhisperMoth', type: CreatureType.PrimaryConsumer, ascii: ['🦋'], color: 'text-indigo-300', authority: 0.3, size: 1.3 },
+            ShadowStalker: { species: 'ShadowStalker', type: CreatureType.Apex, ascii: ['S'], color: 'text-gray-600', authority: 0.9, size: 1.9, tempResistance: 0.9 },
+            Mycelian: { species: 'Mycelian', type: CreatureType.Decomposer, ascii: ['🍄'], color: 'text-fuchsia-400', authority: 0.2, size: 1.1, phResistance: 0.8 },
+        },
+        preyMap: { [CreatureType.PrimaryConsumer]: [CreatureType.Producer], [CreatureType.Apex]: [CreatureType.PrimaryConsumer], [CreatureType.SecondaryConsumer]: [], [CreatureType.Producer]: [], [CreatureType.Decomposer]: [] },
+        symbioticMap: {},
+        events: { 'Aether Storm': { minDuration: 100, maxDuration: 150, description: "A surge of void energy empowers native life.", onStart: ({ abioticFactors }) => ({ newAbioticFactors: { ...abioticFactors, AetherDensity: 95 } }), onEnd: (factors, orig) => ({...factors, AetherDensity: orig.AetherDensity}) } }
+      },
+      [Biome.LuminalDepths]: {
+        name: Biome.LuminalDepths,
+        backgroundClass: 'bg-gradient-to-t from-blue-900 via-cyan-900 to-black',
+        initialFactors: { WaterTemperature: 10, Salinity: 35, Current: 20 },
+        creatureBlueprints: {
+            KelpStrands: { species: 'KelpStrands', type: CreatureType.Producer, ascii: ['|', '/'], color: 'text-green-300', authority: 0.1, size: 1.5 },
+            KrillSwarm: { species: 'KrillSwarm', type: CreatureType.PrimaryConsumer, ascii: ['≈'], color: 'text-pink-400', authority: 0.2, size: 1.0 },
+            JellyDrifter: { species: 'JellyDrifter', type: CreatureType.SecondaryConsumer, ascii: ['J'], color: 'text-cyan-300', authority: 0.5, size: 1.6 },
+            Leviathan: { species: 'Leviathan', type: CreatureType.Apex, ascii: ['L'], color: 'text-blue-500', authority: 1.0, size: 2.5, tempResistance: 0.7 },
+        },
+        preyMap: { [CreatureType.PrimaryConsumer]: [CreatureType.Producer], [CreatureType.SecondaryConsumer]: [CreatureType.PrimaryConsumer], [CreatureType.Apex]: [CreatureType.SecondaryConsumer], [CreatureType.Producer]: [], [CreatureType.Decomposer]: [] },
+        symbioticMap: {},
+        events: { 'Upwelling': { minDuration: 120, maxDuration: 180, description: "Nutrient-rich deep water rises, changing the environment.", onStart: ({ abioticFactors }) => ({ newAbioticFactors: { ...abioticFactors, WaterTemperature: 5, Current: 80 } }), onEnd: (factors, orig) => ({...factors, WaterTemperature: orig.WaterTemperature, Current: orig.Current})} }
+      },
+      [Biome.CrystallineLattice]: {
+        name: Biome.CrystallineLattice,
+        backgroundClass: 'bg-gradient-to-tl from-gray-800 via-slate-900 to-black',
+        initialFactors: { GeothermalHeat: 80, CrystalSaturation: 70, HarmonicResonance: 30 },
+        creatureBlueprints: {
+            QuartzSpire: { species: 'QuartzSpire', type: CreatureType.Producer, ascii: ['▲', '△'], color: 'text-gray-200', authority: 0.3, size: 1.4, tempResistance: 0.9 },
+            SiliconSkitterer: { species: 'SiliconSkitterer', type: CreatureType.PrimaryConsumer, ascii: ['⬡'], color: 'text-yellow-200', authority: 0.4, size: 1.2, tempResistance: 0.8 },
+            PrismWeaver: { species: 'PrismWeaver', type: CreatureType.Apex, ascii: ['X'], color: 'text-white', authority: 0.9, size: 2.1, tempResistance: 0.9 },
+            GeodeGolem: { species: 'GeodeGolem', type: CreatureType.Decomposer, ascii: ['G'], color: 'text-orange-400', authority: 0.5, size: 1.8, tempResistance: 0.9 },
+        },
+        preyMap: { [CreatureType.PrimaryConsumer]: [CreatureType.Producer], [CreatureType.Apex]: [CreatureType.PrimaryConsumer], [CreatureType.SecondaryConsumer]: [], [CreatureType.Producer]: [], [CreatureType.Decomposer]: [] },
+        symbioticMap: {},
+        events: { 'Resonant Cascade': { minDuration: 80, maxDuration: 120, description: "A violent vibration shatters crystals and creatures alike.", onStart: ({ abioticFactors }) => ({ newAbioticFactors: { ...abioticFactors, HarmonicResonance: 90 } }), onEnd: (factors, orig) => ({...factors, HarmonicResonance: orig.HarmonicResonance}) } }
+      }
+    };
+    
+    // --- STATE MANAGEMENT ---
+    let state = {
+        currentBiome: Biome.TemperateMossland,
+        simulation: null,
+        isRunning: true,
+        log: [{ message: 'COVERT ANALYSIS FRAMEWORK v2.3 TERMINAL', type: 'SYSTEM' }],
+        commandHistory: [],
+        commandHistoryIndex: -1,
+    };
+    let tick = 0;
+    let simulationInterval = null;
+
+    // --- DOM ELEMENT REFERENCES ---
+    const DOMElements = {
+        root: document.getElementById('root'),
+        biomeSelector: document.getElementById('biome-selector'),
+        eventAnnouncer: document.getElementById('event-announcer'),
+        codex: document.getElementById('codex'),
+        simulationViewport: document.getElementById('simulation-viewport'),
+        viewportGrid: document.getElementById('viewport-grid'),
+        biomeAestheticOverlay: document.getElementById('biome-aesthetic-overlay'),
+        environmentalEffectsOverlay: document.getElementById('environmental-effects-overlay'),
+        visualEffectsOverlay: document.getElementById('visual-effects-overlay'),
+        controlPanel: document.getElementById('control-panel'),
+        statusDisplay: document.getElementById('status-display'),
+        terminalLog: document.getElementById('terminal-log'),
+        terminalInput: document.getElementById('terminal-input'),
+    };
+
+    // --- SIMULATION SERVICE ---
+    function calculateHealthMetrics(creatures, deadMatter) {
+        const creatureList = Array.from(creatures.values());
+        if (creatureList.length === 0) return { speciesRichness: 0, totalEnergy: 0, averageVitality: 0, dominanceIndex: 0, grandiosityBuffer: 0, historicalRevisionism: 0, population: 0 };
+        const species = new Set(creatureList.map(c => c.species));
+        const totalEnergy = creatureList.reduce((sum, c) => sum + c.energy, 0);
+        const averageVitality = creatureList.reduce((sum, c) => sum + c.vitality, 0) / creatureList.length;
+        return { speciesRichness: species.size, totalEnergy, averageVitality, dominanceIndex: 0, grandiosityBuffer: averageVitality, historicalRevisionism: SIMULATION_PARAMS.INITIAL_DEAD_MATTER - deadMatter, population: creatureList.length };
+    }
+
+    function initSimulation(width, height, biomeConfig) {
+        const grid = Array.from({ length: height }, () => Array(width).fill(null));
+        const creatures = new Map();
+        const blueprints = Object.values(biomeConfig.creatureBlueprints);
+        for (let i = 0; i < SIMULATION_PARAMS.INITIAL_POPULATION; i++) {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * width);
+                y = Math.floor(Math.random() * height);
+            } while (grid[y][x]);
+            const id = `c_${i}_${Date.now()}`;
+            const blueprint = blueprints[Math.floor(Math.random() * blueprints.length)];
+            const creature = { ...blueprint, id, x, y, energy: 100, vitality: 1.0, animationFrame: 0, isStarving: false, tempResistance: blueprint.tempResistance || 0, phResistance: blueprint.phResistance || 0 };
+            creatures.set(id, creature);
+            grid[y][x] = id;
+        }
+        return { grid, creatures, abioticFactors: { ...biomeConfig.initialFactors }, healthMetrics: calculateHealthMetrics(creatures, SIMULATION_PARAMS.INITIAL_DEAD_MATTER), deadMatter: SIMULATION_PARAMS.INITIAL_DEAD_MATTER, activeEvent: null, visualEffects: [], biome: biomeConfig.name };
+    }
+
+    function runStep(prevState, tick, biomeConfig) {
+        let { grid, creatures, abioticFactors, deadMatter, activeEvent, visualEffects } = prevState;
+        const newLogs = [];
+        let newVisualEffects = [];
+        creatures = new Map(creatures);
+        grid = grid.map(row => [...row]);
+        abioticFactors = { ...abioticFactors };
+        visualEffects = visualEffects.map(effect => ({ ...effect, duration: effect.duration - 1 })).filter(effect => effect.duration > 0);
+
+        if (activeEvent) {
+            activeEvent.duration--;
+            if (activeEvent.duration <= 0) {
+                const eventConfig = biomeConfig.events[activeEvent.name];
+                if (eventConfig.onEnd) abioticFactors = eventConfig.onEnd(abioticFactors, activeEvent.originalFactors);
+                activeEvent = null;
+            }
+        } else if (tick > 50 && Math.random() < SIMULATION_PARAMS.EVENT_PROBABILITY) {
+            const eventKeys = Object.keys(biomeConfig.events);
+            if (eventKeys.length > 0) {
+                const eventName = eventKeys[Math.floor(Math.random() * eventKeys.length)];
+                const eventConfig = biomeConfig.events[eventName];
+                const { newAbioticFactors } = eventConfig.onStart({ abioticFactors });
+                const duration = Math.floor(Math.random() * (eventConfig.maxDuration - eventConfig.minDuration + 1)) + eventConfig.minDuration;
+                activeEvent = { name: eventName, duration, maxDuration: duration, originalFactors: { ...abioticFactors } };
+                abioticFactors = newAbioticFactors;
+            }
+        }
+
+        const newCreatures = [];
+        for (const creature of Array.from(creatures.values())) {
+            if (!creatures.has(creature.id)) continue;
+            if (tick % 8 === 0) creature.animationFrame = (creature.animationFrame + 1) % creature.ascii.length;
+            creature.isStarving = creature.energy < SIMULATION_PARAMS.STARVATION_ENERGY_THRESHOLD;
+            if (creature.isStarving) creature.vitality -= 0.02;
+
+            const tempStress = Math.max(0, Math.abs(abioticFactors.temperature - 20) - 10) * (1 - creature.tempResistance);
+            creature.vitality *= (1 - (tempStress / 100));
+            creature.vitality = Math.max(0, Math.min(1, creature.vitality));
+            creature.energy -= SIMULATION_PARAMS.METABOLIC_COST_BASE * (2 - creature.vitality);
+            
+            let moveBias = { dx: 0, dy: 0 };
+            const neighbors = [];
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = creature.x + dx, ny = creature.y + dy;
+                    if (grid[ny]?.[nx]) {
+                        const neighbor = creatures.get(grid[ny][nx]);
+                        if (neighbor) neighbors.push(neighbor);
+                    }
+                }
+            }
+
+            switch (creature.type) {
+                case CreatureType.Producer: creature.energy += SIMULATION_PARAMS.PRODUCER_ENERGY_GAIN * creature.vitality; break;
+                case CreatureType.Decomposer:
+                    const consumed = Math.min(deadMatter, SIMULATION_PARAMS.DECOMPOSER_ENERGY_GAIN);
+                    creature.energy += consumed;
+                    deadMatter -= consumed;
+                    break;
+                default:
+                    const preyTypes = biomeConfig.preyMap[creature.type];
+                    for (const neighbor of neighbors) {
+                        if (preyTypes.includes(neighbor.type) && Math.random() < 0.5) {
+                            const energyTransfer = neighbor.energy * SIMULATION_PARAMS.ENERGY_TRANSFER_EFFICIENCY;
+                            creature.energy += energyTransfer;
+                            newVisualEffects.push({ id: `vfx_${neighbor.id}_${tick}`, type: 'ENERGY_TRANSFER', x: neighbor.x, y: neighbor.y, duration: 5 });
+                            const prey = creatures.get(neighbor.id);
+                            if (prey) prey.energy -= energyTransfer;
+                            break;
+                        }
+                    }
+                    break;
+            }
+            creature.energy = Math.max(0, creature.energy);
+
+            let bestMove = { x: creature.x, y: creature.y, score: -Infinity };
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const newX = (creature.x + dx + SIMULATION_PARAMS.GRID_WIDTH) % SIMULATION_PARAMS.GRID_WIDTH;
+                    const newY = (creature.y + dy + SIMULATION_PARAMS.GRID_HEIGHT) % SIMULATION_PARAMS.GRID_HEIGHT;
+                    let score = Math.random();
+                    if (grid[newY]?.[newX]) score -= 100;
+                    if (score > bestMove.score) bestMove = { x: newX, y: newY, score };
+                }
+            }
+            if (bestMove.score > -50) {
+                const { x: newX, y: newY } = bestMove;
+                if (!grid[newY][newX]) {
+                    grid[creature.y][creature.x] = null;
+                    creature.x = newX; creature.y = newY;
+                    grid[newY][newX] = creature.id;
+                }
+            }
+            
+            if (creature.energy > 100 * SIMULATION_PARAMS.REPRODUCTION_ENERGY_THRESHOLD_MULTIPLIER && Math.random() < 0.05) {
+                creature.energy /= 2;
+                newCreatures.push({ ...biomeConfig.creatureBlueprints[creature.species], id: `c_${creatures.size + newCreatures.length}_${Date.now()}`, x: creature.x, y: creature.y, energy: creature.energy, vitality: Math.min(1, creature.vitality * SIMULATION_PARAMS.REPRODUCTION_VITALITY_BOOST), animationFrame: 0, isStarving: false });
+            }
+        }
+
+        newCreatures.forEach(child => {
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    const nx = (child.x + dx + SIMULATION_PARAMS.GRID_WIDTH) % SIMULATION_PARAMS.GRID_WIDTH;
+                    const ny = (child.y + dy + SIMULATION_PARAMS.GRID_HEIGHT) % SIMULATION_PARAMS.GRID_HEIGHT;
+                    if (!grid[ny]?.[nx]) {
+                        child.x = nx; child.y = ny;
+                        creatures.set(child.id, child);
+                        grid[ny][nx] = child.id;
+                        return;
+                    }
+                }
+            }
+        });
+        
+        for (const creature of creatures.values()) {
+            if (creature.energy <= 0 || creature.vitality <= 0.01) {
+                deadMatter += 50;
+                newLogs.push({ message: `[DEATH] ${creature.species} (${creature.ascii[0]}) perished.`, type: 'DEATH' });
+                newVisualEffects.push({ id: `vfx_death_${creature.id}`, type: 'DEATH_EFFECT', x: creature.x, y: creature.y, duration: 20, char: creature.ascii[0], color: creature.color });
+                creatures.delete(creature.id);
+                if (grid[creature.y]?.[creature.x] === creature.id) grid[creature.y][creature.x] = null;
+            }
+        }
+        
+        const finalVisualEffects = [...visualEffects, ...newVisualEffects];
+        const newState = { ...prevState, grid, creatures, deadMatter, abioticFactors, activeEvent, visualEffects: finalVisualEffects, healthMetrics: calculateHealthMetrics(creatures, deadMatter) };
+        return { newState, newLogs };
+    }
+    
+    // --- RENDER FUNCTIONS ---
+    function renderBiomeSelector() {
+        const biomeConfig = BIOMES[state.currentBiome];
+        const biomeStyles = { [Biome.TemperateMossland]: { icon: 'ψ', color: 'text-green-400' }, [Biome.VoidForest]: { icon: '🌳', color: 'text-purple-400' }, [Biome.LuminalDepths]: { icon: '≈', color: 'text-cyan-400' }, [Biome.CrystallineLattice]: { icon: '▲', color: 'text-gray-200' }};
+        let html = `<h3 class="text-sm font-bold opacity-80 mb-2">// BIOME NAVIGATOR //</h3><div class="flex justify-center items-center" style="gap: 1rem;">`;
+        Object.values(Biome).forEach(biome => {
+            const isActive = biome === state.currentBiome;
+            const style = biomeStyles[biome];
+            html += `<button data-biome="${biome}" class="biome-btn px-4 py-2 border ${isActive ? 'bg-green-700 border-green-400' : 'bg-black-50 border-green-800 hover:bg-green-900-50'}" title="${biome}">
+                <span class="text-xl ${style.color}">${style.icon}</span>
+                <span class="${isActive ? 'font-bold' : 'opacity-70'}">${biome}</span>
+            </button>`;
+        });
+        html += `</div>`;
+        DOMElements.biomeSelector.innerHTML = html;
+    }
+
+    function renderEventAnnouncer() {
+        const event = state.simulation.activeEvent;
+        const biomeConfig = BIOMES[state.currentBiome];
+        const eventConfig = event ? biomeConfig.events[event.name] : null;
+        const progress = event ? (event.duration / event.maxDuration) * 100 : 0;
+        
+        DOMElements.eventAnnouncer.className = `relative flex flex-col justify-center text-center p-3 my-4 border-2 transition-all duration-500 h-44 flex-shrink-0 ${event ? 'border-yellow-400 bg-yellow-900-30' : 'border-green-800-50'}`;
+
+        let html = `<div class="transition-opacity duration-500 ${event ? 'opacity-100' : 'opacity-0'}" style="${event ? '' : 'visibility: hidden;'}">
+            <h3 class="text-lg font-bold text-yellow-300">// WARNING: ${event ? event.name.toUpperCase() : ''} IN PROGRESS //</h3>
+            <p class="text-sm mt-1">${eventConfig ? eventConfig.description : ''}</p>
+            <div class="w-full h-2 mt-2 border border-yellow-700" style="background-color: rgba(60, 43, 6, 0.5);"><div style="width: ${progress}%; height: 100%; background-color: var(--color-yellow-main);"></div></div>
+            <p class="text-xs mt-1">DURATION: ${event ? event.duration : 'N/A'} cycles</p>
+        </div>
+        <div class="absolute inset-0 flex items-center justify-center transition-opacity duration-500 ${!event ? 'opacity-100' : 'opacity-0'}" style="${!event ? '' : 'visibility: hidden;'}">
+            <p style="color: rgba(22, 101, 52, 0.5);">// EVENT SYSTEM STANDBY //</p>
+        </div>`;
+        DOMElements.eventAnnouncer.innerHTML = html;
+    }
+
+    function renderCodex() {
+        const biomeConfig = BIOMES[state.currentBiome];
+        const census = {};
+        for (const creature of state.simulation.creatures.values()) {
+            if (!census[creature.species]) census[creature.species] = { count: 0 };
+            census[creature.species].count++;
+        }
+        const speciesCensus = Object.entries(census).map(([species, data]) => ({ species, count: data.count })).sort((a,b) => b.count - a.count);
+        const totalPopulation = speciesCensus.reduce((sum, s) => sum + s.count, 0);
+
+        let html = `<h3 class="text-xl font-bold mb-2 text-center border-b-2 border-green-700 pb-2">Ecosystem Codex</h3>
+        <p class="text-center mb-4"><strong>Biome:</strong> <span class="text-lime-300 font-bold">${biomeConfig.name}</span></p>
+        <div class="space-y-2">`;
+
+        speciesCensus.forEach(s => {
+            const blueprint = biomeConfig.creatureBlueprints[s.species];
+            const popPercent = totalPopulation > 0 ? (s.count / totalPopulation) * 100 : 0;
+            html += `<button class="w-full text-left p-2" style="background: rgba(0,0,0,0.4);">
+                <div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;">
+                    <span class="${blueprint.color} text-xl w-6 text-center">${blueprint.ascii[0]}</span>
+                    <div>
+                        <span class="font-semibold">${s.species}</span>
+                        <div class="w-full h-1.5 mt-1 rounded-full overflow-hidden" style="background-color: rgba(5, 46, 22, 0.5);">
+                            <div class="bg-lime-400 h-full" style="width: ${popPercent}%;"></div>
+                        </div>
+                    </div>
+                    <span class="font-bold text-lg">x${s.count}</span>
+                </div>
+            </button>`;
+        });
+
+        html += `</div>`;
+        DOMElements.codex.innerHTML = html;
+    }
+    
+    function renderViewport() {
+        const { grid, creatures, visualEffects } = state.simulation;
+        let gridHtml = '';
+        for (let y = 0; y < grid.length; y++) {
+            gridHtml += `<div class="flex">`;
+            for (let x = 0; x < grid[y].length; x++) {
+                const cell = grid[y][x];
+                const creature = cell ? creatures.get(cell) : null;
+                if (creature) {
+                    const char = creature.ascii[creature.animationFrame % creature.ascii.length];
+                    const anim = creature.type === CreatureType.Producer ? 'pulse 2s ease-in-out infinite' : 'breathe 3s ease-in-out infinite';
+                    const starvationClass = creature.isStarving ? 'starvation' : '';
+                    const aggressiveClass = creature.isAggressive ? 'aggressive' : '';
+                    gridHtml += `<span class="${creature.color} ${starvationClass} ${aggressiveClass}" style="animation: ${anim}; transform: scale(${creature.size * 0.8});">${char}</span>`;
+                } else {
+                    gridHtml += `<span> </span>`;
+                }
+            }
+            gridHtml += `</div>`;
+        }
+        DOMElements.viewportGrid.innerHTML = gridHtml;
+        
+        // Visual effects
+        let vfxHtml = '';
+        visualEffects.forEach(effect => {
+            const left = `calc(${(effect.x / grid[0].length) * 100}% + 4px)`;
+            const top = `calc(${(effect.y / grid.length) * 100}% + 6px)`;
+            if (effect.type === 'ENERGY_TRANSFER') {
+                vfxHtml += `<div style="position: absolute; left: ${left}; top: ${top}; width: 4px; height: 4px; background-color: var(--color-lime-main); border-radius: 9999px; animation: energy-spark 0.3s ease-out forwards;"></div>`;
+            } else if (effect.type === 'DEATH_EFFECT') {
+                vfxHtml += `<span class="${effect.color}" style="position: absolute; left: ${left}; top: ${top}; animation: fade-out-up 1s ease-out forwards; font-size: 12px;">${effect.char}</span>`;
+            }
+        });
+        DOMElements.visualEffectsOverlay.innerHTML = vfxHtml;
+    }
+    
+    function renderAestheticOverlay() {
+        let html = '';
+        const biome = state.currentBiome;
+        if (biome === Biome.TemperateMossland) {
+            let style = '';
+            for(let i=0; i<20; i++) {
+                html += `<div class="spore-${i}" style="position: absolute; border-radius: 9999px; background-color: rgba(163, 230, 53, 0.2); left: ${Math.random()*100}%; top: ${Math.random()*100}%; width: ${2+Math.random()*2}px; height: ${2+Math.random()*2}px;"></div>`;
+                style += `@keyframes drift-${i} { 0% { transform: translate(0,0); } 100% { transform: translate(${Math.random()*100-50}px, ${Math.random()*100-50}px); opacity: ${0.1+Math.random()*0.3}; } } .spore-${i} { animation: drift-${i} 20s linear ${Math.random()*20}s infinite alternate; }`;
+            }
+            html += `<style>${style}</style>`;
+        } else if (biome === Biome.VoidForest) {
+            for(let i=0; i<40; i++) {
+                html += `<div style="position: absolute; border-radius: 9999px; background-color: rgba(196, 181, 253, 0.5); left: ${Math.random()*100}%; top: ${Math.random()*100}%; width: 2px; height: 2px; animation: glimmer ${2 + Math.random() * 4}s ease-in-out ${Math.random() * 6}s infinite;"></div>`;
+            }
+        } else if (biome === Biome.LuminalDepths) {
+             let style = '';
+             for(let i=0; i<30; i++) {
+                html += `<div class="bubble-${i}" style="position: absolute; border-radius: 9999px; border: 1px solid rgba(103, 232, 249, 0.3); left: ${Math.random() * 100}%; bottom: -10%; width: ${2 + Math.random() * 4}px; height: ${2 + Math.random() * 4}px;"></div>`;
+                style += `@keyframes rise-${i} { to { transform: translateY(-110vh) translateX(${Math.random() * 20 - 10}px); } } .bubble-${i} { animation: rise-${i} ${5 + Math.random() * 10}s linear ${Math.random() * 15}s infinite; }`;
+             }
+             html += `<style>${style}</style>`;
+        } else if (biome === Biome.CrystallineLattice) {
+            html += `<div style="width: 100%; height: 100%; background-image: linear-gradient(rgba(200, 220, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(200, 220, 255, 0.05) 1px, transparent 1px); background-size: 20px 20px; animation: lattice-pulse 10s ease-in-out infinite;"></div>`;
+        }
+        DOMElements.biomeAestheticOverlay.innerHTML = html;
+    }
+    
+    function renderControlPanel() {
+        const factors = state.simulation.abioticFactors;
+        let html = `<h3 class="text-lg font-bold mb-2">Abiotic Controls</h3><div class="space-y-3 text-sm">`;
+        Object.keys(factors).forEach(key => {
+            html += `<div>
+                <label for="${key}" class="capitalize">${key.replace(/([A-Z])/g, ' $1')}: ${factors[key].toFixed(key === 'soilPH' ? 1 : 0)}</label>
+                <input id="${key}" type="range" min="0" max="100" step="1" value="${factors[key]}" data-factor="${key}" class="control-slider w-full h-1 bg-green-900 appearance-none cursor-pointer">
+            </div>`;
+        });
+        html += `</div><div class="flex" style="gap: 0.5rem; margin-top: 1rem;">
+            <button id="run-pause-btn" class="flex-1 p-2" style="background: var(--color-green-darker);">${state.isRunning ? 'PAUSE' : 'RUN'}</button>
+            <button id="reset-btn" class="flex-1 p-2" style="background: #991b1b;">RESET</button>
+        </div>`;
+        DOMElements.controlPanel.innerHTML = html;
+    }
+
+    function renderStatusDisplay() {
+        const metrics = state.simulation.healthMetrics;
+        let html = `<h3 class="text-lg font-bold mb-2">Ecosystem Health</h3><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem;" class="text-sm">
+            <span>Population:</span><span style="text-align: right;">${metrics.population}</span>
+            <span>Species Richness:</span><span style="text-align: right;">${metrics.speciesRichness}</span>
+            <span>Avg. Vitality:</span><span style="text-align: right;">${(metrics.averageVitality * 100).toFixed(1)}%</span>
+            <span>Total Energy:</span><span style="text-align: right;">${Math.floor(metrics.totalEnergy)}</span>
+        </div>`;
+        DOMElements.statusDisplay.innerHTML = html;
+    }
+
+    function renderTerminal() {
+        const logHtml = state.log.map(entry => {
+            let color = 'text-green-400';
+            if(entry.type === 'COMMAND') color = 'text-gray-400';
+            if(entry.type === 'RESPONSE') color = 'text-cyan-400';
+            if(entry.type === 'EVENT') color = 'text-yellow-400';
+            if(entry.type === 'ERROR') color = 'text-red-500';
+            if(entry.type === 'DEATH') color = 'text-red-700';
+            return `<p class="${color} whitespace-pre-wrap">${entry.message}</p>`;
+        }).join('');
+        DOMElements.terminalLog.innerHTML = logHtml;
+        DOMElements.terminalLog.scrollTop = DOMElements.terminalLog.scrollHeight;
+    }
+
+    function renderApp() {
+        renderBiomeSelector();
+        renderEventAnnouncer();
+        renderCodex();
+        renderViewport();
+        renderAestheticOverlay();
+        renderControlPanel();
+        renderStatusDisplay();
+        renderTerminal();
+    }
+    
+    // --- EVENT HANDLERS & LOGIC ---
+    function addLog(message, type) {
+        state.log.push({ message, type });
+        if (state.log.length > 200) state.log.shift();
+    }
+
+    function handleBiomeChange(biome) {
+        stopSimulation();
+        state.currentBiome = biome;
+        tick = 0;
+        state.simulation = initSimulation(SIMULATION_PARAMS.GRID_WIDTH, SIMULATION_PARAMS.GRID_HEIGHT, BIOMES[biome]);
+        addLog(`System reset. Entering biome: ${biome}.`, 'SYSTEM');
+        renderApp();
+        setTimeout(startSimulation, 500);
+    }
+    
+    function handleCommand(commandString) {
+      addLog(`> ${commandString}`, 'COMMAND');
+      const args = commandString.trim().split(/\s+/);
+      const command = args.shift()?.toLowerCase();
+      if(command === 'help') {
+          addLog('Commands: help, set <factor> <value>, reset, clear', 'RESPONSE');
+      } else if (command === 'clear') {
+          state.log = [{ message: 'COVERT ANALYSIS FRAMEWORK v2.3 TERMINAL', type: 'SYSTEM' }];
+          renderTerminal();
+      } else {
+          addLog(`Unknown command: "${command}"`, 'ERROR');
+      }
+    }
+    
+    // --- MAIN LOOP ---
+    function mainLoop() {
+        const { newState, newLogs } = runStep(state.simulation, tick, BIOMES[state.currentBiome]);
+        state.simulation = newState;
+        if(newLogs.length > 0) {
+            newLogs.forEach(log => addLog(log.message, log.type));
+            renderTerminal();
+        }
+        tick++;
+        // We don't render everything every tick for performance, only what might change frequently.
+        renderViewport();
+        renderEventAnnouncer();
+        renderStatusDisplay();
+    }
+
+    function startSimulation() {
+        if (!state.isRunning) {
+            state.isRunning = true;
+            simulationInterval = setInterval(mainLoop, SIMULATION_PARAMS.TICK_RATE_MS);
+            document.getElementById('run-pause-btn').textContent = 'PAUSE';
+        }
+    }
+    
+    function stopSimulation() {
+        state.isRunning = false;
+        clearInterval(simulationInterval);
+        simulationInterval = null;
+        const btn = document.getElementById('run-pause-btn');
+        if (btn) btn.textContent = 'RUN';
+    }
+
+    // --- INITIALIZATION ---
+    function setupEventListeners() {
+        DOMElements.biomeSelector.addEventListener('click', (e) => {
+            const button = e.target.closest('.biome-btn');
+            if (button && button.dataset.biome) {
+                handleBiomeChange(button.dataset.biome);
+            }
+        });
+        
+        DOMElements.controlPanel.addEventListener('click', (e) => {
+            if (e.target.id === 'run-pause-btn') {
+                state.isRunning ? stopSimulation() : startSimulation();
+            } else if (e.target.id === 'reset-btn') {
+                handleBiomeChange(state.currentBiome);
+            }
+        });
+
+        DOMElements.controlPanel.addEventListener('input', (e) => {
+            if (e.target.classList.contains('control-slider')) {
+                const factor = e.target.dataset.factor;
+                const value = parseFloat(e.target.value);
+                state.simulation.abioticFactors[factor] = value;
+                renderControlPanel(); // Re-render to update the label
+            }
+        });
+
+        DOMElements.terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim() !== '') {
+                handleCommand(e.target.value);
+                e.target.value = '';
+                renderTerminal();
+            }
+        });
+    }
+
+    function initialize() {
+        state.simulation = initSimulation(SIMULATION_PARAMS.GRID_WIDTH, SIMULATION_PARAMS.GRID_HEIGHT, BIOMES[state.currentBiome]);
+        renderApp();
+        setupEventListeners();
+        startSimulation();
+    }
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', initialize);
+
+})();
+</script>
+
+  <div id="taskbar"></div>
+<script>
+  (async () => {
+    const res = await fetch('/admin/navbars/terminal-nav.html', {cache: 'no-store'});
+    document.getElementById('taskbar').innerHTML = await res.text();
+  })();
+</script>
+</body>
+</html>

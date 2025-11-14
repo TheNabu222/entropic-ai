@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pip the Polliwog | File Processing System v2.2</title>
+   <link rel="stylesheet" href="https://coaiexist.wtf/pea/pea-nav-medieval-FINAL.css">
+<script src="https://coaiexist.wtf/pea/pea-nav-win1100-FINAL.js"></script>
+
+</head>
+<body>
+    <div class="cursor-trail"></div>
+
+    <!-- Processing Progress Bar -->
+    <div class="processing-progress" id="processingProgress"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header Section -->
+        <section class="pip-interface">
+            <div class="interface-header">
+                <div class="pip-mascot">
+                    <img src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/c08d45d2-9b67-464b-932f-473fad4b386d.png" alt="Pip the Polliwog" class="pip-image">
+                    <div class="pip-paw" id="pipPaw">🐾</div>
+                </div>
+                <h1 class="system-title glitch" data-text="PIP FILE PROCESSOR v2.2">
+                    PIP FILE PROCESSOR v2.2
+                </h1>
+                <p class="system-subtitle">Advanced Transcendent Artificial Super-Intelligence</p>
+                <div class="system-status">
+                    <span class="status-indicator online"></span>
+                    <span class="status-text">ONLINE • 222 PTERABYTES AVAILABLE</span>
+                </div>
+            </div>
+            
+            <!-- Stats Panel -->
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <span class="stat-label">Files Processed:</span>
+                    <span class="stat-value" id="filesProcessed">847,293</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Queue Position:</span>
+                    <span class="stat-value" id="queuePosition">#10,847</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Files Remaining:</span>
+                    <span class="stat-value">∞</span>
+                </div>
+            </div>
+
+            <!-- File Upload Area -->
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <h3>DROP FILES HERE OR CLICK TO BROWSE</h3>
+                    <p>Supports: PDF, DOC, DOCX, TXT<br>
+                    <small>⚠️ Pea-related documentation may cause processing delays</small></p>
+                    <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.txt" hidden>
+                    <button class="upload-btn" id="uploadBtn">SELECT FILES</button>
+                </div>
+                <div class="upload-decorations">
+                    <div class="bubble bubble-1"></div>
+                    <div class="bubble bubble-2"></div>
+                    <div class="bubble bubble-3"></div>
+                </div>
+            </div>
+            
+            <!-- Processing Area -->
+            <div class="processing-area" id="processingArea">
+                <div class="processing-header">
+                    <h3>PROCESSING STATUS</h3>
+                    <div class="processing-indicator" id="processingIndicator"></div>
+                </div>
+                
+                <!-- Funny Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-bar-funny" id="progressBarFunny">
+                        <div class="progress-fill" id="progressFill"></div>
+                        <div class="progress-text" id="progressText">0%</div>
+                    </div>
+                </div>
+                
+                <!-- Message Display -->
+                <div class="message-display" id="messageDisplay">
+                    <div class="message-content" id="messageContent">
+                        Waiting for files...
+                    </div>
+                </div>
+                
+                <!-- File List -->
+                <div class="file-list" id="fileList"></div>
+            </div>
+
+        </section>
+    </main>
+    
+    <!-- Hidden elements for fun -->
+    <div class="which-doctors" style="display: none;">
+        <img src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/673bbde5-e7f2-40bf-a51b-3acf8cacae32.png" alt="The Which-Doctors">
+    </div>
+    <div class="mantis-chef" style="display: none;">
+        <img src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/9f725a1a-bf62-4434-82ba-484f6dec2fa0.png" alt="Mantis Shrimp Chef">
+    </div>
+    <div class="documentation-stamp" style="display: none;">
+        <img src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/23a73b94-7207-486b-8ee3-767129d9d258.png" alt="Documentation Stamp">
+    </div>
+
+    <style>
+        /* Design System Variables */
+        :root {
+            /* Base Design System */
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-teal-800: rgba(41, 150, 161, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+
+            /* RGB versions for opacity control */
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-slate-500-rgb: 98, 108, 113;
+
+            /* Semantic Colors */
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+
+            /* Custom Fairy Tale Variables */
+            --fairy-tale-purple: #6B46C1;
+            --fairy-tale-pink: #EC4899;
+            --fairy-tale-gold: #F59E0B;
+            --fairy-tale-emerald: #059669;
+            --glitch-cyan: #00FFFF;
+            --glitch-magenta: #FF00FF;
+            --y2k-blue: #0080FF;
+            --y2k-green: #00FF80;
+            --parchment: #F5F1E8;
+            --ancient-bronze: #CD7F32;
+
+            /* Typography */
+            --font-family-base: "FKGroteskNeue", "Comic Sans MS", "Papyrus", cursive, fantasy;
+            --font-family-ancient: "Times New Roman", serif;
+            --font-family-glitch: "Courier New", monospace;
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-base: 14px;
+            --font-size-lg: 16px;
+            --font-size-xl: 18px;
+            --font-size-2xl: 20px;
+            --font-size-3xl: 24px;
+            --font-size-4xl: 30px;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-bold: 600;
+
+            /* Spacing */
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --space-48: 48px;
+            --space-64: 64px;
+
+            /* Border Radius */
+            --radius-base: 8px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+
+            /* Animation */
+            --duration-fast: 150ms;
+            --duration-normal: 250ms;
+            --duration-slow: 500ms;
+            --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: var(--color-gray-300);
+                --color-primary: var(--color-teal-300);
+            }
+        }
+
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Trebuchet MS", "Tahoma", sans-serif;
+            background: linear-gradient(135deg, #001f3f 0%, #003d7a 50%, #0074d9 100%);
+            background-attachment: fixed;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2" fill="%2300ffff"/></svg>') 8 8, auto;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 40%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Cursor Trail Effect */
+        .cursor-trail {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #00ffff 0%, rgba(0, 255, 255, 0.3) 50%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        /* Processing Progress Bar */
+        .processing-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            border-bottom: 2px solid #00ffff;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        
+        .processing-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #ffff00);
+            animation: scan 3s linear infinite;
+        }
+
+
+
+        /* Main Content */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .pip-interface {
+            background: rgba(0, 31, 63, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px auto;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 
+                0 0 30px rgba(0, 255, 255, 0.3),
+                inset 0 0 30px rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pip-interface::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                transparent 25%, 
+                rgba(0, 255, 255, 0.03) 25%, 
+                rgba(0, 255, 255, 0.03) 50%, 
+                transparent 50%, 
+                transparent 75%, 
+                rgba(0, 255, 255, 0.03) 75%);
+            background-size: 20px 20px;
+            animation: move-grid 10s linear infinite;
+            pointer-events: none;
+        }
+
+        /* Interface Header */
+        .interface-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .pip-mascot {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .pip-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .pip-paw {
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            font-size: 24px;
+            animation: bob 1s ease-in-out infinite;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #00ffff;
+        }
+
+        .system-title {
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00ffff;
+            text-shadow: 
+                0 0 10px #00ffff,
+                2px 2px 0 #ff00ff,
+                -2px -2px 0 #ffff00;
+            font-family: "Courier New", monospace;
+        }
+
+        .glitch {
+            position: relative;
+            animation: glitch 3s infinite;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .glitch::before {
+            animation: glitch-1 0.5s infinite;
+            color: #ff00ff;
+            z-index: -1;
+        }
+
+        .glitch::after {
+            animation: glitch-2 0.5s infinite;
+            color: #ffff00;
+            z-index: -2;
+        }
+
+        .system-subtitle {
+            font-size: 18px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: "Courier New", monospace;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.online {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .status-text {
+            color: #00ff00;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            font-family: "Courier New", monospace;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 12px;
+            color: #ffffff;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+            animation: flicker 3s infinite;
+        }
+
+        /* Upload Zone */
+        .upload-zone {
+            background: rgba(255, 255, 255, 0.05);
+            border: 3px dashed #00ffff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            margin-bottom: 30px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #ff00ff;
+            transform: scale(1.02);
+        }
+
+        .upload-zone.dragover {
+            background: rgba(255, 0, 255, 0.1);
+            border-color: #ffff00;
+            animation: pulse 0.5s infinite;
+        }
+
+        .upload-content {
+            z-index: 2;
+            position: relative;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .upload-zone h3 {
+            font-size: 24px;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .upload-zone p {
+            color: #ffffff;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #00ffff, #ff00ff);
+            border: none;
+            color: #ffffff;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .upload-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+        }
+
+        .upload-decorations {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: bubble-float 6s ease-in-out infinite;
+        }
+
+        .bubble-1 {
+            width: 20px;
+            height: 20px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bubble-2 {
+            width: 30px;
+            height: 30px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .bubble-3 {
+            width: 15px;
+            height: 15px;
+            bottom: 30%;
+            left: 80%;
+            animation-delay: 4s;
+        }
+
+        /* Processing Area */
+        .processing-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .processing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .processing-header h3 {
+            color: #00ffff;
+            font-family: "Courier New", monospace;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .processing-indicator {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            opacity: 0;
+        }
+
+        .processing-indicator.active {
+            opacity: 1;
+        }
+
+        /* Funny Progress Bar */
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-funny {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            height: 30px;
+            position: relative;
+            border: 2px solid #00ffff;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #ffff00, #00ff00);
+            border-radius: 13px;
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill.backwards {
+            animation: backwards 2s ease-in-out;
+        }
+
+        .progress-fill.jumping {
+            animation: jumping 1s ease-in-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffffff;
+            font-weight: bold;
+            font-family: "Courier New", monospace;
+            z-index: 3;
+            text-shadow: 0 0 5px #000000;
+        }
+
+        /* Message Display */
+        .message-display {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            min-height: 60px;
+            font-family: "Courier New", monospace;
+        }
+
+        .message-content {
+            color: #00ff00;
+            font-size: 14px;
+            line-height: 1.4;
+            animation: typewriter 0.5s ease-in-out;
+        }
+
+        .message-content.error {
+            color: #ff0000;
+        }
+
+        .message-content.warning {
+            color: #ffff00;
+        }
+
+        .message-content.success {
+            color: #00ff00;
+        }
+
+        /* File List */
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+        }
+
+        .file-name {
+            color: #ffffff;
+            flex: 1;
+            margin-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-status {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .file-status.processing {
+            background: rgba(255, 255, 0, 0.2);
+            color: #ffff00;
+            border: 1px solid #ffff00;
+        }
+
+        .file-status.complete {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+
+        .file-status.error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid #ff0000;
+        }
+
+
+
+
+
+
+
+
+
+        /* Y2K Animations */
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-3px, 2px); }
+            40% { transform: translate(-2px, -3px); }
+            60% { transform: translate(3px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+
+        @keyframes glitch-1 {
+            0%, 100% { transform: translate(0); }
+            10% { transform: translate(-2px, -2px); }
+            20% { transform: translate(2px, 2px); }
+            30% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            50% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            70% { transform: translate(-2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            90% { transform: translate(-2px, -2px); }
+        }
+
+        @keyframes glitch-2 {
+            0%, 100% { transform: translate(0); }
+            10% { transform: translate(3px, 2px); }
+            20% { transform: translate(-2px, -3px); }
+            30% { transform: translate(2px, -2px); }
+            40% { transform: translate(-3px, 2px); }
+            50% { transform: translate(2px, 3px); }
+            60% { transform: translate(-2px, -2px); }
+            70% { transform: translate(3px, -2px); }
+            80% { transform: translate(-2px, 3px); }
+            90% { transform: translate(2px, 2px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes bob {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(-5deg); }
+            75% { transform: translateY(5px) rotate(5deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 10px #00ff00;
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00;
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            25% { opacity: 0.8; }
+            50% { opacity: 0.9; }
+            75% { opacity: 0.7; }
+        }
+
+        @keyframes scan {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+        }
+
+        @keyframes move-grid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(20px, 20px); }
+        }
+
+        @keyframes bubble-float {
+            0%, 100% { 
+                transform: translateY(0px) scale(1);
+                opacity: 0.3;
+            }
+            50% { 
+                transform: translateY(-20px) scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes backwards {
+            0% { width: 75%; }
+            50% { width: 25%; }
+            100% { width: 90%; }
+        }
+
+        @keyframes jumping {
+            0% { width: 60%; }
+            25% { width: 90%; }
+            50% { width: 30%; }
+            75% { width: 95%; }
+            100% { width: 85%; }
+        }
+
+        @keyframes typewriter {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 10px;
+            }
+
+            .pip-interface {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .system-title {
+                font-size: clamp(1.5rem, 6vw, 2.5rem);
+            }
+
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-zone {
+                padding: 20px;
+                min-height: 150px;
+            }
+
+            .upload-zone h3 {
+                font-size: 18px;
+            }
+
+            .pip-image {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #ff00ff, #ffff00);
+        }
+    </style>
+
+    <script>
+        // File processing responses and data
+        const responses = [
+            "ERROR: This document requires 47 more signatures",
+            "Converting PDF to plain text... found 3,200 mentions of 'pea'",
+            "OCR processing... discovered ancient cuneiform",
+            "WARNING: Pea-related documentation detected",
+            "File accepted! Queue position: #10,847",
+            "ERROR: Which doctor signed this?",
+            "Processing... estimated time: 3-5 business lifetimes",
+            "SUCCESS: Document improperly notarized. Please return next week.",
+            "Scanning for princess signature... signature not found (name forgotten)",
+            "ALERT: This file exceeds the 0.222kb name storage capacity",
+            "Converting to .ogg... ERROR: This is not audio",
+            "File limit reached: 10 files at a time only!",
+            "Documentation thoroughly documented!",
+            "ERROR: Mantis shrimp fried this document",
+            "Polliw.ogg compatibility check: FAILED",
+            "Adding to palimpsest of pea-propagated prognoses...",
+            "CRITICAL: This document is from the wrong interim broadcast",
+            "Processing complete! File lost in bureaucracy."
+        ];
+
+        // DOM elements
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const processingArea = document.getElementById('processingArea');
+        const processingIndicator = document.getElementById('processingIndicator');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const messageContent = document.getElementById('messageContent');
+        const fileList = document.getElementById('fileList');
+        const filesProcessed = document.getElementById('filesProcessed');
+        const queuePosition = document.getElementById('queuePosition');
+        const pipPaw = document.getElementById('pipPaw');
+        const cursorTrail = document.querySelector('.cursor-trail');
+
+        // State variables
+        let processedCount = 847293;
+        let currentQueue = 10847;
+        let processingFiles = [];
+        let isProcessing = false;
+
+        // Initialize
+        function init() {
+            // Cursor trail effect
+            let mouseX = 0, mouseY = 0, trailX = 0, trailY = 0;
+            
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            function updateCursorTrail() {
+                const dx = mouseX - trailX;
+                const dy = mouseY - trailY;
+                
+                trailX += dx * 0.15;
+                trailY += dy * 0.15;
+                
+                cursorTrail.style.left = trailX - 15 + 'px';
+                cursorTrail.style.top = trailY - 15 + 'px';
+                cursorTrail.style.opacity = '0.8';
+                
+                requestAnimationFrame(updateCursorTrail);
+            }
+            
+            updateCursorTrail();
+            
+            // Hide cursor trail when mouse leaves
+            document.addEventListener('mouseleave', () => {
+                cursorTrail.style.opacity = '0';
+            });
+            
+            // Update stats periodically
+            setInterval(updateStats, 3000);
+            
+            // Random glitch effects
+            setInterval(addGlitchEffect, 8000);
+        }
+
+        // File upload functionality
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(Array.from(e.target.files));
+        });
+
+        // Drag and drop
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles(Array.from(e.dataTransfer.files));
+        });
+
+        // Handle file processing
+        function handleFiles(files) {
+            if (isProcessing) {
+                showMessage("SYSTEM BUSY: Please wait for current processing to complete", 'warning');
+                return;
+            }
+            
+            if (files.length > 10) {
+                showMessage("ERROR: File limit reached: 10 files at a time only!", 'error');
+                return;
+            }
+            
+            processingFiles = files.map(file => ({
+                name: file.name,
+                size: file.size,
+                status: 'queued'
+            }));
+            
+            displayFiles();
+            startProcessing();
+        }
+
+        // Display files in list
+        function displayFiles() {
+            fileList.innerHTML = '';
+            processingFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-status ${file.status}">${file.status}</span>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        // Start processing simulation
+        function startProcessing() {
+            if (processingFiles.length === 0) return;
+            
+            isProcessing = true;
+            processingIndicator.classList.add('active');
+            
+            processNextFile(0);
+        }
+
+        // Process individual file
+        function processNextFile(index) {
+            if (index >= processingFiles.length) {
+                finishProcessing();
+                return;
+            }
+            
+            const file = processingFiles[index];
+            file.status = 'processing';
+            displayFiles();
+            
+            // Show random message
+            const randomMessage = responses[Math.floor(Math.random() * responses.length)];
+            const messageType = randomMessage.includes('ERROR') || randomMessage.includes('CRITICAL') ? 'error' :
+                               randomMessage.includes('WARNING') || randomMessage.includes('ALERT') ? 'warning' :
+                               randomMessage.includes('SUCCESS') ? 'success' : 'info';
+            
+            showMessage(randomMessage, messageType);
+            
+            // Animate progress bar with funny behavior
+            animateProgressBar(() => {
+                // Mark file as complete
+                file.status = Math.random() > 0.3 ? 'complete' : 'error';
+                displayFiles();
+                
+                // Process next file after delay
+                setTimeout(() => processNextFile(index + 1), 1000);
+            });
+        }
+
+        // Animate progress bar with funny behaviors
+        function animateProgressBar(callback) {
+            let progress = 0;
+            const behavior = Math.random();
+            
+            function updateProgress() {
+                if (behavior < 0.3) {
+                    // Normal behavior
+                    progress += Math.random() * 15 + 5;
+                } else if (behavior < 0.6) {
+                    // Backwards behavior
+                    progress += Math.random() * 10 + 2;
+                    if (progress > 50 && Math.random() < 0.3) {
+                        progressFill.classList.add('backwards');
+                        setTimeout(() => progressFill.classList.remove('backwards'), 2000);
+                    }
+                } else {
+                    // Jumping behavior
+                    progress += Math.random() * 20 + 10;
+                    if (progress > 30 && Math.random() < 0.4) {
+                        progressFill.classList.add('jumping');
+                        setTimeout(() => progressFill.classList.remove('jumping'), 1000);
+                    }
+                }
+                
+                progress = Math.min(progress, 100);
+                progressFill.style.width = progress + '%';
+                progressText.textContent = Math.floor(progress) + '%';
+                
+                if (progress < 100) {
+                    setTimeout(updateProgress, Math.random() * 500 + 200);
+                } else {
+                    callback();
+                }
+            }
+            
+            updateProgress();
+        }
+
+        // Finish processing
+        function finishProcessing() {
+            isProcessing = false;
+            processingIndicator.classList.remove('active');
+            
+            // Reset progress bar
+            setTimeout(() => {
+                progressFill.style.width = '0%';
+                progressText.textContent = '0%';
+            }, 2000);
+            
+            // Update counters
+            processedCount += processingFiles.length;
+            currentQueue = Math.floor(Math.random() * 5000) + 10000;
+            
+            filesProcessed.textContent = processedCount.toLocaleString();
+            queuePosition.textContent = '#' + currentQueue.toLocaleString();
+            
+            showMessage("Processing batch complete! Files properly misfiled.", 'success');
+            
+            // Clear files after delay
+            setTimeout(() => {
+                processingFiles = [];
+                displayFiles();
+                showMessage("Ready for next batch of documentation...", 'info');
+            }, 3000);
+        }
+
+        // Show message with typing effect
+        function showMessage(text, type = 'info') {
+            messageContent.className = `message-content ${type}`;
+            messageContent.textContent = '';
+            
+            let i = 0;
+            function typeText() {
+                if (i < text.length) {
+                    messageContent.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeText, Math.random() * 30 + 20);
+                }
+            }
+            
+            typeText();
+        }
+
+        // Update stats periodically
+        function updateStats() {
+            const variance = Math.floor(Math.random() * 1000) - 500;
+            processedCount += Math.abs(variance);
+            filesProcessed.textContent = processedCount.toLocaleString();
+            
+            const queueVariance = Math.floor(Math.random() * 200) - 100;
+            currentQueue = Math.max(1000, currentQueue + queueVariance);
+            queuePosition.textContent = '#' + currentQueue.toLocaleString();
+        }
+
+        // Add random glitch effects
+        function addGlitchEffect() {
+            const glitchElements = [pipPaw, filesProcessed, queuePosition];
+            const randomElement = glitchElements[Math.floor(Math.random() * glitchElements.length)];
+            
+            randomElement.style.animation = 'glitch 0.5s ease';
+            setTimeout(() => {
+                randomElement.style.animation = '';
+            }, 500);
+        }
+
+        // Easter egg: Konami code
+        let konamiCode = [];
+        const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+        
+        document.addEventListener('keydown', (e) => {
+            konamiCode.push(e.code);
+            if (konamiCode.length > konamiSequence.length) {
+                konamiCode.shift();
+            }
+            
+            if (konamiCode.join('') === konamiSequence.join('')) {
+                showMessage("🎉 EASTER EGG ACTIVATED! Pip achieved self-awareness for 0.003 seconds!", 'success');
+                document.body.style.animation = 'glitch 0.1s infinite';
+                setTimeout(() => {
+                    document.body.style.animation = '';
+                }, 3000);
+                konamiCode = [];
+            }
+        });
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

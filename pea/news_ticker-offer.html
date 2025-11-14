@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Radio Podbrain Peacast | Breaking News Ticker</title>
+ <link rel="stylesheet" href="https://coaiexist.wtf/pea/pea-nav-medieval-FINAL.css">
+<script src="https://coaiexist.wtf/pea/pea-nav-win1100-FINAL.js"></script>
+
+
+</head>
+<body>
+    <div class="news-app">
+        <!-- Header Controls -->
+        <div class="ticker-controls">
+            <div class="network-info">
+                <h1 class="network-title" id="networkTitle">RIGHT WING WOKE LIBERAL QANON ALPHADRACONIC REPTOILLUMINATI THOTTI BUGATTI BANANA FANA FO FROGGY SMOG AGENDA</h1>
+                <div class="network-subtitle">aka THE DEEPSTATE</div>
+            </div>
+            
+            <div class="control-panel">
+                <button class="control-btn" id="toggleNetwork">SWITCH TO SHALLOWCOMMONS</button>
+                <div class="speed-control">
+                    <label for="speedSlider">TICKER SPEED:</label>
+                    <input type="range" id="speedSlider" min="10" max="100" value="50" class="speed-slider">
+                    <span id="speedValue">50</span>
+                </div>
+                <button class="control-btn sound-btn" id="soundBtn">🔇 THANK OBRAMA ;D</button>
+            </div>
+        </div>
+
+        <!-- Main Ticker Container -->
+        <div class="ticker-container" id="tickerContainer">
+            <div class="ticker-label">BREAKING NEWS</div>
+            <div class="ticker-content">
+                <div class="ticker-text" id="tickerText"></div>
+            </div>
+        </div>
+
+        <!-- Background Chaos -->
+        <div class="chaos-background">
+            <div class="floating-emoji">🦐</div>
+            <div class="floating-emoji">👑</div>
+            <div class="floating-emoji">📄</div>
+            <div class="floating-emoji">🫛</div>
+            <div class="floating-emoji">💾</div>
+        </div>
+    </div>
+
+    <style>
+        /* Design System Variables */
+        :root {
+            /* Primitive Color Tokens */
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-teal-800: rgba(41, 150, 161, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+
+            /* RGB versions for opacity control */
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-slate-500-rgb: 98, 108, 113;
+            --color-red-500-rgb: 192, 21, 47;
+            --color-red-400-rgb: 255, 84, 89;
+            --color-orange-500-rgb: 168, 75, 47;
+            --color-orange-400-rgb: 230, 129, 97;
+
+            /* Semantic Color Tokens */
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-primary-active: var(--color-teal-700);
+            --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+
+            /* Typography */
+            --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-family-mono: "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-base: 14px;
+            --font-size-lg: 16px;
+            --font-size-xl: 18px;
+            --font-size-2xl: 20px;
+            --font-size-3xl: 24px;
+            --font-size-4xl: 30px;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 550;
+            --font-weight-bold: 600;
+
+            /* Spacing */
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+
+            /* Border Radius */
+            --radius-base: 8px;
+            --radius-lg: 12px;
+            --radius-full: 9999px;
+
+            /* Network-specific colors */
+            --deepstate-primary: #FF0000;
+            --deepstate-secondary: #8B0000;
+            --deepstate-bg: #1a0000;
+            --deepstate-text: #FFFF00;
+            --deepstate-accent: #FF6600;
+            
+            --shallowcommons-primary: #0066FF;
+            --shallowcommons-secondary: #003d99;
+            --shallowcommons-bg: #000033;
+            --shallowcommons-text: #00FFFF;
+            --shallowcommons-accent: #6600FF;
+            
+            /* Current network (starts as deepstate) */
+            --current-primary: var(--deepstate-primary);
+            --current-secondary: var(--deepstate-secondary);
+            --current-bg: var(--deepstate-bg);
+            --current-text: var(--deepstate-text);
+            --current-accent: var(--deepstate-accent);
+        }
+
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: var(--color-gray-300);
+                --color-primary: var(--color-teal-300);
+            }
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: var(--current-bg);
+            color: var(--current-text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: all 0.5s ease;
+        }
+
+        .news-app {
+            position: relative;
+            min-height: 100vh;
+            background: linear-gradient(45deg, var(--current-bg) 0%, var(--current-secondary) 100%);
+        }
+
+        /* Header Controls */
+        .ticker-controls {
+            padding: var(--space-20);
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 3px solid var(--current-primary);
+            position: relative;
+            z-index: 100;
+        }
+
+        .network-info {
+            text-align: center;
+            margin-bottom: var(--space-16);
+        }
+
+        .network-title {
+            font-size: clamp(1.2rem, 4vw, 2.5rem);
+            font-weight: var(--font-weight-bold);
+            color: var(--current-primary);
+            text-shadow: 0 0 10px var(--current-primary);
+            animation: pulse-glow 2s infinite alternate;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .network-subtitle {
+            font-size: var(--font-size-xl);
+            color: var(--current-text);
+            font-weight: var(--font-weight-semibold);
+            margin-top: var(--space-8);
+            opacity: 0.9;
+        }
+
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--space-24);
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: var(--current-primary);
+            color: var(--color-black);
+            border: none;
+            padding: var(--space-12) var(--space-20);
+            border-radius: var(--radius-base);
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-btn:hover {
+            background: var(--current-accent);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--current-primary);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            font-size: var(--font-size-sm);
+            color: var(--current-text);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .speed-slider {
+            width: 100px;
+            accent-color: var(--current-primary);
+        }
+
+        /* Main Ticker */
+        .ticker-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: var(--current-primary);
+            border-top: 3px solid var(--current-accent);
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .ticker-label {
+            background: var(--current-secondary);
+            color: var(--color-white);
+            padding: 0 var(--space-20);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-lg);
+            min-width: 150px;
+            justify-content: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: flash 2s infinite;
+        }
+
+        .ticker-content {
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            background: var(--current-primary);
+        }
+
+        .ticker-text {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            white-space: nowrap;
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-black);
+            padding: 0 var(--space-24);
+            animation: scroll-left 60s linear infinite;
+        }
+
+        .breaking-badge {
+            background: var(--current-accent);
+            color: var(--color-white);
+            padding: var(--space-4) var(--space-12);
+            margin: 0 var(--space-16);
+            border-radius: var(--radius-base);
+            font-weight: var(--font-weight-bold);
+            text-transform: uppercase;
+            animation: flash-breaking 1s infinite;
+            font-size: var(--font-size-sm);
+        }
+
+        .headline-separator {
+            margin: 0 var(--space-32);
+            color: var(--current-secondary);
+            font-weight: var(--font-weight-bold);
+            font-size: 1.2em;
+        }
+
+        /* Background Chaos */
+        .chaos-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .floating-emoji {
+            position: absolute;
+            font-size: 3rem;
+            opacity: 0.3;
+            animation: float-chaos 8s ease-in-out infinite;
+        }
+
+        .floating-emoji:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-emoji:nth-child(2) {
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .floating-emoji:nth-child(3) {
+            bottom: 30%;
+            left: 70%;
+            animation-delay: 4s;
+        }
+
+        .floating-emoji:nth-child(4) {
+            top: 40%;
+            left: 50%;
+            animation-delay: 6s;
+        }
+
+        .floating-emoji:nth-child(5) {
+            top: 80%;
+            right: 30%;
+            animation-delay: 1s;
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            0% {
+                text-shadow: 0 0 10px var(--current-primary);
+            }
+            100% {
+                text-shadow: 0 0 20px var(--current-primary), 0 0 30px var(--current-primary);
+            }
+        }
+
+        @keyframes scroll-left {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        @keyframes flash {
+            0%, 100% {
+                background: var(--current-secondary);
+            }
+            50% {
+                background: var(--current-accent);
+            }
+        }
+
+        @keyframes flash-breaking {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes float-chaos {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            25% {
+                transform: translateY(-20px) rotate(90deg) scale(1.2);
+            }
+            50% {
+                transform: translateY(10px) rotate(180deg) scale(0.8);
+            }
+            75% {
+                transform: translateY(-10px) rotate(270deg) scale(1.1);
+            }
+        }
+
+        /* Network switching animations */
+        .network-switching {
+            animation: glitch-switch 0.5s ease-in-out;
+        }
+
+        @keyframes glitch-switch {
+            0%, 100% {
+                filter: hue-rotate(0deg);
+            }
+            20% {
+                filter: hue-rotate(90deg) contrast(200%);
+            }
+            40% {
+                filter: hue-rotate(180deg) brightness(200%);
+            }
+            60% {
+                filter: hue-rotate(270deg) saturate(300%);
+            }
+            80% {
+                filter: hue-rotate(360deg) invert(100%);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .ticker-controls {
+                padding: var(--space-12);
+            }
+            
+            .control-panel {
+                flex-direction: column;
+                gap: var(--space-12);
+            }
+            
+            .ticker-container {
+                height: 60px;
+            }
+            
+            .ticker-label {
+                min-width: 100px;
+                font-size: var(--font-size-sm);
+            }
+            
+            .ticker-text {
+                font-size: var(--font-size-base);
+            }
+            
+            .floating-emoji {
+                font-size: 2rem;
+            }
+        }
+
+        /* Sound button variants */
+        .sound-btn.muted {
+            background: var(--current-secondary);
+            opacity: 0.7;
+        }
+    </style>
+
+    <script>
+        // News headlines data
+        const deepstateHeadlines = [
+            "🦐 BREAKING: Mantis shrimp fried rice reaches unsustainable environmental levels",
+            "👑 Princess vacation delayed due to 47 additional signature requirements", 
+            "📄 Palace announces: It's a PEA on brain, NOT pea-brain, thoroughly documented",
+            "🦐 Mantis shrimp employment initiative gains traction - Get them OUT of ocean!",
+            "⚠️ BREAKING: Which-doctor finally agrees with self, immediately disagrees again",
+            "🫛 Pea documentation enters 3,200th year of thorough recording",
+            "🦐 Shrimp fry YOU in Soviet Russia edition - more at 11",
+            "👑 Queen Regent Princess technically princess confirms technical technicalities",
+            "📱 Live-action memes hit all-time high in capital hamlet",
+            "🦐 BREAKING: Can shrimp fry rice? Yes. Should they? Debate continues",
+            "📄 Citizen #48 revealed as unauthorized resident, requires 89 signatures",
+            "💾 Pip the Polliwog processes infinity files, makes no progress",
+            "🦐 Mantis shrimp considered for international waters citizenship",
+            "👑 Royal brother too busy trading to notice he's heir apparent",
+            "BREAKING: idfk bro gtfo - voice from void confirms princess existential dread",
+            "🫛 Pea crevices and crannies thoroughly mapped, romance novelists appalled",
+            "📄 Standard boilerplate complaint rate exceeds hashtag capacity",
+            "🦐 Chef Shrimpy appointed to underwater culinary position",
+            "⚠️ BREAKING: Documentation overwhelms palace, requires documentation of documentation"
+        ];
+
+        const shallowcommonsHeadlines = [
+            "🦐 Mantis shrimp union demands better working conditions, chef hats for all",
+            "👑 Princess hermetic sabbatical interrupted by obstacles, as predicted",
+            "📄 BREAKING: 47 citizens file 892 complaints, all improperly notarized",
+            "🦐 Gordon Shrampsey rates local mantis shrimp: 'INFERIOR SHRIMP FRAMP'",
+            "🫛 Medical community still unsure which doctor discovered the pea",
+            "💾 Pip's .ogg file compatibility deemed 'suspiciously specific'",
+            "👑 Royal paperwork backlog now qualifies as palimpsest",
+            "🦐 BREAKING: Shrimp sustainability questioned - too hot, too fried",
+            "📱 Hashtag #C-10847 goes viral in capital city of 47-89 residents",
+            "⚠️ Census reveals population might be 47, or 89, definitely one of those",
+            "🦐 Crustachefs demand recognition as legitimate culinary professionals",
+            "👑 Princess age confirmed as '29 for the 5th time' or possibly 3200",
+            "📄 BREAKING: All signatures require signatures, infinite loop detected",
+            "💾 7 of 8 prototype Pips self-defenestrate, Pip #8 doing great",
+            "🫛 Pea vs brain: An ongoing saga of crevasses and documentation",
+            "🦐 Mantis shrimp liberty and justice update: All may exploit da shrimp!",
+            "👑 Royal family tree deemed 'confusing mess of technicalities'",
+            "📄 Forms now require forms to acquire forms, bureaucracy achieves singularity",
+            "⚠️ BREAKING: Nobody can remember anyone's name anymore, signatures impossible"
+        ];
+
+        // Network configurations
+        const networks = {
+            deepstate: {
+                title: "RIGHT WING WOKE LIBERAL QANON ALPHADRACONIC REPTOILLUMINATI THOTTI BUGATTI BANANA FANA FO FROGGY SMOG AGENDA",
+                subtitle: "aka THE DEEPSTATE",
+                headlines: deepstateHeadlines,
+                soundText: "🔇 THANK OBRAMA ;D",
+                soundTextMuted: "🔇 BLAME OBRAMA >:(",
+                switchText: "SWITCH TO SHALLOWCOMMONS"
+            },
+            shallowcommons: {
+                title: "THE LEFT FOOT DROWSED CONSERVATIVELY WITHHELD BETA MINOR CENOCEPHANARCHO-TRADWIFE SEDANLIFE POMEGRANATE-PO-PLANET HELIUM-DISORDER",
+                subtitle: "aka THE SHALLOWCOMMONS", 
+                headlines: shallowcommonsHeadlines,
+                soundText: "🔇 BLAME OPRAH ;3",
+                soundTextMuted: "🔇 THANK OPRAH :P",
+                switchText: "SWITCH TO DEEPSTATE"
+            }
+        };
+
+        // DOM elements
+        const networkTitle = document.getElementById('networkTitle');
+        const toggleNetworkBtn = document.getElementById('toggleNetwork');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        const soundBtn = document.getElementById('soundBtn');
+        const tickerText = document.getElementById('tickerText');
+        const tickerContainer = document.getElementById('tickerContainer');
+        const newsApp = document.querySelector('.news-app');
+
+        // State
+        let currentNetwork = 'deepstate';
+        let soundEnabled = true;
+        let tickerSpeed = 50;
+        let headlineIndex = 0;
+
+        // Initialize
+        function init() {
+            setupEventListeners();
+            generateTickerContent();
+            updateNetworkTheme();
+            startTickerAnimation();
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            toggleNetworkBtn.addEventListener('click', switchNetwork);
+            
+            speedSlider.addEventListener('input', (e) => {
+                tickerSpeed = parseInt(e.target.value);
+                speedValue.textContent = tickerSpeed;
+                updateTickerSpeed();
+            });
+            
+            soundBtn.addEventListener('click', toggleSound);
+        }
+
+        // Switch between networks
+        function switchNetwork() {
+            newsApp.classList.add('network-switching');
+            
+            currentNetwork = currentNetwork === 'deepstate' ? 'shallowcommons' : 'deepstate';
+            
+            setTimeout(() => {
+                updateNetworkContent();
+                updateNetworkTheme();
+                generateTickerContent();
+                newsApp.classList.remove('network-switching');
+            }, 250);
+        }
+
+        // Update network content
+        function updateNetworkContent() {
+            const network = networks[currentNetwork];
+            networkTitle.textContent = network.title;
+            document.querySelector('.network-subtitle').textContent = network.subtitle;
+            toggleNetworkBtn.textContent = network.switchText;
+            soundBtn.textContent = soundEnabled ? network.soundText : network.soundTextMuted;
+        }
+
+        // Update network theme colors
+        function updateNetworkTheme() {
+            const root = document.documentElement;
+            
+            if (currentNetwork === 'deepstate') {
+                root.style.setProperty('--current-primary', '#FF0000');
+                root.style.setProperty('--current-secondary', '#8B0000');
+                root.style.setProperty('--current-bg', '#1a0000');
+                root.style.setProperty('--current-text', '#FFFF00');
+                root.style.setProperty('--current-accent', '#FF6600');
+            } else {
+                root.style.setProperty('--current-primary', '#0066FF');
+                root.style.setProperty('--current-secondary', '#003d99');
+                root.style.setProperty('--current-bg', '#000033');
+                root.style.setProperty('--current-text', '#00FFFF');
+                root.style.setProperty('--current-accent', '#6600FF');
+            }
+        }
+
+        // Generate ticker content
+        function generateTickerContent() {
+            const headlines = networks[currentNetwork].headlines;
+            let content = '';
+            
+            // Create a continuous loop of headlines
+            for (let i = 0; i < 3; i++) { // Repeat headlines 3 times for smoother loop
+                headlines.forEach((headline, index) => {
+                    // Add breaking badge every 4th headline
+                    if ((index + 1) % 4 === 0) {
+                        content += `<span class="breaking-badge">BREAKING</span>`;
+                    }
+                    
+                    content += headline;
+                    content += '<span class="headline-separator">●●●</span>';
+                });
+            }
+            
+            tickerText.innerHTML = content;
+        }
+
+        // Update ticker animation speed
+        function updateTickerSpeed() {
+            const duration = 120 - tickerSpeed; // Inverse relationship
+            tickerText.style.animationDuration = `${duration}s`;
+        }
+
+        // Start ticker animation
+        function startTickerAnimation() {
+            updateTickerSpeed();
+        }
+
+        // Toggle sound
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const network = networks[currentNetwork];
+            soundBtn.textContent = soundEnabled ? network.soundText : network.soundTextMuted;
+            soundBtn.classList.toggle('muted', !soundEnabled);
+        }
+
+        // Random chaos effects
+        function addChaosEffects() {
+            setInterval(() => {
+                // Randomly glitch the ticker
+                if (Math.random() < 0.1) {
+                    tickerContainer.style.filter = 'hue-rotate(' + Math.random() * 360 + 'deg)';
+                    setTimeout(() => {
+                        tickerContainer.style.filter = 'none';
+                    }, 200);
+                }
+            }, 3000);
+            
+            // Randomly regenerate content
+            setInterval(() => {
+                if (Math.random() < 0.3) {
+                    generateTickerContent();
+                }
+            }, 15000);
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            addChaosEffects();
+        });
+    </script>
+</body>
+</html>

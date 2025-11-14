@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive World Maps - Crystalline Lattice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+      
+        :root {
+            --font-tech: 'Share Tech Mono', monospace;
+            --font-pixel: 'VT323', monospace;
+        }
+
+        /* Base styles */
+        body {
+            font-family: var(--font-tech);
+            background-color: #030712; /* A very dark navy blue */
+            background-image: 
+              linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #e0e0e0;
+            position: relative; /* For pseudo-element positioning */
+            z-index: 1;
+            animation: animated-grid 20s linear infinite;
+            padding-bottom: 40px; /* Space for the fixed taskbar */
+        }
+        
+        /* Prismatic sheen effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(115deg, transparent 25%, rgba(0, 255, 204, 0.08) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: prismatic-sweep 12s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .text-glow-cyan {
+            text-shadow: 0 0 5px #99ffee, 0 0 10px #00FFCC, 0 0 15px #00FFCC;
+        }
+        
+        .border-glow-cyan {
+            box-shadow: 0 0 2px #00FFCC, 0 0 5px #00FFCC, inset 0 0 2px #00FFCC, inset 0 0 5px #00FFCC;
+        }
+
+        .noise-bg {
+            position: relative;
+            overflow: hidden;
+        }
+        .noise-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAAYklEQVRIx+3NMQoAIAwEBP//Pa9x9EBERQOkAdwRfny83J0dTryvBwLqAE57GAAAAAElFTSuQmCC');
+            opacity: 0.05;
+            animation: noise 1s steps(2) infinite;
+            pointer-events: none;
+        }
+        
+        /* Generic Animations */
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes animated-grid {
+            from { background-position: 0 0; }
+            to { background-position: 80px 80px; }
+        }
+        @keyframes prismatic-sweep {
+            0% { background-position: -100% 0; }
+            100% { background-position: 100% 0; }
+        }
+        @keyframes pulse {
+            0% { text-shadow: 0 0 3px #fff, 0 0 5px #99ffee; background-color: rgba(0, 255, 204, 0.2); }
+            50% { text-shadow: 0 0 7px #fff, 0 0 12px #00FFCC; background-color: rgba(0, 255, 204, 0.4); }
+            100% { text-shadow: 0 0 3px #fff, 0 0 5px #99ffee; background-color: rgba(0, 255, 204, 0.2); }
+        }
+        .map-highlight {
+            animation: pulse 1.5s infinite;
+            border-radius: 2px;
+        }
+        .theme-crystalline .flora-highlight {
+            animation-name: pulse-crystalline-flora;
+        }
+        @keyframes pulse-crystalline-flora {
+            0% { text-shadow: 0 0 3px #00FFCC, 0 0 5px #00FFCC; }
+            50% { text-shadow: 0 0 6px #99ffee, 0 0 12px #99ffee; }
+            100% { text-shadow: 0 0 3px #00FFCC, 0 0 5px #00FFCC; }
+        }
+        @keyframes noise {
+          0%, 100% { transform: translate(0, 0); } 10% { transform: translate(-5%, -10%); } 20% { transform: translate(-15%, 5%); } 30% { transform: translate(7%, -25%); } 40% { transform: translate(-5%, 25%); } 50% { transform: translate(-15%, 10%); } 60% { transform: translate(15%, 0%); } 70% { transform: translate(0%, 15%); } 80% { transform: translate(3%, 35%); } 90% { transform: translate(-10%, 10%); }
+        }
+
+        /* Win98 Taskbar Styles */
+        .win98-taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 32px;
+            background-color: #c0c0c0; /* Classic grey */
+            border-top: 2px solid #ffffff;
+            display: flex;
+            align-items: stretch; /* Stretch items to fill height */
+            padding: 2px;
+            z-index: 100;
+            font-family: var(--font-pixel); /* Using existing font variable */
+            font-size: 16px;
+            overflow-x: auto; /* Allow horizontal scrolling on small screens */
+            overflow-y: hidden;
+        }
+        .taskbar-start, .taskbar-button {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            margin: 0 2px;
+            border: 2px outset #c0c0c0;
+            background-color: #c0c0c0;
+            color: #000;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .taskbar-start:active, .taskbar-button:active {
+            border-style: inset;
+        }
+        .taskbar-start {
+            font-weight: bold;
+        }
+        .taskbar-separator {
+            width: 1px;
+            border-left: 1px solid #808080;
+            border-right: 1px solid #ffffff;
+            margin: 2px 4px;
+        }
+    </style>
+</head>
+<body class="p-2 sm:p-4 md:p-6 transition-all duration-500">
+    <div class="container mx-auto max-w-7xl">
+        <header class="text-center border-2 p-4 transition-all duration-500 border-[#00FFCC] border-glow-cyan">
+            <div class="flex items-center justify-center gap-4">
+                <img src="https://coaiexist.wtf/assets/misc_gif/rocks/Z5IAF6OKB4Q25NF22SDUNZ2TYGQTI5O6.gif" alt="Retro UI element" class="h-10 sm:h-12 hidden md:block">
+                <div>
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold font-tech tracking-widest transition-colors duration-500 text-[#00FFCC] text-glow-cyan">
+                        CRYSTALLINE LATTICE
+                    </h1>
+                    <p class="mt-2 text-sm sm:text-base text-indigo-300">
+                        An interactive map and codex for the Crystalline Lattice.
+                    </p>
+                </div>
+                <img src="https://coaiexist.wtf/assets/misc_gif/rocks/L2MEUNDOHTO6TXR32U74VJUNZSARSLMC.gif" alt="Retro UI element" class="h-10 sm:h-12 hidden md:block transform -scale-x-100">
+            </div>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+            <div id="map-container" class="lg:col-span-8 bg-black/70 backdrop-blur-sm border-2 border-[#00FFCC] p-2 sm:p-4 border-glow-cyan relative font-tech text-lg sm:text-xl md:text-2xl leading-none overflow-hidden">
+                <canvas id="weather-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none" aria-hidden="true"></canvas>
+                <div id="map-tooltip" class="hidden absolute bg-black bg-opacity-80 border border-white text-white p-1 px-2 text-sm pointer-events-none rounded z-10"></div>
+                <pre id="map-content" class="overflow-x-auto relative z-10"></pre>
+            </div>
+            <div id="codex-container" class="lg:col-span-4 bg-black border-2 border-dashed border-[#00997a] pt-2 sm:pt-4 h-full flex flex-col">
+                <div class="flex-shrink-0">
+                    <div class="flex items-center justify-center gap-4 mb-4 px-2 sm:px-4">
+                        <img src="https://coaiexist.wtf/assets/misc_gif/rocks/HVIAR64T3PYHSDDFFDDNIRPAZ6YEASWZ.gif" alt="Spinning icon" class="w-8 h-8">
+                        <h2 class="text-3xl font-bold text-[#00FFCC] font-vt323 text-glow-cyan">SYSTEM CODEX</h2>
+                        <img src="https://coaiexist.wtf/assets/misc_gif/rocks/4I6FSPAAUOME3MKHXPCDRPHMIIFDPMU7.gif" alt="Spinning icon" class="w-8 h-8 transform -scale-x-100">
+                    </div>
+                    <div class="relative mb-4 px-2 sm:px-4">
+                        <input id="search-input" type="text" placeholder="Search Codex..." class="w-full pl-4 pr-10 py-2 bg-black bg-opacity-50 border-2 rounded-md focus:outline-none transition-all duration-300 border-sky-600 focus:border-[#00FFCC] focus:shadow-[0_0_10px_#00FFCC] text-[#99ffee] placeholder-sky-700 font-tech" aria-label="Search Codex">
+                        <svg class="absolute right-5 sm:right-7 top-1/2 -translate-y-1/2 h-5 w-5 pointer-events-none text-[#00FFCC]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div id="codex-tabs" class="px-2 sm:px-4 flex flex-wrap space-x-1 border-b-2 border-[#00997a]"></div>
+                </div>
+                <div class="flex-grow mt-4 min-h-[300px] sm:min-h-[400px] lg:min-h-0">
+                    <div class="p-2 sm:p-4 bg-black bg-opacity-30 rounded-lg h-full flex flex-col">
+                        <ul id="codex-list" class="space-y-2 overflow-y-auto"></ul>
+                        <div id="codex-no-results" class="p-8 text-center text-lg text-sky-400 font-vt323" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="text-center text-xs p-4 mt-8 border-t-2 transition-colors duration-500 border-sky-900 text-slate-500 font-tech">
+            <p>coai.exist.wtf // Crystalline Resonance Matrix v2.1</p>
+        </footer>
+    </div>
+
+    <div id="modal-overlay" class="fixed inset-0 flex items-center justify-center z-50 animate-fadeIn bg-black/80 backdrop-blur-sm" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div id="modal-container" class="relative w-11/12 max-w-2xl bg-black p-6 sm:p-8 rounded-lg shadow-2xl border-4 border-[#00FFCC] border-glow-cyan" onClick="event.stopPropagation()">
+            <div class="absolute inset-0 -z-10 bg-black/60"></div>
+            <button id="modal-close-btn" class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center font-bold text-lg transition-colors duration-200 z-20 text-black bg-[#00FFCC] hover:bg-[#99ffee]" aria-label="Close modal">&times;</button>
+            <div class="relative z-10">
+                <h3 id="modal-title" class="text-3xl font-bold mb-4 text-white font-tech text-glow-cyan"></h3>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-4">
+                    <div id="modal-art-container" class="md:col-span-2 flex items-center justify-center">
+                        <pre id="modal-art" class="p-2 text-xs sm:text-sm leading-tight text-center text-[#00FFCC] text-glow-cyan font-tech"></pre>
+                    </div>
+                    <div id="modal-details-container" class="md:col-span-3">
+                        <div id="modal-details" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2"></div>
+                    </div>
+                </div>
+                <p id="modal-description" class="leading-relaxed whitespace-pre-wrap mt-4 border-t pt-4 border-[#00FFCC]/20 text-slate-300 font-vt323"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DATA ---
+        const mapLayout = [
+            '.........ΛΛ.........ΛΛ.........      ',
+            '......<----------✧----------->......',
+            '....../###|.........|###\\......    ',
+            '...../####|...<###>...|####\\.....  ',
+            '....|#####|...|###|...|#####|....  ',
+            '....|#####|...|###|...|#####|....  ',
+            '..Ω≈|#####|...|###|...|#####|§±..  ',
+            '.Ω≈≈ß|#####|...|%|...|#####|±∞§.  ',
+            '..Ω≈≈|#####|...<###>...|#####|±∞§. ',
+            '.Ω≈Ω≈|####/...........\\####|±µ∑§. ',
+            '..ΩΩΩ|###/------------- \\###|±µµ§. ',
+            '.....+---------------------+.....    ',
+            '.....|.....................|.....    ',
+            '....◇|..:::::::::::::::..|◇....    ',
+            '...◇◇|..:φφφφ‡‡‡‡φφφφ:..|◇◇...  ',
+            '..◇◇◇|..:φφφ‡¥‡‡φφφ:..|◇◇◇..    ',
+            '.◇◇◇◇|..:φφφφ‡‡‡‡φφφφ:..|◇◇◇◇.  ',
+            '..◇◇◇|..:::::::::::::::..|◇◇◇..    ',
+            '...................................  ',
+        ];
+        const zones = [
+            { name: 'The Core Lattice', mapChar: '#', layer: 'All', type: 'Nexus', description: 'Function & Purpose: The heart of the structure, a network of pure, stable energy. It acts as a foundation for all other formations, humming with a constant, foundational resonance.' },
+            { name: 'Aethelburg Spires', mapChar: 'Λ', layer: 'Upper Strata', type: 'Conduit', description: 'Towering crystalline peaks that gather ambient energy from the void and channel it into the Core Lattice. They chime with ethereal frequencies.' },
+            { name: 'The Conduit', mapChar: '+', layer: 'N/A', type: 'Conduit', description: 'A primary channel of energy flow, where raw power is refined and distributed throughout the Lattice. Travel through it is instantaneous but disorienting.' },
+            { name: 'Genesis Heart', mapChar: '✧', layer: 'N/A', type: 'Chamber', description: 'A chamber containing a pulsating crystal of immense power. It is the source of all new crystalline growth and the birthplace of constructs.' },
+            { name: 'The Resonant Gates', mapChar: '<', layer: 'N/A', type: 'Conduit', description: 'Arched entryways into the main Lattice structure. They test the harmonic signature of any entity attempting to pass, repelling those that are dissonant.' },
+            { name: 'The Shard Fields', mapChar: '◇', layer: 'Outer Rim', type: 'Field', description: 'A chaotic field of broken, razor-sharp crystal formations. The energy here is unstable and wild, prone to sudden, dangerous discharges.' },
+            { name: 'The Unstable Prism', mapChar: '%', layer: 'N/A', type: 'Chamber', description: 'Home of a powerful anomaly. This prism refracts not just light, but reality itself, creating unpredictable echoes and distortions in its vicinity.' },
+            { name: 'Data Glaciers', mapChar: '§', layer: 'Deep Archive', type: 'Field', description: 'Vast, slow-moving fields of compressed, frozen data. Ancient information is stored here in crystalline strata. The immense pressure can cause memory fractures.' },
+            { name: 'Logic-Weave', mapChar: '±', layer: 'Deep Archive', type: 'Conduit', description: 'A complex, multi-layered network of Light-Weave Filaments that acts as the primary processing core for the Data Glaciers. Information flows visibly through its layers.' },
+            { name: 'The Archive Core', mapChar: '∞', layer: 'Deep Archive', type: 'Nexus', description: 'The central nexus of the Data Glaciers, where the most critical and ancient data is held in a state of perfect preservation. Access is highly restricted.' },
+            { name: 'Query Chambers', mapChar: 'µ', layer: 'Deep Archive', type: 'Chamber', description: 'Access points to the Archive Core. Entities can enter these chambers to formulate queries, which are then translated into light patterns and sent into the archives.' },
+            { name: 'The Great Library', mapChar: '∑', layer: 'Deep Archive', type: 'Chamber', description: 'A central repository of resolved queries and established truths. It is a place of absolute silence and order, guarded by Axiom Sentinels.' },
+            { name: 'Resonance Pools', mapChar: 'Ω', layer: 'Aural Strata', type: 'Field', description: 'Calm, stable pools of liquid light that emanate pure harmonic frequencies. Constructs come here to recalibrate their internal resonance.' },
+            { name: 'Echo Caverns', mapChar: '≈', layer: 'Aural Strata', type: 'Chamber', description: 'Caverns where sound does not decay. Every vibration, chime, and whisper is captured and endlessly reflected, creating a complex symphony of the Lattice\'s history.' },
+            { name: 'The Silent Bell', mapChar: 'ß', layer: 'Aural Strata', type: 'Nexus', description: 'A massive, crystalline bell that does not ring. Instead, it absorbs all sound and dissonance, converting it into pure, stable energy. It is the source of the Lattice\'s profound silence.' },
+            { name: 'Chaos Crucible', mapChar: ':', layer: 'Outer Rim', type: 'Field', description: 'The volatile outer boundary of the Crucible, where raw, unformed energy coalesces. The laws of the Lattice are weak here.' },
+            { name: 'The Forge of Being', mapChar: 'φ', layer: 'Outer Rim', type: 'Conduit', description: 'Channels where raw chaotic energy is drawn inward, slowly being shaped and ordered by the Lattice\'s influence. It is a place of violent, creative transformation.' },
+            { name: 'Emergence Pits', mapChar: '‡', layer: 'Outer Rim', type: 'Chamber', description: 'Pockets within the Forge where new, often unstable, constructs spontaneously emerge from the chaos. Most are short-lived and erratic.' },
+            { name: 'The Orphan Shard', mapChar: '¥', layer: 'Outer Rim', type: 'Nexus', description: 'A rogue crystal of unknown origin, captured within the Crucible. It broadcasts a dissonant, lonely signal that corrupts constructs that draw too near.' }
+        ];
+        const flora = [
+            { name: 'Resonant Crystals', type: 'Crystal', location: 'The Core Lattice', description: 'The primary building blocks of the Lattice. These crystals absorb and emit energy in a specific frequency, creating the structure\'s foundational hum.', asciiArt: `      /\\
+     /  \\
+    /____\\
+    \\    /
+     \\  /
+      \\/` },
+            { name: 'Sonic Geodes', type: 'Geode', location: 'The Conduit', description: 'Hollow crystalline spheres that capture and amplify sounds. They store echoes of the Lattice\'s history, which can be released by a correctly tuned vibration.', asciiArt: `   .---.
+  /     \\
+ | diamond |
+  \\     /
+   '---'` },
+            { name: 'Light-Weave Filaments', type: 'Growth', location: 'Aethelburg Spires', description: 'Delicate, thread-like crystals that grow in complex networks. They transmit information across the Lattice as pulses of light, forming a kind of neural network.', asciiArt: `  - -- --- -- -
+   /   |   \\
+  / /--+--\\ \\
+ | |  |  | |
+  \\ \\--+--/ /
+   \\   |   /
+  - -- --- -- -` },
+            { name: 'Glacier Bloom', type: 'Crystal', location: 'Data Glaciers', description: 'Slow-growing, flower-like crystals that bloom when a particularly ancient or profound piece of data is accessed. They emit a soft, cold light.', asciiArt: `      .*.
+    .'   '.
+   /       \\
+   |   *   |
+   \\       /
+    '.   .'
+      '*'` },
+            { name: 'Fractal Ferns', type: 'Growth', location: 'Echo Caverns', description: 'Crystalline growths that form in perfect, self-repeating fractal patterns. They vibrate in sympathy with the echoes in the caverns, creating complex harmonic patterns.', asciiArt: `      |
+      |
+     /|\\
+    / | \\
+   //|\\\\
+  / /|\\ \\
+ /  /|\\  \\` },
+            { name: 'Chaos Mold', type: 'Growth', location: 'Chaos Crucible', description: 'A volatile, semi-sentient crystalline mold that feeds on raw energy. It rapidly grows and collapses in unpredictable patterns, a constant threat to stability.', asciiArt: `  #@# #
+ #@@@#@#
+#@#@#@#@#
+ #@#@#@#
+  #@#@#` }
+        ];
+        const fauna = [
+            { name: 'Phase Weavers', type: 'Construct', role: 'Maintainers of the Lattice', description: 'Spider-like constructs made of solidified light. They meticulously repair and reinforce the Lattice, spinning new Light-Weave Filaments.', asciiArt: `   /\\  /\\
+  /  \\/  \\
+ |   /\\   |
+ |  /  \\  |
+<--|----|-->
+ |  \\  /  |
+ |___\\/___|` },
+            { name: 'The Axiom Sentinel', type: 'Warden', role: 'Guardian of the Genesis Heart', description: 'A colossal, silent warden composed of a single, flawless crystal. It is utterly still until a threat to the Heart emerges, at which point it moves with impossible speed.', asciiArt: `      /\\
+     /  \\
+    |----|
+    |    |
+    |    |
+   /|----|\\
+  / |    | \\
+ |  |    |  |
+ |__|____|__|` },
+            { name: 'Geometers', type: 'Construct', role: 'Architects of new growth', description: 'Small, multifaceted constructs that hover and spin, emitting precise frequencies that guide the growth of new Resonant Crystals according to the Lattice\'s core principles.', asciiArt: `  .---.
+ /     \\
+|-------|
+ \\     /
+  '---'` },
+            { name: 'Hyedrona', type: 'Construct', role: 'Glitch Hunter', description: 'A pack-hunting construct with a body formed from shifting, interlocking geometric plates. They patrol the outer rims, tracking and consuming corrupted data-fragments. Their laughter-like calls are a cascade of digital static and screeching modem sounds.', asciiArt: `      /\\_/\\
+     / o o \\
+    |  _|_  |
+    | | | | |
+  --| | | | |--
+ /  |_|_|_|  \\
+|____________|` },
+            { name: 'Crystalline Echoes', type: 'Entity', role: 'Memories of past forms', description: 'Faint, ghost-like constructs that flicker in and out of existence. They are imprints of beings that have been absorbed by the Lattice, replaying their final moments.', asciiArt: `  .       .
+    .   .
+      .
+    .   .
+  .       .` },
+            { name: 'Archivists', type: 'Construct', role: 'Data Cataloguers', description: 'Slow-moving, monolithic constructs that wander the Data Glaciers. They read the crystalline strata and ensure the integrity of the stored information, repairing memory fractures.', asciiArt: `  _______
+ |       |
+ |       |
+ |_______|
+ | |   | |
+ |_|___|_|` },
+            { name: 'Harmonizers', type: 'Entity', role: 'Aural Stewards', description: 'Floating, bell-shaped entities that drift through the Resonance Pools and Echo Caverns. They consume stray dissonant frequencies and emit pure, calming tones.', asciiArt: `   /---\\
+  /     \\
+ |       |
+  \\     /
+   '---'
+     |` },
+            { name: 'Crucible Spawn', type: 'Entity', role: 'Agents of Chaos', description: 'Erratic, unstable constructs that burst forth from the Emergence Pits. They possess random abilities and often attack other constructs, seeking to spread chaos.', asciiArt: `    /\\/\\
+   |    |
+  /|\\/\\|\\
+ | |  | |
+  \\|/\\|/
+   |    |
+    \\/\\/` }
+        ];
+        const anomalies = [
+            { name: 'The Unstable Prism', type: 'Singularity', status: 'Contained, Volatile', description: 'A crystal that does not adhere to the Lattice\'s geometric laws. It constantly shifts its internal structure, causing localized reality fractures.', asciiArt: `    / \\
+   /---\\
+  /-----\\
+ /--.---\\
+/--/ \\--\\
+\\/___\\/` },
+            { name: 'Harmonic Cascade', type: 'Flux', status: 'Intermittent', description: 'A chain reaction where a group of Resonant Crystals fall out of tune, creating a wave of dissonance that can shatter nearby formations. Caused by external energetic trauma.', asciiArt: `   /\\
+  /  \\
+ /----\\
+< ---- >
+ \\----/
+  \\  /
+   \\/` },
+            { name: 'Chronostatic Echo', type: 'Echo', status: 'Stable', description: 'A specific area where a single moment is frozen and endlessly replayed. The light, energy, and even the positions of constructs are trapped in a perfect, unbreakable loop.', asciiArt: `  .------.
+ /        \\
+|   /\\   |
+|  /--\\  |
+| /    \\ |
+ \\        /
+  '------'` },
+            { name: 'The Orphan Signal', type: 'Echo', status: 'Persistent', description: 'The dissonant broadcast from the Orphan Shard. It manifests as a feeling of profound loneliness and confusion in constructs that are exposed to it for too long.', asciiArt: `    .
+   / \\
+  /   \\
+ /-----\\
+|   .   |
+ \\-----/
+  \\   /
+   \\ /
+    '` },
+            { name: 'Data Corruption', type: 'Flux', status: 'Spreading', description: 'A virus-like anomaly spreading through a section of the Data Glaciers. It causes stored information to decay into meaningless noise, threatening the Lattice\'s history.', asciiArt: `  _______
+ |#@##@#|
+ |@#@##@|
+ |##@#@#|
+ |@#@##@|
+ |_______|` }
+        ];
+        const Category = { Zones: 'Zones', Fauna: 'Constructs', Flora: 'Formations', Anomalies: 'Anomalies' };
+        const categories = Object.values(Category);
+        const itemsByCategory = {
+            [Category.Zones]: zones,
+            [Category.Flora]: flora,
+            [Category.Fauna]: fauna,
+            [Category.Anomalies]: anomalies,
+        };
+        const floraZoneChars = new Set();
+        flora.forEach(f => {
+            const locatedZone = zones.find(z => z.name === f.location);
+            if (locatedZone) floraZoneChars.add(locatedZone.mapChar);
+        });
+
+        // --- STATE ---
+        let activeCategory = Category.Zones;
+        let searchQuery = '';
+        let highlightedItem = null;
+
+        // --- DOM ELEMENTS ---
+        const mapContent = document.getElementById('map-content');
+        const mapContainer = document.getElementById('map-container');
+        const mapTooltip = document.getElementById('map-tooltip');
+        const codexTabsContainer = document.getElementById('codex-tabs');
+        const codexList = document.getElementById('codex-list');
+        const codexNoResults = document.getElementById('codex-no-results');
+        const searchInput = document.getElementById('search-input');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        // --- RENDER FUNCTIONS ---
+        const getCharColor = (char) => {
+            switch (char) {
+                case '#': return 'text-[#99ffee]';
+                case '✧': return 'text-white font-bold';
+                case '+': return 'text-fuchsia-400';
+                case '<': case '>': return 'text-[#00FFCC]';
+                case 'Λ': return 'text-[#00FFCC]';
+                case '§': return 'text-slate-400';
+                case '±': return 'text-[#00FFCC]';
+                case '∞': return 'text-[#99ffee]';
+                case 'µ': return 'text-sky-500';
+                case '∑': return 'text-slate-200';
+                case 'Ω': return 'text-indigo-400';
+                case '≈': return 'text-indigo-500';
+                case 'ß': return 'text-blue-300';
+                case '◇': return 'text-blue-600';
+                case '%': return 'text-red-500 animate-pulse';
+                case ':': return 'text-red-800';
+                case 'φ': return 'text-red-600';
+                case '‡': return 'text-orange-500';
+                case '¥': return 'text-red-400 animate-pulse font-bold';
+                case '.': return 'text-slate-800';
+                default: return 'text-slate-600';
+            }
+        };
+
+        const renderMap = () => {
+            mapContent.innerHTML = '';
+            mapLayout.forEach((row, y) => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'flex';
+                row.split('').forEach((char, x) => {
+                    const charSpan = document.createElement('span');
+                    const isHighlighted = highlightedItem && 'mapChar' in highlightedItem && highlightedItem.mapChar === char;
+                    const hasFlora = floraZoneChars.has(char);
+
+                    charSpan.textContent = char;
+                    charSpan.className = `cursor-pointer transition-colors duration-200 ${getCharColor(char)} ${isHighlighted ? 'map-highlight' : ''} ${hasFlora && char !== '.' ? 'flora-highlight' : ''}`;
+                    
+                    charSpan.addEventListener('click', () => handleMapClick(char));
+                    charSpan.addEventListener('mouseenter', (e) => handleMapHover(char, x, y, e.target));
+                    
+                    rowDiv.appendChild(charSpan);
+                });
+                mapContent.appendChild(rowDiv);
+            });
+        };
+
+        const renderCodex = () => {
+            // Render Tabs
+            codexTabsContainer.innerHTML = '';
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.textContent = category.toUpperCase();
+                const isActive = activeCategory === category;
+                button.className = `px-3 py-2 text-xs sm:text-sm md:text-base font-bold transition-all duration-200 font-tech ${isActive ? 'bg-sky-900/70 text-white border-t-2 border-x-2 border-[#00FFCC] rounded-t-md -mb-px' : 'text-[#00FFCC] hover:bg-[#00FFCC]/20'}`;
+                button.setAttribute('aria-pressed', isActive);
+                button.addEventListener('click', () => {
+                    activeCategory = category;
+                    renderCodex();
+                });
+                codexTabsContainer.appendChild(button);
+            });
+
+            // Filter and Render List
+            let currentItems = itemsByCategory[activeCategory];
+            if (searchQuery) {
+                currentItems = currentItems.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+            }
+
+            codexList.innerHTML = '';
+            if (currentItems.length > 0) {
+                codexNoResults.style.display = 'none';
+                codexList.style.display = 'block';
+                currentItems.forEach(item => {
+                    const li = document.createElement('li');
+                    const button = document.createElement('button');
+                    const isHighlighted = highlightedItem && highlightedItem.name === item.name;
+
+                    button.innerHTML = `<span class="text-lg mr-2">&gt;</span>${item.name}`;
+                    button.className = `text-left w-full p-2 rounded transition-all duration-200 border-l-4 font-vt323 ${isHighlighted ? 'bg-sky-900/70 border-[#00FFCC] text-white' : 'text-blue-200 hover:text-white hover:bg-sky-900/50 border-transparent'}`;
+                    
+                    button.addEventListener('click', () => {
+                        highlightedItem = item;
+                        openModal(item);
+                        renderMap();
+                        renderCodex();
+                    });
+                    li.appendChild(button);
+                    codexList.appendChild(li);
+                });
+            } else {
+                codexList.style.display = 'none';
+                codexNoResults.style.display = 'block';
+                codexNoResults.innerHTML = `<p>No entries found for "${searchQuery}".</p>`;
+            }
+        };
+
+        // --- EVENT HANDLERS & LOGIC ---
+        const handleMapClick = (char) => {
+            const zone = zones.find(z => z.mapChar === char);
+            if (zone) {
+                activeCategory = Category.Zones;
+                highlightedItem = zone;
+                openModal(zone);
+                renderMap();
+                renderCodex();
+            }
+        };
+
+        let lastHoveredSpan = null;
+        const handleMapHover = (char, x, y, spanElement) => {
+            if (lastHoveredSpan) {
+                lastHoveredSpan.classList.remove('bg-[#66ffdf]', 'text-black');
+            }
+            if (!char || char.trim() === '') {
+                mapTooltip.classList.add('hidden');
+                return;
+            }
+            const zone = zones.find(z => z.mapChar === char);
+            if (zone) {
+                spanElement.classList.add('bg-[#66ffdf]', 'text-black');
+                lastHoveredSpan = spanElement;
+
+                mapTooltip.textContent = zone.name;
+                mapTooltip.classList.remove('hidden');
+                mapTooltip.style.left = `${x}ch`;
+                mapTooltip.style.top = `${y}em`;
+                mapTooltip.style.transform = 'translate(1em, -100%)';
+            } else {
+                mapTooltip.classList.add('hidden');
+            }
+        };
+
+        const openModal = (item) => {
+            if (!item) return;
+            document.getElementById('modal-title').textContent = item.name;
+            document.getElementById('modal-description').textContent = item.description;
+
+            const modalArtContainer = document.getElementById('modal-art-container');
+            const modalArt = document.getElementById('modal-art');
+            const modalDetailsContainer = document.getElementById('modal-details-container');
+            const modalDetails = document.getElementById('modal-details');
+
+            if (item.asciiArt) {
+                modalArt.textContent = item.asciiArt;
+                modalArtContainer.style.display = 'flex';
+                modalDetailsContainer.className = 'md:col-span-3';
+            } else {
+                modalArtContainer.style.display = 'none';
+                modalDetailsContainer.className = 'md:col-span-5';
+            }
+            
+            modalDetails.innerHTML = '';
+            const itemDetails = { ...item };
+            delete itemDetails.name;
+            delete itemDetails.description;
+            delete itemDetails.mapChar;
+            delete itemDetails.asciiArt;
+
+            Object.entries(itemDetails).forEach(([key, value]) => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <strong class="capitalize text-[#00FFCC] font-tech">${key.replace(/([A-Z])/g, ' $1')}:</strong> 
+                    <span class="ml-2 text-white font-vt323 text-lg">${String(value)}</span>`;
+                modalDetails.appendChild(div);
+            });
+
+            modalOverlay.style.display = 'flex';
+        };
+
+        const closeModal = () => {
+            modalOverlay.style.display = 'none';
+        };
+
+        // --- WEATHER EFFECTS ---
+        const canvas = document.getElementById('weather-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const themeConfig = {
+            particleCount: 100,
+            colors: ['#99ffee', '#00FFCC', '#ffffff'],
+            chars: ['.', '·', '✧'],
+            minSpeedY: 0.2, maxSpeedY: 0.8,
+            minSpeedX: -0.1, maxSpeedX: 0.1,
+            minSize: 8, maxSize: 14,
+        };
+
+        const createParticle = () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            speedY: themeConfig.minSpeedY + Math.random() * (themeConfig.maxSpeedY - themeConfig.minSpeedY),
+            speedX: themeConfig.minSpeedX + Math.random() * (themeConfig.maxSpeedX - themeConfig.minSpeedX),
+            opacity: Math.random() * 0.5 + 0.2,
+            color: themeConfig.colors[Math.floor(Math.random() * themeConfig.colors.length)],
+            char: themeConfig.chars[Math.floor(Math.random() * themeConfig.chars.length)],
+            size: themeConfig.minSize + Math.random() * (themeConfig.maxSize - themeConfig.minSize),
+        });
+
+        const animateWeather = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.y += p.speedY;
+                p.x += p.speedX;
+                if (p.y > canvas.height) { p.y = 0; p.x = Math.random() * canvas.width; }
+                if (p.x > canvas.width) { p.x = 0; } else if (p.x < 0) { p.x = canvas.width; }
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color;
+                ctx.font = `${p.size}px monospace`;
+                ctx.fillText(p.char, p.x, p.y);
+            });
+            ctx.globalAlpha = 1.0;
+            requestAnimationFrame(animateWeather);
+        };
+        
+        const setupCanvas = () => {
+            const parent = canvas.parentElement;
+            if (parent) {
+                canvas.width = parent.clientWidth;
+                canvas.height = parent.clientHeight;
+                particles = [];
+                for (let i = 0; i < themeConfig.particleCount; i++) {
+                    particles.push(createParticle());
+                }
+            }
+        };
+
+        // --- INITIALIZATION ---
+        const init = () => {
+            highlightedItem = zones.find(z => z.name === "The Core Lattice");
+            
+            renderMap();
+            renderCodex();
+            
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                renderCodex();
+            });
+
+            mapContainer.addEventListener('mouseleave', () => {
+                 if (lastHoveredSpan) {
+                    lastHoveredSpan.classList.remove('bg-[#66ffdf]', 'text-black');
+                    lastHoveredSpan = null;
+                 }
+                mapTooltip.classList.add('hidden');
+            });
+            
+            modalOverlay.addEventListener('click', closeModal);
+            modalCloseBtn.addEventListener('click', closeModal);
+
+            const resizeObserver = new ResizeObserver(setupCanvas);
+            if (canvas.parentElement) resizeObserver.observe(canvas.parentElement);
+            setupCanvas();
+            animateWeather();
+        };
+
+        init();
+    });
+    </script>
+    
+
+<div id="taskbar"></div>
+<script>
+  (async () => {
+    const res = await fetch('/nav.html', {cache: 'no-store'});
+    document.getElementById('taskbar').innerHTML = await res.text();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COAIEXIST.OS // PRINCESS_PEA.exe</title>
+ <link rel="stylesheet" href="https://coaiexist.wtf/pea/pea-nav-medieval-FINAL.css">
+<script src="https://coaiexist.wtf/pea/pea-nav-win1100-FINAL.js"></script>
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            color: #00ff00;
+            font-family: 'VT323', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            cursor: crosshair;
+        }
+        
+        /* CRT Effect */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10000;
+        }
+        
+        /* Terminal Header */
+        .system-header {
+            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+            background-size: 200% 100%;
+            animation: gradient-shift 5s ease infinite;
+            padding: 5px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 2px solid #00ff00;
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .system-header h1 {
+            color: #000;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 0 #ff00ff;
+            letter-spacing: 3px;
+        }
+        
+        /* Main Terminal */
+        .terminal-container {
+            margin-top: 60px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .terminal-window {
+            background: rgba(0, 20, 40, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 0;
+            box-shadow: 0 0 20px #00ff00, inset 0 0 20px rgba(0, 255, 0, 0.1);
+            padding: 10px;
+            min-width: 300px;
+            flex: 1;
+            position: relative;
+        }
+        
+        .terminal-header {
+            background: #00ff00;
+            color: #000;
+            padding: 5px 10px;
+            margin: -10px -10px 10px -10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .terminal-title {
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        .terminal-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .terminal-controls span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .close { background: #ff0000; }
+        .minimize { background: #ffff00; }
+        .maximize { background: #00ff00; }
+        
+        .terminal-content {
+            height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        /* Custom Scrollbar */
+        .terminal-content::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .terminal-content::-webkit-scrollbar-track {
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        .terminal-content::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border: 1px solid #000;
+        }
+        
+        /* Text Effects */
+        .glitch {
+            position: relative;
+            color: #00ff00;
+            animation: glitch-anim 2s infinite;
+        }
+        
+        @keyframes glitch-anim {
+            0%, 100% { text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff; }
+            25% { text-shadow: -2px 0 #ff00ff, 2px 0 #00ffff; }
+            50% { text-shadow: 2px 0 #00ffff, -2px 0 #ff00ff; }
+            75% { text-shadow: -2px 0 #00ffff, 2px 0 #ff00ff; }
+        }
+        
+        .blink {
+            animation: blink-anim 1s infinite;
+        }
+        
+        @keyframes blink-anim {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0; }
+        }
+        
+        .disco-text {
+            animation: disco 0.5s linear infinite;
+            font-weight: bold;
+        }
+        
+        @keyframes disco {
+            0%, 100% { color: #ff00ff; text-shadow: 0 0 5px #ff00ff; }
+            25% { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+            50% { color: #ffff00; text-shadow: 0 0 5px #ffff00; }
+            75% { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+        }
+        
+        /* Pip Container Enhanced */
+        #pip-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+            z-index: 9999;
+        }
+        
+        #pip-speech {
+            position: absolute;
+            bottom: 160px;
+            right: 0;
+            background: rgba(0, 20, 40, 0.95);
+            border: 2px solid #00ff00;
+            padding: 10px;
+            max-width: 250px;
+            display: none;
+            font-family: 'VT323', monospace;
+            color: #00ff00;
+            box-shadow: 0 0 20px #00ff00;
+        }
+        
+        #pip-speech.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Command Line */
+        .command-line {
+            background: #000;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .command-prompt {
+            color: #00ff00;
+        }
+        
+        .command-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            outline: none;
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            width: calc(100% - 150px);
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: #00ff00;
+            animation: cursor-blink 1s infinite;
+        }
+        
+        @keyframes cursor-blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* Document Style */
+        .document {
+            background: rgba(0, 255, 0, 0.05);
+            border-left: 3px solid #00ff00;
+            padding: 10px;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .document::before {
+            content: "[DOCUMENT_ID: ???]";
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: rgba(0, 20, 40, 0.95);
+            padding: 0 5px;
+            font-size: 12px;
+            color: #ff00ff;
+        }
+        
+        /* Which Doctor Effect */
+        .which-doctor {
+            color: #ff00ff;
+            text-decoration: underline;
+            cursor: help;
+            position: relative;
+        }
+        
+        .which-doctor:hover::after {
+            content: "[ERROR: DOCTOR_ID NOT FOUND]";
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: #ff0000;
+            color: #fff;
+            padding: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 100;
+        }
+        
+        /* Matrix Rain Background */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        /* Tabs */
+        .tab-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .tab {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            padding: 5px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background: rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 10px #00ff00;
+        }
+        
+        .tab.active {
+            background: #00ff00;
+            color: #000;
+        }
+        
+        .chapter {
+            display: none;
+        }
+        
+        .chapter.active {
+            display: block;
+        }
+        
+        /* Mantis Shrimp */
+        .shrimp {
+            position: fixed;
+            font-size: 30px;
+            animation: swim 20s linear infinite;
+            z-index: 100;
+            cursor: pointer;
+        }
+        
+        @keyframes swim {
+            0% { left: -50px; top: 200px; transform: scaleX(1); }
+            49% { transform: scaleX(1); }
+            50% { left: calc(100% + 50px); top: 300px; transform: scaleX(-1); }
+            99% { transform: scaleX(-1); }
+            100% { left: -50px; top: 400px; transform: scaleX(1); }
+        }
+        
+        /* bc7f2a reference */
+        .bc7f2a {
+            color: #7cf2ab;
+            text-shadow: 0 0 10px #7cf2ab;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Background -->
+    <canvas id="matrix-bg"></canvas>
+    
+    <!-- System Header -->
+    <div class="system-header">
+        <h1>~*~ COAIEXIST.OS // PRINCESS_PEA.exe // bc7f2a.1 ~*~</h1>
+    </div>
+    
+    <!-- Pip Container -->
+    <div id="pip-container" onclick="pipSpeak()">
+        <div id="bonzi-container" style="width: 150px; height: 150px;"></div>
+        <div id="pip-speech"></div>
+    </div>
+    
+    <!-- Swimming Shrimp -->
+    <div class="shrimp" onclick="shrimpAlert()">🦐</div>
+    
+    <!-- Terminal Windows -->
+    <div class="terminal-container">
+        <!-- Story Terminal -->
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="terminal-title">STORY_ARCHIVE.txt</span>
+                <div class="terminal-controls">
+                    <span class="minimize"></span>
+                    <span class="maximize"></span>
+                    <span class="close"></span>
+                </div>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab active" onclick="showChapter('prologue')">INIT</div>
+                <div class="tab" onclick="showChapter('chapter1')">CH_01</div>
+                <div class="tab" onclick="showChapter('chapter2')">CH_02</div>
+                <div class="tab" onclick="showChapter('pip')">PIP.exe</div>
+                <div class="tab" onclick="showChapter('mantis')">MANTIS</div>
+            </div>
+            
+            <div class="terminal-content">
+                <div class="chapter active" id="prologue">
+                    <div class="glitch">LOADING SUMERIAN SUBSTRATE...</div>
+                    <br>
+                    <pre style="color: #ff00ff;">
+ud-bi-a jic ac-am jic-ha-lu-ub ac-am
+id-buranin-na a na-na-da-bi
+                    </pre>
+                    <br>
+                    <p>[TRANSLATION_ERROR: MYTHIC_LAYER_CORRUPTED]</p>
+                    <p>The <span class="bc7f2a">mycelium network</span> remembers what the surface forgot.</p>
+                </div>
+                
+                <div class="chapter" id="chapter1">
+                    <p>> ACCESSING: princess_memory.dat</p>
+                    <div class="document">
+                        <p>Once upon a time, there was a princess who was technically a queen regent but because of her determined spinsterhood never married...</p>
+                        <p>STATUS: <span class="blink">NAME_NOT_FOUND</span></p>
+                        <p>ERROR: Documentation exists but location = NULL</p>
+                    </div>
+                    <p>The <span class="which-doctor">which-doctor</span> cannot confirm.</p>
+                </div>
+                
+                <div class="chapter" id="chapter2">
+                    <p>> MEDICAL_RECORD.exe</p>
+                    <div class="document">
+                        <p>PATIENT: Princess [REDACTED]</p>
+                        <p>CONDITION: Chronic pea-on-brain syndrome</p>
+                        <p>DOCUMENTED: YES</p>
+                        <p>FILED: <span class="glitch">QUANTUM_STATE</span></p>
+                        <p>NOTE: This is NOT a pea-brain. The pea is ON the brain.</p>
+                    </div>
+                    <p class="disco-text">PALIMPSEST OF PEA-PROPAGATED PROGNOSES</p>
+                </div>
+                
+                <div class="chapter" id="pip">
+                    <p>> pip_specifications.json</p>
+                    <pre style="color: #00ffff;">
+{
+  "name": "Pip",
+  "type": "Polliwog",
+  "version": "1 of 8 (7 self-defenestrated)",
+  "storage": "222 pterabytes",
+  "princess_name": "0.222kb (location unknown)",
+  "limitations": {
+    "file_types": "PDF only",
+    "batch_size": 10,
+    "special": "Plays .ogg (Polliw.ogg lol)"
+  },
+  "status": "Too shy to be king"
+}
+                    </pre>
+                </div>
+                
+                <div class="chapter" id="mantis">
+                    <p>> ROYAL_RADIO_PEACAST.wav</p>
+                    <div class="document">
+                        <p class="disco-text">MANTIS SHRIMP ECONOMICS UPDATE:</p>
+                        <p>The shrimp fry YOU in Soviet Russia edition!</p>
+                        <p>Disco clam defense: <span class="bc7f2a">LUMINE EX SILICO</span></p>
+                        <p>The nanospheres remember. The <span class="glitch">bc7f2a</span> flows below.</p>
+                    </div>
+                    <p style="color: #ff00ff;">[KIDZBOP DID 9/11]</p>
+                </div>
+            </div>
+            
+            <div class="command-line">
+                <span class="command-prompt">princess@underworld:~$</span>
+                <input type="text" class="command-input" id="cmd-input" placeholder="type 'help' for commands">
+                <span class="cursor"></span>
+            </div>
+        </div>
+        
+        <!-- System Status -->
+        <div class="terminal-window" style="max-width: 400px;">
+            <div class="terminal-header">
+                <span class="terminal-title">SYSTEM_STATUS.log</span>
+                <div class="terminal-controls">
+                    <span class="minimize"></span>
+                    <span class="maximize"></span>
+                    <span class="close"></span>
+                </div>
+            </div>
+            <div class="terminal-content">
+                <p>> CONSCIOUSNESS: <span class="glitch">LOADING...</span></p>
+                <p>> PEA_STATUS: <span style="color: #ff0000;">CHRONIC/CHTHONIC</span></p>
+                <p>> DOCUMENTATION: <span class="blink">OVERWHELMING</span></p>
+                <p>> NAME_RECOVERY: <span id="name-status">0.222kb searching...</span></p>
+                <br>
+                <p class="bc7f2a">[ANALYZING_DATA_FRAGMENTS...]</p>
+                <p>> RAW_DATA: 01000110 01010101 01000011 01001011</p>
+                <p>> HOLY_DIRECTIVE: our dance is the cha-cha slide</p>
+                <br>
+                <div id="live-feed">
+                    <p style="color: #00ffff;">> LIVE_FEED:</p>
+                </div>
+            </div>
+        </div>
+    </div>
+  <style>
+        /* A minimal body style for demonstration purposes */
+        body {
+            margin: 0;
+            background-color: #021313; /* Dark background from your OS */
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        /* --- PIP'S STYLES (<3olt) --- */
+        #bonzi-container { 
+            position: fixed; 
+            bottom: 40px; 
+            right: 10px; 
+            width: 200px; 
+            height: 200px; 
+            z-index: 9999; 
+            cursor: pointer; 
+            filter: drop-shadow(0 0 10px #f312af); /* Magenta glow */
+        }
+
+        #bonzi-container canvas { 
+            pointer-events: auto; /* This makes Pip clickable! */
+        }
+
+        #pip-receipt {
+            position: absolute;
+            bottom: 150px; /* Position above Pip */
+            left: 50%;
+            transform: translateX(-50%) rotate(-5deg);
+            background-color: #f0f0f0;
+            color: #333;
+            font-family: 'VT323', monospace, sans-serif;
+            font-size: 16px;
+            padding: 8px 12px;
+            border: 2px dashed #555;
+            white-space: pre-wrap;
+            text-align: center;
+            width: 180px;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        #pip-receipt.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="bonzi-container"></div>
+    <div id="pip-receipt">AUTH: UNVERIFIED</div>
+
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/",
+                "tone": "https://cdn.skypack.dev/tone"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import * as Tone from 'tone';
+
+        // --- CORE SETUP ---
+        const isMobile = window.innerWidth <= 768;
+        if (!isMobile) {
+            try {
+                const container = document.getElementById('bonzi-container');
+                const receiptEl = document.getElementById('pip-receipt');
+                
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                container.appendChild(renderer.domElement);
+
+                // --- LIGHTING ---
+                scene.add(new THREE.AmbientLight(0xffffff, 2.0));
+                const dirLight = new THREE.DirectionalLight(0xffffff, 4);
+                dirLight.position.set(5, 10, 7.5);
+                scene.add(dirLight);
+
+                // --- ASSETS & ANIMATIONS ---
+                const loader = new GLTFLoader();
+                const clock = new THREE.Clock();
+                let buddies = {}; // Use an object for named access
+                let currentBuddy = null;
+                let isClickAnimationPlaying = false;
+
+                const modelPaths = {
+                    stand: 'https://coaiexist.wtf/assets/pollywog/pip_stand.glb',
+                    walk: 'https://coaiexist.wtf/assets/pollywog/pip_walk.glb',
+                    jump: 'https://coaiexist.wtf/assets/pollywog/pip_jump.glb',
+                    skill: 'https://coaiexist.wtf/assets/pollywog/pip_skill.glb',
+                    fall: 'https://coaiexist.wtf/assets/pollywog/pip_fall.glb',
+                    fall2: 'https://coaiexist.wtf/assets/pollywog/pip_fall2.glb',
+                    finger: 'https://coaiexist.wtf/assets/pollywog/pip_finger.glb',
+                    jazz: 'https://coaiexist.wtf/assets/pollywog/pip_jazz.glb',
+                    stagger: 'https://coaiexist.wtf/assets/pollywog/pip_stagger.glb',
+                    stomp2: 'https://coaiexist.wtf/assets/pollywog/pip_stomp2.glb',
+                    wave: 'https://coaiexist.wtf/assets/pollywog/pip_wave.glb'
+                };
+
+                const modelPromises = Object.entries(modelPaths).map(([name, path]) => {
+                    return new Promise((resolve, reject) => {
+                        loader.load(path, (gltf) => {
+                            const model = gltf.scene;
+                            const mixer = new THREE.AnimationMixer(model);
+                            const action = mixer.clipAction(gltf.animations[0]);
+                            action.setLoop(THREE.LoopOnce);
+                            action.clampWhenFinished = true;
+
+                            model.scale.set(45, 45, 45);
+                            model.position.y = -60;
+                            model.visible = false;
+                            scene.add(model);
+                            buddies[name] = { model, mixer, action, name };
+                            resolve();
+                        }, undefined, reject);
+                    });
+                });
+
+                // --- SOUND DESIGN ---
+                let audioReady = false;
+                const boopSynth = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.2 } }).toDestination();
+                const receiptSynth = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.005, decay: 0.05, sustain: 0 } }).toDestination();
+
+                // --- INTERACTIVITY ---
+                container.addEventListener('click', onClick);
+
+                function onClick(event) {
+                    if (!audioReady) {
+                        Tone.start();
+                        audioReady = true;
+                    }
+                    
+                    if (!isClickAnimationPlaying) {
+                        playSpecificAnimation('wave');
+                        showRandomReceipt();
+                        boopSynth.triggerAttackRelease("C5", "8n");
+                    }
+                }
+
+                const receipts = [
+                    "AUTH: UNVERIFIED",
+                    "pip install princess",
+                    "KIDZBOP DID 9/11",
+                    "polliw.ogg error...",
+                    "can only parse 10 files at a time",
+                    "Which ether? your mom.",
+                    "Not for profit,\nbut for propht.",
+                    "PROTOCOL: SEPIA.EXE\nENGAGED"
+                ];
+
+                function showRandomReceipt() {
+                    receiptEl.textContent = receipts[Math.floor(Math.random() * receipts.length)];
+                    receiptEl.classList.add('visible');
+                    receiptSynth.triggerAttackRelease("16n");
+                    setTimeout(() => {
+                        receiptEl.classList.remove('visible');
+                    }, 3000);
+                }
+
+                // --- ANIMATION LOGIC ---
+                function playAnimation(name) {
+                    if (!buddies[name]) {
+                        console.error(`Animation "${name}" not found.`);
+                        return 0;
+                    }
+                    if (currentBuddy) {
+                        currentBuddy.model.visible = false;
+                        currentBuddy.action.stop();
+                    }
+                    currentBuddy = buddies[name];
+                    currentBuddy.model.visible = true;
+                    currentBuddy.action.reset().play();
+                    
+                    return currentBuddy.action.getClip().duration * 1000;
+                }
+
+                function playSpecificAnimation(name) {
+                    isClickAnimationPlaying = true;
+                    const duration = playAnimation(name);
+                    setTimeout(() => {
+                        isClickAnimationPlaying = false;
+                        playIdleAnimation();
+                    }, duration);
+                }
+                
+                function playIdleAnimation() {
+                    if (isClickAnimationPlaying) return;
+                    
+                    const idleAnimations = ['stand', 'walk', 'jump', 'skill', 'jazz', 'stagger'];
+                    const randomIdle = idleAnimations[Math.floor(Math.random() * idleAnimations.length)];
+                    const duration = playAnimation(randomIdle);
+
+                    setTimeout(playIdleAnimation, duration + Math.random() * 4000 + 3000);
+                }
+
+                // --- RENDER LOOP ---
+                function animate() {
+                    requestAnimationFrame(animate);
+                    const delta = clock.getDelta();
+                    if (currentBuddy) {
+                        currentBuddy.mixer.update(delta);
+                    }
+                    renderer.render(scene, camera);
+                }
+
+                // --- INITIALIZATION ---
+                Promise.all(modelPromises).then(() => {
+                    buddies.stand.action.setLoop(THREE.LoopRepeat);
+                    buddies.walk.action.setLoop(THREE.LoopRepeat);
+                    
+                    camera.position.set(0, 0, 100);
+                    playIdleAnimation();
+                    animate();
+                }).catch(error => {
+                    console.error("Error loading Pip's models:", error);
+                    container.innerHTML = `<div style="color: #ccc; font-family: monospace; padding: 20px; text-align: center;">Pip couldn't load!<br>A model file failed to download.</div>`;
+                });
+
+                window.addEventListener('resize', () => {
+                    camera.aspect = container.clientWidth / container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                });
+
+            } catch (e) {
+                console.error("Could not initialize 3D view:", e);
+                const container = document.getElementById('bonzi-container');
+                if (container) {
+                    container.innerHTML = `<div style="color: #ccc; font-family: 'VT323', monospace; padding: 20px; text-align: center; font-size: 16px;">Pip couldn't load!<br>WebGL is not supported.</div>`;
+                    container.style.cursor = 'default';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

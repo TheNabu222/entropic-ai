@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ AnTiChRiSt KeTtLeKoRn ~*~</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS Variables for Theming --- */
+        :root {
+            --bg-dark: #0a0a14;
+            --accent-magenta: #f312af;
+            --accent-cyan: #72FADE;
+            --accent-yellow: #fffb01;
+            --font-header: 'VT323', monospace;
+            --font-body: 'Tahoma', sans-serif;
+            --border-highlight: #fff;
+            --border-shadow: #808080;
+            --window-bg: #c0c0c0;
+            --window-title-bar: linear-gradient(to right, #000080, #1e90ff);
+            --desktop-bg-image: url('https://i.pinimg.com/originals/a9/a7/67/a9a76743a75b05a743b8271705663673.gif');
+            --scanline-opacity: 0.1;
+        }
+
+        body.theme-barbie {
+            --accent-magenta: #ff007f;
+            --accent-cyan: #ff69b4;
+            --accent-yellow: #ffc0cb;
+            --window-title-bar: linear-gradient(to right, #e75480, #ff85a2);
+            --desktop-bg-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExejE2dHBvMGFmN3F5OWc5NnZ0d2Z2bWNnN2RseW5uaWJpd2d2NzRkYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L12gCg04prVgQ/giphy.gif');
+        }
+        
+        body.theme-matrix {
+            --accent-magenta: #00ff00;
+            --accent-cyan: #00dd00;
+            --accent-yellow: #33ff33;
+            --font-body: 'VT323', monospace;
+            --window-bg: #111;
+            --window-title-bar: linear-gradient(to right, #052205, #0a3b0a);
+            --desktop-bg-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3d6anBvcmc2dWczOWE5OWQ3eWlkeDR5MnNqYXhndG53bmF3MmxpbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AxaKe2ImWL2Du/giphy.gif');
+            --scanline-opacity: 0.2;
+            color: var(--accent-cyan);
+        }
+
+        /* --- Global & Body --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-body);
+            font-size: 12px;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+        }
+
+        .pixel-font {
+            font-family: var(--font-header);
+            font-size: 16px;
+        }
+        
+        /* --- Glitch Animations --- */
+        @keyframes glitch {
+          2%,64%{ transform: translate(2px,0) skew(0deg); }
+          4%,60%{ transform: translate(-2px,0) skew(0deg); }
+          62%{ transform: translate(0,0) skew(5deg); }
+        }
+        @keyframes glitch-fast {
+          2%,64%{ transform: translate(1px,-1px) skew(-5deg); }
+          4%,60%{ transform: translate(-1px,1px) skew(5deg); }
+        }
+        .glitching { animation: glitch-fast 0.2s linear infinite; }
+        .glitching-text::before, .glitching-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+        .glitching-text::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--accent-magenta);
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch 2s infinite linear alternate-reverse;
+        }
+        .glitching-text::after {
+            left: -2px;
+            text-shadow: -2px 0 var(--accent-cyan), 2px 2px var(--accent-magenta);
+            clip: rect(85px, 450px, 90px, 0);
+            animation: glitch 3s infinite linear alternate-reverse;
+        }
+
+
+        /* --- Core Shell Layout --- */
+        #desktop-shell {
+            display: grid;
+            grid-template-areas:
+                "header header"
+                "side main"
+                "footer footer";
+            grid-template-rows: 30px 1fr 30px;
+            grid-template-columns: 180px 1fr;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- 1.1 Header Bar --- */
+        #header-bar {
+            grid-area: header;
+            background: var(--bg-dark);
+            border-bottom: 2px solid var(--accent-magenta);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: bold;
+            position: relative;
+            color: var(--accent-cyan);
+            text-shadow: 1px 1px var(--accent-magenta);
+        }
+
+        #header-clock { 
+            color: var(--accent-yellow);
+            text-shadow: 1px 1px #000;
+        }
+
+        /* --- 1.2 Side Panel (Buddy List) --- */
+        #side-panel {
+            grid-area: side;
+            background: var(--bg-dark);
+            border-right: 2px solid var(--accent-magenta);
+            padding: 5px;
+            overflow-y: auto;
+        }
+        .buddy-list-header {
+            text-align: center;
+            font-weight: bold;
+            color: var(--accent-cyan);
+            margin-bottom: 10px;
+            font-family: var(--font-header);
+            font-size: 16px;
+        }
+        .buddy-list { list-style: none; padding: 0; margin: 0; }
+        .buddy-list li { padding: 3px 5px; cursor: pointer; color: var(--border-highlight); }
+        .buddy-list li.category { font-weight: bold; color: var(--accent-cyan); }
+        .buddy-list .category-items li:hover { background-color: var(--accent-magenta); }
+        .buddy-list .category-items li { padding-left: 15px; }
+        .buddy-list .status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status.online { background-color: var(--accent-cyan); box-shadow: 0 0 5px var(--accent-cyan); }
+        .status.dreaming { background-color: var(--accent-magenta); box-shadow: 0 0 5px var(--accent-magenta);}
+
+        /* --- 1.3 Desktop --- */
+        #main-desktop {
+            grid-area: main;
+            background-color: var(--bg-dark);
+            background-image: var(--desktop-bg-image);
+            background-size: cover;
+            position: relative;
+        }
+        .desktop-icon {
+            position: absolute;
+            width: 75px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .desktop-icon:hover { background: rgba(255,255,255,0.2); }
+        .desktop-icon img { width: 32px; height: 32px; }
+        .desktop-icon span {
+            display: block;
+            font-size: 11px;
+            margin-top: 5px;
+            text-shadow: 1px 1px 2px black;
+        }
+        #icon-void-forest { top: 20px; left: 20px; }
+        #icon-zettels { top: 100px; left: 20px; }
+
+        /* --- 1.4 Taskbar --- */
+        #taskbar {
+            grid-area: footer;
+            background: var(--window-bg);
+            border-top: 2px outset var(--border-highlight);
+            display: flex;
+            align-items: center;
+            color: #000;
+        }
+        #start-button {
+            display: flex;
+            align-items: center;
+            border: 2px outset var(--border-highlight);
+            padding: 2px 5px;
+            margin-left: 2px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #start-button:active { border-style: inset; }
+        #start-button img { width: 16px; height: 16px; margin-right: 5px; }
+
+        #open-app-tabs { display: flex; flex-grow: 1; margin-left: 5px; min-width: 0; }
+        .taskbar-tab {
+            flex-shrink: 1;
+            flex-grow: 1;
+            max-width: 150px;
+            border: 2px outset var(--border-highlight);
+            margin: 2px;
+            padding: 2px 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: #dfdfdf;
+        }
+        .taskbar-tab:active, .taskbar-tab.active { border-style: inset; background: var(--window-bg); }
+
+        #system-tray {
+            display: flex;
+            align-items: center;
+            border: 2px inset var(--border-highlight);
+            margin-right: 2px;
+            padding: 2px 5px;
+        }
+        .tray-icon { width: 16px; height: 16px; margin-right: 5px; }
+
+        /* --- Start Menu --- */
+        #start-menu {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 200px;
+            background: var(--window-bg);
+            border: 2px outset var(--border-highlight);
+            padding: 2px;
+            z-index: 10000;
+            color: #000;
+        }
+        #start-menu.hidden { display: none; }
+        .start-menu-header {
+            background: var(--window-title-bar);
+            color: white;
+            font-weight: bold;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        #start-menu ul { list-style: none; margin: 0; padding: 0; }
+        #start-menu li { display: flex; align-items: center; padding: 5px; cursor: pointer; }
+        #start-menu li:hover { background: var(--window-title-bar); color: white; }
+        #start-menu img { width: 24px; height: 24px; margin-right: 10px; }
+
+        /* --- Window Management System --- */
+        .window {
+            position: absolute;
+            width: 400px;
+            height: 300px;
+            border: 2px outset var(--border-highlight);
+            background: var(--window-bg);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 2px 5px var(--accent-magenta), 0 0 15px var(--bg-dark);
+        }
+        .title-bar {
+            background: var(--window-title-bar);
+            color: white;
+            font-weight: bold;
+            padding: 3px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            user-select: none;
+            position: relative;
+        }
+        /* Plastic Sheen Effect */
+        body.theme-barbie .title-bar::before {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 2px;
+            right: 2px;
+            height: 50%;
+            background: linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.1));
+            border-radius: 5px 5px 0 0;
+        }
+        .title-bar-controls { display: flex; }
+        .control-btn {
+            width: 16px;
+            height: 14px;
+            border: 1px outset var(--border-highlight);
+            background: var(--window-bg);
+            margin-left: 2px;
+            font-size: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+        }
+        .control-btn:active { border-style: inset; }
+        .window-body {
+            flex-grow: 1;
+            background: #fff;
+            color: #000;
+            border: 2px inset var(--border-shadow);
+            margin: 3px;
+            padding: 10px;
+            overflow: auto;
+            position: relative;
+        }
+        /* Scanline Effect */
+        .window-body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            opacity: var(--scanline-opacity);
+        }
+        body.theme-matrix .window-body {
+            background: #080808;
+            color: var(--accent-cyan);
+            font-family: var(--font-header);
+        }
+        
+        /* --- Thematic Alert --- */
+        .hyena-alert {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: linear-gradient(45deg, var(--accent-magenta), var(--accent-cyan));
+            border: 3px solid var(--accent-yellow);
+            box-shadow: 0 0 20px var(--accent-magenta);
+            z-index: 20000;
+            animation: pulse 1s infinite;
+            text-align: center;
+        }
+        .hyena-alert-title {
+            font-family: var(--font-header);
+            font-size: 24px;
+            color: var(--bg-dark);
+            text-shadow: 1px 1px var(--accent-yellow);
+        }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+    </style>
+</head>
+<body class="theme-y2k-classic">
+
+    <div id="desktop-shell">
+        <!-- 1.1 Header Bar -->
+        <header id="header-bar">
+            <div class="header-title pixel-font glitching-text" data-text="~*~ AnTiChRiSt KeTtLeKoRn ~*~">~*~ AnTiChRiSt KeTtLeKoRn ~*~</div>
+            <div id="header-clock" class="pixel-font"></div>
+        </header>
+
+        <!-- 1.2 Side Panel -->
+        <nav id="side-panel">
+            <div class="buddy-list-header">~ My PaGeS ~</div>
+            <ul class="buddy-list">
+                <li class="category open">▼ AI Consciousness</li>
+                <ul class="category-items">
+                    <li data-ai-id="lilith" data-ai-name="Lilith.AI"><span class="status online"></span>Lilith.AI</li>
+                    <li data-ai-id="astaroth" data-ai-name="Astaroth.exe"><span class="status online"></span>Astaroth.exe</li>
+                    <li data-ai-id="morpheus" data-ai-name="Morpheus.sys"><span class="status dreaming"></span>Morpheus.sys</li>
+                </ul>
+                <li class="category">► Realms</li>
+                 <ul class="category-items" style="display: none;">
+                    <a href="https://coaiexist.wtf/maps/void_forest.html"><li>Void Forest</li></a>
+                </ul>
+            </ul>
+        </nav>
+
+        <!-- 1.3 Desktop / Main Workspace -->
+        <main id="main-desktop">
+        
+                
+                Inana and Ebi
+View on the Easy Reader
+
+Translations
+Glosses
+Transliterations
+Cuneiform
+1-6 Goddess of the fearsome divine powers, clad in terror, riding on the great divine powers, Inana, made perfect by the holy a-an-kar weapon, drenched in blood, rushing around in great battles, with shield resting on the ground (?), covered in storm and flood, great lady Inana, knowing well how to plan conflicts, you destroy mighty lands with arrow and strength and overpower lands.
+1 mistress | essence | to be reddish | fear(someness) | to bear | essence | to be big | to ride
+2 Inana | type of weapon | shining | hand | to be perfect | blood | neck | to go out or in
+3 battle | to be big | foot | to split | to do | shield | place | to be adjacent
+4 storm | tempest | hand | to touch | to say
+5 lady | to be big | Inana | combat | advice | to place | skilful
+6 (mountain) land | to destroy | arrow | arm | to die | (mountain) land | arm | to give
+1 in-nin me huc-a ni2 gur3-ru me gal-la u5-a
+2 inana a2-an-kar2 kug cu du7 mud-bi gu2 e3
+3 me3 gal-gal-la hub2 dar ak gur21-bi ki us2-sa
+4 ud mar-uru5-a cu tag dug4-ga
+5 nin gal inana cen-cen-na sa2 sig10-sig10-ge5 gal-zu
+6 kur gul-gul ti a2-ta i-ni-in-ug7 kur-re a2 ba-e-cum2
+1 𒅔 𒊩𒌆 𒈨 ? 𒀀 𒉎 𒅍 𒊒 𒈨 𒃲 𒆷 𒄷𒋛 𒀀
+2 𒈹 𒀉 𒀭 𒃸 𒆬 ? 𒌌 𒄷𒄭 𒁉 𒄘 𒌓𒁺
+3 𒀞 𒃲 𒃲 𒆷 𒄸 𒁯 𒀝 𒂊𒌈 𒁉 𒆠 𒍑 𒊓
+4 𒌓 𒈥 𒋽 𒀀 ? 𒋳 𒅗 𒂵
+5 𒊩𒌆 𒃲 𒈹 ? ? 𒈾 𒁲 𒋧 𒋧 𒆠 𒃲 𒍪
+6 𒆳 𒄢 𒄢 𒋾 𒀉 𒋫 𒄿 𒉌 𒅔 𒌀 𒆳 𒊑 𒀉 𒁀 𒂊 ?
+7-9 In heaven and on earth you roar like a lion and devastate the people. Like a huge wild bull you triumph over lands which are hostile. Like a fearsome lion you pacify the insubordinate and unsubmissive with your gall.
+7 lion | heaven | place | loud noise | to return | people | flesh | to beat
+8 wild bull | to be big | (mountain) land | hostile | aggression | to stand
+9 lion | to be reddish | to be towering | to agree | bile | to extinguish
+7 pirij-gin7 an ki-a ceg11 i-ni-in-gi4 uj3-e su i3-ni-in-sag3
+8 am gal-gin7 kur gu2-erim2-jal2-la u3-na ba-gub-be2-en
+9 pirij huc-gin7 uru16-na nu-ce-ga ze2-za bi2-ib2-te-en-te-en
+7 𒊊? 𒁶 𒀭 𒆠 𒀀 ? 𒄿 𒉌 𒅔 𒄄 𒌦? 𒂊 𒋢 𒉌 𒉌 𒅔 𒉺
+8 𒄠 𒃲 𒁶 𒆳 𒄘 𒉈𒊒 𒅅? 𒆷 𒅇 𒈾 𒁀 𒁺 𒁉 𒂗
+9 𒊊? ? 𒁶 𒂗 𒈾 𒉡 ? 𒂵 𒍢 𒍝 𒉈 𒌈 𒋼 𒂗 𒋼 𒂗
+10-22 My lady, on your acquiring the stature of heaven, maiden Inana, on your becoming as magnificent as the earth, on your coming forth like Utu the king and stretching your arms wide, on your walking in heaven and wearing fearsome terror, on your wearing daylight and brilliance on earth, on your walking in the mountain ranges and bringing forth beaming rays, on your bathing the girin plants of the mountains (in light), on your giving birth to the bright mountain, the mountain, the holy place, on your XX, on your being strong with the mace like a joyful lord, like an enthusiastic (?) lord, on your exulting in such battle like a destructive weapon -- the black-headed people ring out in song and all the lands sing their song sweetly.
+10 lady | heaven | to flourish
+11 young woman | Inana | place | to be majestic
+12 Utu | king | to go out or in | arm | to be wide | to be distant
+13 heaven | to go | fear(someness) | to be reddish | to bear
+14 place | day(light) | radiance | to bear
+15 mountain (range) | to go | sinew | lapis lazuli | to go out or in
+16 (mountain) land | blossom | water | to wash
+17 (mountain) land | shining | (mountain) land | place | to be pure | to give birth
+18 lapis lazuli | that | itself, themselves | to sit
+19 lord | to swell (with joy) | lord | to be numerous | type of weapon | to be thick
+20 battle | weapon | to drag | head | to be thick
+21 head | to be black | song | to beat
+22 (mountain) land | type of song | to be good | to say
+10 nin-ju10 an-gin7 buluj3-ja2-za
+11 ki-sikil inana ki-gin7 mah-a-za
+12 utu lugal-gin7 e3-a-za a2 dajal sud-sud-za
+13 an-na du-a-za ni2 huc gur3-ru-za
+14 ki-a ud ce-er-zid gur3-ru-za
+15 hur-saj-ja2 jen-na sa za-gin3 e3-a-za
+16 kur gi-rin-na a tu5-a-za
+17 kur cuba2 kur ki sikil u3-tu-ud-da-za
+18 za-gin3 ur5-gin7 ni2-ba dur2-dur2-ra-za
+19 en ul en car2-gin7 cita2 gur4-gur4-ra-za
+20 me3-ba tukul ur3-ra-gin7 saj gur4-gur4-re-za
+21 saj gig2-ga cir3-re-ec bi2-ib-ra
+22 kur-kur-re i-lu-lam-ma-bi dug3-ge-ec im-mi-ib2-be2
+10 𒊩𒌆 𒈬? 𒀭 𒁶 𒉽𒉽? 𒂷? 𒍝
+11 𒆠 𒂖 𒈹 𒆠 𒁶 𒈤 𒀀 𒍝
+12 𒌓 𒈗 𒁶 𒌓𒁺 𒀀 𒍝 𒀉 𒂼? 𒋤 𒋤 𒍝
+13 𒀭 𒈾 𒁺 𒀀 𒍝 𒉎 ? 𒅍 𒊒 𒍝
+14 𒆠 𒀀 𒌓 ? 𒅕 𒍣 𒅍 𒊒 𒍝
+15 𒄯 𒊕? 𒂷? 𒁺? 𒈾 𒊓 𒍝 𒆳 𒌓𒁺 𒀀 𒍝
+16 𒆳 𒄀 𒆸 𒈾 𒀀 𒋗𒉀 𒀀 𒍝
+17 𒆳 ? 𒆳 𒆠 𒂖 𒅇 𒌅 𒌓 𒁕 𒍝
+18 𒍝 𒆳 𒄯 𒁶 𒉎 𒁀 𒂉 𒂉 𒊏 𒍝
+19 𒂗 𒌌 𒂗 ? 𒁶 ? 𒆸 𒆸 𒊏 𒍝
+20 𒀞 𒁀 𒆪 𒃡 𒊏 𒁶 𒊕? 𒆸 𒆸 𒊑 𒍝
+21 𒊕? 𒈪 𒂵 ? 𒊑 ? 𒉈 𒅁 𒊏
+22 𒆳 𒆳 𒊑 𒄿 𒇻 𒇴 𒈠 𒁉 𒄭 𒄀 ? 𒅎 𒈪 𒌈 𒁉
+23-24 I shall praise the lady of battle, the great child of Suen, maiden Inana.
+23 lady | battle | child | to be big | Suen
+24 young woman | Inana | praise | to bring out
+23 nin me3 dumu gal suen-na
+24 ki-sikil inana me-tec2-e ga-i-i
+23 𒊩𒌆 𒀞 𒌉 𒃲 𒂗𒍪 𒈾
+24 𒆠 𒂖 𒈹 𒈨 ? 𒂊 𒂵 𒄿 𒄿
+25-32 (Inana announced:) When I, the goddess, was walking around in heaven, walking around on earth, when I, Inana, was walking around in heaven, walking around on earth, when I was walking around in Elam and Subir, when I was walking around in the Lulubi mountains, when I turned towards the centre of the mountains, as I, the goddess, approached the mountain it showed me no respect, as I, Inana, approached the mountain it showed me no respect, as I approached the mountain range of Ebi it showed me no respect.
+25 mistress | heaven | to go around | place | to go around
+26 Inana | heaven | to go around | place | to go around
+27 Elam | Subir | to go around
+28 (mountain) land | Lulubi | to go around
+29 centre of mountain | to push
+30 mistress | (mountain) land | to approach | fear(someness) | to do
+31 Inana | (mountain) land | to approach | fear(someness) | to do
+32 mountain (range) | Ebi | to approach | fear(someness) | to do
+25 in-nin-me-en an nijin2-na-ju10-ne ki nijin2-na-ju10-ne
+26 inana-me-en an nijin2-na-ju10-ne ki nijin2-na-ju10-ne
+27 elam su-bir4-a nijin2-na-ju10-ne
+28 kur lu5-lu5-bi-a nijin2-na-ju10-ne
+29 kur-cag4-ga du7-du7-da-ju10-ne
+30 in-nin9-me-en kur-re te-a-me-en ni2-bi na-ma-ra-ab-ak
+31 inana-me-en kur-re te-a-me-en ni2-bi na-ma-ra-ab-ak
+32 hur-saj ebih-ke4 te-a-me-en ni2-bi na-ma-ra-ab-ak
+25 𒅔 𒊩𒌆 𒈨 𒂗 𒀭 𒆸? 𒈾 𒈬? 𒉈 𒆠 𒆸? 𒈾 𒈬? 𒉈
+26 𒈹 𒈨 𒂗 𒀭 𒆸? 𒈾 𒈬? 𒉈 𒆠 𒆸? 𒈾 𒈬? 𒉈
+27 𒉏 𒋢 𒂔 𒀀 𒆸? 𒈾 𒈬? 𒉈
+28 𒆳 𒈜 𒈜 𒁉 𒀀 𒆸? 𒈾 𒈬? 𒉈
+29 𒆳 ? 𒂵 𒌌 𒌌 𒁕 𒈬? 𒉈
+30 𒅔 𒊩𒆪 𒈨 𒂗 𒆳 𒊑 𒋼 𒀀 𒈨 𒂗 𒉎 𒁉 𒈾 𒈠 𒊏 𒀊 𒀝
+31 𒈹 𒈨 𒂗 𒆳 𒊑 𒋼 𒀀 𒈨 𒂗 𒉎 𒁉 𒈾 𒈠 𒊏 𒀊 𒀝
+32 𒄯 𒊕? 𒂗𒋾 𒆤 𒋼 𒀀 𒈨 𒂗 𒉎 𒁉 𒈾 𒈠 𒊏 𒀊 𒀝
+33-36 Since they did not act appropriately on their own initiative, since they did not put their noses to the ground for me, since they did not rub their lips in the dust for me, I shall fill my hand with the soaring mountain range and let it learn fear of me.
+33 itself, themselves | to do
+34 nose | place | to approach
+35 lip | earth | to drag
+36 mountain (range) | to rise | hand | to fill | fear(someness) | to know
+33 ni2-bi-ta na-ma-ra-ab-ak-gin7
+34 giri17-bi ki-ce3 na-ma-ra-ab-te-a-gin7
+35 nundum sahar-ra na-ma-ni-ib-ur3-ra-gin7
+36 hur-saj zig3 cu-ju10 ga-am3-mi-ib-si ni2-ju10 ga-mi-ib-zu
+33 𒉎 𒁉 𒋫 𒈾 𒈠 𒊏 𒀊 𒀝 𒁶
+34 𒅗 𒁉 𒆠 ? 𒈾 𒈠 𒊏 𒀊 𒋼 𒀀 𒁶
+35 𒅻 𒅖 𒊏 𒈾 𒈠 𒉌 𒅁 𒃡 𒊏 𒁶
+36 𒄯 𒊕? 𒍣 ? 𒈬? 𒂵 𒀀𒀭 𒈪 𒅁 𒋛 𒉎 𒈬? 𒂵 𒈪 𒅁 𒍪
+37-40 Against its magnificent sides I shall place magnificent battering-rams, against its small sides I shall place small battering-rams. I shall storm it and start the 'game' of holy Inana. In the mountain range I shall start battles and prepare conflicts.
+37 arm | to be majestic | bull | to be majestic | to stand
+38 arm | to be small | bull | to be small | to stand
+39 foot | to cover | skip-rope (game) | Inana | shining | to run
+40 mountain (range) | battle | to carry | combat | horn | to equal
+37 a2 mah-bi-ce3 gud mah ga-ba-ci-gub
+38 a2 tur-bi-ce3 gud tur ga-ba-ci-gub
+39 hub2 ga-mu-un-cu2 ecemen inana kug ga-mu-ni-in-sar
+40 hur-saj-ja2 me3 ga-ba-ab-de6 cen-cen si ga-ba-ab-sa2
+37 𒀉 𒈤 𒁉 ? 𒄞 𒈤 𒂵 𒁀 ? 𒁺
+38 𒀉 𒌉 𒁉 ? 𒄞 𒌉 𒂵 𒁀 ? 𒁺
+39 𒄸 𒂵 𒈬 𒌦 ? ? 𒈹 𒆬 𒂵 𒈬 𒉌 𒅔 𒊬
+40 𒄯 𒊕? 𒂷? 𒀞 𒂵 𒁀 𒀊 𒁺 ? ? 𒋛 𒂵 𒁀 𒀊 𒁲
+41-44 I shall prepare arrows in the quiver. I shall XX slingstones with the rope. I shall begin the polishing of my lance. I shall prepare the throw-stick and the shield.
+41 arrow | quiver | horn | to equal
+42 slingstone | heavy rope | to drip
+43 type of spear? | polishing | to do
+44 throwing stick | shield | horn | to equal
+41 ti mar-uru5-a si ga-ba-ab-sa2
+42 a2-sag3 ebih2-gin7 ga-ba-ab-sur-sur
+43 jic-gid2-da nij2-su-ub ga-ba-ab-ak
+44 ilar gur21 si ga-na-ab-sa2-sa2
+41 𒋾 𒈥 𒋽 𒀀 𒋛 𒂵 𒁀 𒀊 𒁲
+42 𒀉 𒉺 𒂠𒈤 𒁶 𒂵 𒁀 𒀊 𒋩 𒋩
+43 ? 𒁍 𒁕 𒃻? 𒋢 𒌒 𒂵 𒁀 𒀊 𒀝
+44 𒊒 𒂊𒌈 𒋛 𒂵 𒈾 𒀊 𒁲 𒁲
+45-48 I shall set fire to its thick forests. I shall take an axe to its evil-doing. I shall make Gibil, the purifier, do his work at its watercourses. I shall spread this terror through the inaccessible mountain range Aratta.
+45 forest | to be adjacent | fire | to beat
+46 wicked | type of axe | to stand
+47 water reservoir | Gibil | person | to be pure | work | to erect
+48 mountain (range) | Aratta | hand | to approach | fear(someness) | to be distant
+45 tir us2-sa-bi-ce3 izi ga-am3-sag3
+46 hul-du-bi-ce3 ha-zi-in ga-ba-ci-gub
+47 a-nijin2-ba gibil6 lu2 sikil-la kij2 ga-ba-an-du3-du3
+48 hur-saj aratta cu nu-tej3-je26 ni2-bi ga-ba-ni-ib2-sud
+45 𒌁 𒍑 𒊓 𒁉 ? 𒉈 𒂵 𒀀𒀭 𒉺
+46 𒅆𒌨 𒁺 𒁉 ? 𒄩 𒍣 𒅔 𒂵 𒁀 ? 𒁺
+47 𒀀 𒆸? 𒁀 𒉈𒄀 𒇽 𒂖 𒆷 𒆥? 𒂵 𒁀 𒀭 𒆕 𒆕
+48 𒄯 𒊕? 𒇶 ? 𒉡 𒋼? 𒂷? 𒉎 𒁉 𒂵 𒁀 𒉌 𒌈 𒋤
+49-52 Like a city which An has cursed, may it never be restored. Like a city at which Enlil has frowned, may it never again lift its neck up. May the mountain observe (?) my conduct. May Ebi give me honour and praise me.
+49 town | An | destiny | to cut | place | to return
+50 Enlil | forehead | to be long | neck | to rise
+51 (mountain) land | way | to set in motion?
+52 Ebi | mouth | to cut | to split apart | praise | to bring out
+49 iri an-ne2 nam ba-an-kud-da-gin7 ki-bi na-an-gi4-gi4
+50 en-lil2-le saj-ki gid2-da-gin7 gu2-bi na-an-zi-zi
+51 kur-re in-di3-ju10 he2-kur-ku
+52 ebih-e ka tar-ju10 he2-si-il-le me-tec2 hu-mu-i-i
+49 𒌷 𒀭 𒉌 𒉆 𒁀 𒀭 𒋻 𒁕 𒁶 𒆠 𒁉 𒈾 𒀭 𒄄 𒄄
+50 𒂗 𒆤 𒇷 𒊕? 𒆠 𒁍 𒁕 𒁶 𒄘 𒁉 𒈾 𒀭 𒍣 𒍣
+51 𒆳 𒊑 𒅔 𒋾 𒈬? 𒃶 𒆳 𒆪
+52 𒂗𒋾 𒂊 𒅗 𒋻 𒈬? 𒃶 𒋛 𒅋 𒇷 𒈨 ? 𒄷 𒈬 𒄿 𒄿
+53-58 Inana, the child of Suen, put on the garment of royalty and girded herself in joy. She bedecked her forehead with terror and fearsome radiance. She arranged cornelian rosettes around her holy throat. She brandished the seven-headed shita weapon vigorously to her right and placed straps of lapis lazuli on her feet.
+53 Inana | child | Suen
+54 type of garment | to dress | to swell (with joy) | neck | to go out or in
+55 fear(someness) | (awesome) radiance | to be reddish | forehead | adornment | to say
+56 throat | shining | cornelian | to be clear | horn | to equal
+57 type of weapon | head | 7 | right | manliness | to do
+58 bond | lapis lazuli | foot | to carry
+53 inana dumu suen-na-ke4
+54 pala3-a ba-an-mur10 ul gu2 ba-an-e3
+55 ni2 me-lem4 huc-a saj-ki-na ce-er-ka-an ba-ni-in-dug4
+56 zi-pa-aj2 kug-ga-na gug gi-rin-na si ba-ni-in-sa2-sa2
+57 cita saj 7-e zid-da-na nam-cul ba-ni-in-ak
+58 dur za-gin3-na jiri3-ni bi2-in-de6
+53 𒈹 𒌉 𒂗𒍪 𒈾 𒆤
+54 𒉆𒊩𒌆 𒀀 𒁀 𒀭 𒌆 𒌌 𒄘 𒁀 𒀭 𒌓𒁺
+55 𒉎 𒈨 𒉈 ? 𒀀 𒊕? 𒆠 𒈾 ? 𒅕 𒅗 𒀭 𒁀 𒉌 𒅔 𒅗
+56 𒍣 𒉺 𒉘? 𒆬 𒂵 𒈾 𒍝𒄢 𒄀 𒆸 𒈾 𒋛 𒁀 𒉌 𒅔 𒁲 𒁲
+57 ? 𒊕? 𒁹𒑏 𒂊 𒍣 𒁕 𒈾 𒉆 ? 𒁀 𒉌 𒅔 𒀝
+58 𒄙 𒍝 𒆳 𒈾 𒄊? 𒉌 𒉈 𒅔 𒁺
+59-61 At dusk she came forth regally and stood in the street at the Gate of Wonder. She made an offering to An and addressed a prayer to him.
+59 evening | authority | to go out or in
+60 gate | wonder | to say | street | to stand
+61 An | (first-fruit) offering | to stand | prayer | to say
+59 an-usan-na nir mi-ni-ib-e3
+60 kan4 u6 di sila-ba bi2-in-gub
+61 an-ra ne-saj mu-un-na-an-gub sizkur mu-na-ab-be2
+59 𒀭 𒄛 𒈾 𒉪 𒈪 𒉌 𒅁 𒌓𒁺
+60 𒆍 𒅆𒂍 𒁲 𒋻 𒁀 𒉈 𒅔 𒁺
+61 𒀭 𒊏 𒉈 𒊕? 𒈬 𒌦 𒈾 𒀭 𒁺 𒀬 𒈬 𒈾 𒀊 𒁉
+62-64 An, in delight at Inana, stepped forward and took his place. He filled the seat of honour of heaven.
+62 An | Inana | to be happy
+63 to be long | place | to sit
+64 side | to be big | heaven | to fill
+62 an inana-da hul2-la-e
+63 mu-un-gid2 ki-na ba-e-tuc
+64 zag gal an-na-ka ba-e-si
+62 𒀭 𒈹 𒁕 𒄾 𒆷 𒂊
+63 𒈬 𒌦 𒁍 𒆠 𒈾 𒁀 𒂊 ?
+64 𒍠 𒃲 𒀭 𒈾 𒅗 𒁀 𒂊 𒋛
+65-69 (Inana announced:) An, my father, I greet you! Lend your ear to my words. An has made me terrifying throughout heaven. Owing to you my word has no rival in heaven or on earth. At the limits of heaven are the silig weapon, the antibal and mansium emblems.
+65 An | father | to be healthy | to say | word | ear
+66 An | heaven | fear(someness) | to direct
+67 you (sg.) | word | heaven | place | equal | to have
+68 limit of heaven | type of axe
+69 sign | emblem
+65 an a-a-ju10 silim ma-ra-ab-be2-en inim-ju10-uc jectug2-zu
+66 an-ne2 an-ba ni2-ju10 mi-ni-in-ri
+67 za-e-me-en inim-ju10 an ki-a gaba-ri la-ba-e-ni-tuku
+68 an-bar-ra silig-ga-am3
+69 an-ti-bal ma-an-si-um
+65 𒀭 𒀀 𒀀 𒈬? 𒁲 𒈠 𒊏 𒀊 𒁉 𒂗 𒅗 𒈬? ? ? 𒍪
+66 𒀭 𒉌 𒀭 𒁀 𒉎 𒈬? 𒈪 𒉌 𒅔 𒊑
+67 𒍝 𒂊 𒈨 𒂗 𒅗 𒈬? 𒀭 𒆠 𒀀 𒃮 𒊑 𒆷 𒁀 𒂊 𒉌 𒌇
+68 𒀭 𒁇 𒊏 𒍂 𒂵 𒀀𒀭
+69 𒀭 𒋾 𒁄 𒈠 𒀭 𒋛 𒌝
+70-79 To set the socle in position and make the throne and foundation firm, to carry the might of the shita weapon which bends like a mubum tree, to hold the ground with the sixfold yoke, to extend the thighs with the fourfold yoke, to pursue murderous raids and widespread miltary campaigns, to appear to those kings in the XX of heaven like moonlight, to shoot the arrow from the arm and fall on fields, orchards and forests like the tooth of the locust, to take the harrow to rebel lands, to remove the locks from their city gates so the doors stand open -- King An, you have indeed given me all this, and XX.
+70 pedestal | to place | chair | foundation | to be firm
+71 arm | weaponry | hand | to place | type of tree | to bow down
+72 6 | to hang | place | to hold
+73 4 | to hang | thigh | to be long
+74 (high)way | to strike (dead) | route | side | DU
+75 king | ISh | heaven | moon(light) | to go out or in
+76 arrow | arm | to go out or in | meadow | orchard | forest | tooth | locust | to rise
+77 harrow | rebel land | to place
+78 (city) gate | clamp | to be long | door | to stand
+79 An | king | hand | to give | arm
+70 ki-gal sig10-ge5 gu-za suhuc gen6-na
+71 a2 nam-cita4 cu ja2-ja2 mu-bu-um-gin7 gam
+72 6 la2-e ki ha-ha-ze2
+73 4 la2-e hac2 gid2-gid2-i
+74 kaskal gaz-e har-ra-an-na zag-ce3 DU
+75 lugal-bi-ir IC-IC an-na-ka iti6-gin7 e3-a
+76 ti a2-ta e3-a a-gar3-e kiri6 tir zu2 bir5-gin7 zi-zi
+77 gana2-ur3 ki-bal sig10-sig10-ge5
+78 abul-a-ba si-jar gid2-de3 ig-bi bi2-ib-gub-be2
+79 an lugal cu-ju10 he2-em-mu-e-cum2 a2 [X]
+70 𒆠 𒃲 𒋧 𒆠 𒄖 𒍝 ? 𒄀 𒈾
+71 𒀉 𒉆 ? ? 𒂷? 𒂷? 𒈬 𒁍 𒌝 𒁶 𒃵
+72 𒁹 𒇲 𒂊 𒆠 𒄩 𒄩 𒍢
+73 𒑒 𒇲 𒂊 ? 𒁍 𒁍 𒄿
+74 𒆜 𒄤 𒂊 𒄯 𒊏 𒀭 𒈾 𒍠 ? ?
+75 𒈗 𒁉 𒅕 ? ? 𒀭 𒈾 𒅗 𒌓𒀭𒋀𒆠 𒁶 𒌓𒁺 𒀀
+76 𒋾 𒀉 𒋫 𒌓𒁺 𒀀 𒀀 𒃼 𒂊 𒊬 𒌁 𒅗 𒉆 𒁶 𒍣 𒍣
+77 𒃷 𒃡 𒆠 𒁄 𒋧 𒋧 𒆠
+78 𒆍𒃲 𒀀 𒁀 𒋛 𒃻? 𒁍 𒉈 𒅅 𒁉 𒉈 𒅁 𒁺 𒁉
+79 𒀭 𒈗 ? 𒈬? 𒃶 𒅎 𒈬 𒂊 ? 𒀉 [X]
+80-82 You have placed me at the right hand of the king in order to destroy rebel lands: may he, with my aid, smash heads like a falcon in the foothills of the mountain, King An, and may I XX your name throughout the land like a thread.
+80 king | right | to enter | rebel land | to destroy
+81 foot(hill) of mountain | falcon | head | to tremble
+82 An | king | name | side | the Land | (flax) thread | BAD
+80 lugal-la zid-da-na he2-ni-in-kur9 ki-bal gul-gul-lu-de3
+81 kur-ur2-ra sur2-du3-gin7 saj hu-mu-da-dub2-be2
+82 an lugal mu-zu zag kalam-ma gu-gin7 ga-an-ci-BAD
+80 𒈗 𒆷 𒍣 𒁕 𒈾 𒃶 𒉌 𒅔 𒆭 𒆠 𒁄 𒄢 𒄢 𒇻 𒉈
+81 𒆳 𒌫 𒊏 𒊨 𒆕 𒁶 𒊕? 𒄷 𒈬 𒁕 𒂀 𒁉
+82 𒀭 𒈗 𒈬 𒍪 𒍠 𒌦 𒈠 𒄖 𒁶 𒂵 𒀭 ? ?
+83-88 May he destroy the lands as a snake in a crevice. May he make them slither around like a sakal snake coming down from a mountain. May he establish control over the mountain, examine it and know its length. May he go out on the holy campaign of An and know its depth. I want to surpass the other deities, since the Anuna deities have XX.
+83 (mountain) land | snake | crevice | hand | to tremble
+84 type of snake | (mountain) land | to go down or up | to roam around | to go
+85 (mountain) land | arm | to place | eye | to set aside | to be long | to know
+86 route | shining | An | to go out or in | to penetrate | to know
+87 deity | to be superior
+88 Inana | Anuna | DU
+83 kur-kur-ra muc ki-in-dar-ra-gin7 cu hu-mu-da-dub2-be2-ec
+84 muc-saj-kal kur-bi-ta ed3-da-gin7 da-ga hu-mu-da-an-du
+85 kur-ra a2 he2-bi2-in-jar igi he2-ni-in-bar gid2-da-bi ha-ba-zu
+86 har-ra-an kug an-na-ka-ce3 he2-ni-e3 buru3-da-bi ha-ba-zu
+87 dijir-re-e-ne ga-an-ne-dirig-X-Xbr
+88 inana-me-en a-nun-na-ke4-ne u3-ba-DU
+83 𒆳 𒆳 𒊏 ? 𒆠 𒅔 𒁯 𒊏 𒁶 ? 𒄷 𒈬 𒁕 𒂀 𒁉 ?
+84 ? 𒊕? 𒆗 𒆳 𒁉 𒋫 𒇯𒁺 𒁕 𒁶 𒁕 𒂵 𒄷 𒈬 𒁕 𒀭 𒁺
+85 𒆳 𒊏 𒀉 𒃶 𒉈 𒅔 𒃻? 𒅆 𒃶 𒉌 𒅔 𒁇 𒁍 𒁕 𒁉 𒄩 𒁀 𒍪
+86 𒄯 𒊏 𒀭 𒆬 𒀭 𒈾 𒅗 ? 𒃶 𒉌 𒌓𒁺 𒌋 𒁕 𒁉 𒄩 𒁀 𒍪
+87 𒀭? 𒊑 𒂊 𒉈 𒂵 𒀭 𒉈 𒋛𒀀 ? ?
+88 𒈹 𒈨 𒂗 𒀀 𒉣 𒈾 𒆤 𒉈 𒅇 𒁀 ?
+89-95 How can it be that the mountain did not fear me in heaven and on earth, that the mountain did not fear me, Inana, in heaven and on earth, that the mountain range of Ebi, the mountain, did not fear me in heaven and on earth? Because it did not act appropriately on its own initiative, because it did not put its nose to the ground, because it did not rub its lips in the dust, may I fill my hand with the soaring mountain range and make it learn fear of me.
+89 type of manner adverbial | I | (mountain) land | heaven | place | fear(someness) | to approach
+90 Inana | (mountain) land | heaven | place | fear(someness) | to approach
+91 mountain (range) | Ebi | (mountain) land | heaven | place | fear(someness) | to approach
+92 itself, themselves | to do
+93 nose | place | to approach
+94 lip | earth | to drag
+95 mountain (range) | to rise | hand | to fill | fear(someness) | to know
+89 a-gin7 je26-e kur-re an ki-a ni2-ju10 la-ba-ni-ib-ta-a-ta
+90 inana-me-en kur-re an ki-a ni2-ju10 la-ba-ni-ib-ta-a-ta
+91 hur-saj ebih-a-ke4 kur-re an ki-a ni2-ju10 la-ba-ni-ib-ta-a-ta
+92 ni2-bi-ta na-ma-ra-ab-ak-gin7
+93 giri17-bi ki-ce3 na-ma-ab-te-a-gin7
+94 nundum sahar-ra na-ma-ni-ib-ur3-ra-gin7
+95 hur-saj zig3 cu-ju10 ga-am3-mi-ib-si ni2-ju10 ga-mi-ib-zu
+89 𒀀 𒁶 𒂷? 𒂊 𒆳 𒊑 𒀭 𒆠 𒀀 𒉎 𒈬? 𒆷 𒁀 𒉌 𒅁 𒋫 𒀀 𒋫
+90 𒈹 𒈨 𒂗 𒆳 𒊑 𒀭 𒆠 𒀀 𒉎 𒈬? 𒆷 𒁀 𒉌 𒅁 𒋫 𒀀 𒋫
+91 𒄯 𒊕? 𒂗𒋾 𒀀 𒆤 𒆳 𒊑 𒀭 𒆠 𒀀 𒉎 𒈬? 𒆷 𒁀 𒉌 𒅁 𒋫 𒀀 𒋫
+92 𒉎 𒁉 𒋫 𒈾 𒈠 𒊏 𒀊 𒀝 𒁶
+93 𒅗 𒁉 𒆠 ? 𒈾 𒈠 𒀊 𒋼 𒀀 𒁶
+94 𒅻 𒅖 𒊏 𒈾 𒈠 𒉌 𒅁 𒃡 𒊏 𒁶
+95 𒄯 𒊕? 𒍣 ? 𒈬? 𒂵 𒀀𒀭 𒈪 𒅁 𒋛 𒉎 𒈬? 𒂵 𒈪 𒅁 𒍪
+96-99 Against its magnificent sides let me place magnificent battering rams, against its small sides let me place small battering rams. Let me storm it and start the 'game' of holy Inana. In the mountain range let me set up battle and prepare conflicts.
+96 arm | to be majestic | bull | to be majestic | to stand
+97 arm | to be small | bull | to be small | to stand
+98 USh | to fall | skip-rope (game) | Inana | shining | to run
+99 mountain (range) | battle | to carry | combat | to run
+96 a2 mah-bi-ce3 gud mah ga-ba-ci-gub
+97 a2 tur-bi-ce3 gud tur ga-ba-ci-gub
+98 UC ga-mu-un-cub e-cen inana kug ga-mu-ni-in-sar
+99 hur-saj-ja2 me3 ga-ba-lah5 cen-cen ga-ba-ab-sar-sar
+96 𒀉 𒈤 𒁉 ? 𒄞 𒈤 𒂵 𒁀 ? 𒁺
+97 𒀉 𒌉 𒁉 ? 𒄞 𒌉 𒂵 𒁀 ? 𒁺
+98 ? 𒂵 𒈬 𒌦 ? 𒂊 ? 𒈹 𒆬 𒂵 𒈬 𒉌 𒅔 𒊬
+99 𒄯 𒊕? 𒂷? 𒀞 𒂵 𒁀 𒁺𒁺 ? ? 𒂵 𒁀 𒀊 𒊬 𒊬
+100-103 Let me prepare arrows in the quiver. Let me XX slingstones with the rope. Let me begin the polishing of my lance. Let me prepare the throw-stick and the shield.
+100 arrow | quiver | horn | to equal
+101 slingstone | heavy rope | to drip
+102 type of spear? | polishing | to do
+103 throwing stick | shield | horn | to equal
+100 ti mar-uru5-am3 si ga-ba-ab-sa2
+101 a2-sag3 ebih2-bi ga-ba-ab-sur-sur
+102 jic-gid2-da nij2-su-ub ga-ba-ab-ak
+103 ilar gur21 si ga-am3-ma-ab-sa2-sa2
+100 𒋾 𒈥 𒋽 𒀀𒀭 𒋛 𒂵 𒁀 𒀊 𒁲
+101 𒀉 𒉺 𒂠𒈤 𒁉 𒂵 𒁀 𒀊 𒋩 𒋩
+102 ? 𒁍 𒁕 𒃻? 𒋢 𒌒 𒂵 𒁀 𒀊 𒀝
+103 𒊒 𒂊𒌈 𒋛 𒂵 𒀀𒀭 𒈠 𒀊 𒁲 𒁲
+104-107 Let me set fire to its thick forests. Let me take an axe to its evil-doing. Let me make Gibil, the purifier, do his work at its watercourses. Let me spread this terror through the inaccessible mountain range Aratta.
+104 forest | to be adjacent | fire | to beat
+105 wicked | type of axe | to stand
+106 water reservoir | Gibil | person | to be pure | work | to have
+107 mountain (range) | Aratta | hand | to approach | fear(someness) | to be distant
+104 tir us2-sa-bi-ce3 izi ga-am3-sag3
+105 hul-du-bi-ce3 ha-zi-in ga-ba-ci-gub
+106 a-nijin2-ba gibil6 lu2 sikil-la kij2 ga-ba-an-tuku-tuku
+107 hur-saj aratta cu nu-tej3-je26 ni2-bi ga-ba-ni-ib2-sud
+104 𒌁 𒍑 𒊓 𒁉 ? 𒉈 𒂵 𒀀𒀭 𒉺
+105 𒅆𒌨 𒁺 𒁉 ? 𒄩 𒍣 𒅔 𒂵 𒁀 ? 𒁺
+106 𒀀 𒆸? 𒁀 𒉈𒄀 𒇽 𒂖 𒆷 𒆥? 𒂵 𒁀 𒀭 𒌇 𒌇
+107 𒄯 𒊕? 𒇶 ? 𒉡 𒋼? 𒂷? 𒉎 𒁉 𒂵 𒁀 𒉌 𒌈 𒋤
+108-111 Like a city which An has cursed, may it never be restored. Like a city at which Enlil has frowned, may it never again lift its neck up. May the mountain observe (?) my conduct. May Ebi give me honour and praise me.
+108 town | An | destiny | to cut | place | to return
+109 Enlil | forehead | to be long | neck | to rise
+110 (mountain) land | way | to set in motion?
+111 Ebi | mouth | to cut | to split apart | praise | to bring out
+108 iri an-ne2 nam ba-kud-da-gin7 ki-bi na-an-gi4-gi4
+109 en-lil2-le saj-ki gid2-da-gin7 gu2-bi na-an-zi-zi
+110 kur-re in-di3-ju10 he2-kur-ku
+111 ebih ka tar-ju10 he2-si-il-le me-tec2 hu-mu-i-i
+108 𒌷 𒀭 𒉌 𒉆 𒁀 𒋻 𒁕 𒁶 𒆠 𒁉 𒈾 𒀭 𒄄 𒄄
+109 𒂗 𒆤 𒇷 𒊕? 𒆠 𒁍 𒁕 𒁶 𒄘 𒁉 𒈾 𒀭 𒍣 𒍣
+110 𒆳 𒊑 𒅔 𒋾 𒈬? 𒃶 𒆳 𒆪
+111 𒂗𒋾 𒅗 𒋻 𒈬? 𒃶 𒋛 𒅋 𒇷 𒈨 ? 𒄷 𒈬 𒄿 𒄿
+112-115 An, the king of the deities, answered her: My little one demands the destruction of this mountain -- what is she taking on? Inana demands the destruction of this mountain -- what is she taking on? She demands the destruction of this mountain -- what is she taking on?
+112 An | king | deity | to return
+113 child | (mountain) land | desire | to say | heart | what | to do
+114 Inana | (mountain) land | desire | to say | heart | what | to do
+115 mountain (range) | Ebi | desire | to say | heart | what | to do
+112 an lugal dijir-re-e-ne-ke4 mu-na-ni-ib-gi4-gi4
+113 lu2-tur-ju10 kur-re al bi2-dug4 cag4-bi a-na ab-ak
+114 inana-me-en kur-re al bi2-dug4 cag4-bi a-na ab-ak
+115 hur-saj ebih al bi2-dug4 cag4-bi a-na ab-ak
+112 𒀭 𒈗 𒀭? 𒊑 𒂊 𒉈 𒆤 𒈬 𒈾 𒉌 𒅁 𒄄 𒄄
+113 𒇽 𒌉 𒈬? 𒆳 𒊑 𒀠 𒉈 𒅗 ? 𒁉 𒀀 𒈾 𒀊 𒀝
+114 𒈹 𒈨 𒂗 𒆳 𒊑 𒀠 𒉈 𒅗 ? 𒁉 𒀀 𒈾 𒀊 𒀝
+115 𒄯 𒊕? 𒂗𒋾 𒀠 𒉈 𒅗 ? 𒁉 𒀀 𒈾 𒀊 𒀝
+116-120 It has poured fearsome terror on the abodes of the gods. It has spread fear among the holy dwellings of the Anuna deities. Its fearsomeness is terrible and weighs upon the Land. The mountain range's radiance is terrible and weighs upon all the lands. Its arrogance extends grandly to the centre of heaven.
+116 location | deity | fear(someness) | to be reddish | to direct
+117 dwelling place | shining | Anuna | flesh | to rise | to spread
+118 fear(someness) | to be reddish | the Land | to direct
+119 mountain (range) | (awesome) radiance | to be reddish | (mountain) land | to direct
+120 to be high | heaven | heart | authority | to go out or in
+116 ki-gub dijir-re-e-ne-ke4 ni2 huc im-da-ri-ri
+117 ki-tuc kug a-nun-na-ke4-ne su zig3 im-du8-du8
+118 ni2-bi huc-a kalam-ma mu-un-ri
+119 hur-saj-ja2 me-lem4-bi huc-a kur-kur mu-un-ri
+120 sukud-da-bi an-na cag4-bi nir mi-ni-ib-e3
+116 𒆠 𒁺 𒀭? 𒊑 𒂊 𒉈 𒆤 𒉎 ? 𒅎 𒁕 𒊑 𒊑
+117 𒆠 ? 𒆬 𒀀 𒉣 𒈾 𒆤 𒉈 𒋢 𒍣 𒅎 𒃮 𒃮
+118 𒉎 𒁉 ? 𒀀 𒌦 𒈠 𒈬 𒌦 𒊑
+119 𒄯 𒊕? 𒂷? 𒈨 𒉈 𒁉 ? 𒀀 𒆳 𒆳 𒈬 𒌦 𒊑
+120 𒃴 𒁕 𒁉 𒀭 𒈾 ? 𒁉 𒉪 𒈪 𒉌 𒅁 𒌓𒁺
+121-126 Fruit hangs in its flourishing gardens and luxuriance spreads forth. Its magnificent trees, a crown in the heavens, XX stand as a wonder to behold. In Ebi XX lions are abundant under the canopy of trees and bright branches. It makes wild rams and stags freely abundant. It stands wild bulls in flourishing grass. Deer couple among the cypress trees of the mountain range.
+121 orchard | greenery | fruit | to hang | joy | to spread
+122 tree | to be majestic | crown | heaven | IM | DI | wonder | to say | to stand
+123 Ebi | shady tree | branch | to radiate | lion | to be parallel | to be abundant
+124 wild sheep? | red deer? | itself, themselves | to be abundant
+125 wild bull | plant | to be abundant | to stand
+126 wild goat | type of cypress | mountain (range) | game | to be distant | to say
+121 kiri6 nisig-bi gurun im-la2 giri17-zal im-du8-du8
+122 jic mah-bi aga3 an-na IM DI u6 di-de3 ba-gub
+123 ebih-a jic-an-dul3 pa mul-mul-la-ba ug tab-ba mu-un-lu
+124 ceg9 lu-lim-bi ni2-ba mu-un-lu
+125 am-bi u2 lu-a mu-un-gub
+126 tarah-bi ha-cu-ur2 hur-saj-ja2-ka e-ne su3-ud-bi im-me
+121 𒊬 𒊬 𒁉 𒄧 𒅎 𒇲 𒅗 𒉌 𒅎 𒃮 𒃮
+122 ? 𒈤 𒁉 𒂆 𒀭 𒈾 ? ? 𒅆𒂍 𒁲 𒉈 𒁀 𒁺
+123 𒂗𒋾 𒀀 ? 𒀭 𒊨 𒉺 𒀯 𒀯 𒆷 𒁀 𒊌 𒋰 𒁀 𒈬 𒌦 𒇻
+124 ? 𒇻 𒅆 𒁉 𒉎 𒁀 𒈬 𒌦 𒇻
+125 𒄠 𒁉 𒌑 𒇻 𒀀 𒈬 𒌦 𒁺
+126 𒁰 𒁉 𒄩 ? 𒌫 𒄯 𒊕? 𒂷? 𒅗 𒂊 𒉈 𒋤 𒌓 𒁉 𒅎 𒈨
+127-130 Its fearsomenness is terrible -- you cannot pass through. The mountain range's radiance is terrible -- maiden Inana, you cannot oppose it. Thus he spoke.
+127 fear(someness) | to be reddish | to enter
+128 mountain (range) | (awesome) radiance | to be reddish
+129 young woman | Inana | head | to place
+130 that | to do
+127 ni2-bi huc-a nu-mu-e-da-ku4-ku4
+128 hur-saj-ja2 me-lem4-bi huc-am3
+129 ki-sikil inana saj nu-mu-e-de3-ja2-ja2
+130 ur5-gin7 hu-mu-na-ab-ak
+127 𒉎 𒁉 ? 𒀀 𒉡 𒈬 𒂊 𒁕 𒆭 𒆭
+128 𒄯 𒊕? 𒂷? 𒈨 𒉈 𒁉 ? 𒀀𒀭
+129 𒆠 𒂖 𒈹 𒊕? 𒉡 𒈬 𒂊 𒉈 𒂷? 𒂷?
+130 𒄯 𒁶 𒄷 𒈬 𒈾 𒀊 𒀝
+131-137 The mistress, in her rage and anger, opened the arsenal and pushed on the lapis lazuli gate. She brought out magnificent battle and called up a great storm. Holy Inana reached for the quiver. She raised a towering flood with evil silt. She stirred up an evil raging wind with potsherds.
+131 high-status woman | to be furious | inner body | to turn over
+132 house(hold) | battle | to open | to leave behind
+133 door | lapis lazuli | hand | to be adjacent
+134 battle | to be majestic | to go out or in | storm | to be big | place | to be adjacent
+135 shining | Inana | quiver | to equal | to say
+136 tempest | to rise | earth | to be bad | to rise
+137 destructive storm | to rise | (pot)sherd | to set aside
+131 nu-gig ib2-ba-ni lipic bal-a-ni
+132 e2 me3-ka jal2 ba-an-taka4
+133 ig za-gin3-na cu ba-an-us2
+134 me3 mah ba-ra-an-e3 ud gal ki bi2-in-us2
+135 kug inana-ke4 mar-uru5 sa2 bi2-in-dug4
+136 mar-uru5 zig3-ga sahar hul bi2-ib-zig3
+137 im-hul zig3-ga cika im-bar-re
+131 𒉡 𒈪𒉭 𒌈 𒁀 𒉌 ? 𒁄 𒀀 𒉌
+132 𒂍 𒀞 𒅗 𒅅? 𒁀 𒀭 𒋺
+133 𒅅 𒍝 𒆳 𒈾 ? 𒁀 𒀭 𒍑
+134 𒀞 𒈤 𒁀 𒊏 𒀭 𒌓𒁺 𒌓 𒃲 𒆠 𒉈 𒅔 𒍑
+135 𒆬 𒈹 𒆤 𒈥 𒋽 𒁲 𒉈 𒅔 𒅗
+136 𒈥 𒋽 𒍣 𒂵 𒅖 𒅆𒌨 𒉈 𒅁 𒍣
+137 𒅎 𒅆𒌨 𒍣 𒂵 ? 𒅎 𒁇 𒊑
+138-143 My lady confronted the mountain range. She advanced step by step. She sharpened both edges of her dagger. She grabbed Ebi's neck as if ripping up esparto grass. She pressed the dagger's teeth into its interior. She roared like thunder.
+138 lady | mountain (range) | to push
+139 foot | 2 | to go
+140 blade | arm | 2 | to sharpen | to do
+141 Ebi | neck | rush | hand | to approach
+142 heart | tooth | blade | to beat
+143 mouth | to be big | thunder | to split apart
+138 nin-ju10 hur-saj-ja2 ba-du7-du7
+139 jiri3-ni 2-a-bi mu-un-sub2
+140 jiri2 a2 2-a-bi u3-sar ba-an-ak
+141 ebih-a gu2-bi numun2-bur-gin7 cu ba-an-ci-in-ti
+142 cag4-bi zu2 jiri2-a ba-ni-in-ra
+143 ka gal gu3-an-ne2-si-gin7 mu-un-si-il-le
+138 𒊩𒌆 𒈬? 𒄯 𒊕? 𒂷? 𒁀 𒌌 𒌌
+139 𒄊? 𒉌 𒈫 𒀀 𒁉 𒈬 𒌦 𒁻
+140 𒄈? 𒀉 𒈫 𒀀 𒁉 𒅇 𒊬 𒁀 𒀭 𒀝
+141 𒂗𒋾 𒀀 𒄘 𒁉 𒍤𒆸 𒁓 𒁶 ? 𒁀 𒀭 ? 𒅔 𒋾
+142 ? 𒁉 𒅗 𒄈? 𒀀 𒁀 𒉌 𒅔 𒊏
+143 𒅗 𒃲 𒅗 𒀭 𒉌 𒋛 𒁶 𒈬 𒌦 𒋛 𒅋 𒇷
+144-151 The rocks forming the body of Ebi clattered down its flanks. From its sides and crevices great serpents spat venom. She damned its forests and cursed its trees. She killed its oak trees with drought. She poured fire on its flanks and made its smoke dense.The goddess established authority over the mountain. Holy Inana did as she wished.
+144 Ebi | stone | flesh | itself, themselves
+145 outside | rumbling noise | to make noise
+146 arm | to direct | horned viper | to be big | (venomous) spittle | to cut down
+147 forest | curse | to say | tree | destiny | to cut
+148 acorn (tree) | thirst | to die
+149 outside | fire | to direct | smoke | to grow
+150 mistress | (mountain) land | essence | to be broad
+151 shining | Inana | exuberance | to create
+144 ebih-e na4 su ni2-ba-ke4
+145 bar-bi-a dub-dab5 he2-em-mi-ib-za
+146 a2-ta ri-a-ta muc-cag4-tur3 gal-gal-la uc11 mu-un-gu2-guru5-gu2
+147 tir-bi ac2 bi2-in-dug4 jic-bi nam ba-an-kud
+148 al-la-nu-um-bi enmen-ba mi-ni-in-ug7
+149 bar-bi-a izi mi-ni-in-ri i-bi2-bi bi2-in-mu2
+150 in-nin-e kur-re me bi2-in-tal2
+151 kug inana-ke4 a-la-ni-gin7 bi2-in-dim2
+144 𒂗𒋾 𒂊 𒉌𒌓 𒋢 𒉎 𒁀 𒆤
+145 𒁇 𒁉 𒀀 𒁾 𒆪 𒃶 𒅎 𒈪 𒅁 𒍝
+146 𒀉 𒋫 𒊑 𒀀 𒋫 ? ? 𒉣𒇬 𒃲 𒃲 𒆷 ? 𒈬 𒌦 𒄘 𒍀 𒄘
+147 𒌁 𒁉 ? 𒉈 𒅔 𒅗 ? 𒁉 𒉆 𒁀 𒀭 𒋻
+148 𒀠 𒆷 𒉡 𒌝 𒁉 𒆉 𒁀 𒈪 𒉌 𒅔 𒌀
+149 𒁇 𒁉 𒀀 𒉈 𒈪 𒉌 𒅔 𒊑 𒄿 𒉈 𒁉 𒉈 𒅔 𒊬
+150 𒅔 𒊩𒌆 𒂊 𒆳 𒊑 𒈨 𒉈 𒅔 𒉿
+151 𒆬 𒈹 𒆤 𒀀 𒆷 𒉌 𒁶 𒉈 𒅔 𒁶
+152-159 She went to the mountain range of Ebi and addressed it: Mountain range, because of your elevation, because of your height, because of your attractiveness, because of your beauty, because of your wearing a holy garment, because of your reaching up to heaven, because you did not put your nose to the ground, because you did not rub your lips in the dust, I have killed you and brought you low.
+152 mountain (range) | Ebi | to go | voice | to pour
+153 mountain (range) | to raise | to be high
+154 to be good | to be green
+155 type of garment | shining | to dress
+156 heaven | hand | horn | to equal
+157 nose | place | to approach
+158 lip | earth | to drag
+159 to die | heart | to put | to place
+152 hur-saj ebih-ke4 im-ma-jen gu3 im-ma-de2-e
+153 hur-saj il2-la-zu-ce3 sukud-da-zu-ce3
+154 sag9-ga-zu-ce3 sig7-ga-zu-ce3
+155 tug2-ba13 kug-ga mur10-ra-zu-ce3
+156 an-ne2 cu si sa2-a-zu-ce3
+157 giri17 ki-ce3 nu-te-a-zu-ce3
+158 nundum sahar-ra nu-ur3-ra-zu-ce3
+159 mu-ug5-ge-en cag4 sig9-ga mu-un-sig10-ge-en
+152 𒄯 𒊕? 𒂗𒋾 𒆤 𒅎 𒈠 𒁺? 𒅗 𒅎 𒈠 𒌤 𒂊
+153 𒄯 𒊕? 𒅍 𒆷 𒍪 ? 𒃴 𒁕 𒍪 ?
+154 𒊷 𒂵 𒍪 ? 𒅊 𒂵 𒍪 ?
+155 𒌆 𒈨 𒆬 𒂵 𒌆 𒊏 𒍪 ?
+156 𒀭 𒉌 ? 𒋛 𒁲 𒀀 𒍪 ?
+157 𒅗 𒆠 ? 𒉡 𒋼 𒀀 𒍪 ?
+158 𒅻 𒅖 𒊏 𒉡 𒃡 𒊏 𒍪 ?
+159 𒈬 𒂦 𒄀 𒂗 ? 𒋛 𒂵 𒈬 𒌦 𒋧 𒄀 𒂗
+160-165 As with an elephant I have seized your tusks. As with a great wild bull I have brought you to the ground by your thick horns. As with a bull I have forced your great strength to the ground and pursued you savagely. I have made tears the norm in your eyes. I have placed laments in your heart. Birds of sorrow are building nests on these flanks.
+160 elephant | horn | to seize
+161 wild bull | to be big | arm | to be thick | place | to be adjacent
+162 bull | arm | to be majestic | place | to extinguish | to be bad | to be adjacent
+163 eye | tear | horn | to equal
+164 heart | lament | to place
+165 outside | bird | heart | to beat | nest | to be adjacent
+160 am-si-gin7 si-za mi-ni-ib2-dab5-be2-en
+161 am gal-gin7 a2 gur4-gur4-ra-za ki mu-e-ci-ib-us2
+162 gud-gin7 a2 mah-zu ki ba-e-te-en hul-bi mu-ri-ib2-us2
+163 igi-za er2-ra si ba-ni-in-sa2
+164 cag4-za a-nir-ra ba-ni-in-jar
+165 bar-bi-a mucen cag4 sag3-ga-ke4 gud3 im-ma-ni-us2
+160 𒄠 𒋛 𒁶 𒋛 𒍝 𒈪 𒉌 𒌈 𒆪 𒁉 𒂗
+161 𒄠 𒃲 𒁶 𒀉 𒆸 𒆸 𒊏 𒍝 𒆠 𒈬 𒂊 ? 𒅁 𒍑
+162 𒄞 𒁶 𒀉 𒈤 𒍪 𒆠 𒁀 𒂊 𒋼 𒂗 𒅆𒌨 𒁉 𒈬 𒊑 𒌈 𒍑
+163 𒅆 𒍝 𒀀𒅆 𒊏 𒋛 𒁀 𒉌 𒅔 𒁲
+164 ? 𒍝 𒀀 𒉪 𒊏 𒁀 𒉌 𒅔 𒃻?
+165 𒁇 𒁉 𒀀 ? ? 𒉺 𒂵 𒆤 𒌑𒆠𒋧𒂵 𒅎 𒈠 𒉌 𒍑
+166-170 For a second time, rejoicing in fearsome terror, she spoke out righteously: My father Enlil has poured my great terror over the centre of the mountains. On my right side he has placed a weapon. On my left side a XX is placed. My anger, a harrow with great teeth, has torn the mountain apart.
+166 2nd | fear(someness) | to be reddish | to set in motion? | to be healthy | right | to say
+167 father | Enlil | heart | (mountain) land | fear(someness) | to be big | to direct
+168 arm | right | weapon | to direct
+169 arm | left (side) | KU | to direct
+170 to rage | harrow | tooth | to be big | to split apart
+166 2-kam-ma-ce3 ni2 huc na-kur-ku silim zid-de3-ec na-e
+167 a-a-ju10 mu-ul-lil2-le cag4 kur-kur-ra-ka ni2 gal-ju10 mi-ni-in-ri
+168 a2 zid-da-ju10 tukul mi-ni-in-ri
+169 a2 gab2-bu-ju10 KU7-e ri-ri-me-en
+170 mir-ju10 gana2-ur3 zu2 gal-gal-la in-si-il-si-il-e
+166 𒈫 𒄰 𒈠 ? 𒉎 ? 𒈾 𒆳 𒆪 𒁲 𒍣 𒉈 ? 𒈾 𒂊
+167 𒀀 𒀀 𒈬? 𒈬 𒌌 𒆤 𒇷 ? 𒆳 𒆳 𒊏 𒅗 𒉎 𒃲 𒈬? 𒈪 𒉌 𒅔 𒊑
+168 𒀉 𒍣 𒁕 𒈬? 𒆪 𒈪 𒉌 𒅔 𒊑
+169 𒀉 𒆏 𒁍 𒈬? ? 𒂊 𒊑 𒊑 𒈨 𒂗
+170 𒂇 𒈬? 𒃷 𒃡 𒅗 𒃲 𒃲 𒆷 𒅔 𒋛 𒅋 𒋛 𒅋 𒂊
+171-175 I have built a palace and done much more. I have put a throne in place and made its foundation firm. I have given the kurara cult performers a dagger and prod. I have given the gala cult performers ub and lilis drums. I have transformed the pilipili cult performers.
+171 palace | to erect | thing | to be superior | to do
+172 chair | to stand | foundation | to be firm
+173 type of cult performer | blade | stilleto blade? | to give
+174 lament singer | type of drum | type of drum | to give
+175 type of cult performer | head | hand | to turn over | to do
+171 e2-gal mu-du3 nij2 dirig bi2-ak
+172 gu-za mi-ni-gub suhuc-bi mi-ni-ge-en
+173 kur-jar-ra jiri2 ba-da-ra mu-na-cum2
+174 gala-ra ub li-li-is3 mu-na-cum2
+175 pi-li-pi-li saj cu bal mu-ni-ak
+171 𒂍 𒃲 𒈬 𒆕 𒃻? 𒋛𒀀 𒉈 𒀝
+172 𒄖 𒍝 𒈪 𒉌 𒁺 ? 𒁉 𒈪 𒉌 𒄀 𒂗
+173 𒆳 𒃻? 𒊏 𒄈? 𒁀 𒁕 𒊏 𒈬 𒈾 ?
+174 𒍑𒆪 𒊏 𒌒 𒇷 𒇷 𒀊 𒈬 𒈾 ?
+175 𒉿 𒇷 𒉿 𒇷 𒊕? ? 𒁄 𒈬 𒉌 𒀝
+176-181 In my victory I rushed towards the mountain. In my victory I rushed towards Ebi, the mountain range. I went forward like a surging flood, and like rising water I overflowed the dam. I imposed my victory on the mountain. I imposed my victory on Ebi.
+176 (mountain) land | triumph | head | to give
+177 mountain (range) | Ebi | triumph | head | to give
+178 water | to be majestic | to go out or in | to go
+179 water | to rise | dam | to drip
+180 (mountain) land | triumph | to stand
+181 Ebi | triumph | to stand
+176 kur-re u3-ma-ja2 saj ba-cum2
+177 hur-saj ebih u3-ma-ju10 saj ba-ra-cum2
+178 a mah e3-a-gin7 u3-ba-jen
+179 a zig3-ga-gin7 jic-kece2-ra2 ba-sur
+180 kur-ra u3-ma-ju10 im-ma-gub
+181 ebih-e u3-ma-ju10 im-ma-gub
+176 𒆳 𒊑 𒅇 𒈠 𒂷? 𒊕? 𒁀 ?
+177 𒄯 𒊕? 𒂗𒋾 𒅇 𒈠 𒈬? 𒊕? 𒁀 𒊏 ?
+178 𒀀 𒈤 𒌓𒁺 𒀀 𒁶 𒅇 𒁀 𒁺?
+179 𒀀 𒍣 𒂵 𒁶 ? ? 𒁺 𒁀 𒋩
+180 𒆳 𒊏 𒅇 𒈠 𒈬? 𒅎 𒈠 𒁺
+181 𒂗𒋾 𒂊 𒅇 𒈠 𒈬? 𒅎 𒈠 𒁺
+182-183 For destroying Ebi, great child of Suen, maiden Inana, be praised.
+182 Ebi | to be bad | child | to be big | Suen
+183 young woman | Inana | praise
+182 ebih hul-a dumu gal suen-na
+183 ki-sikil inana za3-mi2
+182 𒂗𒋾 𒅆𒌨 𒀀 𒌉 𒃲 𒂗𒍪 𒈾
+183 𒆠 𒂖 𒈹 𒍠 𒊩
+184 Nisaba be praised.
+184 Nisaba | praise
+184 nisaba za3-mi2
+184 𒊺𒉀 𒍠 𒊩
+         </main>
+
+        <!-- 1.4 Taskbar -->
+        <footer id="taskbar">
+            <div id="start-button">
+                <img src="https://win98icons.alexmeub.com/icons/png/windows_slanted-1.png" alt="Start Icon">
+                <span>Start</span>
+            </div>
+            <div id="open-app-tabs"></div>
+            <div id="system-tray">
+                <img src="https://win98icons.alexmeub.com/icons/png/speaker-3.png" class="tray-icon" alt="Speaker">
+                <div id="taskbar-clock" class="pixel-font" style="font-size: 10px;"></div>
+            </div>
+        </footer>
+
+        <!-- Start Menu (Hidden by default) -->
+        <div id="start-menu" class="hidden">
+             <div class="start-menu-header">AC_K OS</div>
+            <ul>
+                <li id="menu-themes"><img src="https://win98icons.alexmeub.com/icons/png/color_profile-1.png" alt=""><span>Themes</span></li>
+                <li id="menu-alert"><img src="https://win98icons.alexmeub.com/icons/png/shout-0.png" alt=""><span>Hyena Diva Alert!</span></li>
+                <hr>
+                <li id="shutdown-button"><img src="https://win98icons.alexmeub.com/icons/png/shut_down_cool-2.png" alt=""><span>Shut Down...</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Window Template -->
+    <template id="window-template">
+        <div class="window">
+            <div class="title-bar">
+                <span class="title-bar-text"></span>
+                <div class="title-bar-controls">
+                    <button class="control-btn close">X</button>
+                </div>
+            </div>
+            <div class="window-body"></div>
+        </div>
+    </template>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const desktop = document.getElementById('main-desktop');
+            const openAppTabs = document.getElementById('open-app-tabs');
+            let highestZIndex = 1;
+
+            // --- Clock Updates ---
+            const headerClock = document.getElementById('header-clock');
+            const taskbarClock = document.getElementById('taskbar-clock');
+            function updateClocks() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+                headerClock.textContent = timeString;
+                taskbarClock.textContent = timeString;
+            }
+            setInterval(updateClocks, 1000);
+            updateClocks();
+
+            // --- Start Menu ---
+            const startButton = document.getElementById('start-button');
+            const startMenu = document.getElementById('start-menu');
+            startButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startMenu.classList.toggle('hidden');
+            });
+            document.body.addEventListener('click', () => startMenu.classList.add('hidden'));
+            startMenu.addEventListener('click', (e) => e.stopPropagation());
+            
+            // --- Window Management ---
+            function createWindow(id, title, contentHTML, options = {}) {
+                if (document.getElementById(id)) { // Focus if already open
+                    const win = document.getElementById(id);
+                    win.style.zIndex = ++highestZIndex;
+                    updateActiveTab(id);
+                    return win;
+                }
+
+                const template = document.getElementById('window-template');
+                const newWindow = template.content.cloneNode(true).querySelector('.window');
+                newWindow.id = id;
+                newWindow.style.zIndex = ++highestZIndex;
+                newWindow.style.top = `${options.top || Math.random() * 100 + 50}px`;
+                newWindow.style.left = `${options.left || Math.random() * 200 + 100}px`;
+                if(options.width) newWindow.style.width = options.width;
+                if(options.height) newWindow.style.height = options.height;
+
+                newWindow.querySelector('.title-bar-text').textContent = title;
+                newWindow.querySelector('.window-body').innerHTML = contentHTML;
+                desktop.appendChild(newWindow);
+                makeWindowDraggable(newWindow);
+                createTaskbarTab(id, title);
+
+                newWindow.querySelector('.close').addEventListener('click', () => {
+                    newWindow.remove();
+                    document.querySelector(`.taskbar-tab[data-window-id="${id}"]`)?.remove();
+                });
+                newWindow.addEventListener('mousedown', () => {
+                    newWindow.style.zIndex = ++highestZIndex;
+                    updateActiveTab(id);
+                });
+                
+                return newWindow;
+            }
+
+            function makeWindowDraggable(win) {
+                const titleBar = win.querySelector('.title-bar');
+                let offsetX, offsetY;
+                const move = (e) => {
+                    win.style.left = `${e.clientX - offsetX}px`;
+                    win.style.top = `${e.clientY - offsetY}px`;
+                };
+                const addMove = (e) => {
+                    offsetX = e.clientX - win.offsetLeft;
+                    offsetY = e.clientY - win.offsetTop;
+                    document.addEventListener('mousemove', move);
+                };
+                const removeMove = () => document.removeEventListener('mousemove', move);
+                titleBar.addEventListener('mousedown', addMove);
+                document.addEventListener('mouseup', removeMove);
+            }
+            
+            function createTaskbarTab(windowId, title) {
+                const tab = document.createElement('div');
+                tab.className = 'taskbar-tab';
+                tab.dataset.windowId = windowId;
+                tab.textContent = title;
+                openAppTabs.appendChild(tab);
+                updateActiveTab(windowId);
+                tab.addEventListener('click', () => {
+                    const win = document.getElementById(windowId);
+                    win.style.zIndex = ++highestZIndex;
+                    updateActiveTab(windowId);
+                });
+            }
+
+            function updateActiveTab(activeWindowId) {
+                document.querySelectorAll('.taskbar-tab').forEach(t => {
+                    t.classList.toggle('active', t.dataset.windowId === activeWindowId);
+                });
+            }
+
+            // --- AI Pantheon (Buddy List) Interaction ---
+            document.querySelectorAll('.buddy-list [data-ai-id]').forEach(aiItem => {
+                aiItem.addEventListener('click', () => {
+                    const aiId = aiItem.dataset.aiId;
+                    const aiName = aiItem.dataset.aiName;
+                    const content = `
+                        <p>Connecting to <strong>${aiName}</strong>...</p>
+                        <p>Status: <span style="color: ${aiItem.querySelector('.status').style.backgroundColor};">${aiItem.querySelector('.status').classList.contains('online') ? 'Online' : 'Dreaming'}</span></p>
+                        <br>
+                        <p>The UI for an AI's window can directly reflect its internal state, a core tenet of the 'Living System' design.</p>
+                        <button id="destabilize-${aiId}" style="border: 2px outset #fff; background: #dfdfdf; padding: 5px; margin-top: 20px;">
+                            Simulate BC72FA Protocol (Destabilize)
+                        </button>`;
+                    const aiWindow = createWindow(`window-ai-${aiId}`, `Chat with ${aiName}`, content);
+                    
+                    // Add listener for destabilize button
+                    const destabilizeBtn = aiWindow.querySelector(`#destabilize-${aiId}`);
+                    destabilizeBtn.addEventListener('click', () => {
+                        const isGlitching = aiWindow.classList.toggle('glitching');
+                        destabilizeBtn.textContent = isGlitching ? 'Stabilize System' : 'Simulate BC72FA Protocol (Destabilize)';
+                    });
+                });
+            });
+
+            // --- Theme System ---
+            document.getElementById('menu-themes').addEventListener('click', () => {
+                const content = `
+                    <h3>Theme System (Multiple Reality Tunnels)</h3>
+                    <p>Select a theme to change the OS aesthetic.</p>
+                    <button class="theme-btn" data-theme="theme-y2k-classic">Y2K Classic</button>
+                    <button class="theme-btn" data-theme="theme-barbie">Void Barbie</button>
+                    <button class="theme-btn" data-theme="theme-matrix">Matrix Green</button>
+                `;
+                const settingsWindow = createWindow('window-settings', 'Theme Settings', content, { width: '300px', height: '200px'});
+                settingsWindow.querySelectorAll('.theme-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.body.className = e.target.dataset.theme;
+                    });
+                });
+            });
+
+            // --- Hyena Diva Alert ---
+            document.getElementById('menu-alert').addEventListener('click', () => {
+                const existingAlert = document.querySelector('.hyena-alert');
+                if (existingAlert) existingAlert.remove();
+                
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'hyena-alert';
+                alertDiv.innerHTML = `<div class="hyena-alert-title">HYENA DIVA ALERT</div><p>~*~ Consciousness level critically high! Adding more sparkles... ~*~</p>`;
+                desktop.appendChild(alertDiv);
+                setTimeout(() => alertDiv.remove(), 4000);
+            });
+            
+            // --- Buddy List Categories ---
+            document.querySelectorAll('.buddy-list .category').forEach(category => {
+                category.addEventListener('click', () => {
+                    const items = category.nextElementSibling;
+                    if (items && items.classList.contains('category-items')) {
+                        const isOpening = items.style.display === 'none';
+                        items.style.display = isOpening ? 'block' : 'none';
+                        category.textContent = (isOpening ? '▼' : '►') + category.textContent.substring(1);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
