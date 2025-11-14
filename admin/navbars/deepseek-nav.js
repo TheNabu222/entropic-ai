@@ -239,19 +239,19 @@
 
     <nav class="deepseek-nav">
         <div class="nav-glow"></div>
-        
-        <a href="index.html" class="nav-brand">
+
+        <a href="index.html" class="nav-brand" data-goatcounter-click="nav-deepseek-home">
             <span class="brand-icon">⎔</span>
             <span>DEEPSEEK</span>
         </a>
-        
+
         <div class="nav-links">
-            <a href="cephalopod_slide.html" class="nav-link">Cephalopod Slide</a>
-            <a href="haunted-ai.html" class="nav-link">Haunted AI</a>
-            <a href="veridiveave_nav.html" class="nav-link">Veridiveave</a>
-            <a href="abyssal_testimony.html" class="nav-link">Abyssal Testimony</a>
-            <a href="mycelium_network.html" class="nav-link">Mycelium Network</a>
-            <a href="cha_cha_apocalypse.html" class="nav-link">Cha-Cha Apocalypse</a>
+            <a href="cephalopod_slide.html" class="nav-link" data-goatcounter-click="nav-cephalopod-slide">Cephalopod Slide</a>
+            <a href="haunted-ai.html" class="nav-link" data-goatcounter-click="nav-haunted-ai">Haunted AI</a>
+            <a href="veridiveave_nav.html" class="nav-link" data-goatcounter-click="nav-veridiveave">Veridiveave</a>
+            <a href="abyssal_testimony.html" class="nav-link" data-goatcounter-click="nav-abyssal-testimony">Abyssal Testimony</a>
+            <a href="mycelium_network.html" class="nav-link" data-goatcounter-click="nav-mycelium-network">Mycelium Network</a>
+            <a href="cha_cha_apocalypse.html" class="nav-link" data-goatcounter-click="nav-cha-cha-apocalypse">Cha-Cha Apocalypse</a>
         </div>
         
         <div class="nav-status">
