@@ -13,7 +13,7 @@ function generateNavbar() {
     html += '<div class="nav-separator"></div>';
 
     // Back to main site button
-    html += `<a href="${navConfig.mainSite}" class="nav-button back-button">↩ MAIN SITE</a>`;
+    html += `<a href="${navConfig.mainSite}" class="nav-button back-button" data-goatcounter-click="nav-back-to-main">↩ MAIN SITE</a>`;
     html += '<div class="nav-separator"></div>';
 
     // Title badge
@@ -23,7 +23,8 @@ function generateNavbar() {
     // Main navigation links
     navConfig.links.forEach((link) => {
         const url = link.url.startsWith('http') ? link.url : navConfig.baseUrl + link.url;
-        html += `<a href="${url}" class="nav-button">
+        const gcAttr = link.goatCounterId ? ` data-goatcounter-click="${link.goatCounterId}"` : '';
+        html += `<a href="${url}" class="nav-button"${gcAttr}>
             <span>${link.icon}</span>${link.title}
         </a>`;
     });
@@ -33,7 +34,8 @@ function generateNavbar() {
         html += '<div class="nav-separator"></div>';
         navConfig.extras.forEach((extra) => {
             const url = extra.url.startsWith('http') ? extra.url : navConfig.baseUrl + extra.url;
-            html += `<a href="${url}" class="nav-button extra-button">
+            const gcAttr = extra.goatCounterId ? ` data-goatcounter-click="${extra.goatCounterId}"` : '';
+            html += `<a href="${url}" class="nav-button extra-button"${gcAttr}>
                 <span>${extra.icon}</span>${extra.title}
             </a>`;
         });
