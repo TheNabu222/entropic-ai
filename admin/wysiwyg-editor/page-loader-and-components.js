@@ -51,7 +51,7 @@ function setupPageLoader() {
         const btn = document.createElement('button');
         btn.id = 'load-source-page-btn';
         btn.className = 'big-button';
-        btn.innerHTML = '📄 Load Page';
+        btn.innerHTML = '📁 Load from Source';
         btn.style.background = '#48c774';
         btn.style.color = '#fff';
         btn.addEventListener('click', () => openModal('source-page-loader-modal'));
@@ -66,12 +66,12 @@ function createPageLoaderModal() {
     modal.innerHTML = `
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📄 Load Page from Source</h2>
+                <h2>📁 Load Page from Source Files</h2>
                 <button class="modal-close" data-close-modal="source-page-loader-modal">×</button>
             </div>
             <div class="modal-body">
                 <p style="margin-bottom: 15px; color: var(--text-secondary);">
-                    Load any page directly from source files. Edit modularly and save components!
+                    Load pages directly from your source files - no CORS issues! Each element becomes individually editable.
                 </p>
 
                 <div id="page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
@@ -82,10 +82,10 @@ function createPageLoaderModal() {
                             </div>
                             <div class="page-card-actions">
                                 <button class="big-button" onclick="loadPageFromSource('${pageName}', false)" style="width: 100%; margin-bottom: 5px;">
-                                    📖 Load Full Page
+                                    📖 Full (HTML+CSS+JS)
                                 </button>
                                 <button class="big-button" onclick="loadPageFromSource('${pageName}', true)" style="width: 100%;">
-                                    🎯 Extract Body Only
+                                    🎯 Body Only
                                 </button>
                             </div>
                         </div>
@@ -142,28 +142,58 @@ window.loadPageFromSource = async function(pageName, bodyOnly = false) {
 
         const html = await response.text();
 
-        if (bodyOnly) {
-            // Extract just the body content
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const bodyContent = doc.body.innerHTML;
+        // Parse the HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
-            // Load into canvas
+        // Extract body content (always needed for canvas)
+        const bodyContent = doc.body.innerHTML;
+
+        if (bodyOnly) {
+            // Just load body content - ignore CSS/JS
             if (window.initCanvas) {
                 initCanvas(bodyContent);
             }
             updateStatus && updateStatus(`Loaded body from ${pageName}`);
         } else {
-            // Load full page
-            if (window.initCanvas) {
-                initCanvas(html);
+            // Load full page with CSS and JS
+            // Extract CSS from <style> tags
+            const cssContent = Array.from(doc.querySelectorAll('style'))
+                .map(s => s.textContent)
+                .join('\n\n');
+
+            // Extract JS from inline <script> tags (not external ones)
+            const jsContent = Array.from(doc.querySelectorAll('script:not([src])'))
+                .map(s => s.textContent)
+                .join('\n\n');
+
+            // Load CSS into editor
+            const cssEditor = document.getElementById('css-editor');
+            if (cssEditor && cssContent) {
+                cssEditor.value = cssContent;
             }
+
+            // Load JS into editor
+            const jsEditor = document.getElementById('js-editor');
+            if (jsEditor && jsContent) {
+                jsEditor.value = jsContent;
+            }
+
+            // Load body content into canvas
+            if (window.initCanvas) {
+                initCanvas(bodyContent);
+            }
+
+            // Apply the CSS and JS
+            if (window.applyCustomCSS) applyCustomCSS();
+            if (window.applyCustomJS) applyCustomJS();
+
             updateStatus && updateStatus(`Loaded full page: ${pageName}`);
         }
 
         closeModal && closeModal('source-page-loader-modal');
         playSound && playSound('success');
-        showStamp && showStamp('📄');
+        showStamp && showStamp('📁');
 
     } catch (error) {
         console.error('Error loading page:', error);
