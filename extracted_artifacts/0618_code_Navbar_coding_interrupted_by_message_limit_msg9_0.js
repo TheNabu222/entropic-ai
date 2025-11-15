@@ -1,0 +1,1 @@
+increment_page_view(p_page_path, p_should_increment)

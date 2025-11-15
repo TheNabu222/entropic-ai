@@ -1,0 +1,21 @@
+<div id="taskbar"></div>
+<script>
+(async () => {
+  const res = await fetch('/nav.html', {cache: 'no-store'});
+  const navHTML = await res.text();
+  
+  // Insert the nav HTML
+  document.getElementById('taskbar').innerHTML = navHTML;
+  
+  // NOW run the tracking code (after nav is in the DOM)
+  const scripts = document.getElementById('taskbar').querySelectorAll('script');
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement('script');
+    Array.from(oldScript.attributes).forEach(attr => {
+      newScript.setAttribute(attr.name, attr.value);
+    });
+    newScript.textContent = oldScript.textContent;
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+})();
+</script>
