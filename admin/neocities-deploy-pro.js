@@ -476,7 +476,8 @@ window.deleteNeocitiesFile = async function(filename) {
 // DEPLOYMENT
 // ============================================
 window.deployCurrentPage = async function() {
-    const filename = document.getElementById('deploy-filename').value.trim();
+    const filenameInput = document.getElementById('deploy-filename');
+    const filename = filenameInput?.value.trim() || 'index.html';
 
     if (!filename) {
         alert('Please enter a filename');

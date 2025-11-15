@@ -286,7 +286,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         function insertImage() {
             const url = prompt('Enter image URL:');
-            if (!url && window.addElementHTML) {
+            if (url && window.addElementHTML) {
                 addElementHTML(`<img src="${url}" alt="Image" style="max-width: 100%; height: auto;">`);
             }
         }
