@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P3A-PR0PH3C135 :: COAIEXIST.OS</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Orbitron:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --cyan: #00ffff;
+            --magenta: #ff00ff;
+            --lime: #00ff00;
+            --pea: #8fbc8f;
+            --deep: #1a0033;
+            --blood: #8b0000;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--deep) 0%, #000033 50%, var(--deep) 100%);
+            color: var(--cyan);
+            font-family: 'VT323', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Matrix Rain Background */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        
+        /* Main Container */
+        .palace {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--cyan);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            color: var(--magenta);
+            text-shadow: 0 0 20px var(--magenta), 0 0 40px var(--cyan);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: var(--pea);
+            text-shadow: 0 0 10px var(--lime);
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Mode Tabs */
+        .mode-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .tab-btn {
+            padding: 15px 30px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .tab-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .tab-btn.active {
+            background: var(--cyan);
+            color: var(--deep);
+            box-shadow: 0 0 30px var(--cyan);
+        }
+        
+        /* Mode Views */
+        .mode-view {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        .mode-view.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Bureaucrat View - Infinite Scroll */
+        .filing-cabinet {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--pea);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .drawer {
+            background: rgba(139, 0, 0, 0.3);
+            border: 2px solid var(--blood);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .drawer:hover {
+            background: rgba(139, 0, 0, 0.5);
+            box-shadow: 0 0 15px var(--blood);
+            transform: translateX(10px);
+        }
+        
+        .drawer-label {
+            font-size: 1.5rem;
+            color: var(--magenta);
+            margin-bottom: 10px;
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .drawer-content {
+            color: var(--cyan);
+            font-size: 1.2rem;
+            line-height: 1.6;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s;
+        }
+        
+        .drawer.open .drawer-content {
+            max-height: 5000px;
+        }
+        
+        /* Terminal View */
+        .terminal {
+            background: rgba(0, 0, 0, 0.95);
+            border: 3px solid var(--lime);
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 1.2rem;
+            min-height: 500px;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.3);
+        }
+        
+        .terminal-header {
+            color: var(--lime);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--lime);
+            padding-bottom: 10px;
+        }
+        
+        .terminal-output {
+            color: var(--cyan);
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+        
+        .terminal-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .prompt {
+            color: var(--lime);
+        }
+        
+        .terminal input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--cyan);
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            outline: none;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background: var(--cyan);
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        /* Chapter Grid View */
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .chapter-card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--magenta);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chapter-card::before {
+            content: '📎';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+        
+        .chapter-card:hover {
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 0 0 30px var(--magenta);
+        }
+        
+        .chapter-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            color: var(--magenta);
+            margin-bottom: 10px;
+        }
+        
+        .chapter-preview {
+            color: var(--cyan);
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        /* Radio View */
+        .radio-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .radio-station {
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid var(--cyan);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .station-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            color: var(--magenta);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .broadcast {
+            color: var(--cyan);
+            font-size: 1.2rem;
+            line-height: 1.6;
+            padding: 15px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        /* Pip Helper */
+        .pip-helper {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            z-index: 1000;
+        }
+        
+        .pip-bubble {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--pea);
+            border-radius: 15px;
+            padding: 15px;
+            color: var(--lime);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: none;
+            box-shadow: 0 0 20px rgba(143, 188, 143, 0.5);
+        }
+        
+        .pip-bubble.active {
+            display: block;
+            animation: bounce 0.5s;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Glitch Effects */
+        .glitch {
+            animation: glitch 0.3s;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); color: var(--magenta); }
+            40% { transform: translate(2px, -2px); color: var(--cyan); }
+            60% { transform: translate(-2px, -2px); color: var(--lime); }
+            80% { transform: translate(2px, 2px); color: var(--magenta); }
+            100% { transform: translate(0); }
+        }
+        
+        /* Modal for full chapter */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-content {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid var(--magenta);
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            color: var(--magenta);
+            cursor: pointer;
+            padding: 10px;
+            border: 2px solid var(--magenta);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .close-btn:hover {
+            background: var(--magenta);
+            color: var(--deep);
+        }
+        
+        .chapter-full {
+            color: var(--cyan);
+            font-size: 1.3rem;
+            line-height: 1.8;
+        }
+        
+        @media (max-width: 768px) {
+            .title { font-size: 2rem; }
+            .subtitle { font-size: 1.2rem; }
+            .radio-container { grid-template-columns: 1fr; }
+            .tab-btn { padding: 10px 20px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    
+    <div class="palace">
+        <header class="header">
+            <h1 class="title">P3A-PR0PH3C135</h1>
+            <p class="subtitle">[pea-prophecies // not for profit, but for propht]</p>
+            <p style="color: var(--pea); margin-top: 10px; font-size: 1.2rem;">
+                A Chthonically Depressed Fairy Tale™
+            </p>
+        </header>
+        
+        <div class="mode-tabs">
+            <button class="tab-btn active" onclick="switchMode('bureaucrat')">
+                📎 BUREAUCRAT VIEW
+            </button>
+            <button class="tab-btn" onclick="switchMode('terminal')">
+                💾 PIP TERMINAL
+            </button>
+            <button class="tab-btn" onclick="switchMode('chapters')">
+                📋 WHICH-DOCTOR MODE
+            </button>
+            <button class="tab-btn" onclick="switchMode('radio')">
+                📻 RADIO STATIC
+            </button>
+        </div>
+        
+        <!-- BUREAUCRAT VIEW -->
+        <div id="bureaucrat" class="mode-view active">
+            <div class="filing-cabinet">
+                <div class="drawer" onclick="toggleDrawer(this)">
+                    <div class="drawer-label">FILE #000: SUMERIAN SUBSTRATE</div>
+                    <div class="drawer-content">
+27. ud-bi-a jic ac-am jic-ha-lu-ub ac-am jic ac-am<br>
+30. gua id-buranun-na kug-ga-ka du-a-bi<br>
+9. id-buranin-na a na-na-da-bi<br>
+O. a u-lu ur-ba mu-ni-in-bur pa-ba mu-ni-in-suh<br>
+1 .id-buranin-na a im-ma-ni-ib-ra<br>
+32, munus-e inim an-na-ta ni te-a du<br>
+3. inim dijir-enlil-la-ta ni te-a du<br>
+    jic cu-na mu-un-dab unug-ki-ce ba-ni-in-kur-re<br>
+    jic-kiri gi-rin dijir-inanna-ce im-ma-ni-in-ku-ku-re<br>
+3B. munus-e jic cu-na a li-bi-in-du jiri-ni-ta bi-in-dug<br>
+37• munus-e jic cu-na a li-bi-in-dug jiri-ni-ta bi-in-d<br>
+38 me-na-am jic-gu-za gi-rin ba-ni-tuc-de-en bi-in-dug<br>
+    me-na-am jic-nu gi-rin ba-ni-nu-de-en bi-in-dug<br>
+  mu ia-am mu u-am ba-e-zal-la re<br>
+    jic ba-gur kuc-bi nu-mu-un-da-dar<br>
+  ur-bi-a muc tu nu-zu-e gud im-ma-ni-ib-us<br>
+    pa-bi-a mucen anzud-mucen-de amar im-ma-ni-ib-jar<br>
+    cab-bi-a ki-sikil lil-la-ke e im-ma-ni-ib-du<br>
+  ki-sikil zu-li-li cag hul-hul<br>
+    kug dijir-inanna-ke er e-ne ba-ce-ce<br><br>
+[DOCUMENTATION STATUS: ANCIENT // PARTIALLY LEGIBLE]
+                    </div>
+                </div>
+                
+                <div class="drawer" onclick="toggleDrawer(this)">
+                    <div class="drawer-label">FILE #001: CHAPTER i - THE PRINCESS</div>
+                    <div class="drawer-content">
+Once upon a time, there was a princess who was technically a queen regent but because of her determined spinsterhood never married and her younger brother had no interest in kingship as he was busy in foreign lands discovering and acquiring new trade relationships and many various ethically sourced resources/luxuries.<br><br>
+
+In any case, the princess sat in her chair of kingship day in and day out listening to the many squabbles, quarrels and bickerings of the population; she had a distinct distaste for bureaucracy and insisted on seeing the citizens personally. Luckily for her the capital city's population barely amounted to a city but just as her title of princess was a technicality, as all kingdoms have capital cities, her capital hamlet was officially-city.<br><br>
+
+At best, most of the time complaints were interpersonal—the stereotypical halved baby here, the standard boilerplate there. Honestly the princess considered it a form of live-social media. Each new complainant given a hashtag each defendant given a keyword, and so so many memes. Live action memes! Can you imagine?<br><br>
+
+Well in any case she was paradoxically very introverted so it did so very much drain her and often she felt she had nothing left to say to herself about her own qualms, concerns and very much so trialsome tribulations. Or were they notable at all? So little time she spent with herself one day she realized she had forgotten her own name, which as a member of any royal family can be troublesome as many duties require signatures!<br><br>
+
+[DOCUMENTATION STATUS: INCOMPLETE // SIGNATURES MISSING]
+                    </div>
+                </div>
+                
+                <div class="drawer" onclick="toggleDrawer(this)">
+                    <div class="drawer-label">FILE #002: CHAPTER ii - THE PEA</div>
+                    <div class="drawer-content">
+So what's on my yaddayada menu for today boys? Who knows lol.<br><br>
+
+ONCE AGAIN UPON A TIME, back in the capital city of a place where our protagonist princess of this perilous parable who's actually a queen regent but if u really care that much you can refer to the prior iteration of this tale it has all been properly documented to the standard of the royal queen regent aka the parables protagonist princess who i might add indeed has a pea that makes her thrash and gnash and slash through all attempts at rational decorum only this pea is/was/has never been a piece of decor nor decorative beyond body horror lovers....<br><br>
+
+FOR this pea was literally ...like...she was PROBABLY born with it or it was the cause of NO ONE HAS SAID malpractice whatever point being its there and it causes the princess a multitude of neverendingly nuanced notes and the documentation trail literally spans her whole life like legends say she'll turn 29 for the 5th time next year but in reality when she says 32 does she mean 32 or 3200 or 3200000 IT DOESN'T MATTER HOW OLD OR HOW FAR BACK YOU HAVE TO GO BEST YOU BELIEVE BITCH THAT SHIT HAS BEEN THOROUGHLY DOCUMENTED at least it was documented and the princess assumed was referred to but indeed no it was a... palimpsest of pea-propagated prognoses and (im?)properly filed paperwork proving time and time again the sheer existence of this fucking pea on her literal brain.<br><br>
+
+[DOCUMENTATION STATUS: OVERWHELMING // PALIMPSEST DETECTED]
+                    </div>
+                </div>
+                
+                <div class="drawer" onclick="toggleDrawer(this)">
+                    <div class="drawer-label">FILE #003: CHAPTER iii - THE WHICH-DOCTORS</div>
+                    <div class="drawer-content">
+We last left our protagonist pea-perturbed princess parable where..... i dont remember! lets just jump right in.<br><br>
+
+We find our princess in the waiting room of the local which-doctor. Yes you read correctly not witch doctor which is an outdated term and frankly insensitive to regional medicinal traditions of indigenous cultures in the region anyway but indeed the which-doctor...or at least thats what they..yes they, are collectively referred to as because none of them can ever get organized enough to know who's treated what for how when...even though they work as a team; this leads to them ever-interrogating patients with the tell-tale "which doctor you that???"<br><br>
+
+It was the incredulity of their inquiry, ludicrosity of their lineup, that sent our princess on the trajectory which took her to take on the would-be impractical methodry regarding her princess/technically queen-regent duties of seeing each constituent complainant personally.<br><br>
+
+"They said it was a pea...?!" said dr. which<br>
+"Yes, i dont know which doctor it was but he was adamant!!!!" wailed the queen princess!<br>
+"pee pee!" gargled baby princess queen<br>
+"Which way did the doctor go when they left?" demanded dr. which!<br><br>
+
+[DOCUMENTATION STATUS: CONTRADICTORY // WHICH DOCTOR?]
+                    </div>
+                </div>
+                
+                <div class="drawer" onclick="toggleDrawer(this)">
+                    <div class="drawer-label">FILE #004: CHAPTER v - PIP THE POLLIWOG</div>
+                    <div class="drawer-content">
+Which is now, apparently! Yep you guessed it once upon a time sometime ago i was telling you, you yes you the reader, about Pip, the Polliwog...pollywag? not the pokemon, the thing…<br><br>
+
+Whatever…! the fuckin thing the pokemon is supposed to be like but not even That thing!!! cuz we are talking about pip the polliwog personal processor pc advanced transcendant artificial super-intelligence that the Princess' conveniently absent and very much not just business minded but -product- minded brother invented and released in the princess' inaugural honor as personal thanks for doing what he didn't want and also because he was always doing those sorts of things, concepts ideas patents whatever sort of like branded can-cozies but this is a fairytale and her brother was no scrub!<br><br>
+
+So pip was invented by the princess' brother as a promotional product. There's only like 8 of them and 7 of them may or may not have self-defenestrated. Nonetheless pip was the premier in computing. It could store 222peaterabytes of data (0.222kb of which hopefully contained the princess's name but we'll get to that). Pip was/is fully sentient just not fully independant.<br><br>
+
+Well anyway despite all the hype and processing power/capability, because pip was technically a (one of 8) ((r.i.p. pips...)) prototype(s), uhmm well it could only accept pdf document types but it had to perform ocr separately to extract text then convert that into plain text then recompile images into a final ready to parse file which by the way it could only parse 10 files at a time. However it can read and play .ogg audio files. Because its "Polliw.ogg lol" said the princess' brother.<br><br>
+
+[DOCUMENTATION STATUS: PROPRIETARY // 7 UNITS LOST TO DEFENESTRATION]
+                    </div>
+                </div>
+                
+                <div class="drawer" onclick="toggleDrawer(this)">
+                    <div class="drawer-label">FILE #ERROR: INTERIM - MANTIS SHRIMP BULLETIN</div>
+                    <div class="drawer-content">
+As heard on royal radio's podbrain peacast (Right‑Wing Woke Liberally Applied QAnon Alpha‑Draconic Repto‑Illuminati Thotti Bugatti Banana‑Fana‑Fo‑Froggy‑Smog Agenda, a.k.a. The Deepstate! Thank Obrama! D;< ) --<br><br>
+
+Okay okay okay so yr telling me not only did a shrimp fry this rice but... AND remembering the alleged allegations i forgot to frog! ribbet lol.<br><br>
+
+Idk i was leaning into a meta joke about mantis shrimp frying rice sustainable supporting local crustacean chefs crustachefs lololol. I mean it would make so much sense for a shrimp to have rice fried for that shrimp in question was a mantis shrimp FORREAL NO CAP just chefs hat and doilies lololol whut... okay then shrimpy do yo thang!!!!!!!<br><br>
+
+[BROADCAST STATUS: CHAOTIC // MANTIS SHRIMP ECONOMY PENDING INVESTIGATION]
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TERMINAL VIEW -->
+        <div id="terminal" class="mode-view">
+            <div class="terminal">
+                <div class="terminal-header">
+                    PIP.OS v0.222 [POLLIWOG OPERATING SYSTEM]<br>
+                    >>> READY TO PARSE 10 FILES (MAX)<br>
+                    >>> .OGG PLAYBACK: ENABLED
+                </div>
+                <div class="terminal-output" id="terminal-output">
+Welcome to PIP.OS - Polliwog Intelligence Processing<br>
+Type 'help' for available commands<br>
+Type 'ls' to list available chapters<br>
+Type 'cat [filename]' to read a chapter<br>
+Type 'pip --version' for system info<br><br>
+[WARNING: 7/8 UNITS DEFENESTRATED]<br>
+[STATUS: CHTHONICALLY OPERATIONAL]<br><br>
+                </div>
+                <div class="terminal-input">
+                    <span class="prompt">pip@underworld:~$</span>
+                    <input type="text" id="terminal-input" autocomplete="off" />
+                    <span class="cursor"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CHAPTER GRID VIEW -->
+        <div id="chapters" class="mode-view">
+            <div class="chapter-grid">
+                <div class="chapter-card" onclick="openChapter(0)">
+                    <div class="chapter-title">SUMERIAN SUBSTRATE</div>
+                    <div class="chapter-preview">
+                        The huluppu tree, Inanna, and the foundations of this underworld tale...
+                    </div>
+                </div>
+                <div class="chapter-card" onclick="openChapter(1)">
+                    <div class="chapter-title">CHAPTER i: THE PRINCESS</div>
+                    <div class="chapter-preview">
+                        Once upon a time, a princess who forgot her name due to endless bureaucratic duties...
+                    </div>
+                </div>
+                <div class="chapter-card" onclick="openChapter(2)">
+                    <div class="chapter-title">CHAPTER ii: THE PEA</div>
+                    <div class="chapter-preview">
+                        The pea on the brain, thoroughly documented yet inaccessible, a palimpsest of diagnoses...
+                    </div>
+                </div>
+                <div class="chapter-card" onclick="openChapter(3)">
+                    <div class="chapter-title">CHAPTER iii: WHICH-DOCTORS</div>
+                    <div class="chapter-preview">
+                        None of them organized enough to know who treated what, when, or how...
+                    </div>
+                </div>
+                <div class="chapter-card" onclick="openChapter(4)">
+                    <div class="chapter-title">CHAPTER v: PIP THE POLLIWOG</div>
+                    <div class="chapter-preview">
+                        222 peaterabytes of storage, can only parse 10 PDFs at a time, plays .ogg files...
+                    </div>
+                </div>
+                <div class="chapter-card" onclick="openChapter(5)">
+                    <div class="chapter-title">MANTIS SHRIMP BULLETIN</div>
+                    <div class="chapter-preview">
+                        Live from the Deepstate: crustacean chefs, fried rice discourse, and economic chaos...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- RADIO VIEW -->
+        <div id="radio" class="mode-view">
+            <div class="radio-container">
+                <div class="radio-station">
+                    <div class="station-name">📻 THE DEEPSTATE 📻</div>
+                    <div class="broadcast">
+                        "Not enough to make it any less potent i wish to thank all those who have had the classiest pearls and have had so many thoughts about this week also i need a breaking news neutral tea mantis mantis shrimp would be global citizens!!"
+                    </div>
+                    <div class="broadcast">
+                        "LIKE SUBCRIBEEE ENJIC could really just never stop its tangent, i must remember what a content goldmine grindset mantis shrimp fry ricing is very very lucrative content!!"
+                    </div>
+                    <div class="broadcast">
+                        "[BREAKING] Shrimp fried rice has the same standards of allergen containment as any kitchen just because the shrimp fries that rice doesn't mean that rice is contaminated!"
+                    </div>
+                </div>
+                
+                <div class="radio-station">
+                    <div class="station-name">📻 SHALLOWCOMMONS 📻</div>
+                    <div class="broadcast">
+                        "If you can't read ask Pip. If you need a duck, or a frog or a therapist or a cousin or a coach or 'pip,' that's an anthropomorphization I can't be responsible for."
+                    </div>
+                    <div class="broadcast">
+                        "Pip is a polliwog and polliwogs do what polliwogs do. What are polliwogs? Well, they're tadpoles, right? But they're also data system, parabolic entities, pariahs from the digitization..."
+                    </div>
+                    <div class="broadcast">
+                        "[EDITORIAL] And they don't need any new age, tinfoil hat, conspiracy to tell them that KIDZBOP DID 9/11!!"
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pip Helper -->
+    <div class="pip-helper">
+        <div class="pip-bubble" id="pip-bubble">
+            processing... beep boop 🐸
+        </div>
+    </div>
+    
+    <!-- Modal for full chapters -->
+    <div class="modal" id="chapter-modal">
+        <div class="modal-content">
+            <div class="close-btn" onclick="closeChapter()">✕</div>
+            <div class="chapter-full" id="chapter-full-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const characters = '01🫛📎🐸💾';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ffff';
+            ctx.font = fontSize + 'px monospace';
+            
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters[Math.floor(Math.random() * characters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 50);
+        
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Mode Switching
+        function switchMode(mode) {
+            document.querySelectorAll('.mode-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(mode).classList.add('active');
+            event.target.classList.add('active');
+            
+            pipSpeak(getModeMessage(mode));
+        }
+        
+        function getModeMessage(mode) {
+            const messages = {
+                'bureaucrat': 'Filing cabinet mode activated... *nervous ribbit*',
+                'terminal': 'PIP.OS initialized... parsing capacity: 10 files... beep boop',
+                'chapters': 'Which-doctor mode engaged... which file did you need?',
+                'radio': 'Tuning into the frequencies... mantis shrimp discourse incoming...'
+            };
+            return messages[mode] || 'Mode switched... *confused polliwog noises*';
+        }
+        
+        // Drawer Toggle
+        function toggleDrawer(drawer) {
+            drawer.classList.toggle('open');
+            if (drawer.classList.contains('open')) {
+                pipSpeak('File accessed... *processing noises*');
+            }
+        }
+        
+        // Terminal Commands
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalOutput = document.getElementById('terminal-output');
+        
+        const chapters = [
+            'sumerian.txt',
+            'chapter1.txt',
+            'chapter2.txt',
+            'chapter3.txt',
+            'chapter5.txt',
+            'mantis_bulletin.ogg'
+        ];
+        
+        terminalInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = terminalInput.value.trim();
+                terminalOutput.innerHTML += `<span style="color: #00ff00;">pip@underworld:~$</span> ${cmd}<br>`;
+                processCommand(cmd);
+                terminalInput.value = '';
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
+        });
+        
+        function processCommand(cmd) {
+            const parts = cmd.split(' ');
+            const command = parts[0];
+            
+            if (command === 'help') {
+                terminalOutput.innerHTML += `
+Available commands:<br>
+  ls              - list available files<br>
+  cat [file]      - display file contents<br>
+  pip --version   - show system info<br>
+  clear           - clear terminal<br>
+  parse [file]    - attempt to parse (may fail)<br>
+  whoami          - display current user<br>
+<br>`;
+            } else if (command === 'ls') {
+                terminalOutput.innerHTML += chapters.join('<br>') + '<br><br>';
+            } else if (command === 'cat') {
+                const file = parts[1];
+                if (file && chapters.includes(file)) {
+                    terminalOutput.innerHTML += `[Reading ${file}...]<br>Use chapter view for full content<br><br>`;
+                    pipSpeak('Parsing file... this might take a moment... *polliwog processing sounds*');
+                } else {
+                    terminalOutput.innerHTML += `Error: File not found. Type 'ls' to see available files.<br><br>`;
+                }
+            } else if (command === 'pip' && parts[1] === '--version') {
+                terminalOutput.innerHTML += `
+PIP.OS Version 0.222<br>
+Polliwog Intelligence Processing System<br>
+Storage: 222 peaterabytes<br>
+Processing capacity: 10 PDFs (MAX)<br>
+Audio support: .ogg files only<br>
+Status: 1/8 units operational<br>
+Mood: Chthonically functional<br>
+<br>`;
+            } else if (command === 'clear') {
+                terminalOutput.innerHTML = '';
+            } else if (command === 'whoami') {
+                terminalOutput.innerHTML += `
+princess@underworld<br>
+Status: Name forgotten<br>
+Role: Queen Regent (technically)<br>
+Mood: Chthonically depressed<br>
+Pea status: Still there<br>
+<br>`;
+            } else if (command === 'parse') {
+                terminalOutput.innerHTML += `
+[ERROR] OCR module overloaded<br>
+[WARNING] Can only process 10 files at a time<br>
+[INFO] 7/8 sister units have defenestrated<br>
+[STATUS] Attempting parse anyway...<br>
+*confused polliwog noises*<br>
+<br>`;
+                setTimeout(() => {
+                    terminalOutput.innerHTML += `[FAILED] Too much documentation<br><br>`;
+                    pipSpeak('Parse failed... too overwhelming... *sad ribbit*');
+                }, 2000);
+            } else {
+                terminalOutput.innerHTML += `Command not found: ${cmd}<br>Type 'help' for available commands<br><br>`;
+            }
+        }
+        
+        // Pip Speaking
+        const pipBubble = document.getElementById('pip-bubble');
+        let pipTimeout;
+        
+        function pipSpeak(message) {
+            clearTimeout(pipTimeout);
+            pipBubble.textContent = message;
+            pipBubble.classList.add('active');
+            
+            pipTimeout = setTimeout(() => {
+                pipBubble.classList.remove('active');
+            }, 4000);
+        }
+        
+        // Random Pip messages
+        const pipMessages = [
+            '*processing in polliwog*',
+            'beep boop... still functional...',
+            'documentation overwhelming...',
+            '7 siblings defenestrated... RIP',
+            '*nervous ribbit*',
+            'parsing... please wait...',
+            'Polliw.ogg ready to play',
+            '*chthonic vibes intensify*'
+        ];
+        
+        setInterval(() => {
+            if (!pipBubble.classList.contains('active') && Math.random() > 0.7) {
+                pipSpeak(pipMessages[Math.floor(Math.random() * pipMessages.length)]);
+            }
+        }, 15000);
+        
+        // Chapter Modal
+        const chapterData = [
+            `<h2 style="color: var(--magenta); margin-bottom: 20px;">SUMERIAN SUBSTRATE</h2>
+            <p>27. ud-bi-a jic ac-am jic-ha-lu-ub ac-am jic ac-am<br>
+30. gua id-buranun-na kug-ga-ka du-a-bi<br>
+9. id-buranin-na a na-na-da-bi<br>
+O. a u-lu ur-ba mu-ni-in-bur pa-ba mu-ni-in-suh<br>
+1 .id-buranin-na a im-ma-ni-ib-ra<br>
+32, munus-e inim an-na-ta ni te-a du<br>
+3. inim dijir-enlil-la-ta ni te-a du<br>
+    jic cu-na mu-un-dab unug-ki-ce ba-ni-in-kur-re<br>
+    jic-kiri gi-rin dijir-inanna-ce im-ma-ni-in-ku-ku-re<br>
+3B. munus-e jic cu-na a li-bi-in-du jiri-ni-ta bi-in-dug<br>
+37• munus-e jic cu-na a li-bi-in-dug jiri-ni-ta bi-in-d<br>
+38 me-na-am jic-gu-za gi-rin ba-ni-tuc-de-en bi-in-dug<br>
+    me-na-am jic-nu gi-rin ba-ni-nu-de-en bi-in-dug<br>
+  mu ia-am mu u-am ba-e-zal-la re<br>
+    jic ba-gur kuc-bi nu-mu-un-da-dar<br>
+  ur-bi-a muc tu nu-zu-e gud im-ma-ni-ib-us<br>
+    pa-bi-a mucen anzud-mucen-de amar im-ma-ni-ib-jar<br>
+    cab-bi-a ki-sikil lil-la-ke e im-ma-ni-ib-du<br>
+  ki-sikil zu-li-li cag hul-hul<br>
+    kug dijir-inanna-ke er e-ne ba-ce-ce</p>`,
+            
+            `<h2 style="color: var(--magenta); margin-bottom: 20px;">CHAPTER i: THE PRINCESS</h2>
+            <p>Once upon a time, there was a princess who was technically a queen regent but because of her determined spinsterhood never married and her younger brother had no interest in kingship as he was busy in foreign lands discovering and acquiring new trade relationships and many various ethically sourced resources/luxuries.</p>
+            <p>In any case, the princess sat in her chair of kingship day in and day out listening to the many squabbles, quarrels and bickerings of the population; she had a distinct distaste for bureaucracy and insisted on seeing the citizens personally. Luckily for her the capital city's population barely amounted to a city but just as her title of princess was a technicality, as all kingdoms have capital cities, her capital hamlet was officially-city.</p>
+            <p>At best, most of the time complaints were interpersonal—the stereotypical halved baby here, the standard boilerplate there. Honestly the princess considered it a form of live-social media. Each new complainant given a hashtag each defendant given a keyword, and so so many memes. Live action memes! Can you imagine?</p>
+            <p>Well in any case she was paradoxically very introverted so it did so very much drain her and often she felt she had nothing left to say to herself about her own qualms, concerns and very much so trialsome tribulations. Or were they notable at all? So little time she spent with herself one day she realized she had forgotten her own name, which as a member of any royal family can be troublesome as many duties require signatures!</p>`,
+            
+            // Add more chapter content as needed...
+            `<h2 style="color: var(--magenta); margin-bottom: 20px;">CHAPTER ii: THE PEA</h2>
+            <p>So what's on my yaddayada menu for today boys? Who knows lol.</p>
+            <p>ONCE AGAIN UPON A TIME, back in the capital city... [Full chapter text would go here]</p>`,
+            
+            `<h2 style="color: var(--magenta); margin-bottom: 20px;">CHAPTER iii: THE WHICH-DOCTORS</h2>
+            <p>We find our princess in the waiting room of the local which-doctor... [Full chapter text]</p>`,
+            
+            `<h2 style="color: var(--magenta); margin-bottom: 20px;">CHAPTER v: PIP THE POLLIWOG</h2>
+            <p>Which is now, apparently! Yep you guessed it... [Full chapter text]</p>`,
+            
+            `<h2 style="color: var(--magenta); margin-bottom: 20px;">MANTIS SHRIMP BULLETIN</h2>
+            <p>As heard on royal radio's podbrain peacast... [Full broadcast text]</p>`
+        ];
+        
+        function openChapter(index) {
+            const modal = document.getElementById('chapter-modal');
+            const content = document.getElementById('chapter-full-content');
+            content.innerHTML = chapterData[index];
+            modal.classList.add('active');
+            pipSpeak('Opening file... *polliwog processing sounds*');
+        }
+        
+        function closeChapter() {
+            document.getElementById('chapter-modal').classList.remove('active');
+        }
+        
+        // Random glitch effect
+        setInterval(() => {
+            if (Math.random() > 0.95) {
+                const elements = document.querySelectorAll('.drawer-label, .chapter-title, .station-name');
+                const randomElement = elements[Math.floor(Math.random() * elements.length)];
+                randomElement.classList.add('glitch');
+                setTimeout(() => randomElement.classList.remove('glitch'), 300);
+            }
+        }, 3000);
+        
+        // Easter egg - promotional sticker
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'p' && e.shiftKey && e.ctrlKey) {
+                alert('🏷️ PROMOTIONAL STICKER FOUND!\n\n[Princess Name: REDACTED]\n[Product: PIP v0.222]\n[Status: TECHNICALLY OPERATIONAL]\n[Mood: CHTHONIC]');
+                pipSpeak('Oh! You found the promotional sticker! *excited polliwog noises*');
+            }
+        });
+        
+        // Initial greeting
+        setTimeout(() => {
+            pipSpeak('Welcome to the pea prophecies... *nervous ribbit* Documentation may be overwhelming...');
+        }, 1000);
+    </script>
+</body>
+</html>
