@@ -3,21 +3,23 @@
 // Load pages from source, save & reuse components
 // ============================================
 
+const SITE_BASE_URL = 'https://coaiexist.wtf';
+
 const PAGE_SOURCES = {
-    'index.html': '/index.html',
-    'construction.html': '/construction.html',
-    'cosmos.html': '/cosmos.html',
-    'hdtv.html': '/hdtv.html',
-    'hex.html': '/hex.html',
-    'guestbook.html': '/guestbook.html',
-    'cavebot.html': '/cavebot.html',
-    'punkd.html': '/punkd.html',
-    'vote_hd.html': '/vote_hd.html',
-    'pip.html': '/pip.html',
-    'dollz.html': '/dollz.html',
-    'not_found.html': '/not_found.html',
-    'explore.html': '/explore.html',
-    'ackk.html': '/ackk.html'
+    'index.html': `${SITE_BASE_URL}/index.html`,
+    'construction.html': `${SITE_BASE_URL}/construction.html`,
+    'cosmos.html': `${SITE_BASE_URL}/cosmos.html`,
+    'hdtv.html': `${SITE_BASE_URL}/hdtv.html`,
+    'hex.html': `${SITE_BASE_URL}/hex.html`,
+    'guestbook.html': `${SITE_BASE_URL}/guestbook.html`,
+    'cavebot.html': `${SITE_BASE_URL}/cavebot.html`,
+    'punkd.html': `${SITE_BASE_URL}/punkd.html`,
+    'vote_hd.html': `${SITE_BASE_URL}/vote_hd.html`,
+    'pip.html': `${SITE_BASE_URL}/pip.html`,
+    'dollz.html': `${SITE_BASE_URL}/dollz.html`,
+    'not_found.html': `${SITE_BASE_URL}/not_found.html`,
+    'explore.html': `${SITE_BASE_URL}/explore.html`,
+    'ackk.html': `${SITE_BASE_URL}/ackk.html`
 };
 
 // Component Library Storage
@@ -133,14 +135,17 @@ window.loadPageFromSource = async function(pageName, bodyOnly = false) {
             return;
         }
 
-        updateStatus && updateStatus(`Loading ${pageName}...`);
+        updateStatus && updateStatus(`Loading ${pageName} from live site...`);
 
-        const response = await fetch(url);
+        // Use CORS proxy to fetch from live site
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
         if (!response.ok) {
             throw new Error(`Failed to load ${pageName}: ${response.statusText}`);
         }
 
-        const html = await response.text();
+        const data = await response.json();
+        const html = data.contents;
 
         // Parse the HTML
         const parser = new DOMParser();
