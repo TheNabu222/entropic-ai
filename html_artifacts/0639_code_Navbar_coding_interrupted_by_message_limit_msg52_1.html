@@ -1,0 +1,37 @@
+<div id="taskbar"></div>
+<script>
+(async () => {
+  const res = await fetch('/nav.html', {cache: 'no-store'});
+  const navHTML = await res.text();
+  
+  // Parse the HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(navHTML, 'text/html');
+  
+  // Insert styles and nav structure
+  const styles = doc.querySelectorAll('style');
+  styles.forEach(style => document.head.appendChild(style.cloneNode(true)));
+  
+  const nav = doc.querySelector('nav');
+  if (nav) document.getElementById('taskbar').appendChild(nav);
+  
+  // MANUALLY execute each script
+  const scripts = doc.querySelectorAll('script');
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement('script');
+    
+    // Copy attributes (src, async, data-*)
+    Array.from(oldScript.attributes).forEach(attr => {
+      newScript.setAttribute(attr.name, attr.value);
+    });
+    
+    // Copy inline code
+    if (oldScript.textContent && !oldScript.src) {
+      newScript.textContent = oldScript.textContent;
+    }
+    
+    // Add to page to execute
+    document.body.appendChild(newScript);
+  });
+})();
+</script>

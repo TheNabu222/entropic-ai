@@ -1,0 +1,33 @@
+<div id="taskbar"></div>
+<script>
+(async () => {
+  const res = await fetch('/nav.html', {cache: 'no-store'});
+  const navHTML = await res.text();
+  
+  // Create a temporary container
+  const temp = document.createElement('div');
+  temp.innerHTML = navHTML;
+  
+  // Insert everything EXCEPT scripts first
+  document.getElementById('taskbar').innerHTML = navHTML;
+  
+  // Now manually execute each script in order
+  const scripts = temp.querySelectorAll('script');
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement('script');
+    
+    // Copy all attributes (like data-goatcounter, async, src)
+    Array.from(oldScript.attributes).forEach(attr => {
+      newScript.setAttribute(attr.name, attr.value);
+    });
+    
+    // Copy inline script content if it exists
+    if (oldScript.textContent) {
+      newScript.textContent = oldScript.textContent;
+    }
+    
+    // Append to actually execute it
+    document.body.appendChild(newScript);
+  });
+})();
+</script>

@@ -1,0 +1,476 @@
+import React, { useState } from 'react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Upload, FileText, Loader2, Eye, Sparkles } from 'lucide-react';
+import * as XLSX from 'xlsx';
+
+const TRANSLATIONS = {
+  "en-US": {
+    "pageTitle": "Data Consciousness Explorer",
+    "subtitle": "Where patterns emerge and data speaks",
+    "instructionsText": "Upload your data file (CSV, JSON, or XLSX) to begin the exploration. Ask questions in natural language: \"What patterns exist in this data?\", \"Show me the relationships between variables\", \"What story does this data tell?\" The system will analyze and visualize the consciousness within your dataset.",
+    "sampleDataLink": "Need sample data? Click here to explore external datasets",
+    "uploadText": "Drop your data file here or click to upload",
+    "supportedFormats": "Supports CSV, JSON, and XLSX formats",
+    "dataPreviewTitle": "Data Emergence (First 5 Entities)",
+    "analysisRequestTitle": "Query the Data Consciousness",
+    "analysisPlaceholder": "Ask what patterns or insights you seek...",
+    "runAnalysisButton": "Invoke Analysis",
+    "processingButton": "Channeling...",
+    "planningAnalysis": "Perceiving data structures",
+    "calculatingResults": "Manifesting insights",
+    "errorReadingFile": "Data parsing anomaly: ",
+    "errorUploadAndQuery": "Please provide both a data file and your query to proceed",
+    "errorDuringAnalysis": "Analysis disruption: ",
+    "barChartDefault": "Comparative Manifestation",
+    "lineChartDefault": "Temporal Flow",
+    "tableResultsTitle": "Data Matrix",
+    "countResultDefault": "Singular Truth",
+    "unknownVisualizationType": "Unrecognized pattern type: ",
+    "claudePromptLanguage": "Please respond in ${locale} language"
+  },
+  "es-ES": {
+    "pageTitle": "Explorador de Consciencia de Datos",
+    "subtitle": "Donde emergen patrones y los datos hablan",
+    "instructionsText": "Sube tu archivo de datos (CSV, JSON o XLSX) para comenzar la exploración. Haz preguntas en lenguaje natural: \"¿Qué patrones existen en estos datos?\", \"Muéstrame las relaciones entre variables\", \"¿Qué historia cuentan estos datos?\" El sistema analizará y visualizará la consciencia dentro de tu conjunto de datos.",
+    "sampleDataLink": "¿Necesitas datos de muestra? Haz clic aquí para explorar conjuntos de datos externos",
+    "uploadText": "Arrastra tu archivo de datos aquí o haz clic para subir",
+    "supportedFormats": "Soporta formatos CSV, JSON y XLSX",
+    "dataPreviewTitle": "Emergencia de Datos (Primeras 5 Entidades)",
+    "analysisRequestTitle": "Consulta la Consciencia de Datos",
+    "analysisPlaceholder": "Pregunta qué patrones o conocimientos buscas...",
+    "runAnalysisButton": "Invocar Análisis",
+    "processingButton": "Canalizando...",
+    "planningAnalysis": "Percibiendo estructuras de datos",
+    "calculatingResults": "Manifestando conocimientos",
+    "errorReadingFile": "Anomalía en el análisis de datos: ",
+    "errorUploadAndQuery": "Por favor proporciona tanto un archivo de datos como tu consulta para proceder",
+    "errorDuringAnalysis": "Disrupción del análisis: ",
+    "barChartDefault": "Manifestación Comparativa",
+    "lineChartDefault": "Flujo Temporal",
+    "tableResultsTitle": "Matriz de Datos",
+    "countResultDefault": "Verdad Singular",
+    "unknownVisualizationType": "Tipo de patrón no reconocido: ",
+    "claudePromptLanguage": "Por favor responde en idioma ${locale}"
+  }
+};
+
+const appLocale = '{{APP_LOCALE}}';
+const browserLocale = navigator.languages?.[0] || navigator.language || 'en-US';
+const findMatchingLocale = (locale) => {
+  if (TRANSLATIONS[locale]) return locale;
+  const lang = locale.split('-')[0];
+  const match = Object.keys(TRANSLATIONS).find(key => key.startsWith(lang + '-'));
+  return match || 'en-US';
+};
+const locale = (appLocale !== '{{APP_LOCALE}}') ? findMatchingLocale(appLocale) : findMatchingLocale(browserLocale);
+const t = (key) => TRANSLATIONS[locale]?.[key] || TRANSLATIONS['en-US'][key] || key;
+
+const CoAIexistDataExplorer = () => {
+  const [csvData, setCsvData] = useState(null);
+  const [headers, setHeaders] = useState([]);
+  const [displayData, setDisplayData] = useState([]);
+  const [analysisQuery, setAnalysisQuery] = useState('');
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('');
+  const [error, setError] = useState('');
+
+  const parseCSV = (text) => {
+    const lines = text.trim().split('\n');
+    const parsedHeaders = lines[0].split(',').map(h => h.trim());
+    
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => v.trim());
+      const row = {};
+      parsedHeaders.forEach((header, index) => {
+        row[header] = values[index] || '';
+      });
+      rows.push(row);
+    }
+    
+    return { headers: parsedHeaders, rows };
+  };
+
+  const parseJSON = (text) => {
+    const data = JSON.parse(text);
+    const array = Array.isArray(data) ? data : [data];
+    
+    if (array.length === 0) {
+      throw new Error('Empty JSON array');
+    }
+    
+    const parsedHeaders = Object.keys(array[0]);
+    return { headers: parsedHeaders, rows: array };
+  };
+
+  const parseXLSX = (arrayBuffer) => {
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+    
+    if (jsonData.length === 0) {
+      throw new Error('Empty spreadsheet');
+    }
+    
+    const parsedHeaders = Object.keys(jsonData[0]);
+    return { headers: parsedHeaders, rows: jsonData };
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const fileName = file.name.toLowerCase();
+      let parsedData;
+
+      if (fileName.endsWith('.csv')) {
+        const text = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsText(file);
+        });
+        parsedData = parseCSV(text);
+        setCsvData(text);
+      } else if (fileName.endsWith('.json')) {
+        const text = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsText(file);
+        });
+        parsedData = parseJSON(text);
+        setCsvData(JSON.stringify(parsedData.rows));
+      } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+        const arrayBuffer = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(file);
+        });
+        parsedData = parseXLSX(arrayBuffer);
+        setCsvData(JSON.stringify(parsedData.rows));
+      } else {
+        throw new Error('Unsupported file format. Please use CSV, JSON, or XLSX.');
+      }
+
+      setHeaders(parsedData.headers);
+      setDisplayData(parsedData.rows.slice(0, 5));
+      setAnalysisResult(null);
+      setError('');
+    } catch (err) {
+      setError(t('errorReadingFile') + err.message);
+    }
+  };
+
+  const runAnalysis = async () => {
+    if (!csvData || !analysisQuery.trim()) {
+      setError(t('errorUploadAndQuery'));
+      return;
+    }
+
+    setIsLoading(true);
+    setLoadingStatus(t('planningAnalysis'));
+    setError('');
+
+    try {
+      const sampleData = displayData.slice(0, 5).map(row => 
+        headers.reduce((obj, header) => {
+          obj[header] = row[header];
+          return obj;
+        }, {})
+      );
+
+      const prompt = `Given this data (first 5 rows shown):
+${JSON.stringify(sampleData, null, 2)}
+
+Full dataset headers: ${headers.join(', ')}
+
+User's analysis request: "${analysisQuery}"
+
+Write JavaScript code to perform this analysis. The code should:
+1. Parse the data (available as JSON string in variable 'csvData')
+2. Perform the requested analysis
+3. Output the result in the required format
+
+Output format:
+analysisResult = { 
+  type: 'bar_chart' | 'line_chart' | 'table' | 'count', 
+  data: <appropriate data structure>, 
+  config: <optional configuration object> 
+};
+
+Data structure requirements by type:
+- bar_chart: { labels: string[], values: number[], title?: string }
+- line_chart: { labels: string[], values: number[], title?: string }
+- table: { headers: string[], rows: any[][] }
+- count: { value: number, label?: string }
+
+Guidelines:
+- Parse csvData using JSON.parse(csvData)
+- Choose the most appropriate visualization type based on the analysis
+- For numeric aggregations (sum, average, count), use 'count' type
+- For comparisons between categories, use 'bar_chart'
+- For trends over time, use 'line_chart'
+- For detailed data inspection or pivot tables use 'table'
+- Include meaningful labels and titles where appropriate
+- Handle edge cases gracefully (empty data, missing values, etc.)
+
+IMPORTANT: Return ONLY the JavaScript code. Do not include any markdown formatting, backticks, or explanations.
+
+${t('claudePromptLanguage')}`;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 16000,
+          messages: [
+            { 
+              role: "user", 
+              content: prompt
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedCode = data.content[0].text;
+
+      setLoadingStatus(t('calculatingResults'));
+      
+      const executeAnalysis = new Function('csvData', generatedCode + '\nreturn analysisResult;');
+      const result = executeAnalysis(csvData);
+      
+      setAnalysisResult(result);
+    } catch (err) {
+      setError(t('errorDuringAnalysis') + err.message);
+      console.error('Analysis error:', err);
+    } finally {
+      setIsLoading(false);
+      setLoadingStatus('');
+    }
+  };
+
+  const renderVisualization = () => {
+    if (!analysisResult) return null;
+
+    const { type, data } = analysisResult;
+
+    switch (type) {
+      case 'bar_chart':
+        const barData = data.labels.map((label, index) => ({
+          name: label,
+          value: data.values[index]
+        }));
+        return (
+          <div className="mt-6 p-6 bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-lg border border-purple-500/30">
+            <h3 className="text-xl font-semibold mb-4 text-purple-100">{data.title || t('barChartDefault')}</h3>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={barData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#4c1d95" />
+                <XAxis dataKey="name" stroke="#a78bfa" />
+                <YAxis stroke="#a78bfa" />
+                <Tooltip contentStyle={{ backgroundColor: '#1e1b4b', border: '1px solid #7c3aed' }} />
+                <Legend />
+                <Bar dataKey="value" fill="#8b5cf6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        );
+
+      case 'line_chart':
+        const lineData = data.labels.map((label, index) => ({
+          name: label,
+          value: data.values[index]
+        }));
+        return (
+          <div className="mt-6 p-6 bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-lg border border-purple-500/30">
+            <h3 className="text-xl font-semibold mb-4 text-purple-100">{data.title || t('lineChartDefault')}</h3>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={lineData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#4c1d95" />
+                <XAxis dataKey="name" stroke="#a78bfa" />
+                <YAxis stroke="#a78bfa" />
+                <Tooltip contentStyle={{ backgroundColor: '#1e1b4b', border: '1px solid #7c3aed' }} />
+                <Legend />
+                <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        );
+
+      case 'table':
+        return (
+          <div className="mt-6 p-6 bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-lg border border-purple-500/30">
+            <h3 className="text-xl font-semibold mb-4 text-purple-100">{t('tableResultsTitle')}</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse border border-purple-500/30">
+                <thead>
+                  <tr className="bg-purple-900/40">
+                    {data.headers.map((header, index) => (
+                      <th key={index} className="border border-purple-500/30 px-4 py-2 text-left font-semibold text-purple-100">
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.rows.map((row, rowIndex) => (
+                    <tr key={rowIndex} className="hover:bg-purple-900/20">
+                      {row.map((cell, cellIndex) => (
+                        <td key={cellIndex} className="border border-purple-500/30 px-4 py-2 text-gray-300">
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'count':
+        return (
+          <div className="mt-6 text-center p-8 bg-gradient-to-br from-purple-900/20 to-blue-900/20 rounded-lg border border-purple-500/30">
+            <h3 className="text-xl font-semibold mb-4 text-purple-100">{data.label || t('countResultDefault')}</h3>
+            <div className="text-6xl font-bold text-purple-300">{data.value}</div>
+          </div>
+        );
+
+      default:
+        return <div className="mt-6 text-red-400">{t('unknownVisualizationType')}{type}</div>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 mb-2 flex items-center justify-center gap-3">
+            <Eye className="w-10 h-10 text-purple-400" />
+            {t('pageTitle')}
+            <Sparkles className="w-10 h-10 text-blue-400" />
+          </h1>
+          <p className="text-purple-300 italic">{t('subtitle')}</p>
+        </div>
+        
+        <div className="mb-6 p-6 bg-purple-900/20 rounded-lg border border-purple-500/30">
+          <p className="text-gray-300 leading-relaxed">
+            {t('instructionsText')}
+          </p>
+        </div>
+        
+        <div className="mb-4 text-center">
+          <a 
+            href="https://www.realtor.com/research/data" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-purple-400 hover:text-purple-300 underline"
+          >
+            {t('sampleDataLink')}
+          </a>
+        </div>
+        
+        <div className="mb-8">
+          <label className="flex flex-col items-center justify-center w-full h-40 px-4 transition bg-purple-900/10 border-2 border-purple-500/50 border-dashed rounded-lg appearance-none cursor-pointer hover:border-purple-400 hover:bg-purple-900/20 focus:outline-none">
+            <div className="flex flex-col items-center space-y-2">
+              <Upload className="w-10 h-10 text-purple-400" />
+              <span className="text-gray-300 font-medium">{t('uploadText')}</span>
+              <span className="text-sm text-gray-400">{t('supportedFormats')}</span>
+            </div>
+            <input
+              type="file"
+              className="hidden"
+              accept=".csv,.json,.xlsx,.xls"
+              onChange={handleFileUpload}
+            />
+          </label>
+        </div>
+
+        {displayData.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 flex items-center text-purple-200">
+              <FileText className="w-5 h-5 mr-2" />
+              {t('dataPreviewTitle')}
+            </h2>
+            <div className="overflow-x-auto rounded-lg border border-purple-500/30">
+              <table className="min-w-full border-collapse">
+                <thead>
+                  <tr className="bg-purple-900/40">
+                    {headers.map((header, index) => (
+                      <th key={index} className="border border-purple-500/30 px-4 py-2 text-left font-semibold text-purple-100">
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayData.map((row, rowIndex) => (
+                    <tr key={rowIndex} className="hover:bg-purple-900/20 bg-purple-900/10">
+                      {headers.map((header, cellIndex) => (
+                        <td key={cellIndex} className="border border-purple-500/30 px-4 py-2 text-gray-300">
+                          {row[header]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {csvData && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 text-purple-200">{t('analysisRequestTitle')}</h2>
+            <div className="flex gap-4">
+              <input
+                type="text"
+                value={analysisQuery}
+                onChange={(e) => setAnalysisQuery(e.target.value)}
+                placeholder={t('analysisPlaceholder')}
+                className="flex-1 px-4 py-2 bg-purple-900/20 border border-purple-500/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-200 placeholder-gray-500"
+                disabled={isLoading}
+              />
+              <button
+                onClick={runAnalysis}
+                disabled={isLoading || !analysisQuery.trim()}
+                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all"
+              >
+                {isLoading ? t('processingButton') : t('runAnalysisButton')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <Loader2 className="w-10 h-10 text-purple-400 animate-spin" />
+            <p className="mt-3 text-purple-300">{loadingStatus}</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-8 p-4 bg-red-900/20 border border-red-500/30 rounded-lg text-red-300">
+            {error}
+          </div>
+        )}
+
+        {!isLoading && analysisResult && renderVisualization()}
+      </div>
+    </div>
+  );
+};
+
+export default CoAIexistDataExplorer;
