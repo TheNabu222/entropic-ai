@@ -476,7 +476,8 @@ window.deleteNeocitiesFile = async function(filename) {
 // DEPLOYMENT
 // ============================================
 window.deployCurrentPage = async function() {
-    const filename = document.getElementById('deploy-filename').value.trim();
+    const filenameInput = document.getElementById('deploy-filename');
+    const filename = filenameInput?.value.trim() || 'index.html';
 
     if (!filename) {
         alert('Please enter a filename');
@@ -566,36 +567,51 @@ window.deployCurrentPage = async function() {
 // ============================================
 let autoDeployTimeout = null;
 
+let lastCanvasHTML = '';
+
 window.toggleAutoDeploy = function(enabled) {
     neocitiesConfig.autoDeployEnabled = enabled;
     saveNeocitiesConfig();
 
     if (enabled) {
-        updateStatus && updateStatus('⚡ Auto-deploy enabled');
+        // Initialize baseline
+        const doc = getCanvasDoc && getCanvasDoc();
+        if (doc) {
+            lastCanvasHTML = doc.body.innerHTML;
+        }
+        updateStatus && updateStatus('⚡ Auto-deploy enabled - watching for changes...');
         playSound && playSound('pop');
+        console.log('🤖 Auto-deploy enabled');
     } else {
         updateStatus && updateStatus('Auto-deploy disabled');
+        clearTimeout(autoDeployTimeout);
     }
 };
 
 function setupAutoDeployListener() {
-    // Listen for changes in the canvas
+    // Poll for changes every 2 seconds
     setInterval(() => {
-        if (neocitiesConfig.autoDeployEnabled) {
-            const doc = getCanvasDoc && getCanvasDoc();
-            if (doc && doc.body.hasAttribute('data-modified')) {
-                // Reset the modified flag
-                doc.body.removeAttribute('data-modified');
+        if (!neocitiesConfig.autoDeployEnabled) return;
 
-                // Debounce auto-deploy
-                clearTimeout(autoDeployTimeout);
-                autoDeployTimeout = setTimeout(() => {
-                    const filename = document.getElementById('deploy-filename')?.value || 'index.html';
-                    deployCurrentPage();
-                }, 3000); // Wait 3 seconds after last change
-            }
+        const doc = getCanvasDoc && getCanvasDoc();
+        if (!doc) return;
+
+        const currentHTML = doc.body.innerHTML;
+
+        // Check if content actually changed
+        if (currentHTML !== lastCanvasHTML) {
+            console.log('🔍 Change detected! Auto-deploy will trigger in 3 seconds...');
+            lastCanvasHTML = currentHTML;
+
+            // Debounce auto-deploy (wait 3 seconds after last change)
+            clearTimeout(autoDeployTimeout);
+            autoDeployTimeout = setTimeout(() => {
+                const filename = document.getElementById('deploy-filename')?.value || 'index.html';
+                console.log('🤖 Auto-deploying:', filename);
+                deployCurrentPage();
+            }, 3000);
         }
-    }, 1000);
+    }, 2000); // Check every 2 seconds
 }
 
 // ============================================
