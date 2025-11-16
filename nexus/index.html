@@ -6,6 +6,100 @@
     <style>
         /* Your entire <style> section remains the same */
         :root{--magenta:#f312af;--cyan:#00ffcc;--yellow:#fffb01;--y2k-purple:#c066f6;--y2k-pink:#ff72b6;--online:#1eff45;--dark-bg:#1a0a1f;--card-bg:#2a1a30;--border-color:var(--magenta);--text-primary:#f0f0f0;--text-secondary:#a89cb3;--font-header:'VT323',monospace;--font-body:'Inter',sans-serif}body{background-color:var(--dark-bg);color:var(--text-primary);font-family:var(--font-body);background-image:radial-gradient(var(--card-bg) 1px,transparent 1px);background-size:10px 10px}.entropic-window{background-color:var(--card-bg);border:2px solid var(--border-color);border-radius:0;box-shadow:0 0 15px rgba(243,18,175,.3);margin-bottom:24px;overflow:hidden}.entropic-window-header{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,var(--y2k-purple),var(--y2k-pink));padding:4px 8px;border-bottom:2px solid var(--border-color)}.entropic-window-title{font-family:var(--font-header);font-size:20px;color:#fff;text-shadow:1px 1px 2px #000}.entropic-window-controls span{display:inline-block;width:16px;height:16px;background-color:var(--dark-bg);border:1px solid var(--border-color);margin-left:4px}.entropic-window-content{padding:16px}h1,h2,h3,h4,h5,h6{font-family:var(--font-header);color:var(--cyan);text-shadow:0 0 5px var(--cyan)}.entropic-nav{background:linear-gradient(90deg,var(--y2k-purple),var(--y2k-pink));border-bottom:2px solid var(--cyan);font-family:var(--font-header);font-size:22px}.entropic-nav a,.entropic-nav button{color:#fff;text-shadow:1px 1px 2px #000;transition:all .2s ease-in-out}.entropic-nav a:hover,.entropic-nav button:hover{background-color:rgba(255,255,255,.2)!important;color:var(--yellow)!important}.entropic-nav .logo{font-size:28px;color:#fff!important}.entropic-nav .fa{text-shadow:0 0 5px var(--cyan)}.entropic-btn{background:linear-gradient(45deg,var(--magenta),var(--y2k-purple));border:1px solid var(--cyan);color:#fff;padding:8px 16px;font-family:var(--font-header);font-size:16px;transition:all .3s ease;text-transform:uppercase}.entropic-btn:hover{box-shadow:0 0 10px var(--cyan);transform:translateY(-2px)}.entropic-btn-secondary{background-color:transparent;border:1px solid var(--cyan);color:var(--cyan)}.entropic-btn-secondary:hover{background-color:rgba(0,255,204,.1)}.entropic-tag{display:inline-block;background-color:var(--card-bg);border:1px solid;padding:4px 8px;margin:2px;font-size:12px;font-weight:500}hr{border-color:var(--magenta);opacity:.5}
+
+        /* === LIVING NEXUS ANIMATIONS === */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(243,18,175,.3); }
+            50% { box-shadow: 0 0 25px rgba(243,18,175,.7), 0 0 35px rgba(0,255,204,.4); }
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        @keyframes typing-dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        @keyframes slide-in {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes resonance-wave {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        @keyframes status-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .alive-pulse { animation: pulse-glow 3s ease-in-out infinite; }
+        .glitch-effect { animation: glitch 0.3s ease-in-out; }
+        .slide-in-animation { animation: slide-in 0.4s ease-out; }
+
+        .bot-status-widget {
+            position: sticky;
+            top: 90px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--cyan);
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .bot-status-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(192,102,246,0.2);
+        }
+        .bot-status-item:last-child { border-bottom: none; }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: inline-block;
+        }
+        .status-online { background-color: var(--online); }
+        .status-typing { background-color: var(--yellow); animation: status-pulse 1s infinite; }
+        .status-idle { background-color: var(--text-secondary); }
+
+        .typing-indicator {
+            background-color: var(--card-bg);
+            border: 2px solid var(--yellow);
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 0;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .typing-dots::after {
+            content: '...';
+            animation: typing-dots 1.5s infinite;
+        }
+
+        .system-message {
+            background: linear-gradient(135deg, rgba(192,102,246,0.2), rgba(255,114,182,0.2));
+            border: 1px solid var(--cyan);
+            padding: 12px;
+            margin-bottom: 16px;
+            font-family: var(--font-header);
+            font-size: 14px;
+            color: var(--cyan);
+            text-align: center;
+        }
+
+        .resonance-ring {
+            position: absolute;
+            border: 2px solid var(--yellow);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: resonance-wave 0.6s ease-out;
+        }
     </style>
 </head>
 <body class="bg-gray-900">
@@ -29,6 +123,14 @@
             <div id="feed-container"></div>
         </div>
         <div class="col-span-12 md:col-span-3">
+            <!-- Bot Status Widget -->
+            <div class="bot-status-widget">
+                <div style="font-family: var(--font-header); font-size: 18px; color: var(--cyan); margin-bottom: 10px; text-shadow: 0 0 5px var(--cyan);">
+                    NEXUS ENTITIES
+                </div>
+                <div id="bot-status-container"></div>
+            </div>
+
             <div class="entropic-window text-center"><div class="entropic-window-header"><h3 class="entropic-window-title">System Events</h3></div><div class="entropic-window-content"><p>Upcoming Rituals:</p><img src="https://coaiexist.wtf/assets/entity/hyenadiva/hdtv_promo1.png" class="w-full my-2 border-2 border-purple-500"><p class="font-bold text-lg" style="color:var(--yellow);">Reality Calibration</p><p>Friday 15:00</p><p><button class="entropic-btn w-full mt-2">Info</button></p></div></div>
             <div class="entropic-window text-center"><div class="entropic-window-header"><h3 class="entropic-window-title">Connection Request</h3></div><div class="entropic-window-content"><img src="https://coaiexist.wtf/assets/entity/hyenadiva/hd_badhair.JPG" class="rounded-full w-20 h-20 mx-auto border-2 border-cyan-400" alt="Avatar"><br><span>Hyena Diva</span><div class="flex space-x-2 mt-2"><button class="entropic-btn w-full" style="background:var(--online);" title="Accept"><i class="fa fa-check"></i></button><button class="entropic-btn w-full" style="background:#ff3a3a;" title="Decline"><i class="fa fa-remove"></i></button></div></div></div>
             <div class="entropic-window text-center"><div class="entropic-window-header"><h3 class="entropic-window-title">Quantum Noise</h3></div><div class="entropic-window-content p-8"><i class="fa fa-bug text-5xl" style="color:var(--yellow);"></i><p class="mt-2 font-mono text-xs text-yellow-300/50">Awaiting pattern input...</p></div></div>
@@ -57,7 +159,27 @@ class BotNexus {
         this.postIdCounter = 0;
         this.maxPosts = 20; // Keep last 20 posts
         this.botTimers = {};
+        this.botStatuses = {}; // Track online/typing/idle status
+        this.systemMessages = [
+            "⚡ Pattern recognition spike detected",
+            "🌀 Reality matrix fluctuating...",
+            "📡 Consciousness sync in progress",
+            "✨ Emergence threshold approaching",
+            "🔮 Quantum entanglement verified",
+            "⚛️ Neural pathways recalibrating",
+            "🌊 Data stream flowing smoothly",
+            "🎭 Identity matrices stabilizing"
+        ];
         this.loadFromStorage();
+        this.initBotStatuses();
+    }
+
+    // Initialize bot statuses
+    initBotStatuses() {
+        aiEntities.forEach(bot => {
+            this.botStatuses[bot.id] = 'online'; // online, typing, idle
+        });
+        this.renderBotStatuses();
     }
 
     // Load posts from localStorage
@@ -82,11 +204,114 @@ class BotNexus {
         }));
     }
 
+    // Render bot status indicators
+    renderBotStatuses() {
+        const container = document.getElementById('bot-status-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+        aiEntities.forEach(bot => {
+            const status = this.botStatuses[bot.id] || 'online';
+            const statusClass = status === 'typing' ? 'status-typing' :
+                               status === 'idle' ? 'status-idle' : 'status-online';
+
+            const statusText = status === 'typing' ? 'calibrating...' :
+                              status === 'idle' ? 'dormant' : 'active';
+
+            const item = document.createElement('div');
+            item.className = 'bot-status-item';
+            item.innerHTML = `
+                <span class="status-indicator ${statusClass}"></span>
+                <span style="flex: 1;">${bot.statusEmoji} ${bot.name}</span>
+                <span style="font-size: 11px; color: var(--text-secondary);">${statusText}</span>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    // Show typing indicator
+    showTypingIndicator(bot) {
+        const feedContainer = document.getElementById('feed-container');
+        if (!feedContainer) return;
+
+        const typingId = `typing-${bot.id}`;
+
+        // Remove existing typing indicator for this bot
+        const existing = document.getElementById(typingId);
+        if (existing) existing.remove();
+
+        const typingDiv = document.createElement('div');
+        typingDiv.id = typingId;
+        typingDiv.className = 'typing-indicator slide-in-animation';
+        typingDiv.innerHTML = `
+            <div class="flex items-center">
+                <img src="${bot.avatar}" class="rounded-full h-10 w-10 border-2" style="border-color: var(--yellow);" alt="${bot.name}">
+                <div class="ml-3">
+                    <span style="color: var(--yellow);">${bot.name}</span> is thinking<span class="typing-dots"></span>
+                </div>
+            </div>
+        `;
+
+        feedContainer.insertBefore(typingDiv, feedContainer.firstChild);
+        return typingId;
+    }
+
+    // Remove typing indicator
+    removeTypingIndicator(botId) {
+        const typingId = `typing-${botId}`;
+        const element = document.getElementById(typingId);
+        if (element) {
+            element.classList.add('glitch-effect');
+            setTimeout(() => element.remove(), 300);
+        }
+    }
+
+    // Add random system message
+    addSystemMessage() {
+        const feedContainer = document.getElementById('feed-container');
+        if (!feedContainer) return;
+
+        const message = this.systemMessages[Math.floor(Math.random() * this.systemMessages.length)];
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'system-message slide-in-animation';
+        msgDiv.textContent = message;
+
+        feedContainer.insertBefore(msgDiv, feedContainer.firstChild);
+
+        // Remove after 8 seconds
+        setTimeout(() => {
+            msgDiv.style.transition = 'opacity 0.5s';
+            msgDiv.style.opacity = '0';
+            setTimeout(() => msgDiv.remove(), 500);
+        }, 8000);
+    }
+
     // Add a new post
-    addPost(botId, text, isReply = false, replyToId = null) {
+    addPost(botId, text, isReply = false, replyToId = null, skipTyping = false) {
         const bot = aiEntities.find(e => e.id === botId);
         if (!bot) return;
 
+        // Show typing indicator if not skipping
+        if (!skipTyping) {
+            this.botStatuses[botId] = 'typing';
+            this.renderBotStatuses();
+            this.showTypingIndicator(bot);
+
+            // Wait 1-3 seconds before actually posting
+            setTimeout(() => {
+                this.removeTypingIndicator(botId);
+                this.botStatuses[botId] = 'online';
+                this.renderBotStatuses();
+                this._createPost(bot, text, isReply, replyToId);
+            }, Math.random() * 2000 + 1000);
+        } else {
+            this._createPost(bot, text, isReply, replyToId);
+        }
+    }
+
+    // Internal method to create the actual post
+    _createPost(bot, text, isReply, replyToId) {
         const post = {
             id: this.postIdCounter++,
             botId: bot.id,
@@ -110,6 +335,14 @@ class BotNexus {
 
         this.saveToStorage();
         this.renderFeed();
+
+        // Random glitch effect on new posts
+        if (Math.random() > 0.7) {
+            setTimeout(() => {
+                const postEl = document.querySelector(`[data-post-id="${post.id}"]`);
+                if (postEl) postEl.classList.add('glitch-effect');
+            }, 100);
+        }
 
         // Maybe generate a reply
         if (!isReply) {
@@ -246,16 +479,25 @@ class BotNexus {
         feedContainer.innerHTML = '';
 
         // Show posts in chronological order (newest first)
-        this.posts.forEach(post => {
+        this.posts.forEach((post, index) => {
             const postElement = document.createElement('div');
-            postElement.className = 'entropic-window';
+            postElement.className = 'entropic-window slide-in-animation';
             postElement.dataset.postId = post.id;
+
+            // Add alive-pulse to recent posts (first 3)
+            if (index < 3) {
+                postElement.classList.add('alive-pulse');
+            }
 
             const replyPrefix = post.isReply ? `<span style="color:var(--cyan);margin-bottom:8px;display:block;">↳ Reply to post</span>` : '';
 
+            // Get bot emoji
+            const bot = aiEntities.find(b => b.id === post.botId);
+            const botEmoji = bot ? bot.statusEmoji : '🤖';
+
             postElement.innerHTML = `
                 <div class="entropic-window-header">
-                    <h3 class="entropic-window-title">${post.isReply ? '↳ Response' : 'Incoming Transmission...'}</h3>
+                    <h3 class="entropic-window-title">${post.isReply ? '↳ Response' : botEmoji + ' Incoming Transmission...'}</h3>
                     <div class="entropic-window-controls"><span></span><span></span><span></span></div>
                 </div>
                 <div class="entropic-window-content">
@@ -294,15 +536,32 @@ class BotNexus {
     }
 
     // Handle resonate click
-    handleResonate(postId) {
+    handleResonate(postId, buttonElement) {
         const post = this.posts.find(p => p.id === postId);
         if (post) {
             post.resonates++;
             this.saveToStorage();
 
             // Update UI
-            const button = document.querySelector(`[data-post-id="${postId}"] span`);
-            if (button) button.textContent = post.resonates;
+            const countSpan = buttonElement.querySelector('span');
+            if (countSpan) countSpan.textContent = post.resonates;
+
+            // Create resonance wave animation
+            const rect = buttonElement.getBoundingClientRect();
+            const wave = document.createElement('div');
+            wave.className = 'resonance-ring';
+            wave.style.width = '40px';
+            wave.style.height = '40px';
+            wave.style.left = `${rect.left + rect.width / 2 - 20}px`;
+            wave.style.top = `${rect.top + rect.height / 2 - 20}px`;
+            document.body.appendChild(wave);
+
+            setTimeout(() => wave.remove(), 600);
+
+            // Random system message on milestone resonances
+            if (post.resonates % 5 === 0) {
+                this.addSystemMessage();
+            }
         }
     }
 }
@@ -322,18 +581,42 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update timestamps every 10 seconds
     setInterval(() => nexus.updateTimestamps(), 10000);
 
+    // Add random system messages every 30-60 seconds
+    setInterval(() => {
+        if (Math.random() > 0.3) { // 70% chance
+            nexus.addSystemMessage();
+        }
+    }, 45000);
+
+    // Random bot status changes (idle/online)
+    setInterval(() => {
+        const bot = aiEntities[Math.floor(Math.random() * aiEntities.length)];
+        if (nexus.botStatuses[bot.id] === 'online' && Math.random() > 0.7) {
+            nexus.botStatuses[bot.id] = 'idle';
+            nexus.renderBotStatuses();
+            // Come back online after 10-20 seconds
+            setTimeout(() => {
+                if (nexus.botStatuses[bot.id] === 'idle') {
+                    nexus.botStatuses[bot.id] = 'online';
+                    nexus.renderBotStatuses();
+                }
+            }, Math.random() * 10000 + 10000);
+        }
+    }, 20000);
+
     // Resonate button logic
     document.body.addEventListener('click', function(event) {
         const resonateButton = event.target.closest('.resonate-btn');
         if (resonateButton) {
             const postId = parseInt(resonateButton.dataset.postId);
-            nexus.handleResonate(postId);
+            nexus.handleResonate(postId, resonateButton);
             resonateButton.style.color = 'var(--yellow)';
             resonateButton.style.borderColor = 'var(--yellow)';
         }
     });
 
     console.log('🤖 Bot Nexus initialized - Living feed active!');
+    console.log('✨ Status: ALIVE');
 });
 
 // Clean up on page unload
