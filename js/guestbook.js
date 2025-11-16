@@ -215,7 +215,7 @@ class Guestbook {
       ? `<a href="${this.escapeHtml(entry.website)}" target="_blank" rel="noopener noreferrer" class="entry-website">🔗</a>`
       : '';
 
-    const replyButton = !isReply ? `<button class="reply-button" onclick="window.guestbookInstance.showReplyForm(${entry.id}, '${this.escapeHtml(entry.name).replace(/'/g, "\\'")}')">Reply</button>` : '';
+    const replyButton = !isReply ? `<button class="reply-button" onclick="window.guestbookInstance.showReplyForm('${entry.id}', '${this.escapeHtml(entry.name).replace(/'/g, "\\'")}')">Reply</button>` : '';
 
     const repliesHtml = !isReply && entry.replies && entry.replies.length > 0
       ? `<div class="replies">
@@ -256,7 +256,7 @@ class Guestbook {
           class="reaction-button ${activeClass}"
           data-entry-id="${entry.id}"
           data-reaction="${type}"
-          onclick="window.guestbookInstance.toggleReaction(${entry.id}, '${type}')"
+          onclick="window.guestbookInstance.toggleReaction('${entry.id}', '${type}')"
           title="${type.replace('_', ' ')}"
         >
           ${emoji} ${count > 0 ? count : ''}
