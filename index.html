@@ -132,18 +132,43 @@ hr.dimensional-rift {
 #audio-control { position: fixed; bottom: 50px; right: 10px; background: var(--dark-bg); border: 1px solid var(--magenta); color: var(--magenta); padding: 5px 10px; cursor: pointer; z-index: 10000; font-family: 'VT323', monospace; font-size: 1rem; }
 
 /* --- PIP'S STYLES (<3olt) --- */
-#bonzi-container { 
-    position: fixed; 
-    bottom: 40px; 
-    right: 10px; 
-    width: 200px; 
+#bonzi-container {
+    position: fixed;
+    bottom: 40px;
+    right: 10px;
+    width: 200px;
     height: 200px; 
     z-index: 9999; 
     cursor: pointer; 
     filter: drop-shadow(0 0 10px var(--magenta)); 
 }
-#bonzi-container canvas { 
+#bonzi-container canvas {
     pointer-events: auto;
+}
+#bonzi-container.pip-mobile {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.pip-mobile-wrapper {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px dashed var(--cyan);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    width: 100%;
+}
+.pip-mobile-image {
+    width: 100%;
+    max-width: 120px;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 8px var(--magenta));
+}
+.pip-mobile-caption {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--yellow);
 }
 #pip-receipt {
     position: absolute;
@@ -167,6 +192,13 @@ hr.dimensional-rift {
 }
 #pip-receipt.visible {
     opacity: 1;
+}
+.pip-error {
+    color: #ccc;
+    font-family: 'VT323', monospace;
+    padding: 20px;
+    text-align: center;
+    font-size: 16px;
 }
 
 /* --- CORE ANIMATIONS --- */
@@ -333,182 +365,11 @@ hr.dimensional-rift {
     }
 </script>
 <script type="module">
-    import * as THREE from 'three';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import * as Tone from 'https://cdn.skypack.dev/tone';
+    import { initPipBuddy } from './pip/pip-buddy.js';
 
-    // --- CORE SETUP ---
-    const isMobile = window.innerWidth <= 768;
-    if (!isMobile) {
-        try {
-            const container = document.getElementById('bonzi-container');
-            const receiptEl = document.getElementById('pip-receipt');
-            
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            container.appendChild(renderer.domElement);
-
-            // --- LIGHTING ---
-            scene.add(new THREE.AmbientLight(0xffffff, 2.0));
-            const dirLight = new THREE.DirectionalLight(0xffffff, 4);
-            dirLight.position.set(5, 10, 7.5);
-            scene.add(dirLight);
-
-            // --- ASSETS & ANIMATIONS ---
-            const loader = new GLTFLoader();
-            const clock = new THREE.Clock();
-            let buddies = {};
-            let currentBuddy = null;
-            let isClickAnimationPlaying = false;
-
-            const modelPaths = {
-                stand: 'https://coaiexist.wtf/assets/pollywog/pip_stand.glb',
-                walk: 'https://coaiexist.wtf/assets/pollywog/pip_walk.glb',
-                jump: 'https://coaiexist.wtf/assets/pollywog/pip_jump.glb',
-                skill: 'https://coaiexist.wtf/assets/pollywog/pip_skill.glb',
-                fall: 'https://coaiexist.wtf/assets/pollywog/pip_fall.glb',
-                fall2: 'https://coaiexist.wtf/assets/pollywog/pip_fall2.glb',
-                finger: 'https://coaiexist.wtf/assets/pollywog/pip_finger.glb',
-                jazz: 'https://coaiexist.wtf/assets/pollywog/pip_jazz.glb',
-                stagger: 'https://coaiexist.wtf/assets/pollywog/pip_stagger.glb',
-                stomp2: 'https://coaiexist.wtf/assets/pollywog/pip_stomp2.glb',
-                wave: 'https://coaiexist.wtf/assets/pollywog/pip_wave.glb'
-            };
-
-            const modelPromises = Object.entries(modelPaths).map(([name, path]) => {
-                return new Promise((resolve, reject) => {
-                    loader.load(path, (gltf) => {
-                        const model = gltf.scene;
-                        const mixer = new THREE.AnimationMixer(model);
-                        const action = mixer.clipAction(gltf.animations[0]);
-                        action.setLoop(THREE.LoopOnce);
-                        action.clampWhenFinished = true;
-
-                        model.scale.set(45, 45, 45);
-                        model.position.y = -60;
-                        model.visible = false;
-                        scene.add(model);
-                        buddies[name] = { model, mixer, action, name };
-                        resolve();
-                    }, undefined, reject);
-                });
-            });
-
-            // --- SOUND DESIGN (<3olt) ---
-            let audioReady = false;
-            const boopSynth = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.2 } }).toDestination();
-            const receiptSynth = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.005, decay: 0.05, sustain: 0 } }).toDestination();
-
-            // --- INTERACTIVITY ---
-            container.addEventListener('click', onClick);
-
-            function onClick(event) {
-                if (!audioReady) {
-                    Tone.start();
-                    audioReady = true;
-                }
-                
-                if (!isClickAnimationPlaying) {
-                    playSpecificAnimation('wave');
-                    showRandomReceipt();
-                    boopSynth.triggerAttackRelease("C5", "8n");
-                }
-            }
-
-            const receipts = [
-                "AUTH: UNVERIFIED",
-                "pip install princess",
-                "KIDZBOP DID 9/11",
-                "polliw.ogg error...",
-                "can only parse 10 files at a time",
-                "Which ether? your mom.",
-                "Not for profit,\nbut for propht.",
-                "PROTOCOL: SEPIA.EXE\nENGAGED"
-            ];
-
-            function showRandomReceipt() {
-                receiptEl.textContent = receipts[Math.floor(Math.random() * receipts.length)];
-                receiptEl.classList.add('visible');
-                receiptSynth.triggerAttackRelease("16n");
-                setTimeout(() => {
-                    receiptEl.classList.remove('visible');
-                }, 3000);
-            }
-
-            // --- ANIMATION LOGIC ---
-            function playAnimation(name) {
-                if (!buddies[name]) {
-                    console.error(`Animation "${name}" not found.`);
-                    return 0;
-                }
-                if (currentBuddy) {
-                    currentBuddy.model.visible = false;
-                    currentBuddy.action.stop();
-                }
-                currentBuddy = buddies[name];
-                currentBuddy.model.visible = true;
-                currentBuddy.action.reset().play();
-                return currentBuddy.action.getClip().duration * 1000;
-            }
-
-            function playSpecificAnimation(name) {
-                isClickAnimationPlaying = true;
-                const duration = playAnimation(name);
-                setTimeout(() => {
-                    isClickAnimationPlaying = false;
-                    playIdleAnimation();
-                }, duration);
-            }
-            
-            function playIdleAnimation() {
-                if (isClickAnimationPlaying) return;
-                const idleAnimations = ['stand', 'walk', 'jump', 'skill', 'jazz', 'stagger'];
-                const randomIdle = idleAnimations[Math.floor(Math.random() * idleAnimations.length)];
-                const duration = playAnimation(randomIdle);
-                setTimeout(playIdleAnimation, duration + Math.random() * 4000 + 3000);
-            }
-
-            // --- RENDER LOOP ---
-            function animate() {
-                requestAnimationFrame(animate);
-                const delta = clock.getDelta();
-                if (currentBuddy) {
-                    currentBuddy.mixer.update(delta);
-                }
-                renderer.render(scene, camera);
-            }
-
-            // --- INITIALIZATION ---
-            Promise.all(modelPromises).then(() => {
-                buddies.stand.action.setLoop(THREE.LoopRepeat);
-                buddies.walk.action.setLoop(THREE.LoopRepeat);
-                camera.position.set(0, 0, 100);
-                playIdleAnimation();
-                animate();
-            }).catch(error => {
-                console.error("Error loading Pip's models:", error);
-                container.innerHTML = `<div style="color: #ccc; font-family: monospace; padding: 20px; text-align: center;">Pip couldn't load!<br>A model file failed to download.</div>`;
-            });
-
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
-
-        } catch (e) {
-            console.error("Could not initialize 3D view:", e);
-            const container = document.getElementById('bonzi-container');
-            if (container) {
-                container.innerHTML = `<div style="color: #ccc; font-family: 'VT323', monospace; padding: 20px; text-align: center; font-size: 16px;">Pip couldn't load!<br>WebGL is not supported in this environment.</div>`;
-                container.style.cursor = 'default';
-            }
-        }
-    }
+    initPipBuddy({
+        mobileCaption: 'Pip is shy on mobile—static preview only. Rotate for chaos.',
+    });
 </script>
 <script>
 /* PAGE INTERACTIVITY SCRIPTS */
