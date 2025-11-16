@@ -1,31 +1,26 @@
 // ============================================
 // PAGE LOADER & COMPONENT LIBRARY SYSTEM
-// Load pages from source, save & reuse components
+// Load pages from embedded source files
 // ============================================
 
-const SITE_BASE_URL = 'https://coaiexist.wtf';
+// Page sources loaded from page-sources-embedded.js (164 HTML files!)
+// Raw source HTML embedded - loads instantly, all elements editable
 
-const PAGE_SOURCES = {
-    'index.html': `${SITE_BASE_URL}/index.html`,
-    'construction.html': `${SITE_BASE_URL}/construction.html`,
-    'cosmos.html': `${SITE_BASE_URL}/cosmos.html`,
-    'hdtv.html': `${SITE_BASE_URL}/hdtv.html`,
-    'hex.html': `${SITE_BASE_URL}/hex.html`,
-    'guestbook.html': `${SITE_BASE_URL}/guestbook.html`,
-    'cavebot.html': `${SITE_BASE_URL}/cavebot.html`,
-    'punkd.html': `${SITE_BASE_URL}/punkd.html`,
-    'vote_hd.html': `${SITE_BASE_URL}/vote_hd.html`,
-    'pip.html': `${SITE_BASE_URL}/pip.html`,
-    'dollz.html': `${SITE_BASE_URL}/dollz.html`,
-    'not_found.html': `${SITE_BASE_URL}/not_found.html`,
-    'explore.html': `${SITE_BASE_URL}/explore.html`,
-    'ackk.html': `${SITE_BASE_URL}/ackk.html`
-};
+// PAGE_SOURCES dynamically populated from PAGE_SOURCE_HTML after it loads
+let PAGE_SOURCES = [];
 
 // Component Library Storage
 let componentLibrary = [];
 
 window.addEventListener('DOMContentLoaded', () => {
+    // Populate PAGE_SOURCES from embedded HTML
+    if (window.PAGE_SOURCE_HTML) {
+        PAGE_SOURCES = Object.keys(window.PAGE_SOURCE_HTML).sort();
+        console.log(`📦 Loaded ${PAGE_SOURCES.length} pages from embedded sources`);
+    } else {
+        console.error('❌ PAGE_SOURCE_HTML not loaded! Make sure page-sources-embedded.js is included.');
+    }
+
     // Load saved components from localStorage
     loadComponentLibrary();
 
@@ -77,7 +72,7 @@ function createPageLoaderModal() {
                 </p>
 
                 <div id="page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-                    ${Object.keys(PAGE_SOURCES).map(pageName => `
+                    ${PAGE_SOURCES.map(pageName => `
                         <div class="page-card" data-page="${pageName}">
                             <div class="page-card-header">
                                 <strong>${pageName}</strong>
@@ -127,25 +122,17 @@ function createPageLoaderModal() {
     return modal;
 }
 
-window.loadPageFromSource = async function(pageName, bodyOnly = false) {
+window.loadPageFromSource = function(pageName, bodyOnly = false) {
     try {
-        const url = PAGE_SOURCES[pageName];
-        if (!url) {
-            alert(`Page ${pageName} not found!`);
+        // Get HTML from embedded sources
+        const html = window.PAGE_SOURCE_HTML && window.PAGE_SOURCE_HTML[pageName];
+        if (!html) {
+            alert(`Page ${pageName} not found in embedded sources!`);
+            console.error('Available pages:', window.PAGE_SOURCE_HTML ? Object.keys(window.PAGE_SOURCE_HTML) : 'PAGE_SOURCE_HTML not loaded');
             return;
         }
 
-        updateStatus && updateStatus(`Loading ${pageName} from live site...`);
-
-        // Use CORS proxy to fetch from live site
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-        const response = await fetch(proxyUrl);
-        if (!response.ok) {
-            throw new Error(`Failed to load ${pageName}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        const html = data.contents;
+        updateStatus && updateStatus(`Loading ${pageName} from source...`);
 
         // Parse the HTML
         const parser = new DOMParser();
