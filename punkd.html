@@ -224,16 +224,24 @@
                     } else {
                         // Wait 800ms after typing finishes before showing link
                         setTimeout(() => {
-                            document.getElementById('final-link').classList.remove('hidden');
-                            document.getElementById('final-link').focus(); // Ensure it's focusable
-                            
+                            const finalLink = document.getElementById('final-link');
+                            finalLink.classList.remove('hidden');
+                            finalLink.focus(); // Ensure it's focusable
+
+                            // Add click event listener NOW that element exists
+                            finalLink.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                document.getElementById('click-sound').play();
+                                setTimeout(() => { window.location.href = finalLink.href; }, 300);
+                            });
+
                             // Fade out static sound
                             if (staticSound) {
                                 let fadeout = setInterval(() => {
                                     staticSound.volume = Math.max(0, staticSound.volume - 0.05);
-                                    if (staticSound.volume <= 0) { 
-                                        staticSound.pause(); 
-                                        clearInterval(fadeout); 
+                                    if (staticSound.volume <= 0) {
+                                        staticSound.pause();
+                                        clearInterval(fadeout);
                                     }
                                 }, 100);
                             }
@@ -244,14 +252,7 @@
 
             }, 500);
         }
-        
-        const finalLink = document.getElementById('final-link');
-        finalLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('click-sound').play();
-            setTimeout(() => { window.location.href = finalLink.href; }, 300);
-        });
-        
+
         const originalSwitchAct = switchAct;
         switchAct = function(nextActNumber) {
             if (nextActNumber === 'meltdown') {
