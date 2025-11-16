@@ -255,11 +255,11 @@ window.addEventListener('DOMContentLoaded', () => {
             } else {
                 selected.style[property] = value;
             }
-            saveState && saveState();
+            if (window.saveState) window.saveState();
         }
 
         function getSelectedElement() {
-            const doc = getCanvasDoc && getCanvasDoc();
+            const doc = window.getCanvasDoc && window.getCanvasDoc();
             if (!doc) return null;
             return doc.querySelector('.selected');
         }
@@ -272,7 +272,7 @@ window.addEventListener('DOMContentLoaded', () => {
             list.innerHTML = '<li>Item 1</li><li>Item 2</li><li>Item 3</li>';
             list.className = 'canvas-element';
             selected.parentNode.replaceChild(list, selected);
-            saveState && saveState();
+            if (window.saveState) window.saveState();
         }
 
         function insertLink() {
@@ -310,7 +310,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const selected = getSelectedElement();
             if (!selected) return;
             selected.removeAttribute('style');
-            saveState && saveState();
+            if (window.saveState) window.saveState();
         }
 
         // Attach RTF button event listeners
@@ -321,7 +321,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (rtfActions[action]) {
                     rtfActions[action]();
                     btn.classList.toggle('active');
-                    playSound && playSound('pop');
+                    if (window.playSound) window.playSound('pop');
                 }
             });
         });
