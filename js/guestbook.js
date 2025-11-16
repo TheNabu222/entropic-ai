@@ -388,7 +388,7 @@ class Guestbook {
     const formId = form.id;
     const statusEl = form.querySelector('.form-status');
     const submitButton = form.querySelector('button[type="submit"]');
-    const parentId = form.dataset.parentId || null;
+    const parentId = form.dataset.parentId && form.dataset.parentId !== '' ? form.dataset.parentId : null;
 
     // Get form data
     const name = form.querySelector('[name="name"]').value.trim();
@@ -413,7 +413,7 @@ class Guestbook {
         message: message,
         website: website || null,
         approved: false, // Requires admin approval
-        parent_id: parentId ? parseInt(parentId) : null
+        parent_id: parentId && parentId !== '' ? parentId : null
       };
 
       // Submit to Supabase
