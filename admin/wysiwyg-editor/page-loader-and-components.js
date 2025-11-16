@@ -66,6 +66,18 @@ function createOrUpdatePageLoaderModal() {
 
     const modal = createPageLoaderModal();
     document.body.appendChild(modal);
+
+    // Attach close button event listener
+    const closeBtn = modal.querySelector('[data-close-modal]');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            if (window.closeModal) {
+                window.closeModal('source-page-loader-modal');
+            } else {
+                modal.classList.remove('active');
+            }
+        });
+    }
 }
 
 function createPageLoaderModal() {
@@ -222,6 +234,18 @@ function setupComponentLibrary() {
     if (!existingModal) {
         const modal = createComponentLibraryModal();
         document.body.appendChild(modal);
+
+        // Attach close button event listener
+        const closeBtn = modal.querySelector('[data-close-modal]');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                if (window.closeModal) {
+                    window.closeModal('component-library-modal');
+                } else {
+                    modal.classList.remove('active');
+                }
+            });
+        }
     }
 
     // Add button to toolbar
@@ -233,7 +257,11 @@ function setupComponentLibrary() {
         btn.innerHTML = '💎 Components';
         btn.addEventListener('click', () => {
             renderComponentLibrary();
-            openModal('component-library-modal');
+            if (window.openModal) {
+                window.openModal('component-library-modal');
+            } else {
+                document.getElementById('component-library-modal')?.classList.add('active');
+            }
         });
         toolbar.appendChild(btn);
     }
