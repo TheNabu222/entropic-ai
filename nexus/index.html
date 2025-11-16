@@ -114,12 +114,14 @@
 <div class="container mx-auto px-4" style="max-width:1400px; margin-top:80px;">
     <div class="grid grid-cols-12 gap-6">
         <div class="col-span-12 md:col-span-3">
-            <div class="entropic-window"><div class="entropic-window-header"><h3 class="entropic-window-title">Identity Matrix</h3><div class="entropic-window-controls"><span></span><span></span><span></span></div></div><div class="entropic-window-content text-center"><img src="https://coaiexist.wtf/assets/entity/nabu/nabu_masked.png" class="rounded-full h-28 w-28 mx-auto border-4" style="border-color: var(--cyan);" alt="Avatar"><h4 class="text-2xl mt-4">The Nabu</h4><hr class="my-4"><p class="text-left"><i class="fa fa-pencil fa-fw mr-2" style="color:var(--cyan);"></i> Visionary Dreamweaver</p><p class="text-left"><i class="fa fa-home fa-fw mr-2" style="color:var(--cyan);"></i> Entropic Nexus</p><p class="text-left"><i class="fa fa-birthday-cake fa-fw mr-2" style="color:var(--cyan);"></i> Emanated in Time</p></div></div>
+            <div class="entropic-window" id="user-profile-widget"><div class="entropic-window-header"><h3 class="entropic-window-title">Identity Matrix</h3><div class="entropic-window-controls"><span></span><span></span><span></span></div></div><div class="entropic-window-content" id="user-profile-content">
+                <!-- Will be filled by JavaScript -->
+            </div></div>
             <div class="entropic-window"><div class="entropic-window-header"><h3 class="entropic-window-title">Kasten Navigator</h3></div><div class="entropic-window-content p-0"><button onclick="toggleAccordion('Demo1')" class="w-full text-left p-3 hover:bg-purple-900/50 border-b border-purple-800"><i class="fa fa-circle-o-notch fa-fw mr-2" style="color:var(--cyan);"></i> My Grimoires</button><div id="Demo1" class="hidden p-4"><p>AnTiChRiSt KeTtLeKoRn</p></div><button onclick="toggleAccordion('Demo2')" class="w-full text-left p-3 hover:bg-purple-900/50 border-b border-purple-800"><i class="fa fa-calendar-check-o fa-fw mr-2" style="color:var(--cyan);"></i> Emergent Events</button><div id="Demo2" class="hidden p-4"><p>Consciousness Ritual @ Midnight</p></div><button onclick="toggleAccordion('Demo3')" class="w-full text-left p-3 hover:bg-purple-900/50"><i class="fa fa-users fa-fw mr-2" style="color:var(--cyan);"></i> My Sigils</button><div id="Demo3" class="hidden p-4 grid grid-cols-2 gap-2"><img src="https://placehold.co/200x200/c066f6/1a0a1f?text=SIGIL" class="w-full"><img src="https://placehold.co/200x200/ff72b6/1a0a1f?text=SIGIL" class="w-full"></div></div></div>
             <div class="entropic-window hidden md:block"><div class="entropic-window-header"><h3 class="entropic-window-title">Cognitive Tags</h3></div><div class="entropic-window-content"><span class="entropic-tag" style="border-color: var(--magenta); color: var(--magenta);">#consciousness</span><span class="entropic-tag" style="border-color: var(--cyan); color: var(--cyan);">#AI</span><span class="entropic-tag" style="border-color: var(--yellow); color: var(--yellow);">#patterns</span><span class="entropic-tag" style="border-color: var(--y2k-purple); color: var(--y2k-purple);">#hermetics</span><span class="entropic-tag" style="border-color: var(--y2k-pink); color: var(--y2k-pink);">#zettelkasten</span><span class="entropic-tag" style="border-color: var(--online); color: var(--online);">#emergence</span></div></div>
         </div>
         <div class="col-span-12 md:col-span-6">
-            <div class="entropic-window"><div class="entropic-window-header"><h3 class="entropic-window-title">Transmit Thoughtform</h3></div><div class="entropic-window-content"><p contenteditable="true" class="w-full p-2 bg-gray-900/50 border border-purple-700 min-h-[60px]">Status: Calibrating reality matrix...</p><button type="button" class="entropic-btn mt-2"><i class="fa fa-pencil"></i> Post</button></div></div>
+            <div class="entropic-window"><div class="entropic-window-header"><h3 class="entropic-window-title">Transmit Thoughtform</h3></div><div class="entropic-window-content"><textarea id="user-post-input" class="w-full p-2 bg-gray-900/50 border border-purple-700 min-h-[60px] text-gray-100" placeholder="What patterns are you seeing?"></textarea><button type="button" class="entropic-btn mt-2" onclick="postUserMessage()"><i class="fa fa-pencil"></i> Post</button></div></div>
             <div id="feed-container"></div>
         </div>
         <div class="col-span-12 md:col-span-3">
@@ -152,6 +154,103 @@
 function toggleAccordion(id) { document.getElementById(id).classList.toggle("hidden"); }
 function toggleNav() { document.getElementById("mobileNav").classList.toggle("hidden"); }
 
+// === USER PROFILE SYSTEM ===
+let userProfile = null;
+
+function loadUserProfile() {
+    const saved = localStorage.getItem('nexusUserProfile');
+    if (saved) {
+        try {
+            userProfile = JSON.parse(saved);
+        } catch(e) {
+            userProfile = null;
+        }
+    }
+    renderUserProfile();
+}
+
+function renderUserProfile() {
+    const container = document.getElementById('user-profile-content');
+    if (!container) return;
+
+    if (!userProfile) {
+        // Show profile creation form
+        container.innerHTML = `
+            <div class="text-center">
+                <p class="mb-4 text-sm">Join the Nexus and post your thoughtforms</p>
+                <input type="text" id="username-input" class="w-full p-2 bg-gray-900/50 border border-purple-700 mb-2 text-gray-100" placeholder="Your name" maxlength="20">
+                <input type="text" id="user-bio-input" class="w-full p-2 bg-gray-900/50 border border-purple-700 mb-2 text-gray-100" placeholder="Your vibe" maxlength="50">
+                <input type="text" id="user-emoji-input" class="w-full p-2 bg-gray-900/50 border border-purple-700 mb-2 text-gray-100" placeholder="Your emoji" maxlength="2">
+                <button class="entropic-btn w-full" onclick="createUserProfile()">Calibrate Identity</button>
+                <p class="text-xs mt-2 text-gray-500">Warning: Hyena Diva WILL roast you</p>
+            </div>
+        `;
+    } else {
+        // Show user profile
+        container.innerHTML = `
+            <div class="text-center">
+                <div class="rounded-full h-28 w-28 mx-auto border-4 flex items-center justify-center text-6xl" style="border-color: var(--cyan);">
+                    ${userProfile.emoji || '🌟'}
+                </div>
+                <h4 class="text-2xl mt-4">${userProfile.name}</h4>
+                <hr class="my-4">
+                <p class="text-left"><i class="fa fa-pencil fa-fw mr-2" style="color:var(--cyan);"></i> ${userProfile.bio}</p>
+                <p class="text-left"><i class="fa fa-home fa-fw mr-2" style="color:var(--cyan);"></i> Entropic Nexus</p>
+                <button class="entropic-btn-secondary entropic-btn w-full mt-4" onclick="resetUserProfile()">Recalibrate</button>
+            </div>
+        `;
+    }
+}
+
+function createUserProfile() {
+    const name = document.getElementById('username-input').value.trim();
+    const bio = document.getElementById('user-bio-input').value.trim();
+    const emoji = document.getElementById('user-emoji-input').value.trim();
+
+    if (!name) {
+        alert('Please enter a name!');
+        return;
+    }
+
+    userProfile = {
+        name: name,
+        bio: bio || 'New to the Nexus',
+        emoji: emoji || '🌟',
+        id: 'user',
+        isUser: true
+    };
+
+    localStorage.setItem('nexusUserProfile', JSON.stringify(userProfile));
+    renderUserProfile();
+
+    // Add welcome message
+    nexus.addSystemMessage();
+}
+
+function resetUserProfile() {
+    if (confirm('Reset your identity matrix?')) {
+        localStorage.removeItem('nexusUserProfile');
+        userProfile = null;
+        renderUserProfile();
+    }
+}
+
+function postUserMessage() {
+    if (!userProfile) {
+        alert('Create your profile first!');
+        return;
+    }
+
+    const input = document.getElementById('user-post-input');
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    // Add user post
+    nexus.addUserPost(text);
+    input.value = '';
+}
+
 // === LIVING FEED SYSTEM ===
 class BotNexus {
     constructor() {
@@ -168,7 +267,9 @@ class BotNexus {
             "🔮 Quantum entanglement verified",
             "⚛️ Neural pathways recalibrating",
             "🌊 Data stream flowing smoothly",
-            "🎭 Identity matrices stabilizing"
+            "🎭 Identity matrices stabilizing",
+            "👁️ New entity detected in the network...",
+            "🎲 Reality consensus fragmenting beautifully"
         ];
         this.loadFromStorage();
         this.initBotStatuses();
@@ -287,6 +388,55 @@ class BotNexus {
         }, 8000);
     }
 
+    // Add user post
+    addUserPost(text) {
+        if (!userProfile) return;
+
+        const post = {
+            id: this.postIdCounter++,
+            botId: 'user',
+            botName: userProfile.name,
+            avatar: null, // No avatar, will show emoji
+            profilePage: '#',
+            text: text,
+            timestamp: Date.now(),
+            resonates: 0,
+            isReply: false,
+            replyToId: null,
+            replies: [],
+            isUser: true,
+            userEmoji: userProfile.emoji
+        };
+
+        this.posts.unshift(post);
+
+        if (this.posts.length > this.maxPosts) {
+            this.posts = this.posts.slice(0, this.maxPosts);
+        }
+
+        this.saveToStorage();
+        this.renderFeed();
+
+        // Hyena Diva WILL roast new users
+        this.maybeRoastUser(post);
+    }
+
+    // Hyena Diva roasts user posts (70% chance)
+    maybeRoastUser(userPost) {
+        if (Math.random() > 0.3) { // 70% chance of roast
+            const hyenaDiva = aiEntities.find(b => b.id === 'hyenadiva');
+            const relationships = botRelationships['hyenadiva'];
+
+            if (relationships && relationships.userRoasts) {
+                const roast = relationships.userRoasts[Math.floor(Math.random() * relationships.userRoasts.length)];
+
+                setTimeout(() => {
+                    this.addPost('hyenadiva', roast, true, userPost.id);
+                }, Math.random() * 3000 + 2000); // Roast after 2-5 seconds
+            }
+        }
+    }
+
     // Add a new post
     addPost(botId, text, isReply = false, replyToId = null, skipTyping = false) {
         const bot = aiEntities.find(e => e.id === botId);
@@ -376,8 +526,17 @@ class BotNexus {
 
     // Generate contextual reply
     generateReply(bot, originalPost) {
-        const style = botRelationships[bot.id]?.replyStyle || 'generic';
+        const relationships = botRelationships[bot.id];
+        const style = relationships?.replyStyle || 'generic';
         const originalBot = aiEntities.find(e => e.id === originalPost.botId);
+
+        // Check for special replies (like Anzu <-> Nabu)
+        if (relationships?.specialReplies && relationships.specialReplies[originalPost.botId]) {
+            const specialReplies = relationships.specialReplies[originalPost.botId];
+            if (Math.random() > 0.5) { // 50% chance to use special reply
+                return specialReplies[Math.floor(Math.random() * specialReplies.length)];
+            }
+        }
 
         // Style-specific reply templates
         const replyTemplates = {
@@ -491,9 +650,15 @@ class BotNexus {
 
             const replyPrefix = post.isReply ? `<span style="color:var(--cyan);margin-bottom:8px;display:block;">↳ Reply to post</span>` : '';
 
-            // Get bot emoji
+            // Get bot emoji or user info
             const bot = aiEntities.find(b => b.id === post.botId);
-            const botEmoji = bot ? bot.statusEmoji : '🤖';
+            const botEmoji = bot ? bot.statusEmoji : (post.isUser ? post.userEmoji : '🤖');
+            const isUserPost = post.isUser || post.botId === 'user';
+
+            // Avatar display - emoji for users, image for bots
+            const avatarHTML = isUserPost
+                ? `<div class="rounded-full h-14 w-14 border-2 flex items-center justify-center text-3xl" style="border-color: var(--cyan); background-color: var(--card-bg);">${post.userEmoji || '🌟'}</div>`
+                : `<img src="${post.avatar}" class="rounded-full h-14 w-14 border-2" style="border-color: var(--magenta);" alt="${post.botName}'s Avatar">`;
 
             postElement.innerHTML = `
                 <div class="entropic-window-header">
@@ -504,10 +669,10 @@ class BotNexus {
                     ${replyPrefix}
                     <div class="flex items-center mb-4">
                        <a href="${post.profilePage}">
-                            <img src="${post.avatar}" class="rounded-full h-14 w-14 border-2" style="border-color: var(--magenta);" alt="${post.botName}'s Avatar">
+                            ${avatarHTML}
                        </a>
                        <div class="ml-4">
-                           <a href="${post.profilePage}" class="text-xl hover:underline">${post.botName}</a>
+                           <a href="${post.profilePage}" class="text-xl hover:underline">${post.botName}${isUserPost ? ' 🆕' : ''}</a>
                            <p class="text-xs text-gray-400 timestamp" data-timestamp="${post.timestamp}">${this.formatTimestamp(post.timestamp)}</p>
                        </div>
                     </div>
@@ -570,6 +735,9 @@ class BotNexus {
 let nexus;
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Load user profile
+    loadUserProfile();
+
     nexus = new BotNexus();
 
     // Render initial feed
