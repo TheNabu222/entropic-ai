@@ -151,7 +151,7 @@ window.loadPageFromSource = function(pageName, bodyOnly = false) {
             return;
         }
 
-        updateStatus && updateStatus(`Loading ${pageName} from source...`);
+        if (window.updateStatus) window.updateStatus(`Loading ${pageName} from source...`);
 
         // Parse the HTML
         const parser = new DOMParser();
@@ -163,9 +163,9 @@ window.loadPageFromSource = function(pageName, bodyOnly = false) {
         if (bodyOnly) {
             // Just load body content - ignore CSS/JS
             if (window.initCanvas) {
-                initCanvas(bodyContent);
+                window.initCanvas(bodyContent);
             }
-            updateStatus && updateStatus(`Loaded body from ${pageName}`);
+            if (window.updateStatus) window.updateStatus(`Loaded body from ${pageName}`);
         } else {
             // Load full page with CSS and JS
             // Extract CSS from <style> tags
@@ -192,24 +192,24 @@ window.loadPageFromSource = function(pageName, bodyOnly = false) {
 
             // Load body content into canvas
             if (window.initCanvas) {
-                initCanvas(bodyContent);
+                window.initCanvas(bodyContent);
             }
 
             // Apply the CSS and JS
-            if (window.applyCustomCSS) applyCustomCSS();
-            if (window.applyCustomJS) applyCustomJS();
+            if (window.applyCustomCSS) window.applyCustomCSS();
+            if (window.applyCustomJS) window.applyCustomJS();
 
-            updateStatus && updateStatus(`Loaded full page: ${pageName}`);
+            if (window.updateStatus) window.updateStatus(`Loaded full page: ${pageName}`);
         }
 
-        closeModal && closeModal('source-page-loader-modal');
-        playSound && playSound('success');
-        showStamp && showStamp('📁');
+        if (window.closeModal) window.closeModal('source-page-loader-modal');
+        if (window.playSound) window.playSound('success');
+        if (window.showStamp) window.showStamp('📁');
 
     } catch (error) {
         console.error('Error loading page:', error);
         alert(`Error loading ${pageName}: ${error.message}`);
-        updateStatus && updateStatus(`Failed to load ${pageName}`);
+        if (window.updateStatus) window.updateStatus(`Failed to load ${pageName}`);
     }
 };
 
@@ -330,9 +330,9 @@ function saveSelectedComponent() {
     componentLibrary.push(component);
     saveComponentLibrary();
 
-    playSound && playSound('success');
-    showStamp && showStamp('💾');
-    updateStatus && updateStatus(`Saved component: ${name}`);
+    if (window.playSound) window.playSound('success');
+    if (window.showStamp) window.showStamp('💾');
+    if (window.updateStatus) window.updateStatus(`Saved component: ${name}`);
 
     alert(`Component "${name}" saved to library!`);
 }
@@ -434,13 +434,13 @@ window.insertComponent = function(componentId) {
     if (!component) return;
 
     if (window.addElementHTML) {
-        addElementHTML(component.html);
+        window.addElementHTML(component.html);
     }
 
-    closeModal && closeModal('component-library-modal');
-    playSound && playSound('pop');
-    showStamp && showStamp('✨');
-    updateStatus && updateStatus(`Inserted: ${component.name}`);
+    if (window.closeModal) window.closeModal('component-library-modal');
+    if (window.playSound) window.playSound('pop');
+    if (window.showStamp) window.showStamp('✨');
+    if (window.updateStatus) window.updateStatus(`Inserted: ${component.name}`);
 };
 
 window.deleteComponent = function(componentId) {
@@ -451,8 +451,8 @@ window.deleteComponent = function(componentId) {
         componentLibrary = componentLibrary.filter(c => c.id !== componentId);
         saveComponentLibrary();
         renderComponentLibrary();
-        playSound && playSound('pop');
-        updateStatus && updateStatus(`Deleted: ${component.name}`);
+        if (window.playSound) window.playSound('pop');
+        if (window.updateStatus) window.updateStatus(`Deleted: ${component.name}`);
     }
 };
 
@@ -492,7 +492,7 @@ window.exportComponentLibrary = function() {
     a.download = 'component-library.json';
     a.click();
     URL.revokeObjectURL(url);
-    updateStatus && updateStatus('Component library exported!');
+    if (window.updateStatus) window.updateStatus('Component library exported!');
 };
 
 window.importComponentLibrary = function() {
@@ -510,8 +510,8 @@ window.importComponentLibrary = function() {
                 componentLibrary = [...componentLibrary, ...imported];
                 saveComponentLibrary();
                 renderComponentLibrary();
-                updateStatus && updateStatus(`Imported ${imported.length} components!`);
-                playSound && playSound('success');
+                if (window.updateStatus) window.updateStatus(`Imported ${imported.length} components!`);
+                if (window.playSound) window.playSound('success');
             } catch (err) {
                 alert('Failed to import: Invalid JSON file');
             }
