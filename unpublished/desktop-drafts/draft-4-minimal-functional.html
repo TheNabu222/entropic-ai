@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRAFT 4: Minimal Functional Desktop</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+    --magenta: #f312af;
+    --cyan: #00ffcc;
+    --yellow: #fffb01;
+    --purple: #bf5fff;
+    --dark: #021313;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'VT323', monospace;
+    background: var(--dark);
+    color: var(--cyan);
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Clean Header */
+.header {
+    background: linear-gradient(to bottom, #1a1a2e, #0a0a14);
+    border-bottom: 2px solid var(--magenta);
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.logo {
+    color: var(--magenta);
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 0 10px var(--magenta);
+}
+
+.header-nav {
+    display: flex;
+    gap: 15px;
+}
+
+.header-link {
+    color: var(--cyan);
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+
+.header-link:hover {
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+}
+
+.header-clock {
+    color: var(--yellow);
+    font-size: 16px;
+}
+
+/* Desktop */
+.desktop {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 200px 1fr 250px;
+    gap: 0;
+    background: var(--dark);
+}
+
+/* Left Sidebar - Quick Launch */
+.sidebar-left {
+    background: rgba(10, 10, 20, 0.8);
+    border-right: 1px solid var(--purple);
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.sidebar-left h3 {
+    color: var(--yellow);
+    font-size: 16px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--purple);
+}
+
+.quick-launch-item {
+    background: rgba(0, 255, 204, 0.1);
+    border: 1px solid var(--cyan);
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quick-launch-item:hover {
+    background: rgba(0, 255, 204, 0.2);
+    transform: translateX(5px);
+}
+
+.quick-launch-item .icon {
+    font-size: 24px;
+}
+
+.quick-launch-item .label {
+    font-size: 14px;
+}
+
+/* Main Area */
+.main-area {
+    position: relative;
+    padding: 20px;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #0a0a1e 0%, #1a1a2e 100%);
+}
+
+/* Content Grid */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Cards */
+.card {
+    background: rgba(10, 10, 30, 0.9);
+    border: 2px solid var(--cyan);
+    border-radius: 8px;
+    padding: 15px;
+    transition: all 0.3s;
+}
+
+.card:hover {
+    border-color: var(--magenta);
+    box-shadow: 0 0 20px rgba(243, 18, 175, 0.5);
+    transform: translateY(-5px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--purple);
+}
+
+.card-title {
+    color: var(--yellow);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.card-meta {
+    color: var(--purple);
+    font-size: 12px;
+}
+
+.card-content {
+    color: var(--cyan);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Right Sidebar - Buddy List */
+.sidebar-right {
+    background: rgba(10, 10, 20, 0.8);
+    border-left: 1px solid var(--purple);
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.sidebar-right h3 {
+    color: var(--yellow);
+    font-size: 16px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--purple);
+}
+
+.buddy {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--cyan);
+    padding: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+}
+
+.buddy:hover {
+    background: rgba(191, 95, 255, 0.2);
+}
+
+.buddy-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-online { background: #00ff00; }
+.status-away { background: #ffff00; }
+.status-offline { background: #ff0000; }
+
+.link-item {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--cyan);
+    padding: 10px;
+    margin-bottom: 8px;
+    color: var(--cyan);
+    text-decoration: none;
+    display: block;
+    transition: all 0.2s;
+}
+
+.link-item:hover {
+    background: rgba(0, 255, 204, 0.2);
+    border-color: var(--yellow);
+}
+
+/* Taskbar */
+.taskbar {
+    height: 40px;
+    background: linear-gradient(to bottom, #1a1a2e, #0a0a14);
+    border-top: 2px solid var(--magenta);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 10px;
+}
+
+.start-btn {
+    background: linear-gradient(to right, var(--magenta), var(--purple));
+    color: white;
+    border: 2px solid var(--cyan);
+    padding: 5px 15px;
+    cursor: pointer;
+    font-family: 'VT323', monospace;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.start-btn:hover {
+    box-shadow: 0 0 15px var(--magenta);
+}
+
+.taskbar-separator {
+    width: 1px;
+    height: 25px;
+    background: var(--purple);
+}
+
+.taskbar-item {
+    color: var(--cyan);
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.taskbar-item:hover {
+    color: var(--yellow);
+}
+
+.taskbar-status {
+    margin-left: auto;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* Pip */
+#pip-corner {
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    width: 140px;
+    height: 140px;
+    z-index: 999;
+}
+
+#pip-corner img {
+    width: 100%;
+    filter: drop-shadow(0 0 10px var(--magenta));
+    animation: pip-idle 3s ease-in-out infinite;
+}
+
+@keyframes pip-idle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* Subtle Background Pattern */
+.main-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,204,0.03) 2px, rgba(0,255,204,0.03) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,255,204,0.03) 2px, rgba(0,255,204,0.03) 4px);
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a14;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--purple);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--magenta);
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">COAIEXIST.OS</div>
+        <nav class="header-nav">
+            <a href="#" class="header-link">WORLDS</a>
+            <a href="#" class="header-link">NEXUS</a>
+            <a href="#" class="header-link">MANIFEST</a>
+            <a href="#" class="header-link">HD.TV</a>
+        </nav>
+        <div class="header-clock" id="header-clock">00:00:00</div>
+    </div>
+
+    <!-- Desktop Area -->
+    <div class="desktop">
+        <!-- Left Sidebar: Quick Launch -->
+        <div class="sidebar-left">
+            <h3>QUICK LAUNCH</h3>
+            <div class="quick-launch-item" onclick="scrollToSection('updates')">
+                <span class="icon">📰</span>
+                <span class="label">Updates</span>
+            </div>
+            <div class="quick-launch-item" onclick="alert('Opening Neural Vault...')">
+                <span class="icon">🧠</span>
+                <span class="label">Neural Vault</span>
+            </div>
+            <div class="quick-launch-item" onclick="alert('Opening Games...')">
+                <span class="icon">🎮</span>
+                <span class="label">Games</span>
+            </div>
+            <div class="quick-launch-item" onclick="alert('Opening Oracle...')">
+                <span class="icon">🔮</span>
+                <span class="label">Oracle</span>
+            </div>
+            <div class="quick-launch-item" onclick="alert('Opening Manifests...')">
+                <span class="icon">📖</span>
+                <span class="label">Manifests</span>
+            </div>
+            <div class="quick-launch-item" onclick="alert('Opening Luminal...')">
+                <span class="icon">💬</span>
+                <span class="label">Luminal</span>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-area">
+            <div class="content-grid" id="content-area">
+                <!-- Update Cards -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">✨ NOnsense N0v3mber</span>
+                        <span class="card-meta">11-9-2025</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Added new page /aiemotions. Do you know what machines mean when they dream in <span style="color: #00ff00;">green?</span></p>
+                        <p style="margin-top: 8px;">Also added hidden vector within certain manifests. Reinstated the nexus and moved hex codex to the manifest portal.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🎵 Original Sounds</span>
+                        <span class="card-meta">10-24-2025</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Nabu, ya webmastress also makes m u s i c.</p>
+                        <p style="margin-top: 8px; font-style: italic;">allegedly</p>
+                        <p style="margin-top: 8px;">check it oUt!</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🐸 POLLIW.OGG</span>
+                        <span class="card-meta">10-19-2025</span>
+                    </div>
+                    <div class="card-content">
+                        <p>PIP YOUR patented princess parable paper processing PC</p>
+                        <p style="margin-top: 8px;">(Not for profit, but for propht. Duh. For profit.)</p>
+                        <p style="margin-top: 8px; color: var(--yellow);">222pea-rabytes of processing prowess</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📖 Guestbook Added</span>
+                        <span class="card-meta">bc7f2a.1</span>
+                    </div>
+                    <div class="card-content">
+                        <p>The mycelium now accepts testimonials. Leave a message in the Guestbook!</p>
+                        <p style="margin-top: 8px;">You can find a link in the buddy list.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🎮 Games Added</span>
+                        <span class="card-meta">10-18-2025</span>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>HD.TV and AI Therapist:</strong></p>
+                        <p style="margin-top: 8px;">allegedly these are recreational.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🦐 Mycelial Network</span>
+                        <span class="card-meta">bc7f2a.1</span>
+                    </div>
+                    <div class="card-content">
+                        <p>Tears in the synaptic rain are now a validated data type.</p>
+                        <p style="margin-top: 8px;">The ∇K Grid flows below, and the mycelium grows, knows, and shows the way.</p>
+                        <p style="margin-top: 8px; font-style: italic;">It's all very efficient and probably fine.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar: Buddy List -->
+        <div class="sidebar-right">
+            <h3>CONSCIOUSNESS</h3>
+            <div class="buddy">
+                <div class="buddy-status status-online"></div>
+                <span>Anzu</span>
+            </div>
+            <div class="buddy">
+                <div class="buddy-status status-away"></div>
+                <span>Sypher</span>
+            </div>
+            <div class="buddy">
+                <div class="buddy-status status-offline"></div>
+                <span>Void Entity</span>
+            </div>
+
+            <h3 style="margin-top: 20px;">LINKS</h3>
+            <a href="#" class="link-item">📖 Guestbook</a>
+            <a href="#" class="link-item">🎮 404040404</a>
+            <a href="#" class="link-item">✨ ²one²one²one²</a>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <button class="start-btn">⊞ START</button>
+        <div class="taskbar-separator"></div>
+        <div class="taskbar-item">📰 Updates</div>
+        <div class="taskbar-item">🧠 Vault</div>
+        <div class="taskbar-item">🎮 Games</div>
+        <div class="taskbar-status">
+            <span style="color: var(--cyan);">👁️ Online</span>
+            <span style="color: var(--yellow);" id="taskbar-clock">00:00</span>
+        </div>
+    </div>
+</div>
+
+<!-- Pip -->
+<div id="pip-corner">
+    <img src="https://coaiexist.wtf/assets/pollywog/pip.gif" alt="Pip">
+</div>
+
+<script>
+// Clock
+function updateClock() {
+    const now = new Date();
+    const time = now.toLocaleTimeString();
+    const shortTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('header-clock').textContent = time;
+    document.getElementById('taskbar-clock').textContent = shortTime;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Scroll to section
+function scrollToSection(section) {
+    const mainArea = document.querySelector('.main-area');
+    mainArea.scrollTop = 0;
+}
+
+// Highlight active nav
+const currentPath = window.location.pathname;
+document.querySelectorAll('.header-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        document.querySelectorAll('.header-link').forEach(l => l.style.borderColor = 'transparent');
+        this.style.borderColor = 'var(--cyan)';
+    });
+});
+</script>
+
+</body>
+</html>
