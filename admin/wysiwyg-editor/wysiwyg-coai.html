@@ -1031,7 +1031,14 @@
             updateStatus(`Loading page from ${url}...`);
             try {
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
+
+                // Fetch with timeout (30 seconds)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+                const response = await fetch(proxyUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
+
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 const parser = new DOMParser();
@@ -1050,8 +1057,14 @@
                 showStamp('📂');
             } catch (error) {
                 console.error("Failed to load page:", error);
-                updateStatus(`❌ Error loading page: ${error.message}`);
-                alert(`Could not load page. This might be due to CORS policy. Try another URL.`);
+
+                let errorMsg = error.message;
+                if (error.name === 'AbortError') {
+                    errorMsg = 'Request timed out - the page took too long to load';
+                }
+
+                updateStatus(`❌ Error loading page: ${errorMsg}`);
+                alert(`Could not load page: ${errorMsg}\n\nThis might be due to CORS policy, timeout, or network issues. Try another URL.`);
                 playSound('error', 'C4');
             }
         }

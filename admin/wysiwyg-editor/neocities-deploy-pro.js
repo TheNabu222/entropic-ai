@@ -37,11 +37,8 @@ function loadNeocitiesConfig() {
             neocitiesConfig = { ...neocitiesConfig, ...config };
         }
 
-        // Set API key if not already stored
-        if (!neocitiesConfig.apiKey) {
-            neocitiesConfig.apiKey = '95cba50ce217a25db2e85800e178044e';
-            saveNeocitiesConfig();
-        }
+        // DO NOT hardcode API keys - security vulnerability!
+        // Users must enter their own API key via the modal
     } catch (e) {
         console.error('Failed to load Neocities config:', e);
     }
@@ -280,6 +277,44 @@ function addDeploymentStyles() {
 }
 
 // ============================================
+// SAFE FETCH HELPER WITH TIMEOUT
+// ============================================
+async function safeFetch(url, options = {}, timeoutMs = 30000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        // Check HTTP status
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        // Parse JSON with error handling
+        try {
+            const data = await response.json();
+            return data;
+        } catch (jsonError) {
+            throw new Error(`Invalid JSON response: ${jsonError.message}`);
+        }
+    } catch (error) {
+        clearTimeout(timeoutId);
+
+        if (error.name === 'AbortError') {
+            throw new Error('Request timed out - please check your network connection');
+        }
+
+        throw error;
+    }
+}
+
+// ============================================
 // API KEY MANAGEMENT
 // ============================================
 window.toggleApiKeyVisibility = function() {
@@ -312,13 +347,11 @@ window.testConnection = async function() {
     statusDiv.innerHTML = '⏳ Testing connection...';
 
     try {
-        const response = await fetch(`${NEOCITIES_API}/info`, {
+        const data = await safeFetch(`${NEOCITIES_API}/info`, {
             headers: {
                 'Authorization': `Bearer ${neocitiesConfig.apiKey}`
             }
         });
-
-        const data = await response.json();
 
         if (data.result === 'success') {
             statusDiv.style.background = 'rgba(72, 199, 116, 0.2)';
@@ -376,13 +409,11 @@ window.refreshNeocitiesFiles = async function() {
     browser.innerHTML = '<p style="color: var(--text-secondary);">⏳ Loading files...</p>';
 
     try {
-        const response = await fetch(`${NEOCITIES_API}/list`, {
+        const data = await safeFetch(`${NEOCITIES_API}/list`, {
             headers: {
                 'Authorization': `Bearer ${neocitiesConfig.apiKey}`
             }
         });
-
-        const data = await response.json();
 
         if (data.result === 'success') {
             neocitiesConfig.siteFiles = data.files;
@@ -404,22 +435,30 @@ function renderFileList(files) {
         return;
     }
 
+    // HTML escape helper to prevent XSS
+    const escapeHtml = (str) => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    };
+
     browser.innerHTML = files.map(file => {
         const icon = file.is_directory ? '📁' : getFileIcon(file.path);
         const size = file.is_directory ? '' : formatFileSize(file.size);
         const date = new Date(file.updated_at).toLocaleString();
+        const escapedPath = escapeHtml(file.path);
 
         return `
             <div class="file-item">
                 <div class="file-info">
                     <span>${icon}</span>
-                    <span style="font-weight: ${file.is_directory ? 'bold' : 'normal'};">${file.path}</span>
+                    <span style="font-weight: ${file.is_directory ? 'bold' : 'normal'};">${escapedPath}</span>
                     ${size ? `<span style="color: var(--text-secondary); font-size: 12px;">${size}</span>` : ''}
                     <span style="color: var(--text-secondary); font-size: 12px;">${date}</span>
                 </div>
                 <div class="file-actions">
                     ${!file.is_directory && file.path !== 'index.html' ? `
-                        <button class="big-button" onclick="deleteNeocitiesFile('${file.path}')" style="background: #f14668; color: white; font-size: 12px; padding: 4px 8px;">
+                        <button class="big-button delete-file-btn" data-filename="${escapedPath}" style="background: #f14668; color: white; font-size: 12px; padding: 4px 8px;">
                             🗑️ Delete
                         </button>
                     ` : ''}
@@ -427,6 +466,14 @@ function renderFileList(files) {
             </div>
         `;
     }).join('');
+
+    // Attach event listeners to delete buttons (safe - no XSS)
+    browser.querySelectorAll('.delete-file-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const filename = e.currentTarget.dataset.filename;
+            window.deleteNeocitiesFile(filename);
+        });
+    });
 }
 
 function getFileIcon(filename) {
@@ -455,15 +502,13 @@ window.deleteNeocitiesFile = async function(filename) {
         const formData = new FormData();
         formData.append('filenames[]', filename);
 
-        const response = await fetch(`${NEOCITIES_API}/delete`, {
+        const data = await safeFetch(`${NEOCITIES_API}/delete`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${neocitiesConfig.apiKey}`
             },
             body: formData
         });
-
-        const data = await response.json();
 
         if (data.result === 'success') {
             if (window.updateStatus) window.updateStatus(`Deleted ${filename}`);
@@ -519,16 +564,14 @@ window.deployCurrentPage = async function() {
         const blob = new Blob([html], { type: 'text/html' });
         formData.append(filename, blob, filename);
 
-        // Deploy!
-        const response = await fetch(`${NEOCITIES_API}/upload`, {
+        // Deploy! (Use longer timeout for uploads - 60 seconds)
+        const data = await safeFetch(`${NEOCITIES_API}/upload`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${neocitiesConfig.apiKey}`
             },
             body: formData
-        });
-
-        const data = await response.json();
+        }, 60000);
 
         if (data.result === 'success') {
             // Success!
