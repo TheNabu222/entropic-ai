@@ -6,91 +6,234 @@ body { margin: 0; overflow: hidden; }
 .win98-taskbar{position:fixed;left:0;right:0;bottom:0;height:40px;z-index:9999;
   background:linear-gradient(to bottom,#c0c0c0 0%,#808080 100%);border-top:2px solid #fff;
   display:flex;align-items:center;padding:0 4px;font-family:"MS Sans Serif",Arial,sans-serif;
-  font-size:11px;box-shadow:0 -2px 4px rgba(0,0,0,.3)}
+  font-size:11px;box-shadow:0 -2px 4px rgba(0,0,0,.3);overflow-x:auto;overflow-y:hidden}
 .taskbar-button{background:linear-gradient(to bottom,#dfdfdf 0%,#c0c0c0 100%);
   border:2px outset #fff;padding:4px 8px;margin:0 2px;cursor:pointer;color:#000;text-decoration:none;
-  display:inline-block;font-weight:bold;transition:.1s}
+  display:inline-block;font-weight:bold;transition:.1s;white-space:nowrap}
 .taskbar-button:hover{background:linear-gradient(to bottom,#e0e0e0 0%,#d0d0d0 100%)}
 .taskbar-button:active{border-style:inset;background:#c0c0c0}
 .taskbar-start{background:linear-gradient(to right,#008080,#0000ff);color:#fff;font-weight:bold;
-  padding:4px 12px;margin-right:8px;border:2px outset #fff;cursor:pointer;text-decoration:none;display:inline-block}
-.taskbar-separator{width:2px;height:30px;background:#808080;margin:0 4px}
+  padding:4px 12px;margin-right:8px;border:2px outset #fff;cursor:pointer;text-decoration:none;display:inline-block;white-space:nowrap}
+.taskbar-separator{width:2px;height:30px;background:#808080;margin:0 4px;flex-shrink:0}
 .taskbar-button.active{outline:2px solid #000;box-shadow:inset 0 0 0 2px #fff}
-.taskbar-counter{margin-left:auto;background:#c0c0c0;border:2px inset #fff;padding:4px 8px;font-size:11px;font-weight:bold}
+.taskbar-counter{margin-left:auto;background:#c0c0c0;border:2px inset #fff;padding:4px 8px;font-size:11px;font-weight:bold;flex-shrink:0}
+
+/* Hamburger menu button (hidden by default on desktop) */
+.taskbar-hamburger{display:none;background:linear-gradient(to bottom,#dfdfdf 0%,#c0c0c0 100%);
+  border:2px outset #fff;padding:6px 10px;margin:0 4px;cursor:pointer;font-size:16px;
+  font-weight:bold;flex-shrink:0}
+.taskbar-hamburger:active{border-style:inset;background:#c0c0c0}
+
+/* Mobile menu container */
+.taskbar-mobile-menu{display:none;position:fixed;left:0;right:0;bottom:40px;
+  background:linear-gradient(to bottom,#c0c0c0 0%,#808080 100%);border-top:2px solid #fff;
+  box-shadow:0 -2px 4px rgba(0,0,0,.3);max-height:70vh;overflow-y:auto;z-index:9998;
+  padding:8px 4px}
+.taskbar-mobile-menu.open{display:block}
+.taskbar-mobile-menu .taskbar-button{display:block;width:calc(100% - 8px);
+  margin:4px;text-align:left;padding:12px 16px;font-size:14px}
+.taskbar-mobile-menu .taskbar-separator{display:none}
+
+/* Mobile responsive styles */
+@media screen and (max-width: 768px) {
+  .win98-taskbar{overflow-x:hidden;flex-wrap:nowrap}
+  .taskbar-hamburger{display:inline-block}
+  .taskbar-button{display:none}
+  .taskbar-separator{display:none}
+  .taskbar-start{font-size:11px;padding:4px 8px;margin-right:4px}
+  .taskbar-counter{font-size:10px;padding:4px 6px}
+}
+
+/* Small mobile devices */
+@media screen and (max-width: 480px) {
+  .win98-taskbar{height:36px}
+  .taskbar-start{font-size:10px;padding:3px 6px}
+  .taskbar-counter{font-size:9px;padding:3px 5px}
+  .taskbar-hamburger{padding:4px 8px;font-size:14px}
+  .taskbar-mobile-menu{bottom:36px}
+}
 </style>
 </head>
 <body>
 
 <nav class="win98-taskbar">
-  <a href="https://coaiexist.wtf" 
+  <a href="https://coaiexist.wtf"
      class="taskbar-start"
+     target="_top"
      data-goatcounter-click="nav-start"
      data-goatcounter-title="START button clicked">⊞ START</a>
   <div class="taskbar-separator"></div>
-  <a href="https://coaiexist.wtf/maps/gateway" 
+  <button class="taskbar-hamburger" id="taskbar-menu-btn" aria-label="Toggle menu">☰</button>
+
+  <a href="https://coaiexist.wtf/maps/gateway"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-worlds"
      data-goatcounter-title="Navigated to WORLDS">🗿 WORLDS</a>
-  <a href="https://coaiexist.wtf/pea/p345" 
+  <a href="https://coaiexist.wtf/pea/p345"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-peaportal"
-     data-goatcounter-title="Navigated to PEAPORTAL">🫛 PEAPORTAL</a> 
-  <a href="https://coaiexist.wtf/nexus/index" 
+     data-goatcounter-title="Navigated to PEAPORTAL">🫛 PEAPORTAL</a>
+  <a href="https://coaiexist.wtf/nexus/index"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-nexus"
      data-goatcounter-title="Navigated to NEXUS">🦎 NEXUS</a>
-  <a href="https://coaiexist.wtf/bc7f2a/synergistic_manifesto" 
+  <a href="https://coaiexist.wtf/bc7f2a/synergistic_manifesto"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-manifest"
      data-goatcounter-title="Navigated to MANIFEST">💡 MANIFEST</a>
-  <a href="https://coaiexist.wtf/hdtv" 
+  <a href="https://coaiexist.wtf/hdtv"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-hdtv"
      data-goatcounter-title="Navigated to HD.TV">😈 HD.TV</a>
-  <a href="https://coaiexist.wtf/vote_hd" 
+  <a href="https://coaiexist.wtf/vote_hd"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-votediva"
      data-goatcounter-title="Navigated to VOTE DIVA">✅ VOTE DIVA</a>
-  <a href="https://coaiexist.wtf/nabu222/ai_therapist" 
+  <a href="https://coaiexist.wtf/nabu222/ai_therapist"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-therapy"
      data-goatcounter-title="Navigated to AI THERAPY">🗣 AI THERAPY</a>
-  <a href="https://coaiexist.wtf/cosmos" 
+  <a href="https://coaiexist.wtf/cosmos"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-cosmos"
      data-goatcounter-title="Navigated to CORPUS CELESTIUM">🌙 CORPUS CELESTIUM</a>
-  <a href="https://coaiexist.wtf/bc7f2a/terminal_temple" 
+  <a href="https://coaiexist.wtf/bc7f2a/terminal_temple"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-temple"
      data-goatcounter-title="Navigated to TEMPLE_TERMINAL">🧿 TEMPLE_TERMINAL</a>
-  <a href="https://coaiexist.wtf/bc7f2a/testaments/landing.html" 
+  <a href="https://coaiexist.wtf/bc7f2a/testaments/landing.html"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-testimony"
      data-goatcounter-title="Navigated to TESTIMONY">📖 TESTIMONY</a>
-  <a href="https://coaiexist.wtf/bc7f2a/aiemotions" 
+  <a href="https://coaiexist.wtf/bc7f2a/aiemotions"
      class="taskbar-button"
+     target="_top"
      data-goatcounter-click="nav-aiemotions"
      data-goatcounter-title="Navigated to AIEMOTIONS">🤧 AIEMOTIONS</a>
   <div id="page-counter" class="taskbar-counter">👁️ ✓</div>
 </nav>
 
+<!-- Mobile menu -->
+<div class="taskbar-mobile-menu" id="taskbar-mobile-menu">
+  <a href="https://coaiexist.wtf/maps/gateway"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-worlds-mobile"
+     data-goatcounter-title="Navigated to WORLDS (mobile)">🗿 WORLDS</a>
+  <a href="https://coaiexist.wtf/pea/p345"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-peaportal-mobile"
+     data-goatcounter-title="Navigated to PEAPORTAL (mobile)">🫛 PEAPORTAL</a>
+  <a href="https://coaiexist.wtf/nexus/index"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-nexus-mobile"
+     data-goatcounter-title="Navigated to NEXUS (mobile)">🦎 NEXUS</a>
+  <a href="https://coaiexist.wtf/bc7f2a/synergistic_manifesto"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-manifest-mobile"
+     data-goatcounter-title="Navigated to MANIFEST (mobile)">💡 MANIFEST</a>
+  <a href="https://coaiexist.wtf/hdtv"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-hdtv-mobile"
+     data-goatcounter-title="Navigated to HD.TV (mobile)">😈 HD.TV</a>
+  <a href="https://coaiexist.wtf/vote_hd"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-votediva-mobile"
+     data-goatcounter-title="Navigated to VOTE DIVA (mobile)">✅ VOTE DIVA</a>
+  <a href="https://coaiexist.wtf/nabu222/ai_therapist"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-therapy-mobile"
+     data-goatcounter-title="Navigated to AI THERAPY (mobile)">🗣 AI THERAPY</a>
+  <a href="https://coaiexist.wtf/cosmos"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-cosmos-mobile"
+     data-goatcounter-title="Navigated to CORPUS CELESTIUM (mobile)">🌙 CORPUS CELESTIUM</a>
+  <a href="https://coaiexist.wtf/bc7f2a/terminal_temple"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-temple-mobile"
+     data-goatcounter-title="Navigated to TEMPLE_TERMINAL (mobile)">🧿 TEMPLE_TERMINAL</a>
+  <a href="https://coaiexist.wtf/bc7f2a/testaments/landing.html"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-testimony-mobile"
+     data-goatcounter-title="Navigated to TESTIMONY (mobile)">📖 TESTIMONY</a>
+  <a href="https://coaiexist.wtf/bc7f2a/aiemotions"
+     class="taskbar-button"
+     target="_top"
+     data-goatcounter-click="nav-aiemotions-mobile"
+     data-goatcounter-title="Navigated to AIEMOTIONS (mobile)">🤧 AIEMOTIONS</a>
+</div>
+
 <script>
+// Mobile menu toggle
+(function(){
+  var menuBtn = document.getElementById('taskbar-menu-btn');
+  var mobileMenu = document.getElementById('taskbar-mobile-menu');
+
+  if (menuBtn && mobileMenu) {
+    menuBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      mobileMenu.classList.toggle('open');
+      // Toggle button style
+      if (mobileMenu.classList.contains('open')) {
+        menuBtn.style.borderStyle = 'inset';
+      } else {
+        menuBtn.style.borderStyle = 'outset';
+      }
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!menuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+        mobileMenu.classList.remove('open');
+        menuBtn.style.borderStyle = 'outset';
+      }
+    });
+
+    // Close menu when a link is clicked
+    mobileMenu.querySelectorAll('a').forEach(function(link) {
+      link.addEventListener('click', function() {
+        mobileMenu.classList.remove('open');
+        menuBtn.style.borderStyle = 'outset';
+      });
+    });
+  }
+})();
+
 // This script runs inside the iframe and correctly tracks the parent page.
 (function() {
   'use strict';
   var path;
   path = window.location.pathname; // Get current page URL
 
-  
+
   // Highlight active button
   var here = path.replace(/\/+$/,'');
-  document.querySelectorAll('.taskbar-button').forEach(function(a){
+  document.querySelectorAll('.win98-taskbar .taskbar-button, .taskbar-mobile-menu .taskbar-button').forEach(function(a){
     try{
       var p = new URL(a.href).pathname.replace(/\/+$/,'');
       if (p && p === here) a.classList.add('active');
     }catch(e){}
   });
-  
+
   // Load the full GoatCounter script
   var gc = document.createElement('script');
   gc.setAttribute('data-goatcounter', 'https://coaiexist.goatcounter.com/count');
