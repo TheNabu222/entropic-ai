@@ -1600,15 +1600,28 @@
                 if (document.querySelector('.modal.active')) return;
                 const target = e.target;
                 if (['INPUT', 'TEXTAREA'].includes(target.tagName) || target.isContentEditable) return;
-                
+
                 const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
                 const isCtrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
-                
+
                 if (isCtrlOrCmd && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
                 else if (isCtrlOrCmd && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); redo(); }
                 else if (isCtrlOrCmd && e.key.toLowerCase() === 'c') { e.preventDefault(); copySelectedElement(); }
                 else if (isCtrlOrCmd && e.key.toLowerCase() === 'v') { e.preventDefault(); pasteElement(); }
+                else if (isCtrlOrCmd && e.key.toLowerCase() === 'a') { e.preventDefault(); selectAllElements(); }
+                else if (isCtrlOrCmd && e.key.toLowerCase() === 's') { e.preventDefault(); saveCurrentWork(); }
                 else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteSelectedElement(); }
+                else if (e.key === 'Escape') { handleElementSelect(null); }
+            });
+
+            // Prevent accidental navigation away
+            window.addEventListener('beforeunload', (e) => {
+                const doc = getCanvasDoc();
+                if (doc && doc.body && doc.body.children.length > 1) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                    return e.returnValue;
+                }
             });
         }
         function copySelectedElement() {
@@ -1643,6 +1656,32 @@
                 saveState();
                 playSound('success'); showStamp('✨');
             }
+        }
+        function selectAllElements() {
+            const doc = getCanvasDoc();
+            if (!doc) return;
+            const elements = doc.querySelectorAll('.canvas-element');
+            if (elements.length > 0) {
+                elements.forEach(el => el.classList.add('highlight'));
+                updateStatus(`Selected ${elements.length} elements`);
+                playSound('pop');
+                setTimeout(() => elements.forEach(el => el.classList.remove('highlight')), 2000);
+            }
+        }
+        function saveCurrentWork() {
+            const doc = getCanvasDoc();
+            if (!doc) return;
+            const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'page-' + Date.now() + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            updateStatus('💾 Page saved!');
+            playSound('success');
+            showStamp('💾');
         }
         let dragTarget = null, isResizing = false, currentResizeHandle = null, initialPos = { x: 0, y: 0 }, initialSize = { width: 0, height: 0 };
         function initDrag(e) { if (e.button !== 0 || e.target.classList.contains('resize-handle')) return; e.preventDefault(); dragTarget = this; initialPos.x = e.clientX - dragTarget.offsetLeft; initialPos.y = e.clientY - dragTarget.offsetTop; const canvasDoc = getCanvasDoc(); canvasDoc.addEventListener('mousemove', doDrag); canvasDoc.addEventListener('mouseup', stopDrag); }
