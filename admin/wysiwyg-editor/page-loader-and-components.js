@@ -35,13 +35,6 @@ window.addEventListener('DOMContentLoaded', () => {
 // PAGE LOADER - Load from actual source files
 // ============================================
 function setupPageLoader() {
-    // Create page loader modal if it doesn't exist
-    const existingModal = document.getElementById('source-page-loader-modal');
-    if (!existingModal) {
-        const modal = createPageLoaderModal();
-        document.body.appendChild(modal);
-    }
-
     // Add button to toolbar
     const toolbar = document.querySelector('.toolbar');
     if (toolbar && !document.getElementById('load-source-page-btn')) {
@@ -51,28 +44,39 @@ function setupPageLoader() {
         btn.innerHTML = '📁 Load from Source';
         btn.style.background = '#48c774';
         btn.style.color = '#fff';
-        btn.addEventListener('click', () => openModal('source-page-loader-modal'));
+        btn.addEventListener('click', () => {
+            // Create/update modal when button is clicked
+            createOrUpdatePageLoaderModal();
+            if (window.openModal) {
+                window.openModal('source-page-loader-modal');
+            } else {
+                document.getElementById('source-page-loader-modal').classList.add('active');
+            }
+        });
         toolbar.appendChild(btn);
     }
 }
 
+function createOrUpdatePageLoaderModal() {
+    // Remove existing modal if present
+    const existingModal = document.getElementById('source-page-loader-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    const modal = createPageLoaderModal();
+    document.body.appendChild(modal);
+}
+
 function createPageLoaderModal() {
+    console.log('Creating page loader modal with', PAGE_SOURCES.length, 'pages');
+
     const modal = document.createElement('div');
     modal.id = 'source-page-loader-modal';
     modal.className = 'modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📁 Load Page from Source Files</h2>
-                <button class="modal-close" data-close-modal="source-page-loader-modal">×</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 15px; color: var(--text-secondary);">
-                    Load pages directly from your source files - no CORS issues! Each element becomes individually editable.
-                </p>
 
-                <div id="page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-                    ${PAGE_SOURCES.map(pageName => `
+    const pageGridHTML = PAGE_SOURCES.length > 0
+        ? PAGE_SOURCES.map(pageName => `
                         <div class="page-card" data-page="${pageName}">
                             <div class="page-card-header">
                                 <strong>${pageName}</strong>
@@ -86,7 +90,22 @@ function createPageLoaderModal() {
                                 </button>
                             </div>
                         </div>
-                    `).join('')}
+                    `).join('')
+        : '<p style="color: var(--text-secondary); padding: 20px;">❌ No pages loaded! page-sources-embedded.js may not have loaded.</p>';
+
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📁 Load Page from Source Files (${PAGE_SOURCES.length} pages)</h2>
+                <button class="modal-close" data-close-modal="source-page-loader-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px; color: var(--text-secondary);">
+                    Load pages directly from embedded source - no CORS issues! Each element becomes individually editable.
+                </p>
+
+                <div id="page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                    ${pageGridHTML}
                 </div>
             </div>
         </div>
