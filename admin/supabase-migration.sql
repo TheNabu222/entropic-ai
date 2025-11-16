@@ -6,20 +6,12 @@
 -- =====================================================
 
 -- Add parent_id column for reply threading (if not exists)
+-- Note: Using UUID to match existing id column type
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns
                   WHERE table_name='guestbook_entries' AND column_name='parent_id') THEN
-        ALTER TABLE guestbook_entries ADD COLUMN parent_id BIGINT REFERENCES guestbook_entries(id) ON DELETE CASCADE;
-    END IF;
-END $$;
-
--- Add id column as primary key if it doesn't exist
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
-                  WHERE table_name='guestbook_entries' AND column_name='id') THEN
-        ALTER TABLE guestbook_entries ADD COLUMN id BIGSERIAL PRIMARY KEY;
+        ALTER TABLE guestbook_entries ADD COLUMN parent_id UUID REFERENCES guestbook_entries(id) ON DELETE CASCADE;
     END IF;
 END $$;
 
@@ -33,8 +25,8 @@ CREATE INDEX IF NOT EXISTS idx_guestbook_created_at ON guestbook_entries(created
 -- =====================================================
 
 CREATE TABLE IF NOT EXISTS guestbook_reactions (
-    id BIGSERIAL PRIMARY KEY,
-    entry_id BIGINT NOT NULL REFERENCES guestbook_entries(id) ON DELETE CASCADE,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    entry_id UUID NOT NULL REFERENCES guestbook_entries(id) ON DELETE CASCADE,
     reaction_type VARCHAR(50) NOT NULL CHECK (reaction_type IN ('heart', 'star', 'fire', 'laugh', 'mind_blown', 'sparkles')),
     user_identifier VARCHAR(255) NOT NULL, -- Could be IP hash or session ID
     created_at TIMESTAMPTZ DEFAULT NOW(),
