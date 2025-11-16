@@ -78,6 +78,20 @@ function createOrUpdatePageLoaderModal() {
             }
         });
     }
+
+    // Attach page load button event listeners
+    modal.querySelectorAll('.load-full-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const pageName = e.currentTarget.dataset.pageName;
+            window.loadPageFromSource(pageName, false);
+        });
+    });
+    modal.querySelectorAll('.load-body-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const pageName = e.currentTarget.dataset.pageName;
+            window.loadPageFromSource(pageName, true);
+        });
+    });
 }
 
 function createPageLoaderModal() {
@@ -87,22 +101,32 @@ function createPageLoaderModal() {
     modal.id = 'source-page-loader-modal';
     modal.className = 'modal';
 
+    // Escape HTML to prevent XSS
+    const escapeHtml = (str) => {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    };
+
     const pageGridHTML = PAGE_SOURCES.length > 0
-        ? PAGE_SOURCES.map(pageName => `
-                        <div class="page-card" data-page="${pageName}">
+        ? PAGE_SOURCES.map(pageName => {
+            const escapedName = escapeHtml(pageName);
+            return `
+                        <div class="page-card" data-page="${escapedName}">
                             <div class="page-card-header">
-                                <strong>${pageName}</strong>
+                                <strong>${escapedName}</strong>
                             </div>
                             <div class="page-card-actions">
-                                <button class="big-button" onclick="loadPageFromSource('${pageName}', false)" style="width: 100%; margin-bottom: 5px;">
+                                <button class="big-button load-full-btn" data-page-name="${escapedName}" style="width: 100%; margin-bottom: 5px;">
                                     📖 Full (HTML+CSS+JS)
                                 </button>
-                                <button class="big-button" onclick="loadPageFromSource('${pageName}', true)" style="width: 100%;">
+                                <button class="big-button load-body-btn" data-page-name="${escapedName}" style="width: 100%;">
                                     🎯 Body Only
                                 </button>
                             </div>
                         </div>
-                    `).join('')
+                    `;
+        }).join('')
         : '<p style="color: var(--text-secondary); padding: 20px;">❌ No pages loaded! page-sources-embedded.js may not have loaded.</p>';
 
     modal.innerHTML = `
@@ -386,25 +410,51 @@ function renderComponentLibrary() {
     grid.style.display = 'grid';
     empty.style.display = 'none';
 
-    grid.innerHTML = componentLibrary.map(comp => `
-        <div class="component-card" data-component-id="${comp.id}">
+    // Escape HTML to prevent XSS
+    const escapeHtml = (str) => {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    };
+
+    grid.innerHTML = componentLibrary.map(comp => {
+        const escapedId = escapeHtml(comp.id);
+        const escapedName = escapeHtml(comp.name);
+        const escapedCategory = escapeHtml(comp.category);
+        return `
+        <div class="component-card" data-component-id="${escapedId}">
             <div class="component-card-header">
-                <strong>${comp.name}</strong>
-                <span class="component-category">${comp.category}</span>
+                <strong>${escapedName}</strong>
+                <span class="component-category">${escapedCategory}</span>
             </div>
             <div class="component-preview">
                 ${comp.thumbnail}
             </div>
             <div class="component-actions">
-                <button class="big-button" onclick="insertComponent('${comp.id}')" style="flex: 1;">
+                <button class="big-button insert-comp-btn" data-comp-id="${escapedId}" style="flex: 1;">
                     ➕ Insert
                 </button>
-                <button class="big-button" onclick="deleteComponent('${comp.id}')" style="background: #ff3860; color: white;">
+                <button class="big-button delete-comp-btn" data-comp-id="${escapedId}" style="background: #ff3860; color: white;">
                     🗑️
                 </button>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
+
+    // Attach event listeners to buttons
+    grid.querySelectorAll('.insert-comp-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const compId = e.currentTarget.dataset.compId;
+            window.insertComponent(compId);
+        });
+    });
+    grid.querySelectorAll('.delete-comp-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const compId = e.currentTarget.dataset.compId;
+            window.deleteComponent(compId);
+        });
+    });
 
     // Add styles
     if (!document.getElementById('component-card-styles')) {
