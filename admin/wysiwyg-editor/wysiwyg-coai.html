@@ -836,6 +836,7 @@
         let gridEnabled = false;
         const GRID_SIZE = 20;
         let draggedToolType = null;
+        let soundEnabled = true;
 
         const sounds = {};
 
@@ -1453,7 +1454,17 @@
             if (aiMode === 'element') { fullPrompt = `You are an expert web developer specializing in retro Y2K, cyberpunk, and glitch art aesthetics, similar to old GeoCities and Neocities websites. Generate a single HTML element with inline styles based on the following user request. The code should be self-contained, use vibrant neon colors, retro fonts (like 'VT323', 'Courier New', 'Inter'), and animations where appropriate. The HTML should be a single root element. DO NOT include any explanations, just provide the raw HTML code. User request: "${prompt}"`;
             } else { fullPrompt = `You are an expert web developer specializing in retro Y2K, cyberpunk, and glitch art aesthetics, similar to old GeoCities and Neocities websites. Your task is to generate the complete inner HTML for a webpage's <body> tag based on the user's request. The generated code should be self-contained and ready to be dropped into a page. It can include <style> tags for CSS. Use vibrant neon colors, retro fonts (like 'VT323', 'Courier New', 'Inter'), animated GIFs, and layouts reminiscent of the late 90s/early 2000s web. DO NOT include <html>, <head>, or <body> tags in your response, only the content that would go inside the <body>. Provide only the raw HTML code without any explanations. User request: "${prompt}"`; }
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                // Get API key from localStorage or prompt user
+                let apiKey = localStorage.getItem('coaiexist-gemini-api-key');
+                if (!apiKey) {
+                    apiKey = prompt('Enter your Gemini API Key (get one at https://aistudio.google.com/app/apikey):');
+                    if (!apiKey) {
+                        document.getElementById('ai-loading').style.display = 'none';
+                        return;
+                    }
+                    localStorage.setItem('coaiexist-gemini-api-key', apiKey);
+                }
+                const ai = new GoogleGenAI({ apiKey: apiKey });
                 const response = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: fullPrompt, });
                 let generatedHtml = response.text.trim().replace(/^```(html)?|```$/g, '').trim();
                 document.getElementById('ai-preview').innerHTML = generatedHtml; document.getElementById('ai-result-container').style.display = 'block'; playSound('success'); showStamp('🤖');
@@ -1474,7 +1485,35 @@
         function applyCustomCSS() { const css = document.getElementById('css-editor').value; const customStyles = getCanvasDoc()?.getElementById('custom-styles'); if (customStyles) { customStyles.textContent = css; } saveState(); playSound('success'); showStamp('🎨'); }
         function applyCustomJS() { const js = document.getElementById('js-editor').value; const customScripts = getCanvasDoc()?.getElementById('custom-scripts'); if (customScripts) { customScripts.textContent = js; } saveState(); playSound('success'); showStamp('⚡'); }
         function exportCode() { const doc = getCanvasDoc()?.cloneNode(true); if (!doc) return; doc.getElementById('editor-styles')?.remove(); doc.querySelectorAll('.canvas-element').forEach(el => { el.removeAttribute('data-element-id'); el.replaceWith(...Array.from(el.childNodes)); }); doc.querySelectorAll('[contenteditable="true"]').forEach(el => el.removeAttribute('contenteditable')); document.getElementById('export-code').value = `<!DOCTYPE html>\n${doc.documentElement.outerHTML}`; openModal('export-modal'); }
-        function copyExportCode() { const textarea = document.getElementById('export-code'); textarea.select(); document.execCommand('copy'); updateStatus('✅ Code copied to clipboard!'); playSound('success'); showStamp('📋'); }
+        async function copyExportCode() {
+            const textarea = document.getElementById('export-code');
+            try {
+                // Use modern Clipboard API (with fallback to deprecated execCommand)
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(textarea.value);
+                } else {
+                    // Fallback for older browsers
+                    textarea.select();
+                    document.execCommand('copy');
+                }
+                updateStatus('✅ Code copied to clipboard!');
+                playSound('success');
+                showStamp('📋');
+            } catch (error) {
+                console.error('Failed to copy:', error);
+                // Try fallback method
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    updateStatus('✅ Code copied to clipboard!');
+                    playSound('success');
+                    showStamp('📋');
+                } catch (e) {
+                    updateStatus('❌ Failed to copy. Please copy manually.');
+                    playSound('error');
+                }
+            }
+        }
         
         // ============================================
         // CSS LAB & JS ENGINE
@@ -1744,7 +1783,6 @@
                 updateStatus(`Template "${templateKey}" loaded!`);
             }
         };
-        let soundEnabled = true;
         function toggleSound() {
             soundEnabled = !soundEnabled;
             const btn = document.getElementById('sound-toggle-btn');
