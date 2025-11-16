@@ -72,7 +72,13 @@ function addDeployButton() {
         btn.innerHTML = '🚀 Deploy to Neocities';
         btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
         btn.style.color = '#fff';
-        btn.addEventListener('click', () => openModal('neocities-deploy-modal'));
+        btn.addEventListener('click', () => {
+            if (window.openModal) {
+                window.openModal('neocities-deploy-modal');
+            } else {
+                document.getElementById('neocities-deploy-modal')?.classList.add('active');
+            }
+        });
         toolbar.appendChild(btn);
     }
 }
@@ -681,8 +687,16 @@ window.compareLocalRemote = async function() {
 
 // Initialize when modal opens
 document.addEventListener('click', (e) => {
-    if (e.target.closest('[data-close-modal="neocities-deploy-modal"]') === null &&
-        e.target.id === 'neocities-deploy-btn') {
+    // Handle close button
+    if (e.target.closest('[data-close-modal="neocities-deploy-modal"]')) {
+        if (window.closeModal) {
+            window.closeModal('neocities-deploy-modal');
+        } else {
+            document.getElementById('neocities-deploy-modal')?.classList.remove('active');
+        }
+    }
+    // Render history when opening
+    else if (e.target.id === 'neocities-deploy-btn') {
         setTimeout(() => {
             renderDeploymentHistory();
         }, 100);
