@@ -299,9 +299,9 @@ window.saveApiKey = function() {
     neocitiesConfig.apiKey = apiKey;
     saveNeocitiesConfig();
 
-    updateStatus && updateStatus('API key saved!');
-    playSound && playSound('success');
-    showStamp && showStamp('🔑');
+    if (window.updateStatus) window.updateStatus('API key saved!');
+    if (window.playSound) window.playSound('success');
+    if (window.showStamp) window.showStamp('🔑');
 };
 
 window.testConnection = async function() {
@@ -328,8 +328,8 @@ window.testConnection = async function() {
             // Load site stats
             displaySiteStats(data.info);
 
-            playSound && playSound('success');
-            showStamp && showStamp('✅');
+            if (window.playSound) window.playSound('success');
+            if (window.showStamp) window.showStamp('✅');
         } else {
             throw new Error(data.error_type || 'Connection failed');
         }
@@ -338,7 +338,7 @@ window.testConnection = async function() {
         statusDiv.style.color = '#f14668';
         statusDiv.innerHTML = `❌ Error: ${error.message}`;
 
-        playSound && playSound('error');
+        if (window.playSound) window.playSound('error');
     }
 };
 
@@ -387,7 +387,7 @@ window.refreshNeocitiesFiles = async function() {
         if (data.result === 'success') {
             neocitiesConfig.siteFiles = data.files;
             renderFileList(data.files);
-            playSound && playSound('pop');
+            if (window.playSound) window.playSound('pop');
         } else {
             throw new Error(data.error_type || 'Failed to load files');
         }
@@ -466,9 +466,9 @@ window.deleteNeocitiesFile = async function(filename) {
         const data = await response.json();
 
         if (data.result === 'success') {
-            updateStatus && updateStatus(`Deleted ${filename}`);
-            playSound && playSound('success');
-            showStamp && showStamp('🗑️');
+            if (window.updateStatus) window.updateStatus(`Deleted ${filename}`);
+            if (window.playSound) window.playSound('success');
+            if (window.showStamp) window.showStamp('🗑️');
             refreshNeocitiesFiles();
         } else {
             throw new Error(data.message || 'Delete failed');
@@ -504,10 +504,10 @@ window.deployCurrentPage = async function() {
     }
 
     try {
-        updateStatus && updateStatus(`Deploying ${filename}...`);
+        if (window.updateStatus) window.updateStatus(`Deploying ${filename}...`);
 
         // Get current HTML from canvas
-        const doc = getCanvasDoc && getCanvasDoc();
+        const doc = window.getCanvasDoc && window.getCanvasDoc();
         if (!doc) {
             throw new Error('No canvas document available');
         }
@@ -542,9 +542,9 @@ window.deployCurrentPage = async function() {
                 size: html.length
             });
 
-            updateStatus && updateStatus(`✅ Deployed ${filename} to Neocities!`);
-            playSound && playSound('success');
-            showStamp && showStamp('🚀');
+            if (window.updateStatus) window.updateStatus(`✅ Deployed ${filename} to Neocities!`);
+            if (window.playSound) window.playSound('success');
+            if (window.showStamp) window.showStamp('🚀');
 
             // Show success message
             alert(`🚀 Successfully deployed ${filename}!\n\n🌐 Live at: https://yoursite.neocities.org/${filename}\n📊 File size: ${formatFileSize(html.length)}`);
@@ -561,7 +561,7 @@ window.deployCurrentPage = async function() {
             error: error.message
         });
 
-        updateStatus && updateStatus(`❌ Deployment failed: ${error.message}`);
+        if (window.updateStatus) window.updateStatus(`❌ Deployment failed: ${error.message}`);
         alert(`Error deploying: ${error.message}`);
 
         renderDeploymentHistory();
@@ -581,15 +581,15 @@ window.toggleAutoDeploy = function(enabled) {
 
     if (enabled) {
         // Initialize baseline
-        const doc = getCanvasDoc && getCanvasDoc();
+        const doc = window.getCanvasDoc && window.getCanvasDoc();
         if (doc) {
             lastCanvasHTML = doc.body.innerHTML;
         }
-        updateStatus && updateStatus('⚡ Auto-deploy enabled - watching for changes...');
-        playSound && playSound('pop');
+        if (window.updateStatus) window.updateStatus('⚡ Auto-deploy enabled - watching for changes...');
+        if (window.playSound) window.playSound('pop');
         console.log('🤖 Auto-deploy enabled');
     } else {
-        updateStatus && updateStatus('Auto-deploy disabled');
+        if (window.updateStatus) window.updateStatus('Auto-deploy disabled');
         clearTimeout(autoDeployTimeout);
     }
 };
@@ -599,7 +599,7 @@ function setupAutoDeployListener() {
     setInterval(() => {
         if (!neocitiesConfig.autoDeployEnabled) return;
 
-        const doc = getCanvasDoc && getCanvasDoc();
+        const doc = window.getCanvasDoc && window.getCanvasDoc();
         if (!doc) return;
 
         const currentHTML = doc.body.innerHTML;
