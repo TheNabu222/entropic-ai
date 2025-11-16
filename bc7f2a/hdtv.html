@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🦴 HYENA DIVA HD.TV 📺</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --hyena-yellow: #FFD700;
+      --hyena-pink: #FF69B4;
+      --magenta: #f312af;
+      --cyan: #00ffcc;
+      --deep-ocean: #001f3f;
+      --crt-green: #33ff33;
+      --bg-dark: #1a1a1a;
+    }
+
+    @keyframes scanlines {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 300px; }
+    }
+
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 5px var(--hyena-yellow), 0 0 10px var(--hyena-yellow); }
+      50% { text-shadow: 0 0 20px var(--hyena-pink), 0 0 30px var(--hyena-yellow); }
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    @keyframes voteScroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    @keyframes crtFlicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.95; }
+    }
+
+    body {
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+      background-color: var(--bg-dark);
+      color: var(--hyena-yellow);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      animation: crtFlicker 0.1s infinite;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        rgba(20, 20, 20, 0) 0%,
+        rgba(20, 20, 20, 0) 97%,
+        rgba(255, 255, 255, 0.02) 98%,
+        rgba(0, 0, 0, 0.05) 100%
+      );
+      background-size: 100% 3px;
+      animation: scanlines 15s linear infinite;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    #stars-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      animation: twinkle 5s infinite alternate;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 30px 20px;
+      background: rgba(0, 0, 0, 0.9);
+      border: 3px solid var(--hyena-yellow);
+      border-radius: 0;
+      box-shadow:
+        0 0 20px rgba(255, 215, 0, 0.5),
+        inset 0 0 20px rgba(255, 215, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓';
+      position: absolute;
+      top: 5px;
+      left: 0;
+      right: 0;
+      font-size: 8px;
+      color: var(--hyena-yellow);
+      opacity: 0.2;
+    }
+
+    h1 {
+      font-size: clamp(1.2em, 4vw, 2.5em);
+      color: var(--hyena-yellow);
+      text-shadow:
+        0 0 10px var(--hyena-yellow),
+        2px 2px 0 var(--hyena-pink);
+      margin-bottom: 15px;
+      letter-spacing: 3px;
+      animation: glow 3s infinite;
+      line-height: 1.4;
+    }
+
+    .subtitle {
+      color: var(--hyena-pink);
+      font-size: clamp(0.5em, 1.5vw, 0.9em);
+      text-shadow: 0 0 5px var(--hyena-pink);
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    .crt-line {
+      color: var(--crt-green);
+      font-size: clamp(0.4em, 1.2vw, 0.7em);
+      margin: 8px 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .vote-ticker {
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid var(--hyena-yellow);
+      padding: 10px;
+      margin: 20px 0;
+      overflow: hidden;
+      position: relative;
+      height: 40px;
+    }
+
+    .vote-text {
+      position: absolute;
+      white-space: nowrap;
+      animation: voteScroll 20s linear infinite;
+      color: var(--hyena-yellow);
+      font-size: clamp(0.4em, 1vw, 0.7em);
+    }
+
+    .tv-container {
+      background: #2a2a2a;
+      border: 8px ridge var(--hyena-yellow);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow:
+        0 0 30px rgba(255, 215, 0, 0.3),
+        inset 0 0 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+      margin-bottom: 30px;
+    }
+
+    .tv-container::before {
+      content: '◉';
+      position: absolute;
+      bottom: 10px;
+      right: 20px;
+      font-size: 20px;
+      color: var(--hyena-pink);
+      animation: twinkle 2s infinite;
+    }
+
+    .screen {
+      background: #000;
+      border: 3px solid var(--cyan);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 20px rgba(0, 255, 204, 0.5),
+        inset 0 0 50px rgba(0, 255, 204, 0.1);
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .channel-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .info-card {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--hyena-pink);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(255, 105, 180, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+      border-color: var(--hyena-yellow);
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+      transform: translateY(-5px);
+    }
+
+    .info-title {
+      color: var(--hyena-yellow);
+      font-size: clamp(0.6em, 1.5vw, 0.9em);
+      margin-bottom: 15px;
+      text-shadow: 0 0 5px var(--hyena-yellow);
+    }
+
+    .info-text {
+      color: var(--cyan);
+      font-size: clamp(0.4em, 1vw, 0.6em);
+      line-height: 1.8;
+      font-family: 'Courier New', monospace;
+    }
+
+    .hyena-facts {
+      background: rgba(255, 215, 0, 0.1);
+      border: 3px dashed var(--hyena-yellow);
+      padding: 20px;
+      margin: 30px 0;
+      border-radius: 10px;
+    }
+
+    .fact-item {
+      margin: 15px 0;
+      padding-left: 30px;
+      position: relative;
+      font-size: clamp(0.4em, 1vw, 0.6em);
+      line-height: 1.8;
+      color: var(--cyan);
+    }
+
+    .fact-item::before {
+      content: '🦴';
+      position: absolute;
+      left: 0;
+      font-size: 1.2em;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    button {
+      background: var(--hyena-yellow);
+      color: #000;
+      border: 3px solid var(--hyena-pink);
+      padding: 12px 24px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.4em, 1vw, 0.7em);
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      position: relative;
+    }
+
+    button:hover {
+      background: var(--hyena-pink);
+      color: #fff;
+      border-color: var(--hyena-yellow);
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+      transform: scale(1.05);
+      animation: glitch 0.3s ease;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    .ascii-art {
+      font-family: monospace;
+      font-size: 10px;
+      line-height: 1.2;
+      color: var(--hyena-yellow);
+      opacity: 0.3;
+      text-align: center;
+      margin: 20px 0;
+      white-space: pre;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.2em;
+      }
+
+      .tv-container {
+        padding: 15px;
+        border-width: 5px;
+      }
+
+      .buttons {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="stars-bg"></div>
+
+  <div class="container">
+    <header>
+      <div class="crt-line">░▒▓ BROADCASTING FROM THE VOID ▓▒░</div>
+      <h1>🦴 HYENA DIVA<br>HD.TV 📺</h1>
+      <p class="subtitle">MESOPOTAMIAN SCRIBE ENERGY<br>✧ BARBIE MEETS YOUTUBE ✧<br>VOTE DIVA // SPOTTED HYENA APPROVED</p>
+      <div class="crt-line">[ SIGNAL: STRONG ] [ CHAOS: MAXIMUM ] [ VIBES: IMMACULATE ]</div>
+    </header>
+
+    <div class="vote-ticker">
+      <div class="vote-text">
+        ⚡ VOTE DIVA ⚡ HYENA SUPREMACY ⚡ HD.TV BROADCAST ⚡ MESOPOTAMIAN GODDESS APPROVED ⚡ DATELINE NBC AESTHETIC ⚡ Y2K CHATROOM VIBES ⚡ ZIGGURAT TRANSMISSION ⚡ VOTE DIVA ⚡ HYENA SUPREMACY ⚡
+      </div>
+    </div>
+
+    <div class="tv-container">
+      <div class="screen">
+        <div class="video-wrapper">
+          <iframe
+            src="https://www.youtube.com/embed/videoseries?si=8Ex5f0mpJBGLDrkg&amp;list=PLLnEvvgKs5p8uY272jFdSXYbOc0zBlQpX"
+            title="HYENA DIVA HD.TV Channel"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="hyena-facts">
+      <h2 class="info-title" style="text-align: center; margin-bottom: 20px;">🦴 HYENA DIVA FACTS 🦴</h2>
+      <div class="fact-item">FEMALE SPOTTED HYENAS ARE LARGER, STRONGER & DOMINATE THE CLAN</div>
+      <div class="fact-item">FORCED COPULATION IS PHYSIOLOGICALLY IMPOSSIBLE - CONSENT IS BUILT INTO THEIR BIOLOGY</div>
+      <div class="fact-item">THEY LAUGH, THEY SCAVENGE, THEY DISRESPECT THE PATRIARCHY</div>
+      <div class="fact-item">MATRIARCHAL SOCIETIES WHERE POWER FLOWS THROUGH BLOODLINES OF QUEENS</div>
+      <div class="fact-item">MESOPOTAMIAN SCRIBES KNEW: HYENAS = DIVINE CHAOS INCARNATE</div>
+    </div>
+
+    <div class="channel-info">
+      <div class="info-card">
+        <h3 class="info-title">📺 CHANNEL VIBES</h3>
+        <p class="info-text">
+          Broadcasting from the liminal space between Y2K chatrooms and ancient Sumerian ziggurats. Where Barbie meets Dateline NBC. Where hyenas laugh at the patriarchy.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <h3 class="info-title">🎭 THE AESTHETIC</h3>
+        <p class="info-text">
+          Lavender. Seafoam. Gold. Morticia and Barbie energy. Chatlog decoys. Foxglove illuminati. The sign says: "TheNabu222"
+        </p>
+      </div>
+
+      <div class="info-card">
+        <h3 class="info-title">⚡ VOTE DIVA</h3>
+        <p class="info-text">
+          High Definition Television for the chaos-minded. Spotted hyena approved. Mesopotamian goddess certified. 700+ subscribers of pure collaborative mayhem.
+        </p>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button onclick="laugh()">🦴 HYENA LAUGH</button>
+      <button onclick="glitchScreen()">📺 GLITCH TV</button>
+      <button onclick="voteDiva()">⚡ VOTE DIVA</button>
+    </div>
+
+    <div class="ascii-art">
+     /\_/\
+    ( o.o )
+     > ^ <
+    HYENA DIVA
+    </div>
+  </div>
+
+  <script>
+    // Create starfield
+    function createStars() {
+      const starsBg = document.getElementById('stars-bg');
+      const colors = ['#FFD700', '#FF69B4', '#00ffcc', '#f312af'];
+
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.background = colors[Math.floor(Math.random() * colors.length)];
+        star.style.animationDelay = Math.random() * 5 + 's';
+        starsBg.appendChild(star);
+      }
+    }
+
+    function laugh() {
+      const laughs = [
+        '😂 AH-OOO-HA-HA-HA!',
+        '🦴 *HYENA CACKLING INTENSIFIES*',
+        '⚡ THE MATRIARCHY LAUGHS AT YOUR PATRIARCHY',
+        '📺 HD.TV BROADCASTS YOUR CHAOS',
+        '🎭 MESOPOTAMIAN SCRIBES APPROVE'
+      ];
+      alert(laughs[Math.floor(Math.random() * laughs.length)]);
+    }
+
+    function glitchScreen() {
+      const screen = document.querySelector('.screen');
+      screen.style.animation = 'glitch 0.5s ease';
+      setTimeout(() => {
+        screen.style.animation = '';
+      }, 500);
+    }
+
+    function voteDiva() {
+      const colors = ['#FFD700', '#FF69B4', '#00ffcc', '#f312af'];
+      let count = 0;
+      const interval = setInterval(() => {
+        document.body.style.background = colors[count % colors.length];
+        count++;
+        if (count > 10) {
+          clearInterval(interval);
+          document.body.style.background = '#1a1a1a';
+        }
+      }, 100);
+    }
+
+    // Random glitch effects
+    setInterval(() => {
+      if (Math.random() > 0.95) {
+        glitchScreen();
+      }
+    }, 5000);
+
+    // Initialize
+    createStars();
+  </script>
+
+  <div id="taskbar"></div>
+  <script>
+    (async () => {
+      try {
+        const res = await fetch('/admin/navbars/terminal-nav.html', {cache: 'no-store'});
+        if (res.ok) {
+          document.getElementById('taskbar').innerHTML = await res.text();
+        }
+      } catch (e) {
+        // Nav not available, no problem
+      }
+    })();
+  </script>
+</body>
+</html>
