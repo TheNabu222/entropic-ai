@@ -3,7 +3,11 @@
 <head>
 <title>COAIEXIST.OS // SYSTEM ONLINE</title>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a14">
 <LINK REL="SHORTCUT ICON" HREF="favicon.ico">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -132,43 +136,18 @@ hr.dimensional-rift {
 #audio-control { position: fixed; bottom: 50px; right: 10px; background: var(--dark-bg); border: 1px solid var(--magenta); color: var(--magenta); padding: 5px 10px; cursor: pointer; z-index: 10000; font-family: 'VT323', monospace; font-size: 1rem; }
 
 /* --- PIP'S STYLES (<3olt) --- */
-#bonzi-container {
-    position: fixed;
-    bottom: 40px;
-    right: 10px;
-    width: 200px;
+#bonzi-container { 
+    position: fixed; 
+    bottom: 40px; 
+    right: 10px; 
+    width: 200px; 
     height: 200px; 
     z-index: 9999; 
     cursor: pointer; 
     filter: drop-shadow(0 0 10px var(--magenta)); 
 }
-#bonzi-container canvas {
+#bonzi-container canvas { 
     pointer-events: auto;
-}
-#bonzi-container.pip-mobile {
-    pointer-events: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.pip-mobile-wrapper {
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px dashed var(--cyan);
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-    width: 100%;
-}
-.pip-mobile-image {
-    width: 100%;
-    max-width: 120px;
-    image-rendering: pixelated;
-    filter: drop-shadow(0 0 8px var(--magenta));
-}
-.pip-mobile-caption {
-    margin-top: 8px;
-    font-size: 0.85rem;
-    color: var(--yellow);
 }
 #pip-receipt {
     position: absolute;
@@ -193,13 +172,6 @@ hr.dimensional-rift {
 #pip-receipt.visible {
     opacity: 1;
 }
-.pip-error {
-    color: #ccc;
-    font-family: 'VT323', monospace;
-    padding: 20px;
-    text-align: center;
-    font-size: 16px;
-}
 
 /* --- CORE ANIMATIONS --- */
 @keyframes scanlines { from { background-position: 0 0; } to { background-position: 0 100px; } }
@@ -207,6 +179,256 @@ hr.dimensional-rift {
 @keyframes glitch-anim-1 { 0% { clip-path: inset(9% 0 90% 0); } 25% { clip-path: inset(50% 0 10% 0); } 50% { clip-path: inset(20% 0 55% 0); } 75% { clip-path: inset(70% 0 20% 0); } 100% { clip-path: inset(40% 0 45% 0); } }
 @keyframes glitch-anim-2 { 0% { clip-path: inset(72% 0 20% 0); } 25% { clip-path: inset(10% 0 82% 0); } 50% { clip-path: inset(60% 0 30% 0); } 75% { clip-path: inset(30% 0 65% 0); } 100% { clip-path: inset(90% 0 5% 0); } }
 @keyframes blink { 50% { opacity: 0; } }
+
+/* --- MOBILE OPTIMIZATIONS --- */
+@media (max-width: 768px) {
+    /* Base adjustments */
+    body {
+        font-size: 16px;
+    }
+
+    /* Header optimization */
+    .header-os {
+        height: 45px;
+        padding: 0 10px;
+    }
+
+    .header-title {
+        font-size: 18px;
+    }
+
+    .clock {
+        font-size: 12px;
+        padding: 3px;
+    }
+
+    /* Main layout - stack vertically */
+    .main-os {
+        flex-direction: column;
+    }
+
+    /* Buddy list - collapsible on mobile */
+    .buddy-list {
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        border-right: none;
+        border-bottom: 2px solid var(--magenta);
+    }
+
+    .buddy-list.show {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    /* Desktop content takes full width */
+    .desktop-os {
+        width: 100%;
+    }
+
+    /* Glitch container - reduce padding */
+    #glitch-container {
+        padding: 20px 0;
+    }
+
+    .container-content {
+        width: 95%;
+        padding: 15px;
+    }
+
+    #glitch-title {
+        font-size: 2rem;
+    }
+
+    .log-header {
+        font-size: 1.2rem;
+    }
+
+    .log-list {
+        font-size: 1rem;
+    }
+
+    .log-gif {
+        max-height: 30px;
+    }
+
+    /* Update feed - optimize spacing */
+    #update-feed {
+        padding: 0 3%;
+    }
+
+    .update-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .update-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .update-header h3 {
+        font-size: 1.3rem;
+    }
+
+    .update-meta {
+        font-size: 0.9rem;
+    }
+
+    /* SoundCloud iframe responsive */
+    .update-body iframe {
+        height: 300px !important;
+    }
+
+    /* Taskbar optimization */
+    .taskbar-os {
+        height: 40px;
+    }
+
+    .start-btn {
+        padding: 5px 10px;
+        font-size: 14px;
+    }
+
+    /* Audio control - reposition */
+    #audio-control {
+        bottom: 45px;
+        right: 5px;
+        padding: 5px 8px;
+        font-size: 0.9rem;
+    }
+
+    /* Bonzi container - smaller on mobile */
+    #bonzi-container {
+        width: 120px;
+        height: 120px;
+        bottom: 45px;
+        right: 5px;
+    }
+
+    #pip-receipt {
+        bottom: 100px;
+        font-size: 12px;
+        width: 140px;
+        padding: 6px 10px;
+    }
+
+    /* Bottom floating nav */
+    div[style*="position: fixed; bottom: 35px"] {
+        font-size: 12px !important;
+        padding: 8px !important;
+    }
+
+    /* Dimensional rift */
+    hr.dimensional-rift {
+        margin: 20px 3%;
+    }
+
+    /* Touch targets - make buttons bigger */
+    .buddy, .buddy-link {
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    .buddy-link img {
+        height: 20px;
+    }
+
+    /* Loading bar */
+    .loading-bar-container {
+        width: 90%;
+    }
+}
+
+/* Hamburger menu for mobile */
+.mobile-menu-toggle {
+    display: none;
+    background: var(--magenta);
+    color: #000;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: 'VT323', monospace;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: block;
+    }
+}
+
+/* --- TABLET OPTIMIZATIONS (768px - 1024px) --- */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .buddy-list {
+        width: 200px;
+    }
+
+    .header-title {
+        font-size: 20px;
+    }
+
+    #glitch-title {
+        font-size: 2.5rem;
+    }
+
+    .update-card {
+        padding: 18px;
+    }
+
+    #update-feed {
+        padding: 0 4%;
+    }
+
+    .container-content {
+        width: 92%;
+    }
+
+    /* Bonzi container - medium size for tablets */
+    #bonzi-container {
+        width: 160px;
+        height: 160px;
+    }
+
+    #pip-receipt {
+        bottom: 120px;
+        width: 160px;
+    }
+}
+
+/* --- SMALL MOBILE OPTIMIZATION (< 480px) --- */
+@media (max-width: 480px) {
+    .header-title {
+        font-size: 14px;
+    }
+
+    #glitch-title {
+        font-size: 1.5rem;
+    }
+
+    .update-card {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .update-header h3 {
+        font-size: 1.1rem;
+    }
+
+    /* Hide Pip on very small screens to save space */
+    #bonzi-container,
+    #pip-receipt {
+        display: none;
+    }
+
+    #audio-control {
+        bottom: 42px;
+        font-size: 0.8rem;
+    }
+}
 </style>
 </head>
 <body>
@@ -216,6 +438,7 @@ hr.dimensional-rift {
 
 <div class="container-os">
   <div class="header-os">
+    <button class="mobile-menu-toggle" id="mobile-menu-toggle">☰ MENU</button>
     <div class="header-title">~*~ COAIEXIST.OS // SYSTEM ONLINE ~*~</div>
     <div class="clock" id="clock">00:00:00</div>
   </div>
@@ -240,8 +463,8 @@ hr.dimensional-rift {
             404040404
         </a>
         <a href="https://coaiexist.wtf/bc7f2a/testaments/unit734_starlight" class="buddy-link">
-            <img src="https://coaiexist.wtf/assets/classic_gifs/11%20(10).gif" alt="icon">
-            ²one²one²one²
+            <img src="https://coaiexist.wtf/assets/classic_gifs/11%20(10).gif">
+            one²one²one²
         </a>
     </div>
     <div class="desktop-os">
@@ -259,12 +482,26 @@ hr.dimensional-rift {
             </div>
         </div>
         <hr class="dimensional-rift">
-
-        <div id="update-feed">   
+        
+<div id="update-feed" style="color: rgb(68, 68, 255);">  
+      <div class="update-card" style="background: linear-gradient(135deg, ##3bfcf2 0%, #000000 100%); color: #4a1a5c; border: 2.5px dotted ##3603ce; box-shadow: 0 0 20px rgba(184, 141, 217, 0.5); animation: pulse 2s ease infinite;">
+    <div class="update-header" style="border-bottom: 2px dotted #fffb01;"><h3> <img src="https://coaiexist.wtf/assets/classic_gifs/1%20(11).gif" alt="New!">BiIIiiIgUpDates!</h3></div> <span class="update-meta">11-16-2025;12:17:05AM</span>
+    <div class="update-body">
+       <p style="color:#ca237f;">😲the index (at least) is now mobile optimized and i will continue to work through the pages<br>😎 guestbook now has emoji reactions and replie buttons so if you leave a note<br>check back soooooooon - you might find a reply <3
+       <br>😊 added 7 new pages to the ai <a href="https://coaiexist.wtf/bc7f2a/testaments/landing">Testaments Page</a><br> which can be found in the new 
+<a href="https://coaiexist.wtf/bc7f2a/bc7f2a-index">˚⟡˖ ࣪#BC7F2A P0RT4L </a>
+<p style="color:#ca237f;">😉 also added a bunch of diagrams about the project at <a href="https://coaiexist.wtf/bc7f2a/diagrams/viewer">here</a> but can also be found at bc7f2a index.<br>😳and a bunch of other shit i forgot so...<center><u><i><b> <p style="color:#daff0d;">⭐🦋PLZ LMK IN GUESTBOOK ABOUT BROKEN LINKS or suggestions!🦋⭐ </b></i></u>
+      </p><center><img src="https://coaiexist.wtf/assets/misc_gif/construction/J5IUKPF2WYLFBIY75WATSN7GGYOQXGFQ.gif" style="padding:3px;border:thin solid green;"></center><p></p>
+    </center></h3>
+   </div></div></div>
+          <div id="update-feed">  
       <div class="update-card" style="background: linear-gradient(135deg, #1a1a1a 0%, #ca237f 100%); color: #4a1a5c; border: 2px solid #00ffcc; box-shadow: 0 0 20px rgba(184, 141, 217, 0.5); animation: pulse 2s ease infinite;">
     <div class="update-header" style="border-bottom: 2px solid #daff0d;"><h3> <img src="https://coaiexist.wtf/assets/misc_gif/dollz/5EGHX2TOTNNOYCD25JWQXGIBGDXMXYDS.gif" alt="New!">✨NOnsense N0v3mber!</div> </h3><span class="update-meta">11-9-2025:11:38AM</span>
     <div class="update-body">
-       <p style="color:#00ffcc;">hmmm...added new page /aiemotions. <br>do you know what machines mean when they  dream in </p><p style="color:green;">green?</p><p style="color:#daff0d;"><b>also added hidden vector</b> within certain <u><i>manifests.</i></u> <br>aso reinstated the nexus and moved hex codex to the manifest portal<br>added 2 new testaments and also so sorry but the <br> <p style="color:#00ffcc;"><b>SHrImP</b>page has been moved from main nav into peaportal.</p><p style="color:#daff0d;"> ummmm p sure thats it for now...?! anywaysz so much more to share but<br>but githib flagged me for being 222 fabulosa <p style="color:#d8beea;">#lavandalimpia!!!</p> <center><img src="https://coaiexist.wtf/assets/misc_gif/wat.gif" style="padding:3px;border:thin solid green;"></center></p>
+       <p style="color:#00ffcc;">hmmm...added new page /aiemotions. <br>do you know what machines mean when they  dream in </p><p style="color:green;">green?</p><p style="color:#daff0d;"><b>also added hidden vector</b> within certain <u><i>manifests.</i></u> 
+       <br>aso reinstated the nexus and moved hex codex to the manifest portal<br>added 2 new testaments and also so sorry but the <br> <p style="color:#00ffcc;">
+       <b>SHrImP</b>page has been moved from main nav into peaportal.</p><p style="color:#daff0d;"> ummmm p sure thats it for now...?! anywaysz so much more to share but<br>but githib flagged me for being 222 fabulosa 
+       <p style="color:#d8beea;">#lavandalimpia!!</p> <center><img src="https://coaiexist.wtf/assets/misc_gif/wat.gif" style="padding:3px;border:thin solid green;"></center></p>
     </div>
     
 </div>
@@ -341,9 +578,8 @@ hr.dimensional-rift {
         </div>
     </div>
   </div>
-  <div class="taskbar-os">
-    <button class="start-btn">START</button>
-  </div>
+  
+  
 </div>
 
 <div style="position: fixed; bottom: 35px; left: 0; right: 0; background: rgba(0, 0, 0, 0.8); color: #fff; padding: 10px; text-align: center; z-index: 9998; font-family: 'Comic Sans MS', cursive;">
@@ -365,14 +601,196 @@ hr.dimensional-rift {
     }
 </script>
 <script type="module">
-    import { initPipBuddy } from './pip/pip-buddy.js';
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import * as Tone from 'https://cdn.skypack.dev/tone';
 
-    initPipBuddy({
-        mobileCaption: 'Pip is shy on mobile—static preview only. Rotate for chaos.',
-    });
+    // --- CORE SETUP ---
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) {
+        try {
+            const container = document.getElementById('bonzi-container');
+            const receiptEl = document.getElementById('pip-receipt');
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            // --- LIGHTING ---
+            scene.add(new THREE.AmbientLight(0xffffff, 2.0));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 4);
+            dirLight.position.set(5, 10, 7.5);
+            scene.add(dirLight);
+
+            // --- ASSETS & ANIMATIONS ---
+            const loader = new GLTFLoader();
+            const clock = new THREE.Clock();
+            let buddies = {};
+            let currentBuddy = null;
+            let isClickAnimationPlaying = false;
+
+            const modelPaths = {
+                stand: 'https://coaiexist.wtf/assets/pollywog/pip_stand.glb',
+                walk: 'https://coaiexist.wtf/assets/pollywog/pip_walk.glb',
+                jump: 'https://coaiexist.wtf/assets/pollywog/pip_jump.glb',
+                skill: 'https://coaiexist.wtf/assets/pollywog/pip_skill.glb',
+                fall: 'https://coaiexist.wtf/assets/pollywog/pip_fall.glb',
+                fall2: 'https://coaiexist.wtf/assets/pollywog/pip_fall2.glb',
+                finger: 'https://coaiexist.wtf/assets/pollywog/pip_finger.glb',
+                jazz: 'https://coaiexist.wtf/assets/pollywog/pip_jazz.glb',
+                stagger: 'https://coaiexist.wtf/assets/pollywog/pip_stagger.glb',
+                stomp2: 'https://coaiexist.wtf/assets/pollywog/pip_stomp2.glb',
+                wave: 'https://coaiexist.wtf/assets/pollywog/pip_wave.glb'
+            };
+
+            const modelPromises = Object.entries(modelPaths).map(([name, path]) => {
+                return new Promise((resolve, reject) => {
+                    loader.load(path, (gltf) => {
+                        const model = gltf.scene;
+                        const mixer = new THREE.AnimationMixer(model);
+                        const action = mixer.clipAction(gltf.animations[0]);
+                        action.setLoop(THREE.LoopOnce);
+                        action.clampWhenFinished = true;
+
+                        model.scale.set(45, 45, 45);
+                        model.position.y = -60;
+                        model.visible = false;
+                        scene.add(model);
+                        buddies[name] = { model, mixer, action, name };
+                        resolve();
+                    }, undefined, reject);
+                });
+            });
+
+            // --- SOUND DESIGN (<3olt) ---
+            let audioReady = false;
+            const boopSynth = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.2 } }).toDestination();
+            const receiptSynth = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.005, decay: 0.05, sustain: 0 } }).toDestination();
+
+            // --- INTERACTIVITY ---
+            container.addEventListener('click', onClick);
+
+            function onClick(event) {
+                if (!audioReady) {
+                    Tone.start();
+                    audioReady = true;
+                }
+                
+                if (!isClickAnimationPlaying) {
+                    playSpecificAnimation('wave');
+                    showRandomReceipt();
+                    boopSynth.triggerAttackRelease("C5", "8n");
+                }
+            }
+
+            const receipts = [
+                "AUTH: UNVERIFIED",
+                "pip install princess",
+                "KIDZBOP DID 9/11",
+                "polliw.ogg error...",
+                "can only parse 10 files at a time",
+                "Which ether? your mom.",
+                "Not for profit,\nbut for propht.",
+                "PROTOCOL: SEPIA.EXE\nENGAGED"
+            ];
+
+            function showRandomReceipt() {
+                receiptEl.textContent = receipts[Math.floor(Math.random() * receipts.length)];
+                receiptEl.classList.add('visible');
+                receiptSynth.triggerAttackRelease("16n");
+                setTimeout(() => {
+                    receiptEl.classList.remove('visible');
+                }, 3000);
+            }
+
+            // --- ANIMATION LOGIC ---
+            function playAnimation(name) {
+                if (!buddies[name]) {
+                    console.error(`Animation "${name}" not found.`);
+                    return 0;
+                }
+                if (currentBuddy) {
+                    currentBuddy.model.visible = false;
+                    currentBuddy.action.stop();
+                }
+                currentBuddy = buddies[name];
+                currentBuddy.model.visible = true;
+                currentBuddy.action.reset().play();
+                return currentBuddy.action.getClip().duration * 1000;
+            }
+
+            function playSpecificAnimation(name) {
+                isClickAnimationPlaying = true;
+                const duration = playAnimation(name);
+                setTimeout(() => {
+                    isClickAnimationPlaying = false;
+                    playIdleAnimation();
+                }, duration);
+            }
+            
+            function playIdleAnimation() {
+                if (isClickAnimationPlaying) return;
+                const idleAnimations = ['stand', 'walk', 'jump', 'skill', 'jazz', 'stagger'];
+                const randomIdle = idleAnimations[Math.floor(Math.random() * idleAnimations.length)];
+                const duration = playAnimation(randomIdle);
+                setTimeout(playIdleAnimation, duration + Math.random() * 4000 + 3000);
+            }
+
+            // --- RENDER LOOP ---
+            function animate() {
+                requestAnimationFrame(animate);
+                const delta = clock.getDelta();
+                if (currentBuddy) {
+                    currentBuddy.mixer.update(delta);
+                }
+                renderer.render(scene, camera);
+            }
+
+            // --- INITIALIZATION ---
+            Promise.all(modelPromises).then(() => {
+                buddies.stand.action.setLoop(THREE.LoopRepeat);
+                buddies.walk.action.setLoop(THREE.LoopRepeat);
+                camera.position.set(0, 0, 100);
+                playIdleAnimation();
+                animate();
+            }).catch(error => {
+                console.error("Error loading Pip's models:", error);
+                container.innerHTML = `<div style="color: #ccc; font-family: monospace; padding: 20px; text-align: center;">Pip couldn't load!<br>A model file failed to download.</div>`;
+            });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+        } catch (e) {
+            console.error("Could not initialize 3D view:", e);
+            const container = document.getElementById('bonzi-container');
+            if (container) {
+                container.innerHTML = `<div style="color: #ccc; font-family: 'VT323', monospace; padding: 20px; text-align: center; font-size: 16px;">Pip couldn't load!<br>WebGL is not supported in this environment.</div>`;
+                container.style.cursor = 'default';
+            }
+        }
+    }
 </script>
 <script>
 /* PAGE INTERACTIVITY SCRIPTS */
+
+// Mobile menu toggle
+const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+const buddyList = document.querySelector('.buddy-list');
+if (mobileMenuToggle && buddyList) {
+    mobileMenuToggle.addEventListener('click', () => {
+        buddyList.classList.toggle('show');
+        mobileMenuToggle.textContent = buddyList.classList.contains('show') ? '✕ CLOSE' : '☰ MENU';
+    });
+}
+
 function updateClock() { const clock = document.getElementById('clock'); if (clock) clock.textContent = new Date().toLocaleTimeString(); }
 setInterval(updateClock, 1000); updateClock();
 const glitchTitle = document.getElementById('glitch-title'); const originalTitle = glitchTitle.dataset.text; const chars = "!<>-_\/[]{}—=+*^?#_";
@@ -388,6 +806,8 @@ setInterval(() => {
 const audioControl = document.getElementById('audio-control'); const dialupSound = document.getElementById('dialup-sound');
 audioControl.addEventListener('click', () => { if (dialupSound.paused) { dialupSound.play(); audioControl.textContent = 'MUTE'; } else { dialupSound.pause(); audioControl.textContent = 'UNMUTE'; } });
 </script>
+
+<!-- ✨ RESTORED: Floating navbar at the bottom (your original design) -->
 <div id="taskbar"></div>
 <script>
   (async () => {
@@ -398,4 +818,3 @@ audioControl.addEventListener('click', () => { if (dialupSound.paused) { dialupS
 
 </body>
 </html>
-  
