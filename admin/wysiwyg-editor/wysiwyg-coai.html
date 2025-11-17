@@ -1091,6 +1091,18 @@
             playSound('boop', 'A4');
         }
         function getCanvasDoc() { return dom.canvasFrame.contentDocument || (dom.canvasFrame.contentWindow && dom.canvasFrame.contentWindow.document); }
+        function getCanvasCoordinates(evt, doc = getCanvasDoc()) {
+            if (!doc) {
+                return { x: evt.clientX, y: evt.clientY };
+            }
+            const view = doc.defaultView;
+            const scrollLeft = (view && view.scrollX) ?? doc.scrollingElement?.scrollLeft ?? doc.documentElement?.scrollLeft ?? doc.body?.scrollLeft ?? 0;
+            const scrollTop = (view && view.scrollY) ?? doc.scrollingElement?.scrollTop ?? doc.documentElement?.scrollTop ?? doc.body?.scrollTop ?? 0;
+            return {
+                x: evt.clientX + scrollLeft,
+                y: evt.clientY + scrollTop,
+            };
+        }
         function rgbToHex(rgbStr) {
             if (!rgbStr || typeof rgbStr !== 'string') return '#000000';
             if (rgbStr.startsWith('#')) return rgbStr;
@@ -1210,15 +1222,14 @@
                     const placeholder = doc.body.querySelector('div:not(.canvas-element)');
                     if (placeholder && placeholder.textContent.includes('Drag stuff here')) { placeholder.remove(); }
                     if (positionMode === 'free') {
-                        const canvasRect = dom.canvasFrame.getBoundingClientRect();
-                        let x = e.clientX - canvasRect.left + doc.documentElement.scrollLeft;
-                        let y = e.clientY - canvasRect.top + doc.documentElement.scrollTop;
+                        const coords = getCanvasCoordinates(e, doc);
+                        let x = coords.x;
+                        let y = coords.y;
                         if (gridEnabled) { x = Math.round(x / GRID_SIZE) * GRID_SIZE; y = Math.round(y / GRID_SIZE) * GRID_SIZE; }
                         newElementWrapper.style.left = `${x}px`; newElementWrapper.style.top = `${y}px`;
                         doc.body.appendChild(newElementWrapper);
                     } else {
-                        const iframeRect = dom.canvasFrame.getBoundingClientRect();
-                        const dropTarget = Array.from(doc.elementsFromPoint(e.clientX - iframeRect.left, e.clientY - iframeRect.top)).find(el => el.classList.contains('canvas-element'));
+                        const dropTarget = Array.from(doc.elementsFromPoint(e.clientX, e.clientY)).find(el => el.classList.contains('canvas-element'));
                         if (dropTarget) {
                             const targetRect = dropTarget.getBoundingClientRect();
                             if (e.clientY - targetRect.top < targetRect.height / 2) { dropTarget.parentNode.insertBefore(newElementWrapper, dropTarget); } else { dropTarget.parentNode.insertBefore(newElementWrapper, dropTarget.nextSibling); }
@@ -2016,6 +2027,24 @@ setInterval(draw, 33);`
             document.getElementById('js-snippet-grid').innerHTML = Object.keys(jsSnippets).map(name => createCard(name, 'js')).join('');
             document.querySelectorAll('[data-snippet-name]').forEach(card => card.addEventListener('click', (e) => { const { snippetType, snippetName } = e.currentTarget.dataset; const editor = document.getElementById('js-editor'); const snippets = jsSnippets; editor.value += (editor.value ? '\n\n' : '') + `/* ${snippetName} */\n` + snippets[snippetName]; playSound('pop'); }));
         }
+
+        // ============================================
+        // EXPOSE FUNCTIONS TO WINDOW FOR OTHER MODULES
+        // ============================================
+        // Other JS files (page-loader-and-components.js, neocities-deploy-pro.js, wysiwyg-enhancements.js)
+        // need to access these functions via window.functionName()
+        window.getCanvasDoc = getCanvasDoc;
+        window.initCanvas = initCanvas;
+        window.addElementHTML = addElementHTML;
+        window.saveState = saveState;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.updateStatus = updateStatus;
+        window.playSound = playSound;
+        window.showStamp = showStamp;
+        window.applyCustomCSS = applyCustomCSS;
+        window.applyCustomJS = applyCustomJS;
+        window.elementTemplates = elementTemplates;
     </script>
     <!-- EMBEDDED PAGE SOURCES - 164 HTML files for instant loading -->
     <script src="page-sources-embedded.js"></script>
