@@ -1,1 +1,0 @@
-// This file is intentionally empty - all JavaScript is inline in index.html

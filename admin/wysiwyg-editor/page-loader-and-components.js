@@ -9,16 +9,55 @@
 // PAGE_SOURCES dynamically populated from PAGE_SOURCE_HTML after it loads
 let PAGE_SOURCES = [];
 
+const populatePageSourcesFromEmbedded = () => {
+    if (!window.PAGE_SOURCE_HTML) {
+        return false;
+    }
+    const embeddedPages = Object.keys(window.PAGE_SOURCE_HTML);
+    if (!embeddedPages.length) {
+        return false;
+    }
+    PAGE_SOURCES = embeddedPages.sort();
+    return true;
+};
+
+const PAGE_SOURCES_WAIT_LIMIT = 8000;
+
+// Rendering helpers to keep the page loader responsive
+const PAGE_LOADER_BATCH_SIZE = 24;
+const pageLoaderRenderState = {
+    handle: null
+};
+
+const scheduleFrame = (callback) => {
+    return (window.requestAnimationFrame || window.setTimeout).call(window, callback, 16);
+};
+
+const cancelFrame = (handle) => {
+    if (handle == null) return;
+    if (window.cancelAnimationFrame) {
+        window.cancelAnimationFrame(handle);
+    } else {
+        clearTimeout(handle);
+    }
+};
+
+const cancelPendingPageLoaderRender = () => {
+    if (pageLoaderRenderState.handle != null) {
+        cancelFrame(pageLoaderRenderState.handle);
+        pageLoaderRenderState.handle = null;
+    }
+};
+
 // Component Library Storage
 let componentLibrary = [];
 
 window.addEventListener('DOMContentLoaded', () => {
     // Populate PAGE_SOURCES from embedded HTML
-    if (window.PAGE_SOURCE_HTML) {
-        PAGE_SOURCES = Object.keys(window.PAGE_SOURCE_HTML).sort();
+    if (populatePageSourcesFromEmbedded()) {
         console.log(`📦 Loaded ${PAGE_SOURCES.length} pages from embedded sources`);
     } else {
-        console.error('❌ PAGE_SOURCE_HTML not loaded! Make sure page-sources-embedded.js is included.');
+        console.warn('⏳ PAGE_SOURCE_HTML not ready yet. Waiting for embedded sources to finish loading...');
     }
 
     // Load saved components from localStorage
@@ -67,6 +106,114 @@ function createOrUpdatePageLoaderModal() {
     const modal = createPageLoaderModal();
     document.body.appendChild(modal);
 
+    initializePageLoaderModal(modal);
+}
+
+function createPageLoaderModal() {
+    console.log('Creating page loader modal with', PAGE_SOURCES.length, 'pages');
+
+    const modal = document.createElement('div');
+    modal.id = 'source-page-loader-modal';
+    modal.className = 'modal';
+
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📁 Load Page from Source Files</h2>
+                <button class="modal-close" data-close-modal="source-page-loader-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px; color: var(--text-secondary);">
+                    Load pages directly from embedded source - no CORS issues! Each element becomes individually editable.
+                </p>
+
+                <div class="page-loader-controls">
+                    <input type="search" id="page-loader-search" placeholder="Search ${PAGE_SOURCES.length} pages..." aria-label="Search source pages" />
+                    <span id="page-loader-count" class="page-loader-count"></span>
+                </div>
+
+                <div id="page-grid" class="page-grid" role="list"></div>
+                <div id="page-loader-empty" class="page-loader-empty" hidden>
+                    <div style="font-size: 40px; margin-bottom: 10px;">🔍</div>
+                    <p>No pages match your search.</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add styles once
+    if (!document.getElementById('page-loader-modal-style')) {
+        const style = document.createElement('style');
+        style.id = 'page-loader-modal-style';
+        style.textContent = `
+            .page-loader-controls {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+            #page-loader-search {
+                flex: 1 1 240px;
+                padding: 8px 12px;
+                border-radius: var(--border-radius);
+                border: 1px solid var(--border-color);
+                background: var(--ui-bg);
+                color: var(--text-primary);
+                font-size: 14px;
+            }
+            #page-loader-search:focus {
+                outline: none;
+                border-color: var(--accent);
+                box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.2);
+            }
+            .page-loader-count {
+                font-size: 13px;
+                color: var(--text-secondary);
+            }
+            .page-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            .page-card {
+                background: var(--ui-bg);
+                border: 1px solid var(--border-color);
+                border-radius: var(--border-radius);
+                padding: 15px;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .page-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 255, 204, 0.3);
+            }
+            .page-card-header {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid var(--border-color);
+                color: var(--accent);
+            }
+            .page-card-actions button {
+                font-size: 13px;
+                padding: 8px 12px;
+                width: 100%;
+            }
+            .page-card-actions button + button {
+                margin-top: 6px;
+            }
+            .page-loader-empty {
+                text-align: center;
+                padding: 30px;
+                color: var(--text-secondary);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    return modal;
+}
+
+function initializePageLoaderModal(modal) {
     // Attach close button event listener
     const closeBtn = modal.querySelector('[data-close-modal]');
     if (closeBtn) {
@@ -79,102 +226,217 @@ function createOrUpdatePageLoaderModal() {
         });
     }
 
-    // Attach page load button event listeners
-    modal.querySelectorAll('.load-full-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const pageName = e.currentTarget.dataset.pageName;
-            window.loadPageFromSource(pageName, false);
-        });
-    });
-    modal.querySelectorAll('.load-body-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const pageName = e.currentTarget.dataset.pageName;
-            window.loadPageFromSource(pageName, true);
-        });
-    });
-}
+    const searchInput = modal.querySelector('#page-loader-search');
+    const countLabel = modal.querySelector('#page-loader-count');
+    const grid = modal.querySelector('#page-grid');
+    const emptyState = modal.querySelector('#page-loader-empty');
 
-function createPageLoaderModal() {
-    console.log('Creating page loader modal with', PAGE_SOURCES.length, 'pages');
+    if (emptyState && !emptyState.dataset.defaultMarkup) {
+        emptyState.dataset.defaultMarkup = emptyState.innerHTML;
+    }
 
-    const modal = document.createElement('div');
-    modal.id = 'source-page-loader-modal';
-    modal.className = 'modal';
-
-    // Escape HTML to prevent XSS
-    const escapeHtml = (str) => {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+    const setEmptyStateMessage = (icon, message) => {
+        if (!emptyState) return;
+        emptyState.innerHTML = `
+            <div style="font-size: 40px; margin-bottom: 10px;">${icon}</div>
+            <p>${message}</p>
+        `;
+        emptyState.hidden = false;
+        if (grid) {
+            grid.hidden = true;
+        }
     };
 
-    const pageGridHTML = PAGE_SOURCES.length > 0
-        ? PAGE_SOURCES.map(pageName => {
-            const escapedName = escapeHtml(pageName);
-            return `
-                        <div class="page-card" data-page="${escapedName}">
-                            <div class="page-card-header">
-                                <strong>${escapedName}</strong>
-                            </div>
-                            <div class="page-card-actions">
-                                <button class="big-button load-full-btn" data-page-name="${escapedName}" style="width: 100%; margin-bottom: 5px;">
-                                    📖 Full (HTML+CSS+JS)
-                                </button>
-                                <button class="big-button load-body-btn" data-page-name="${escapedName}" style="width: 100%;">
-                                    🎯 Body Only
-                                </button>
-                            </div>
-                        </div>
-                    `;
-        }).join('')
-        : '<p style="color: var(--text-secondary); padding: 20px;">❌ No pages loaded! page-sources-embedded.js may not have loaded.</p>';
+    const resetEmptyStateMessage = () => {
+        if (!emptyState || !emptyState.dataset.defaultMarkup) return;
+        emptyState.innerHTML = emptyState.dataset.defaultMarkup;
+    };
 
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>📁 Load Page from Source Files (${PAGE_SOURCES.length} pages)</h2>
-                <button class="modal-close" data-close-modal="source-page-loader-modal">×</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 15px; color: var(--text-secondary);">
-                    Load pages directly from embedded source - no CORS issues! Each element becomes individually editable.
-                </p>
+    const applyFilter = () => {
+        const query = (searchInput?.value || '').trim().toLowerCase();
+        const filteredPages = query
+            ? PAGE_SOURCES.filter(name => name.toLowerCase().includes(query))
+            : PAGE_SOURCES.slice();
+        updatePageLoaderCount(countLabel, filteredPages.length);
+        renderPageLoaderGrid(grid, emptyState, filteredPages);
+    };
 
-                <div id="page-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
-                    ${pageGridHTML}
-                </div>
-            </div>
-        </div>
-    `;
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            cancelPendingPageLoaderRender();
+            pageLoaderRenderState.handle = scheduleFrame(applyFilter);
+        });
+    }
 
-    // Add styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .page-card {
-            background: var(--ui-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 15px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .page-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 255, 204, 0.3);
-        }
-        .page-card-header {
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--accent);
-        }
-        .page-card-actions button {
-            font-size: 13px;
-            padding: 8px 12px;
-        }
-    `;
-    document.head.appendChild(style);
+    if (grid) {
+        grid.addEventListener('click', handlePageGridClick);
+    }
 
-    return modal;
+    const startRendering = () => {
+        resetEmptyStateMessage();
+        applyFilter();
+    };
+
+    const waitForSourcesAndRender = () => {
+        if (populatePageSourcesFromEmbedded()) {
+            startRendering();
+            return;
+        }
+
+        if (countLabel) {
+            countLabel.textContent = 'Loading sources...';
+        }
+        if (grid) {
+            grid.hidden = true;
+        }
+        setEmptyStateMessage('⏳', 'Preparing the embedded source list...');
+
+        const startTime = performance.now();
+        const poll = () => {
+            if (!document.body.contains(modal)) {
+                return;
+            }
+            if (populatePageSourcesFromEmbedded()) {
+                startRendering();
+                return;
+            }
+            if (performance.now() - startTime > PAGE_SOURCES_WAIT_LIMIT) {
+                if (countLabel) {
+                    countLabel.textContent = 'Sources still loading...';
+                }
+                setEmptyStateMessage('⚠️', 'Still waiting for embedded sources to finish loading. Please try again in a moment.');
+                return;
+            }
+            scheduleFrame(poll);
+        };
+
+        scheduleFrame(poll);
+    };
+
+    waitForSourcesAndRender();
+}
+
+function updatePageLoaderCount(target, count) {
+    if (!target) return;
+    const label = count === 1 ? 'page' : 'pages';
+    target.textContent = `${count} ${label}`;
+}
+
+function renderPageLoaderGrid(grid, emptyState, pages) {
+    if (!grid || !emptyState) return;
+    cancelPendingPageLoaderRender();
+    grid.innerHTML = '';
+
+    if (!pages.length) {
+        grid.hidden = true;
+        emptyState.hidden = false;
+        return;
+    }
+
+    grid.hidden = false;
+    emptyState.hidden = true;
+
+    let index = 0;
+    const renderChunk = () => {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < PAGE_LOADER_BATCH_SIZE && index < pages.length; i += 1, index += 1) {
+            fragment.appendChild(createPageCard(pages[index]));
+        }
+        grid.appendChild(fragment);
+
+        if (index < pages.length) {
+            pageLoaderRenderState.handle = scheduleFrame(renderChunk);
+        } else {
+            pageLoaderRenderState.handle = null;
+        }
+    };
+
+    applyFilter();
+}
+
+function updatePageLoaderCount(target, count) {
+    if (!target) return;
+    const label = count === 1 ? 'page' : 'pages';
+    target.textContent = `${count} ${label}`;
+}
+
+function renderPageLoaderGrid(grid, emptyState, pages) {
+    if (!grid || !emptyState) return;
+    cancelPendingPageLoaderRender();
+    grid.innerHTML = '';
+
+    if (!pages.length) {
+        grid.hidden = true;
+        emptyState.hidden = false;
+        return;
+    }
+
+    grid.hidden = false;
+    emptyState.hidden = true;
+
+    let index = 0;
+    const renderChunk = () => {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < PAGE_LOADER_BATCH_SIZE && index < pages.length; i += 1, index += 1) {
+            fragment.appendChild(createPageCard(pages[index]));
+        }
+        grid.appendChild(fragment);
+
+        if (index < pages.length) {
+            pageLoaderRenderState.handle = scheduleFrame(renderChunk);
+        } else {
+            pageLoaderRenderState.handle = null;
+        }
+    };
+
+    renderChunk();
+}
+
+function createPageCard(pageName) {
+    const card = document.createElement('div');
+    card.className = 'page-card';
+    card.dataset.page = pageName;
+    card.setAttribute('role', 'listitem');
+
+    const header = document.createElement('div');
+    header.className = 'page-card-header';
+    const title = document.createElement('strong');
+    title.textContent = pageName;
+    header.appendChild(title);
+
+    const actions = document.createElement('div');
+    actions.className = 'page-card-actions';
+
+    const fullBtn = document.createElement('button');
+    fullBtn.className = 'big-button load-full-btn';
+    fullBtn.dataset.pageName = pageName;
+    fullBtn.type = 'button';
+    fullBtn.textContent = '📖 Full (HTML+CSS+JS)';
+
+    const bodyBtn = document.createElement('button');
+    bodyBtn.className = 'big-button load-body-btn';
+    bodyBtn.dataset.pageName = pageName;
+    bodyBtn.type = 'button';
+    bodyBtn.textContent = '🎯 Body Only';
+
+    actions.appendChild(fullBtn);
+    actions.appendChild(bodyBtn);
+
+    card.appendChild(header);
+    card.appendChild(actions);
+
+    return card;
+}
+
+function handlePageGridClick(event) {
+    const button = event.target.closest('button[data-page-name]');
+    if (!button) {
+        return;
+    }
+    event.preventDefault();
+    const pageName = button.dataset.pageName;
+    const bodyOnly = button.classList.contains('load-body-btn');
+    window.loadPageFromSource(pageName, bodyOnly);
 }
 
 window.loadPageFromSource = function(pageName, bodyOnly = false) {

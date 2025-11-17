@@ -682,6 +682,48 @@
     }
     .pov-name.completed {
       color: #00ffcc;
+    /* Retro Dolls & Assets */
+    .corner-doll-hdtv {
+      position: fixed;
+      z-index: 1005;
+      max-width: 70px;
+      image-rendering: pixelated;
+      opacity: 0.9;
+    }
+
+    .corner-doll-hdtv.top-left {
+      top: 10px;
+      left: 10px;
+    }
+
+    .corner-doll-hdtv.top-right {
+      top: 10px;
+      right: 10px;
+    }
+
+    .corner-doll-hdtv.bottom-left {
+      bottom: 50px;
+      left: 10px;
+    }
+
+    .corner-doll-hdtv.bottom-right {
+      bottom: 50px;
+      right: 10px;
+    }
+
+    .floating-doll-hdtv {
+      position: fixed;
+      opacity: 0.2;
+      animation: floatHdtv 10s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 1;
+      max-width: 55px;
+    }
+
+    @keyframes floatHdtv {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(20px, -20px) rotate(8deg); }
+      66% { transform: translate(-20px, 20px) rotate(-8deg); }
     }
 
 
@@ -699,6 +741,20 @@
 </script>
 </head>
 <body>
+  <!-- Corner Pixel Dolls -->
+  <img src="https://coaiexist.wtf/assets/dollz/girlz/silentz/a17.gif" class="corner-doll-hdtv top-left" alt="pixel doll">
+  <img src="https://coaiexist.wtf/assets/dollz/girlz/wonderkinz/wacc2.gif" class="corner-doll-hdtv top-right" alt="pixel doll">
+  <img src="https://coaiexist.wtf/assets/dollz/girlz/silentz/a21.gif" class="corner-doll-hdtv bottom-left" alt="pixel doll">
+  <img src="https://coaiexist.wtf/assets/dollz/girlz/wonderkinz/wacc15.gif" class="corner-doll-hdtv bottom-right" alt="pixel doll">
+
+  <!-- Floating Pixel Dolls & Bling -->
+  <img src="https://coaiexist.wtf/assets/dollz/girlz/silentz/a13.gif" class="floating-doll-hdtv" style="top: 20%; left: 18%; animation-delay: 0s;" alt="pixel doll">
+  <img src="https://coaiexist.wtf/assets/dollz/girlz/wonderkinz/wacc1.gif" class="floating-doll-hdtv" style="top: 45%; right: 15%; animation-delay: 2.5s;" alt="pixel doll">
+  <img src="https://coaiexist.wtf/assets/dollz/girlz/silentz/a19.gif" class="floating-doll-hdtv" style="bottom: 25%; left: 12%; animation-delay: 5s;" alt="pixel doll">
+  <img src="https://coaiexist.wtf/assets/misc_gif/blingeez/100 (4).gif" class="floating-doll-hdtv" style="top: 65%; right: 25%; animation-delay: 1.5s;" alt="bling">
+  <img src="https://coaiexist.wtf/assets/misc_gif/blingeez/100 (9).gif" class="floating-doll-hdtv" style="top: 35%; left: 75%; animation-delay: 3.5s;" alt="bling">
+  <img src="https://coaiexist.wtf/assets/misc_gif/blingeez/100 (16).gif" class="floating-doll-hdtv" style="bottom: 35%; right: 70%; animation-delay: 4.5s;" alt="bling">
+
   <div id="desktop-bg-container"></div>
   <div id="root"></div>
   <script type="module">
@@ -3405,8 +3461,23 @@ if (container) {
   console.error('Failed to find the root element');
 }
   </script>
-   <iframe src="/nav.html" 
+   <iframe id="nav-iframe" src="/nav.html"
         style="position:fixed;bottom:0;left:0;width:100%;height:50px;border:none;z-index:9999;">
 </iframe>
+
+<script>
+// Listen for nav menu open/close events and resize iframe
+window.addEventListener('message', function(e) {
+  var navFrame = document.getElementById('nav-iframe');
+  if (!navFrame) return;
+
+  if (e.data.type === 'navMenuOpen') {
+    navFrame.style.height = e.data.height + 'px';
+    navFrame.style.transition = 'height 0.2s ease';
+  } else if (e.data.type === 'navMenuClose') {
+    navFrame.style.height = '50px';
+  }
+});
+</script>
 </body>
 </html>
