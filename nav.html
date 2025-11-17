@@ -24,10 +24,11 @@ body { margin: 0; overflow: hidden; }
   font-weight:bold;flex-shrink:0}
 .taskbar-hamburger:active{border-style:inset;background:#c0c0c0}
 
-/* Mobile menu container */
+/* Mobile menu container - FIXED Z-INDEX */
 .taskbar-mobile-menu{display:none;position:fixed;left:0;right:0;bottom:40px;
   background:linear-gradient(to bottom,#c0c0c0 0%,#808080 100%);border-top:2px solid #fff;
-  box-shadow:0 -2px 4px rgba(0,0,0,.3);max-height:70vh;overflow-y:auto;z-index:9998;
+  box-shadow:0 -2px 4px rgba(0,0,0,.3);max-height:calc(100vh - 50px);overflow-y:auto;
+  z-index:2147483647 !important;
   padding:8px 4px}
 .taskbar-mobile-menu.open{display:block}
 .taskbar-mobile-menu .taskbar-button{display:block;width:calc(100% - 8px);
@@ -192,11 +193,16 @@ body { margin: 0; overflow: hidden; }
     menuBtn.addEventListener('click', function(e) {
       e.preventDefault();
       mobileMenu.classList.toggle('open');
+      var isOpen = mobileMenu.classList.contains('open');
       // Toggle button style
-      if (mobileMenu.classList.contains('open')) {
+      if (isOpen) {
         menuBtn.style.borderStyle = 'inset';
+        // Calculate and send menu height to parent
+        var menuHeight = mobileMenu.scrollHeight + 50; // +50 for taskbar
+        window.parent.postMessage({type: 'navMenuOpen', height: menuHeight}, '*');
       } else {
         menuBtn.style.borderStyle = 'outset';
+        window.parent.postMessage({type: 'navMenuClose'}, '*');
       }
     });
 
@@ -205,6 +211,7 @@ body { margin: 0; overflow: hidden; }
       if (!menuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
         mobileMenu.classList.remove('open');
         menuBtn.style.borderStyle = 'outset';
+        window.parent.postMessage({type: 'navMenuClose'}, '*');
       }
     });
 
@@ -213,6 +220,7 @@ body { margin: 0; overflow: hidden; }
       link.addEventListener('click', function() {
         mobileMenu.classList.remove('open');
         menuBtn.style.borderStyle = 'outset';
+        window.parent.postMessage({type: 'navMenuClose'}, '*');
       });
     });
   }

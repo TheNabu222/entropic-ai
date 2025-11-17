@@ -351,6 +351,44 @@ function renderPageLoaderGrid(grid, emptyState, pages) {
         }
     };
 
+    applyFilter();
+}
+
+function updatePageLoaderCount(target, count) {
+    if (!target) return;
+    const label = count === 1 ? 'page' : 'pages';
+    target.textContent = `${count} ${label}`;
+}
+
+function renderPageLoaderGrid(grid, emptyState, pages) {
+    if (!grid || !emptyState) return;
+    cancelPendingPageLoaderRender();
+    grid.innerHTML = '';
+
+    if (!pages.length) {
+        grid.hidden = true;
+        emptyState.hidden = false;
+        return;
+    }
+
+    grid.hidden = false;
+    emptyState.hidden = true;
+
+    let index = 0;
+    const renderChunk = () => {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < PAGE_LOADER_BATCH_SIZE && index < pages.length; i += 1, index += 1) {
+            fragment.appendChild(createPageCard(pages[index]));
+        }
+        grid.appendChild(fragment);
+
+        if (index < pages.length) {
+            pageLoaderRenderState.handle = scheduleFrame(renderChunk);
+        } else {
+            pageLoaderRenderState.handle = null;
+        }
+    };
+
     renderChunk();
 }
 

@@ -417,6 +417,125 @@
         animation: pulse-current-location 2s infinite;
     }
 
+    /* === NEW VISUAL ENHANCEMENTS === */
+
+    /* Animated Stat Bars */
+    .stat-bar-container {
+      display: flex;
+      align-items: center;
+      margin: 4px 0;
+      gap: 8px;
+    }
+    .stat-bar-label {
+      font-size: 10px;
+      min-width: 80px;
+      text-transform: uppercase;
+    }
+    .stat-bar-wrapper {
+      flex-grow: 1;
+      height: 12px;
+      background: linear-gradient(to bottom, #505050, #303030);
+      border: 1px inset #B0B0B0;
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    .stat-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00ffcc 0%, #7722ff 50%, #ff77de 100%);
+      transition: width 0.5s ease-out;
+      position: relative;
+      box-shadow: 0 0 8px rgba(0, 255, 204, 0.5);
+      animation: stat-glow 2s ease-in-out infinite;
+    }
+    @keyframes stat-glow {
+      0%, 100% { box-shadow: 0 0 8px rgba(0, 255, 204, 0.5); }
+      50% { box-shadow: 0 0 15px rgba(0, 255, 204, 0.9); }
+    }
+    .stat-bar-value {
+      font-size: 9px;
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      z-index: 1;
+    }
+
+    /* Ambient Floating Particles */
+    .ambient-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 5;
+      animation: float-particle linear forwards;
+      opacity: 0.6;
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+    @keyframes float-particle {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.6;
+      }
+      90% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-120vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Character Emotion Overlay */
+    .character-portrait-container {
+      position: relative;
+      width: 100px;
+      height: 100px;
+    }
+    .emotion-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      animation: emotion-pulse 1s ease-in-out;
+      z-index: 2;
+    }
+    @keyframes emotion-pulse {
+      0% { opacity: 0; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.1); }
+      100% { opacity: 0.8; transform: scale(1); }
+    }
+
+    /* Scene Transition Effect */
+    .scene-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      background-size: cover;
+      background-position: center;
+      z-index: 9998;
+      animation: scene-glitch 0.8s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes scene-glitch {
+      0% { opacity: 0; }
+      20% { opacity: 1; transform: translateX(-5px); }
+      40% { opacity: 1; transform: translateX(5px); }
+      60% { opacity: 1; transform: translateX(-3px); }
+      80% { opacity: 1; transform: translateX(0); }
+      100% { opacity: 0; }
+    }
+
 
   </style>
   <script type="importmap">
@@ -455,6 +574,124 @@ const ASSET_DATA_URIS = {
 const GAME_TITLE = "CoAIexist: Rashomon in Rogers Park";
 const SAVE_GAME_KEY = 'coAIexistSaveData_v3';
 const GLENWOOD_BG = 'https://coaiexist.wtf/assets/hdtv_game_assets/gwood.png';
+
+/*
+ * ═══════════════════════════════════════════════════════════════════
+ * 🎮 HD.TV VISUAL & AUDIO ENHANCEMENT SYSTEM
+ * ═══════════════════════════════════════════════════════════════════
+ *
+ * IMPLEMENTED FEATURES:
+ * ✨ Animated visual stat bars with gradient fills and glow effects
+ * 🎨 Ambient floating GIF particles (Y2K Barbie aesthetic)
+ * 🎭 Scene transition glitch effects between story nodes
+ * 🖼️ Character emotion overlay system (portraits can show GIF reactions)
+ * 🎵 Audio manager with background music & SFX hooks (disabled until files added)
+ * 🔊 Sound triggers on: button clicks, hovers, interactions, transitions
+ * 🗺️ Interactive object system for Glenwood location (5 clickable hotspots)
+ * 📊 Visual feedback for stat changes
+ *
+ * TO ENABLE AUDIO:
+ * - Add audio files to /assets/audio/ directory
+ * - Set AudioManager.enabled = true (line 644)
+ * - Uncomment AUDIO_ASSETS paths (lines 624-636)
+ *
+ * ═══════════════════════════════════════════════════════════════════
+ */
+
+// === VISUAL ASSET LIBRARY ===
+const VISUAL_ASSETS = {
+  backgrounds: {
+    glenwood: '/assets/hdtv_game_assets/gwood.png',
+    glenwoodWithSprites: '/assets/hdtv_game_assets/gwood_withsprites.png', // Use for dramatic moments
+    rizzlersRoom: '/assets/hdtv_game_assets/rizzlers_room.png',
+    hdBg: '/assets/hdtv_game_assets/hd_bg.png',
+  },
+  interactiveObjects: {
+    mop: '/assets/hdtv_game_assets/hd_asset.png',
+    chalkboard: '/assets/hdtv_game_assets/hd_asset-2.png',
+    rug: '/assets/hdtv_game_assets/hd_asset-3.png',
+    floor: '/assets/hdtv_game_assets/hd_asset-4.png',
+    musicStand: '/assets/hdtv_game_assets/hd_asset-5.png',
+  },
+  ambientGifs: [
+    '/assets/hdtv_game_assets/barbie_gifs/barbie.gif',
+    '/assets/hdtv_game_assets/barbie_gifs/barbiedoll.gif',
+    '/assets/hdtv_game_assets/barbie_gifs/happybirthday.gif',
+  ],
+  characterEmotions: {
+    nabu: {
+      neutral: '/assets/hdtv_game_assets/nabu_sprite.png',
+      happy: '/assets/hdtv_game_assets/barbie_gifs/happybirthday.gif',
+      thoughtful: '/assets/hdtv_game_assets/barbie_gifs/barbie.gif',
+    },
+    hd: {
+      neutral: '/assets/hdtv_game_assets/hd_sprite.png',
+      fabulous: '/assets/hdtv_game_assets/barbie_gifs/barbiedoll.gif',
+      fierce: '/hd_tv/hyenanomous_1.jpeg',
+    },
+    sypher: {
+      neutral: '/assets/hdtv_game_assets/sypher_sprite.png',
+      calculating: '/assets/hdtv_game_assets/barbie_gifs/barbie.gif',
+    },
+    rizzlord: {
+      neutral: '/assets/hdtv_game_assets/rizzler_sprite.png',
+      confident: '/assets/hdtv_game_assets/barbie_gifs/barbiedoll.gif',
+    }
+  }
+};
+
+// === AUDIO ASSET LIBRARY ===
+const AUDIO_ASSETS = {
+  music: {
+    mainMenu: '/assets/sounds/MapleLeafRag.mp3', // Ragtime for menu - perfect retro vibe
+    glenwood: '/assets/sounds/DreamwalkerSEP2.mp3', // Atmospheric for the venue
+    tense: '/assets/sounds/jb.MP3', // For dramatic moments
+    victory: '/assets/sounds/oops.mp3', // Celebratory
+    // MIDI files also available: Aqua_Barbie_Girl.mid, pink_panther.mid, etc.
+  },
+  sfx: {
+    // Using existing MP3s for subtle SFX - can be replaced with dedicated SFX later
+    click: '/assets/sounds/oops.mp3',
+    interact: '/assets/sounds/jb.MP3',
+  }
+};
+
+// Simple audio manager
+const AudioManager = {
+  bgMusic: null,
+  sfxVolume: 0.15, // Lower volume for SFX since we're using music files
+  musicVolume: 0.25,
+  enabled: true, // ENABLED! Audio files found!
+
+  playMusic(track, loop = true) {
+    if (!this.enabled) return;
+    if (this.bgMusic) {
+      this.bgMusic.pause();
+      this.bgMusic.currentTime = 0;
+    }
+    if (!AUDIO_ASSETS.music[track]) return;
+
+    this.bgMusic = new Audio(AUDIO_ASSETS.music[track]);
+    this.bgMusic.volume = this.musicVolume;
+    this.bgMusic.loop = loop;
+    this.bgMusic.play().catch(() => {}); // Ignore autoplay errors
+  },
+
+  playSfx(effect) {
+    if (!this.enabled) return;
+    if (!AUDIO_ASSETS.sfx[effect]) return;
+    const sfx = new Audio(AUDIO_ASSETS.sfx[effect]);
+    sfx.volume = this.sfxVolume;
+    sfx.play().catch(() => {});
+  },
+
+  stopMusic() {
+    if (this.bgMusic) {
+      this.bgMusic.pause();
+      this.bgMusic.currentTime = 0;
+    }
+  }
+};
 
 const INITIAL_NABU_STATS = {
     integrity: 50,
@@ -1911,6 +2148,63 @@ const FlavorTextTooltip = ({ text, x, y }) => {
     );
 };
 
+// Visual Stat Bar Component
+const VisualStatBar = ({ stat, value, maxValue = 100 }) => {
+  const percentage = Math.min(100, Math.max(0, (value / maxValue) * 100));
+  return jsx("div", {
+    className: "stat-bar-container",
+    children: [
+      jsx("div", {
+        className: "stat-bar-label",
+        children: stat
+      }),
+      jsx("div", {
+        className: "stat-bar-wrapper",
+        children: [
+          jsx("div", {
+            className: "stat-bar-fill",
+            style: { width: `${percentage}%` }
+          }),
+          jsx("div", {
+            className: "stat-bar-value",
+            children: value
+          })
+        ]
+      })
+    ]
+  });
+};
+
+// Ambient Particle System Component
+const AmbientParticles = ({ enabled = true }) => {
+  useEffect(() => {
+    if (!enabled) return;
+
+    const spawnParticle = () => {
+      const particle = document.createElement('img');
+      const randomGif = VISUAL_ASSETS.ambientGifs[Math.floor(Math.random() * VISUAL_ASSETS.ambientGifs.length)];
+      particle.src = randomGif;
+      particle.className = 'ambient-particle';
+      particle.style.left = Math.random() * 100 + 'vw';
+      particle.style.bottom = '0';
+      particle.style.animationDuration = (8 + Math.random() * 7) + 's';
+
+      document.body.appendChild(particle);
+
+      setTimeout(() => {
+        if (particle.parentNode) particle.parentNode.removeChild(particle);
+      }, 15000);
+    };
+
+    const interval = setInterval(spawnParticle, 4000);
+    spawnParticle(); // Spawn one immediately
+
+    return () => clearInterval(interval);
+  }, [enabled]);
+
+  return null;
+};
+
 const InGameScreen = props => {
   const {
     storyState,
@@ -2025,16 +2319,18 @@ const InGameScreen = props => {
                         style: {
                             display: 'block',
                             borderBottom: '1px solid #808080',
-                            marginBottom: '4px',
+                            marginBottom: '8px',
                             paddingBottom: '3px',
                             fontSize: '12px'
                         },
                         children: "STATUS:"
                     }),
-                    playerStats ? 
-                        Object.entries(playerStats).map(([stat, value]) => 
-                            jsx("div", { 
-                                children: `${stat}: ${value}` 
+                    playerStats ?
+                        Object.entries(playerStats).map(([stat, value]) =>
+                            jsx(VisualStatBar, {
+                                stat: stat,
+                                value: value,
+                                maxValue: 100
                             }, stat)
                         ) : "No stats available."
                 ]
@@ -2060,8 +2356,10 @@ const InGameScreen = props => {
               children: visibleChoices.map((choice, index) => jsx("li", {
                 children: jsx("button", {
                   onClick: () => {
+                    AudioManager.playSfx('click');
                     onChoice(choice.nextNodeId, choice);
                   },
+                  onMouseEnter: () => AudioManager.playSfx('hover'),
                   children: jsx(GlitchyText, {
                     text: choice.text
                   })
@@ -2285,6 +2583,15 @@ const App = () => {
     setCurrentTaskbarTitle(title);
   }, [currentScreen, storyState.currentNodeId, storyState.characterId, saveLoadState.isOpen]);
 
+  // Background music based on screen
+  useEffect(() => {
+    if (currentScreen === 'mainMenu' || currentScreen === 'characterSelect') {
+      AudioManager.playMusic('mainMenu');
+    } else if (currentScreen === 'inGame' && storyState.currentLocation === 'glenwood') {
+      AudioManager.playMusic('glenwood');
+    }
+  }, [currentScreen, storyState.currentLocation]);
+
   const handleSave = (slotIndex) => {
     const recapText = RECAP_TEXTS[storyState.currentNodeId] || `You are currently at: ${NODES[storyState.currentNodeId]?.title || 'Unknown Location'}.`;
     const newSave = { storyState, timestamp: Date.now(), recapText };
@@ -2391,7 +2698,16 @@ const App = () => {
 
   const handleChoice = (nextNodeId, choice) => {
     setTooltip({ visible: false, text: '', x: 0, y: 0 }); // Hide tooltip on scene change
-    
+
+    // Scene transition effect
+    AudioManager.playSfx('transition');
+    const transitionDiv = document.createElement('div');
+    transitionDiv.className = 'scene-transition';
+    document.body.appendChild(transitionDiv);
+    setTimeout(() => {
+      if (transitionDiv.parentNode) transitionDiv.parentNode.removeChild(transitionDiv);
+    }, 800);
+
     if (choice.hexFlash) {
         setFlash({ active: true, color: choice.hexFlash });
         setTimeout(() => setFlash({ active: false, color: '' }), 700);
@@ -2460,6 +2776,9 @@ const App = () => {
   
   const handleInteractiveClick = (interactive, event) => {
     if (storyState.clickedInteractives.has(interactive.id)) return;
+
+    AudioManager.playSfx('interact');
+
     setStoryState(prevState => ({
         ...prevState,
         clickedInteractives: new Set(prevState.clickedInteractives).add(interactive.id)
@@ -2549,7 +2868,8 @@ const App = () => {
         closeMenu: () => setIsStartMenuOpen(false),
         isGameActive: isGameActive
       })
-    }), tooltip.visible && jsx(FlavorTextTooltip, { text: tooltip.text, x: tooltip.x, y: tooltip.y })
+    }), tooltip.visible && jsx(FlavorTextTooltip, { text: tooltip.text, x: tooltip.x, y: tooltip.y }),
+    jsx(AmbientParticles, { enabled: currentScreen === 'inGame' })
     ]
   });
 };

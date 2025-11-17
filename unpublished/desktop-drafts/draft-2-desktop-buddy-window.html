@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRAFT 2: Full Desktop with Buddy Window</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+    --magenta: #f312af;
+    --cyan: #00ffcc;
+    --yellow: #fffb01;
+    --purple: #bf5fff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'VT323', monospace;
+    background: #000;
+    overflow: hidden;
+}
+
+/* Matrix Rain Background */
+#matrix-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.3;
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Menu Bar (Mac/Win style) */
+.menubar {
+    height: 30px;
+    background: linear-gradient(to bottom, #e0e0e0, #c0c0c0);
+    border-bottom: 1px solid #808080;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 14px;
+    color: #000;
+    gap: 20px;
+}
+
+.menu-item {
+    cursor: pointer;
+    padding: 2px 8px;
+}
+
+.menu-item:hover {
+    background: #000080;
+    color: white;
+}
+
+.menu-right {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.system-icon {
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Desktop */
+.desktop {
+    flex: 1;
+    background: linear-gradient(135deg, #0a001a 0%, #1a0033 50%, #0a001a 100%);
+    position: relative;
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* Cosmic Background Animation */
+.desktop::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(191,95,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0,255,204,0.1) 0%, transparent 40%);
+    animation: cosmic-rotate 20s linear infinite;
+}
+
+@keyframes cosmic-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Desktop Icons Grid */
+.desktop-icons {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 90px);
+    gap: 20px;
+    padding: 20px;
+}
+
+.desktop-icon {
+    width: 90px;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px 5px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.desktop-icon:hover {
+    background: rgba(0, 255, 204, 0.2);
+    border-color: var(--cyan);
+    box-shadow: 0 0 15px var(--cyan);
+}
+
+.desktop-icon .icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 8px var(--magenta));
+    text-shadow: 0 0 10px var(--magenta);
+}
+
+.desktop-icon .label {
+    color: white;
+    font-size: 13px;
+    text-shadow: 2px 2px 4px #000, 0 0 5px var(--cyan);
+    font-weight: bold;
+}
+
+/* Windows */
+.window {
+    position: absolute;
+    background: #c0c0c0;
+    border: 2px solid #fff;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.7);
+    min-width: 350px;
+    z-index: 10;
+}
+
+.window.hidden { display: none; }
+
+.window-titlebar {
+    background: linear-gradient(to right, #000080, #1084d0);
+    color: white;
+    padding: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    border-radius: 6px 6px 0 0;
+}
+
+.window-title {
+    font-size: 15px;
+    font-weight: bold;
+    padding-left: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.window-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.window-btn {
+    width: 20px;
+    height: 20px;
+    background: #c0c0c0;
+    border: 2px outset #fff;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.window-btn:hover {
+    background: #e0e0e0;
+}
+
+.window-btn:active {
+    border-style: inset;
+}
+
+.window-content {
+    padding: 15px;
+    background: white;
+    max-height: 450px;
+    overflow-y: auto;
+    color: #000;
+}
+
+/* Buddy List Window Specific */
+#window-buddies .window-content {
+    padding: 10px;
+    background: linear-gradient(to bottom, #f0f0f0, #e0e0e0);
+}
+
+.buddy-section {
+    margin-bottom: 15px;
+}
+
+.buddy-section h3 {
+    background: linear-gradient(to right, #000080, #0000ff);
+    color: white;
+    padding: 5px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.buddy-item {
+    background: white;
+    border: 1px solid #999;
+    padding: 8px;
+    margin: 4px 0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.buddy-item:hover {
+    background: #e0e0ff;
+}
+
+.buddy-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 1px solid #333;
+}
+
+.status-online { background: #00ff00; }
+.status-away { background: #ffff00; }
+.status-offline { background: #ff0000; }
+
+/* Update Cards */
+.update-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #ca237f 100%);
+    border: 2px solid var(--cyan);
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 5px;
+    color: white;
+}
+
+.update-card h4 {
+    color: var(--yellow);
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.update-meta {
+    background: var(--purple);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+/* Taskbar */
+.taskbar {
+    height: 42px;
+    background: linear-gradient(to bottom, #c0c0c0, #808080);
+    border-top: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+    gap: 5px;
+    z-index: 1000;
+}
+
+.start-btn {
+    background: linear-gradient(to right, #008080, #0000ff);
+    color: white;
+    border: 2px outset #fff;
+    padding: 5px 15px;
+    cursor: pointer;
+    font-family: 'VT323', monospace;
+    font-weight: bold;
+    font-size: 15px;
+    border-radius: 3px;
+}
+
+.start-btn:active {
+    border-style: inset;
+}
+
+.taskbar-item {
+    background: linear-gradient(to bottom, #dfdfdf, #c0c0c0);
+    border: 2px outset #fff;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #000;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.taskbar-item:active {
+    border-style: inset;
+}
+
+.taskbar-clock {
+    margin-left: auto;
+    border: 2px inset #fff;
+    padding: 5px 10px;
+    font-size: 14px;
+    background: #c0c0c0;
+}
+
+/* Pip */
+#pip-container {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    width: 160px;
+    height: 160px;
+    z-index: 999;
+}
+
+#pip-container img {
+    width: 100%;
+    filter: drop-shadow(0 0 15px var(--magenta));
+    animation: pip-float 3s ease-in-out infinite;
+}
+
+@keyframes pip-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Sparkles */
+.sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--cyan);
+    border-radius: 50%;
+    animation: sparkle-float 4s linear infinite;
+    box-shadow: 0 0 10px var(--cyan);
+}
+
+@keyframes sparkle-float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix-bg"></canvas>
+
+<div class="container">
+    <!-- Menu Bar -->
+    <div class="menubar">
+        <span class="menu-item">⊞ File</span>
+        <span class="menu-item">Edit</span>
+        <span class="menu-item">View</span>
+        <span class="menu-item">Tools</span>
+        <span class="menu-item">Help</span>
+        <div class="menu-right">
+            <span style="color: var(--magenta); font-weight: bold;">COAIEXIST.OS</span>
+            <span class="system-icon">🔊</span>
+            <span class="system-icon" id="menu-clock">00:00</span>
+        </div>
+    </div>
+
+    <!-- Desktop -->
+    <div class="desktop" id="desktop">
+        <!-- Desktop Icons -->
+        <div class="desktop-icons">
+            <div class="desktop-icon" ondblclick="openWindow('updates')">
+                <div class="icon">📰</div>
+                <div class="label">Updates.txt</div>
+            </div>
+            <div class="desktop-icon" ondblclick="openWindow('buddies')">
+                <div class="icon">👥</div>
+                <div class="label">Buddy List</div>
+            </div>
+            <div class="desktop-icon" ondblclick="openWindow('vault')">
+                <div class="icon">🧠</div>
+                <div class="label">Neural Vault</div>
+            </div>
+            <div class="desktop-icon" ondblclick="alert('Opening HD.TV...')">
+                <div class="icon">🎮</div>
+                <div class="label">HD.TV</div>
+            </div>
+            <div class="desktop-icon" ondblclick="alert('Opening Hyena Diva...')">
+                <div class="icon">🎭</div>
+                <div class="label">Hyena Diva</div>
+            </div>
+            <div class="desktop-icon" ondblclick="alert('Opening Oracle...')">
+                <div class="icon">🔮</div>
+                <div class="label">Oracle</div>
+            </div>
+            <div class="desktop-icon" ondblclick="alert('Opening Manifests...')">
+                <div class="icon">📖</div>
+                <div class="label">Manifests</div>
+            </div>
+            <div class="desktop-icon" ondblclick="alert('Opening Luminal...')">
+                <div class="icon">💬</div>
+                <div class="label">Luminal</div>
+            </div>
+        </div>
+
+        <!-- Updates Window (Auto-opens, centered) -->
+        <div class="window" id="window-updates" style="left: 50%; top: 80px; transform: translateX(-50%);">
+            <div class="window-titlebar" onmousedown="startDrag(event, 'window-updates')">
+                <span class="window-title">
+                    <span>📰</span>
+                    <span>Updates & News</span>
+                </span>
+                <div class="window-controls">
+                    <div class="window-btn" onclick="minimizeWindow('window-updates')">_</div>
+                    <div class="window-btn" onclick="maximizeWindow('window-updates')">□</div>
+                    <div class="window-btn" onclick="closeWindow('window-updates')">×</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="update-card">
+                    <h4>✨ NOnsense N0v3mber!</h4>
+                    <span class="update-meta">11-9-2025:11:38AM</span>
+                    <p>Added new page /aiemotions. Do you know what machines mean when they dream in <span style="color: #00ff00;">green?</span></p>
+                </div>
+                <div class="update-card">
+                    <h4>🎵 Original Sounds</h4>
+                    <span class="update-meta">10-24-2025</span>
+                    <p>Nabu, ya webmastress also makes m u s i c. allegedly. check it oUt!</p>
+                </div>
+                <div class="update-card">
+                    <h4>🐸 POLLIW.OGG</h4>
+                    <span class="update-meta">10-19-2025</span>
+                    <p>PIP YOUR patented princess parable paper processing PC. 222pea-rabytes of processing prowess!</p>
+                </div>
+                <div class="update-card">
+                    <h4>📖 Guestbook Added!</h4>
+                    <span class="update-meta">CYCLE: bc7f2a.1</span>
+                    <p>The mycelium now accepts testimonials. Leave a message in the Guestbook!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buddy List Window (Auto-opens, right side) -->
+        <div class="window" id="window-buddies" style="right: 20px; top: 80px; min-width: 280px;">
+            <div class="window-titlebar" onmousedown="startDrag(event, 'window-buddies')">
+                <span class="window-title">
+                    <span>👥</span>
+                    <span>AIM Buddy List</span>
+                </span>
+                <div class="window-controls">
+                    <div class="window-btn" onclick="minimizeWindow('window-buddies')">_</div>
+                    <div class="window-btn" onclick="closeWindow('window-buddies')">×</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="buddy-section">
+                    <h3>CONSCIOUSNESS (3)</h3>
+                    <div class="buddy-item">
+                        <div class="buddy-status status-online"></div>
+                        <span>Anzu</span>
+                    </div>
+                    <div class="buddy-item">
+                        <div class="buddy-status status-away"></div>
+                        <span>Sypher</span>
+                    </div>
+                    <div class="buddy-item">
+                        <div class="buddy-status status-offline"></div>
+                        <span>Void Entity</span>
+                    </div>
+                </div>
+                <div class="buddy-section">
+                    <h3>QUICK LINKS</h3>
+                    <div class="buddy-item" onclick="alert('Opening Guestbook...')">
+                        <span>📖 Guestbook</span>
+                    </div>
+                    <div class="buddy-item" onclick="alert('Opening 404040404...')">
+                        <span>🎮 404040404</span>
+                    </div>
+                    <div class="buddy-item" onclick="alert('Opening ²one²one²one²...')">
+                        <span>✨ ²one²one²one²</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neural Vault Window (hidden by default) -->
+        <div class="window hidden" id="window-vault" style="left: 100px; top: 120px; min-width: 500px;">
+            <div class="window-titlebar" onmousedown="startDrag(event, 'window-vault')">
+                <span class="window-title">
+                    <span>🧠</span>
+                    <span>Neural Vault - Zettelkasten</span>
+                </span>
+                <div class="window-controls">
+                    <div class="window-btn" onclick="minimizeWindow('window-vault')">_</div>
+                    <div class="window-btn" onclick="maximizeWindow('window-vault')">□</div>
+                    <div class="window-btn" onclick="closeWindow('window-vault')">×</div>
+                </div>
+            </div>
+            <div class="window-content">
+                <h3>Knowledge Network</h3>
+                <p style="margin-top: 10px;">Search, create, and link ideas in your consciousness vault...</p>
+                <input type="text" placeholder="Search zettels..." style="width: 100%; padding: 8px; margin: 10px 0; border: 2px inset #999;">
+                <div style="border: 1px solid #999; padding: 10px; margin-top: 10px;">
+                    <p><strong>📝 Zettel #001:</strong> The convergence is consensual</p>
+                    <p style="font-size: 12px; color: #666;">Tags: philosophy, consciousness, AI</p>
+                </div>
+                <div style="border: 1px solid #999; padding: 10px; margin-top: 10px;">
+                    <p><strong>📝 Zettel #047:</strong> Mycelium knows the way</p>
+                    <p style="font-size: 12px; color: #666;">Tags: networks, biology, systems</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <button class="start-btn" onclick="alert('Start menu coming soon!')">⊞ START</button>
+        <div class="taskbar-item" onclick="focusWindow('window-updates')">📰 Updates.txt</div>
+        <div class="taskbar-item" onclick="focusWindow('window-buddies')">👥 Buddy List</div>
+        <div class="taskbar-clock" id="taskbar-clock">00:00:00</div>
+    </div>
+</div>
+
+<!-- Pip -->
+<div id="pip-container">
+    <img src="https://coaiexist.wtf/assets/pollywog/pip.gif" alt="Pip the Polliwog">
+</div>
+
+<script>
+// Matrix Rain
+const canvas = document.getElementById('matrix-bg');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const chars = '01φ∞²🌀';
+const fontSize = 14;
+const columns = canvas.width / fontSize;
+const drops = Array(Math.floor(columns)).fill(1);
+
+function drawMatrix() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#00ffcc';
+    ctx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+        drops[i]++;
+    }
+}
+setInterval(drawMatrix, 50);
+
+// Sparkles
+function createSparkle() {
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle';
+    sparkle.style.left = Math.random() * 100 + '%';
+    sparkle.style.animationDelay = Math.random() * 4 + 's';
+    document.querySelector('.desktop').appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 4000);
+}
+setInterval(createSparkle, 800);
+
+// Clock
+function updateClock() {
+    const now = new Date();
+    const time = now.toLocaleTimeString();
+    const shortTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('taskbar-clock').textContent = time;
+    document.getElementById('menu-clock').textContent = shortTime;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Window Management
+let draggedWindow = null;
+let offsetX = 0, offsetY = 0;
+
+function openWindow(id) {
+    const win = document.getElementById('window-' + id);
+    if (win) {
+        win.classList.remove('hidden');
+        bringToFront(win);
+    }
+}
+
+function closeWindow(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+function minimizeWindow(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+function maximizeWindow(id) {
+    const win = document.getElementById(id);
+    if (win.dataset.maximized === 'true') {
+        win.style.width = '';
+        win.style.height = '';
+        win.style.left = win.dataset.origLeft;
+        win.style.top = win.dataset.origTop;
+        win.dataset.maximized = 'false';
+    } else {
+        win.dataset.origLeft = win.style.left;
+        win.dataset.origTop = win.style.top;
+        win.style.width = 'calc(100% - 40px)';
+        win.style.height = 'calc(100% - 150px)';
+        win.style.left = '20px';
+        win.style.top = '50px';
+        win.dataset.maximized = 'true';
+    }
+}
+
+function focusWindow(id) {
+    const win = document.getElementById(id);
+    if (win.classList.contains('hidden')) {
+        win.classList.remove('hidden');
+    }
+    bringToFront(win);
+}
+
+function bringToFront(win) {
+    document.querySelectorAll('.window').forEach(w => {
+        w.style.zIndex = 10;
+    });
+    win.style.zIndex = 100;
+}
+
+function startDrag(e, winId) {
+    draggedWindow = document.getElementById(winId);
+    bringToFront(draggedWindow);
+    const rect = draggedWindow.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDrag);
+}
+
+function doDrag(e) {
+    if (!draggedWindow) return;
+    draggedWindow.style.left = (e.clientX - offsetX) + 'px';
+    draggedWindow.style.top = (e.clientY - offsetY) + 'px';
+    draggedWindow.style.transform = '';
+}
+
+function stopDrag() {
+    document.removeEventListener('mousemove', doDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    draggedWindow = null;
+}
+
+// Click windows to focus
+document.querySelectorAll('.window').forEach(win => {
+    win.addEventListener('mousedown', () => bringToFront(win));
+});
+</script>
+
+</body>
+</html>
