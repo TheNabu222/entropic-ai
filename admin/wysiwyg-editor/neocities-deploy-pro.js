@@ -405,7 +405,7 @@ window.testConnection = async function() {
     } catch (error) {
         statusDiv.style.background = 'rgba(241, 70, 104, 0.2)';
         statusDiv.style.color = '#f14668';
-        statusDiv.innerHTML = `❌ Error: ${error.message}`;
+        statusDiv.innerHTML = `❌ Error: ${escapeHtml(error.message)}`;
 
         if (window.playSound) window.playSound('error');
     }
@@ -415,21 +415,26 @@ function displaySiteStats(info) {
     const statsSection = document.getElementById('site-stats-section');
     const statsDiv = document.getElementById('site-stats');
 
+    const safeHits = escapeHtml(formatNumberSafe(info?.hits, '0'));
+    const safeSitename = escapeHtml(info?.sitename || 'Unknown site');
+    const safeCreated = escapeHtml(formatDateSafe(info?.created_at, 'date', 'Unknown date'));
+    const safeLastUpdated = escapeHtml(formatDateSafe(info?.last_updated, 'time', 'Unknown time'));
+
     statsDiv.innerHTML = `
         <div class="stat-card">
-            <div class="stat-card-value">${info.hits.toLocaleString()}</div>
+            <div class="stat-card-value">${safeHits}</div>
             <div class="stat-card-label">Total Hits</div>
         </div>
         <div class="stat-card">
-            <div class="stat-card-value">${info.sitename}</div>
+            <div class="stat-card-value">${safeSitename}</div>
             <div class="stat-card-label">Site Name</div>
         </div>
         <div class="stat-card">
-            <div class="stat-card-value">${new Date(info.created_at).toLocaleDateString()}</div>
+            <div class="stat-card-value">${safeCreated}</div>
             <div class="stat-card-label">Created</div>
         </div>
         <div class="stat-card">
-            <div class="stat-card-value">${new Date(info.last_updated).toLocaleTimeString()}</div>
+            <div class="stat-card-value">${safeLastUpdated}</div>
             <div class="stat-card-label">Last Updated</div>
         </div>
     `;
@@ -465,7 +470,7 @@ window.refreshNeocitiesFiles = async function() {
             throw new Error(data.error_type || 'Failed to load files');
         }
     } catch (error) {
-        browser.innerHTML = `<p style="color: #f14668;">❌ Error: ${error.message}</p>`;
+        browser.innerHTML = `<p style="color: #f14668;">❌ Error: ${escapeHtml(error.message)}</p>`;
     }
 };
 
@@ -480,7 +485,7 @@ function renderFileList(files) {
     browser.innerHTML = files.map(file => {
         const icon = file.is_directory ? '📁' : getFileIcon(file.path);
         const size = file.is_directory ? '' : formatFileSize(file.size);
-        const date = new Date(file.updated_at).toLocaleString();
+        const date = escapeHtml(formatDateSafe(file.updated_at));
         const escapedPath = escapeHtml(file.path);
 
         return `
@@ -737,7 +742,7 @@ function renderDeploymentHistory() {
                         ${entry.status === 'success' ? '✅' : '❌'} ${safeFilename}
                     </div>
                     <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
-                        ${date.toLocaleString()} (${timeAgo})
+                        ${readableDate} (${timeAgo})
                         ${entry.size ? ` • ${formatFileSize(entry.size)}` : ''}
                         ${entry.error ? ` • Error: ${safeError}` : ''}
                     </div>
