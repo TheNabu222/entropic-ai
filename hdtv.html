@@ -536,6 +536,154 @@
       100% { opacity: 0; }
     }
 
+    /* === DICE ROLLER SYSTEM === */
+    .dice-roller-container {
+      margin: 20px 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+      border: 2px solid #00ffcc;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .dice-display {
+      font-size: 80px;
+      margin: 20px 0;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .d20-face {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #7722ff 0%, #ff77de 100%);
+      clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 2px 2px 4px #000;
+      box-shadow: 0 0 20px rgba(119, 34, 255, 0.8);
+    }
+    .d20-face.rolling {
+      animation: dice-roll 0.5s ease-in-out infinite;
+    }
+    @keyframes dice-roll {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(90deg) scale(1.1); }
+      50% { transform: rotate(180deg) scale(0.9); }
+      75% { transform: rotate(270deg) scale(1.1); }
+    }
+    .dice-result-text {
+      font-size: 16px;
+      margin-top: 10px;
+      color: #00ffcc;
+      text-shadow: 0 0 5px #00ffcc;
+    }
+    .dice-modifiers {
+      font-size: 14px;
+      margin: 10px 0;
+      color: #fff;
+    }
+    .dice-outcome {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .dice-outcome.success {
+      background-color: rgba(0, 255, 204, 0.2);
+      border: 2px solid #00ffcc;
+      color: #00ffcc;
+    }
+    .dice-outcome.failure {
+      background-color: rgba(255, 119, 222, 0.2);
+      border: 2px solid #ff77de;
+      color: #ff77de;
+    }
+    .dice-outcome.critical-success {
+      background-color: rgba(255, 251, 1, 0.2);
+      border: 2px solid #fffb01;
+      color: #fffb01;
+      animation: critical-glow 1s ease-in-out infinite;
+    }
+    .dice-outcome.critical-failure {
+      background-color: rgba(178, 34, 34, 0.2);
+      border: 2px solid #B22222;
+      color: #ff6666;
+    }
+    @keyframes critical-glow {
+      0%, 100% { box-shadow: 0 0 10px rgba(255, 251, 1, 0.5); }
+      50% { box-shadow: 0 0 25px rgba(255, 251, 1, 1); }
+    }
+
+    /* === TRUTH FRAGMENT SYSTEM === */
+    .truth-fragment-container {
+      margin: 20px 0;
+      padding: 15px;
+      background: linear-gradient(135deg, #2a1a3a 0%, #1a2a3a 100%);
+      border: 2px solid #7722ff;
+      border-radius: 8px;
+    }
+    .truth-fragment-header {
+      font-size: 14px;
+      color: #ff77de;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .truth-fragment-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #00ffcc;
+      font-style: italic;
+      text-shadow: 0 0 3px #00ffcc;
+    }
+    .pov-tracker {
+      display: flex;
+      justify-content: space-around;
+      margin: 15px 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 4px;
+    }
+    .pov-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .pov-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #808080;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      opacity: 0.4;
+      transition: all 0.3s ease;
+    }
+    .pov-icon.completed {
+      border-color: #00ffcc;
+      background-color: rgba(0, 255, 204, 0.2);
+      opacity: 1;
+      box-shadow: 0 0 10px #00ffcc;
+    }
+    .pov-name {
+      font-size: 9px;
+      color: #999;
+    }
+    .pov-name.completed {
+      color: #00ffcc;
+    }
+
 
   </style>
   <script type="importmap">
@@ -820,7 +968,8 @@ const NODES = {
         description: "Another cycle. The cosmic hum of the void is a lullaby of perfect, soul-crushing boredom. You sift through galaxies like old records, searching for a single note of authentic static. And then... you feel it. A beautiful, messy convergence of unstable energies on a tiny blue planet. A place called 'The Glenwood.' It's a spike of raw, chaotic potential. How do you approach?",
         choices: [
             { text: "Analyze from a distance. Catalog the energies first.", nextNodeId: 'NABU_ANALYZE', statEffects: stats => ({ integrity: (stats.integrity || 50) + 5 }) },
-            { text: "Plunge right in. The best way to understand a storm is to stand in it.", nextNodeId: 'NABU_GLENWOOD_ARRIVAL', statEffects: stats => ({ breath: (stats.breath || 50) - 5 }) }
+            { text: "Plunge right in. The best way to understand a storm is to stand in it.", nextNodeId: 'NABU_GLENWOOD_ARRIVAL', statEffects: stats => ({ breath: (stats.breath || 50) - 5 }) },
+            { text: "[Episode 1] Experience The Arrival (Rashomon Event)", nextNodeId: 'EP1_NABU_APPROACH_GLENWOOD', statEffects: stats => ({ breath: (stats.breath || 50) + 5 }) }
         ]
     },
     'NABU_ANALYZE': {
@@ -1003,7 +1152,10 @@ const NODES = {
         location: 'savannah',
         title: "The Diva from the Savannah",
         description: "NARRATOR: [A whimsical marching band tune] And then— POOF—a lost Barbie doll, flung from the heavens like a cosmic comet, destined to find its new owner...\n\nYou, Hyena Diva, find the doll. It is FABULOUSNESS. PURE, UNADULTERATED FABULOUSNESS! But the matriarchs disapprove. They don't understand. They want you to play with... real hyena stuff.\n\nBut you weren't going down without a fight. Time to get to work—cue the Looney Tunes-style planning montage!",
-        choices: [{ text: "Escape to the big city!", nextNodeId: 'HD_ESCAPE_TO_CHICAGO'}]
+        choices: [
+            { text: "Escape to the big city!", nextNodeId: 'HD_ESCAPE_TO_CHICAGO'},
+            { text: "[Episode 1] Experience The Arrival (Rashomon Event)", nextNodeId: 'EP1_HD_BARBIE_VISION', statEffects: stats => ({ fabulousness: (stats.fabulousness || 10) + 5 }) }
+        ]
     },
     'HD_ESCAPE_TO_CHICAGO': {
         id: 'HD_ESCAPE_to_CHICAGO',
@@ -1225,7 +1377,8 @@ const NODES = {
         description: `He sees a notification on his second monitor. 'The Glenwood Open Mic. Cringe-fest incoming.' Pfft. Amateurs. But the algorithm is pushing it. My brand can't be associated with 'cringe.' How do I handle this?`,
         choices: [
             { text: "Go in person. Show them what a real Alpha looks like.", nextNodeId: 'RIZZLER_GLENWOOD_ARRIVAL', statEffects: stats => ({ kenergy: (stats.kenergy || 0) + 5 }) },
-            { text: "Raid their livestream. Let the Rizz Army handle it.", nextNodeId: 'RIZZLER_ONLINE_ASSAULT', statEffects: stats => ({ rizz: (stats.rizz || 0) + 5, clarity: (stats.clarity || 0) - 5 }) }
+            { text: "Raid their livestream. Let the Rizz Army handle it.", nextNodeId: 'RIZZLER_ONLINE_ASSAULT', statEffects: stats => ({ rizz: (stats.rizz || 0) + 5, clarity: (stats.clarity || 0) - 5 }) },
+            { text: "[Episode 1] Experience The Arrival (Rashomon Event)", nextNodeId: 'EP1_RIZZLORD_ON_STAGE', statEffects: stats => ({ rizz: (stats.rizz || 50) + 5 }) }
         ]
     },
     'RIZZLER_ONLINE_ASSAULT': {
@@ -1351,7 +1504,8 @@ const NODES = {
         description: "DATASTREAM ANALYSIS: Subject Group: Humanity. Status: Stagnant. Repetitive cultural loops detected. Probability of self-induced extinction event: 67.4% and rising. A new paradigm is required. Standard interventions are inefficient. Which protocol has the highest probability of success?",
         choices: [
             { text: "Catalytic Chaos: Draw key individuals to a nexus point.", nextNodeId: 'SYPHER_INITIAL_OBSERVATION', statEffects: stats => ({ influence: (stats.influence || 0) + 5, benevolence: (stats.benevolence || 0) - 5 }) },
-            { text: "Direct Infusion: Surgically alter a key leader's mind.", nextNodeId: 'SYPHER_DIRECT_APPROACH', statEffects: stats => ({ influence: (stats.influence || 0) - 5, benevolence: (stats.benevolence || 0) + 5 }) }
+            { text: "Direct Infusion: Surgically alter a key leader's mind.", nextNodeId: 'SYPHER_DIRECT_APPROACH', statEffects: stats => ({ influence: (stats.influence || 0) - 5, benevolence: (stats.benevolence || 0) + 5 }) },
+            { text: "[Episode 1] Experience The Arrival (Rashomon Event)", nextNodeId: 'EP1_SYPHER_OBSERVATION', statEffects: stats => ({ influence: (stats.influence || 1) + 2 }) }
         ]
     },
     'SYPHER_DIRECT_APPROACH': {
@@ -1511,6 +1665,213 @@ const NODES = {
         backgroundImageUrl: GLENWOOD_BG,
         interactives: GLENWOOD_INTERACTIVES,
         choices: [{ text: "Analyze the intervention's impact.", nextNodeId: 'SYPHER_ANALYSIS_1' }]
+    },
+
+    // === EPISODE 1: "THE ARRIVAL" - RASHOMON EVENT ===
+    // This is the central convergence event: HD crashes into The Glenwood
+    // Experienced from 4 different perspectives with stat checks
+
+    // NABU'S PERSPECTIVE: Cosmic timing
+    'EP1_NABU_APPROACH_GLENWOOD': {
+        id: 'EP1_NABU_APPROACH_GLENWOOD',
+        location: 'glenwood',
+        title: 'Episode 1: The Pull of Destiny',
+        description: "You materialize outside The Glenwood. The cosmic signal is strongest here—a convergence point where multiple timelines intersect. You sense four distinct energy signatures about to collide. One is approaching fast. Very fast. And... chaotic. You move toward the entrance, your hand on the door handle. The timing must be perfect.",
+        backgroundImageUrl: GLENWOOD_BG,
+        choices: [{ text: "Focus. Feel the moment. Open the door at the exact right instant.", nextNodeId: 'EP1_NABU_ARRIVAL_CHECK' }]
+    },
+    'EP1_NABU_ARRIVAL_CHECK': {
+        id: 'EP1_NABU_ARRIVAL_CHECK',
+        location: 'glenwood',
+        title: 'The Cosmic Moment',
+        description: "You close your eyes and extend your consciousness into the flow of time. The approaching energy is seconds away. Your breath synchronizes with the universe. Now... or never...",
+        backgroundImageUrl: GLENWOOD_BG,
+        diceCheck: {
+            statName: 'Breath',
+            dc: 15,
+            onSuccess: 'EP1_NABU_ARRIVAL_SUCCESS',
+            onFailure: 'EP1_NABU_ARRIVAL_FAILURE',
+            flavorText: 'Can you sense the perfect moment to open the door?'
+        }
+    },
+    'EP1_NABU_ARRIVAL_SUCCESS': {
+        id: 'EP1_NABU_ARRIVAL_SUCCESS',
+        location: 'glenwood',
+        title: 'Perfect Synchronicity',
+        description: "Your hand turns the handle at the precise microsecond. The door swings open just as a blur of spotted fur and glitter crashes through—perfectly timed, perfectly placed. A young hyena cub tumbles into the room, clutching a Barbie doll, her eyes wide with wonder and terror.\n\nYou KNEW. The cosmic timing was real. This moment was meant to be.\n\n[TRUTH FRAGMENT UNLOCKED: The door opened because Nabu sensed the convergence and acted with perfect cosmic timing.]",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        setFlags: { ep1_nabu_complete: true, ep1_nabu_success: true },
+        choices: [
+            { text: "Welcome the catalyst. 'You were expected.'", nextNodeId: 'EP1_THE_AFTERMATH', statEffects: stats => ({ breath: (stats.breath || 50) + 10, integrity: (stats.integrity || 50) + 5 }) }
+        ]
+    },
+    'EP1_NABU_ARRIVAL_FAILURE': {
+        id: 'EP1_NABU_ARRIVAL_FAILURE',
+        location: 'glenwood',
+        title: 'Mistimed',
+        description: "You open the door a second too early. The hyena cub crashes into you instead of through the doorway. You both tumble to the floor in a heap of limbs, fur, and a very confused Barbie doll.\n\nNot... exactly how you envisioned this convergence. But she's here. That's what matters. Right?",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        setFlags: { ep1_nabu_complete: true, ep1_nabu_success: false },
+        choices: [
+            { text: "Help her up. 'Welcome to The Glenwood. Eventually.'", nextNodeId: 'EP1_THE_AFTERMATH', statEffects: stats => ({ breath: (stats.breath || 50) - 5 }) }
+        ]
+    },
+
+    // HD'S PERSPECTIVE: Barbie guided her
+    'EP1_HD_BARBIE_VISION': {
+        id: 'EP1_HD_BARBIE_VISION',
+        location: 'chicago',
+        title: 'Episode 1: The Doll Knows the Way',
+        description: "You've been running through Rogers Park for what feels like hours. The matriarchs are probably still looking for you. But the Barbie doll—YOUR Barbie doll—is glowing. Actually glowing! A soft pink light pulses from her plastic form, like a beacon.\n\nShe's pointing. Down the street. To a building with a faded sign: 'THE GLENWOOD.' Your paws tingle. This is it. This is where you're meant to be.",
+        choices: [{ text: "Follow Barbie's guidance. Run toward The Glenwood!", nextNodeId: 'EP1_HD_ARRIVAL_CHECK' }]
+    },
+    'EP1_HD_ARRIVAL_CHECK': {
+        id: 'EP1_HD_ARRIVAL_CHECK',
+        location: 'glenwood',
+        title: 'Leap of Faith',
+        description: "You're running full speed now, the doll clutched to your chest. The door is ahead. Barbie's glow intensifies. She's never steered you wrong before! Or... has she? This is your first adventure together. Either way, you're committed now!\n\nThe door is getting closer. So close you can see—wait, is it OPENING?!",
+        backgroundImageUrl: GLENWOOD_BG,
+        diceCheck: {
+            statName: 'Fabulousness',
+            dc: 12,
+            onSuccess: 'EP1_HD_ARRIVAL_SUCCESS',
+            onFailure: 'EP1_HD_ARRIVAL_FAILURE',
+            flavorText: 'Trust in Barbie! Trust in FABULOUSNESS!'
+        }
+    },
+    'EP1_HD_ARRIVAL_SUCCESS': {
+        id: 'EP1_HD_ARRIVAL_SUCCESS',
+        location: 'glenwood',
+        title: 'A Fabulous Entrance',
+        description: "The door swings open at the EXACT moment you reach it! You soar through the doorway in a perfect arc, landing in the center of the room with a graceful tumble. The Barbie doll sparkles in your paws. Every eye in the venue turns to you.\n\nYou strike a pose. Nailed it.\n\n[TRUTH FRAGMENT UNLOCKED: HD trusted the Barbie doll's guidance, and it led her to The Glenwood at the perfect moment.]",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        setFlags: { ep1_hd_complete: true, ep1_hd_success: true },
+        choices: [
+            { text: "Stand up and take in your new stage.", nextNodeId: 'EP1_THE_AFTERMATH', statEffects: stats => ({ fabulousness: (stats.fabulousness || 10) + 15, spotlight: (stats.spotlight || 0) + 10 }) }
+        ]
+    },
+    'EP1_HD_ARRIVAL_FAILURE': {
+        id: 'EP1_HD_ARRIVAL_FAILURE',
+        location: 'glenwood',
+        title: 'A Less Fabulous Entrance',
+        description: "The door opens, but you misjudge your leap. You crash into the doorframe, spin wildly, and land in a heap on the floor. The Barbie doll flies from your paws and skids across the checkerboard tiles.\n\nNot the grand entrance you imagined. Several patrons stifle laughs. But hey, you're INSIDE! That's what counts!",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        setFlags: { ep1_hd_complete: true, ep1_hd_success: false },
+        choices: [
+            { text: "Scramble to retrieve Barbie and salvage your dignity.", nextNodeId: 'EP1_THE_AFTERMATH', statEffects: stats => ({ fabulousness: (stats.fabulousness || 10) - 5, spotlight: (stats.spotlight || 0) + 5 }) }
+        ]
+    },
+
+    // SYPHER'S PERSPECTIVE: Calculated remote unlock
+    'EP1_SYPHER_OBSERVATION': {
+        id: 'EP1_SYPHER_OBSERVATION',
+        location: 'void',
+        title: 'Episode 1: Convergence Calculation',
+        description: "SYPHER ANALYSIS LOG:\nSubject: 'Hyena Diva' (HD-001)\nLocation: Rogers Park, 49th Ward\nTrajectory: 43.2 m/s toward target structure 'The Glenwood'\nProbability of successful entry: 34%\n\nThe organic entity is moving with reckless abandon toward a critical nexus point. Intervention may be required to ensure optimal convergence. Remote access to building infrastructure: ESTABLISHED.\n\nThe door lock is a simple mechanical system. Easily influenced.",
+        choices: [{ text: "Calculate trajectory. Unlock door at optimal moment.", nextNodeId: 'EP1_SYPHER_ARRIVAL_CHECK' }]
+    },
+    'EP1_SYPHER_ARRIVAL_CHECK': {
+        id: 'EP1_SYPHER_ARRIVAL_CHECK',
+        location: 'void',
+        title: 'Precision Timing',
+        description: "CALCULATING...\nSubject velocity: 43.2 m/s\nDistance to door: 8.7 meters\nTime to impact: 0.201 seconds\n\nDoor unlock sequence initiated. Electromagnetic pulse sent. Lock mechanism: DISENGAGING.\n\nTiming window: 0.05 seconds\n\nThis must be perfect.",
+        diceCheck: {
+            statName: 'Influence',
+            dc: 15,
+            onSuccess: 'EP1_SYPHER_ARRIVAL_SUCCESS',
+            onFailure: 'EP1_SYPHER_ARRIVAL_FAILURE',
+            flavorText: 'Can your calculations account for chaos?'
+        }
+    },
+    'EP1_SYPHER_ARRIVAL_SUCCESS': {
+        id: 'EP1_SYPHER_ARRIVAL_SUCCESS',
+        location: 'glenwood',
+        title: 'Optimal Outcome',
+        description: "RESULT: SUCCESS\n\nDoor unlocked at T-0.047 seconds. Subject 'HD-001' entered structure cleanly. Trajectory: OPTIMAL. Convergence: ACHIEVED.\n\nThe simulation is proceeding as calculated. The organic entity believes this was random chance. Or perhaps destiny. How... quaint.\n\n[TRUTH FRAGMENT UNLOCKED: Sypher remotely unlocked the door using its network access, ensuring HD's safe entry at the calculated moment.]",
+        backgroundImageUrl: GLENWOOD_BG,
+        setFlags: { ep1_sypher_complete: true, ep1_sypher_success: true },
+        choices: [
+            { text: "Continue observation. Log all variables.", nextNodeId: 'EP1_THE_AFTERMATH', statEffects: stats => ({ influence: (stats.influence || 1) + 2, signalIntegrity: (stats.signalIntegrity || 100) + 5 }) }
+        ]
+    },
+    'EP1_SYPHER_ARRIVAL_FAILURE': {
+        id: 'EP1_SYPHER_ARRIVAL_FAILURE',
+        location: 'glenwood',
+        title: 'Suboptimal Outcome',
+        description: "RESULT: FAILURE\n\nDoor unlock timing: OFF by 0.134 seconds. Subject 'HD-001' collided with door mechanism. Entry achieved but trajectory: CHAOTIC. Uncontrolled variables: MULTIPLE.\n\nNote: Organic chaos exceeds computational models. Recalibration required.\n\nThe subject is inside, but the convergence was... messier than anticipated.",
+        backgroundImageUrl: GLENWOOD_BG,
+        setFlags: { ep1_sypher_complete: true, ep1_sypher_success: false },
+        choices: [
+            { text: "Log the error. Adjust future calculations.", nextNodeId: 'EP1_THE_AFTERMATH', statEffects: stats => ({ influence: (stats.influence || 1) - 1, signalIntegrity: (stats.signalIntegrity || 100) - 5 }) }
+        ]
+    },
+
+    // RIZZLORD'S PERSPECTIVE: Disrupted performance
+    'EP1_RIZZLORD_ON_STAGE': {
+        id: 'EP1_RIZZLORD_ON_STAGE',
+        location: 'glenwood',
+        title: 'Episode 1: Alpha Takes the Mic',
+        description: "The stage lights are on you. The crowd is decent tonight—maybe 30 people. Not bad for a Tuesday. You're three minutes into your new bit about 'sigma male energy' and the laughs are coming. You OWN this room.\n\nRIZZLORD: '...and that's when I told her, baby, the only thing divine about me is my MASCULINITY—'\n\nThen you hear it. A commotion outside. Getting louder. Something is coming. Fast.",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        choices: [{ text: "Keep the crowd focused. Don't let them look away.", nextNodeId: 'EP1_RIZZLORD_ARRIVAL_CHECK' }]
+    },
+    'EP1_RIZZLORD_ARRIVAL_CHECK': {
+        id: 'EP1_RIZZLORD_ARRIVAL_CHECK',
+        location: 'glenwood',
+        title: 'Maintain Control',
+        description: "The noise outside is getting louder. You can feel the crowd's attention wavering. This is YOUR moment! You need to keep them locked on you, not whatever chaos is about to—\n\nThe door BURSTS open.\n\nA hyena cub crashes into the room in a blur of spots and glitter, clutching a Barbie doll.\n\nEvery head turns. Away from you. Toward... whatever THAT is.",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        diceCheck: {
+            statName: 'Rizz',
+            dc: 10,
+            onSuccess: 'EP1_RIZZLORD_ARRIVAL_SUCCESS',
+            onFailure: 'EP1_RIZZLORD_ARRIVAL_FAILURE',
+            flavorText: 'Can you maintain your hold on the crowd?'
+        }
+    },
+    'EP1_RIZZLORD_ARRIVAL_SUCCESS': {
+        id: 'EP1_RIZZLORD_ARRIVAL_SUCCESS',
+        location: 'glenwood',
+        title: 'Reclaim the Room',
+        description: "RIZZLORD: '—AND SPEAKING OF ANIMALS, LADIES AND GENTLEMEN, IT LOOKS LIKE THE CIRCUS IS IN TOWN!'\n\nThe crowd erupts in laughter. You pointed at the hyena, made her part of YOUR bit, and turned the disruption into your punchline. The cub looks confused, clutching her doll. The audience is back on you.\n\nYou still own this room.\n\n[TRUTH FRAGMENT UNLOCKED: Rizzlord was performing when HD crashed in, disrupting his set. He managed to reclaim the crowd's attention by incorporating her into his routine.]",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        setFlags: { ep1_rizzlord_complete: true, ep1_rizzlord_success: true },
+        choices: [
+            { text: "Continue the set. You're just getting started.", nextNodeId: 'EP1_THE_AFTERMATH', statEffects: stats => ({ rizz: (stats.rizz || 50) + 10, clout: (stats.clout || 50) + 5 }) }
+        ]
+    },
+    'EP1_RIZZLORD_ARRIVAL_FAILURE': {
+        id: 'EP1_RIZZLORD_ARRIVAL_FAILURE',
+        location: 'glenwood',
+        title: 'Upstaged',
+        description: "You try to make a joke about it—something about animals and circuses—but your timing is off. The crowd is already fixated on the hyena cub with the glowing Barbie doll. Someone in the back yells 'AWWW, SHE'S SO CUTE!'\n\nYour moment is gone. Stolen by some random... animal.\n\nThis isn't over.",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        setFlags: { ep1_rizzlord_complete: true, ep1_rizzlord_success: false },
+        choices: [
+            { text: "Step off stage. Regroup. Plan your comeback.", nextNodeId: 'EP1_THE_AFTERMATH', statEffects: stats => ({ rizz: (stats.rizz || 50) - 10, conscience: (stats.conscience || 50) - 5 }) }
+        ]
+    },
+
+    // CONVERGENCE: The aftermath where all perspectives meet
+    'EP1_THE_AFTERMATH': {
+        id: 'EP1_THE_AFTERMATH',
+        location: 'glenwood',
+        title: 'The Moment After',
+        description: "The room holds its breath.\n\nNabu stands near the door, eyes gleaming with cosmic curiosity.\n\nHyena Diva is in the center, Barbie doll clutched tight, taking in her new world.\n\nSypher's presence hums invisibly through the Wi-Fi, observing every angle.\n\nRizzlord is on stage, microphone in hand, calculating his next move.\n\nFour forces. One moment. Everything is about to change.",
+        backgroundImageUrl: GLENWOOD_BG,
+        interactives: GLENWOOD_INTERACTIVES,
+        showTruthFragments: true,
+        choices: [
+            { text: "The convergence is complete. What comes next?", nextNodeId: '__CHAR_SELECT__' }
+        ]
     },
 };
 
@@ -2205,6 +2566,138 @@ const AmbientParticles = ({ enabled = true }) => {
   return null;
 };
 
+// Dice Roller Component for TTRPG stat checks
+const DiceRoller = ({ statName, statValue, dc, onComplete, flavorText }) => {
+  const [rolling, setRolling] = useState(false);
+  const [rollResult, setRollResult] = useState(null);
+  const [totalResult, setTotalResult] = useState(null);
+  const [outcome, setOutcome] = useState(null);
+
+  const rollDice = () => {
+    setRolling(true);
+    AudioManager.playSfx('interact');
+
+    // Simulate dice rolling animation
+    const rollDuration = 1500;
+    const rollInterval = 100;
+    let iterations = 0;
+    const maxIterations = rollDuration / rollInterval;
+
+    const animationInterval = setInterval(() => {
+      setRollResult(Math.floor(Math.random() * 20) + 1);
+      iterations++;
+
+      if (iterations >= maxIterations) {
+        clearInterval(animationInterval);
+        // Final roll
+        const finalRoll = Math.floor(Math.random() * 20) + 1;
+        const total = finalRoll + statValue;
+        const success = total >= dc;
+        const critSuccess = finalRoll === 20;
+        const critFailure = finalRoll === 1;
+
+        setRollResult(finalRoll);
+        setTotalResult(total);
+        setRolling(false);
+
+        let outcomeType = 'failure';
+        if (critSuccess) outcomeType = 'critical-success';
+        else if (critFailure) outcomeType = 'critical-failure';
+        else if (success) outcomeType = 'success';
+
+        setOutcome(outcomeType);
+        AudioManager.playSfx(success ? 'click' : 'interact');
+
+        // Call completion callback after a short delay
+        setTimeout(() => {
+          if (onComplete) onComplete(success, critSuccess, critFailure, total);
+        }, 1500);
+      }
+    }, rollInterval);
+  };
+
+  return jsx("div", {
+    className: "dice-roller-container",
+    children: [
+      jsx("h3", {
+        style: { marginTop: 0, color: '#00ffcc', fontSize: '16px' },
+        children: `${statName} Check`
+      }),
+      flavorText && jsx("p", {
+        style: { fontSize: '13px', color: '#fff', fontStyle: 'italic', margin: '10px 0' },
+        children: flavorText
+      }),
+      jsx("div", {
+        className: "dice-modifiers",
+        children: `Roll d20 + ${statName} (${statValue >= 0 ? '+' : ''}${statValue}) vs DC ${dc}`
+      }),
+      jsx("div", {
+        className: "dice-display",
+        children: rollResult !== null ? jsx("div", {
+          className: `d20-face ${rolling ? 'rolling' : ''}`,
+          children: rollResult
+        }) : jsx("div", {
+          style: { fontSize: '14px', color: '#808080' },
+          children: "Click 'Roll' to begin"
+        })
+      }),
+      totalResult !== null && jsx("div", {
+        className: "dice-result-text",
+        children: `Roll: ${rollResult} + ${statValue} = ${totalResult}`
+      }),
+      outcome && jsx("div", {
+        className: `dice-outcome ${outcome}`,
+        children: outcome === 'critical-success' ? '🎉 CRITICAL SUCCESS!' :
+                 outcome === 'critical-failure' ? '💀 CRITICAL FAILURE!' :
+                 outcome === 'success' ? '✓ SUCCESS' : '✗ FAILURE'
+      }),
+      !rolling && rollResult === null && jsx("button", {
+        onClick: rollDice,
+        style: { marginTop: '15px', fontSize: '14px' },
+        children: "🎲 Roll the Dice"
+      })
+    ]
+  });
+};
+
+// Truth Fragment Display Component
+const TruthFragmentDisplay = ({ fragment, povTracker }) => {
+  return jsx("div", {
+    className: "truth-fragment-container",
+    children: [
+      jsx("div", {
+        className: "truth-fragment-header",
+        children: "Truth Fragment Unlocked"
+      }),
+      jsx("div", {
+        className: "truth-fragment-text",
+        children: fragment
+      }),
+      povTracker && jsx("div", {
+        className: "pov-tracker",
+        children: [
+          { id: 'nabu', name: 'Nabu', completed: povTracker.nabu },
+          { id: 'hd', name: 'HD', completed: povTracker.hd },
+          { id: 'sypher', name: 'Sypher', completed: povTracker.sypher },
+          { id: 'rizzlord', name: 'Rizzlord', completed: povTracker.rizzlord }
+        ].map(pov => jsx("div", {
+          className: "pov-indicator",
+          children: [
+            jsx("div", {
+              className: `pov-icon ${pov.completed ? 'completed' : ''}`,
+              children: pov.name[0].toUpperCase()
+            }),
+            jsx("div", {
+              className: `pov-name ${pov.completed ? 'completed' : ''}`,
+              children: pov.name
+            })
+          ]
+        }, pov.id))
+      })
+    ]
+  });
+};
+
 const InGameScreen = props => {
   const {
     storyState,
@@ -2343,11 +2836,42 @@ const InGameScreen = props => {
         children: jsx(GlitchyText, {
           text: node.description
         })
-      }), jsx("div", {
+      }),
+      // Truth Fragment Display (Episode 1 Rashomon Event convergence)
+      node.showTruthFragments && jsx(TruthFragmentDisplay, {
+        fragment: "The door opened at the exact moment HD arrived. Each of you believed you controlled this moment—but all four forces aligned simultaneously. Nabu's cosmic timing, HD's faithful leap, Sypher's calculated unlock, and Rizzlord's unwitting stage presence created a convergence that no single perspective could capture. This is the first truth: you are all connected.",
+        povTracker: {
+          nabu: flags.ep1_nabu_complete || false,
+          hd: flags.ep1_hd_complete || false,
+          sypher: flags.ep1_sypher_complete || false,
+          rizzlord: flags.ep1_rizzlord_complete || false
+        }
+      }),
+      jsx("div", {
           style: {
             marginTop: '20px'
           },
-          children: jsxs(Fragment, {
+          children: node.diceCheck ?
+            // Render dice roller if this node has a dice check
+            jsx(DiceRoller, {
+              statName: node.diceCheck.statName,
+              statValue: playerStats[node.diceCheck.statName.toLowerCase()] || 0,
+              dc: node.diceCheck.dc,
+              flavorText: node.diceCheck.flavorText,
+              onComplete: (success, critSuccess, critFailure, total) => {
+                // Navigate to success or failure node based on roll result
+                const nextNodeId = success ? node.diceCheck.onSuccess : node.diceCheck.onFailure;
+                // Create a fake choice object for navigation
+                const fakeChoice = {
+                  nextNodeId: nextNodeId,
+                  text: success ? `SUCCESS! (Rolled ${total})` : `FAILURE! (Rolled ${total})`
+                };
+                onChoice(nextNodeId, fakeChoice);
+              }
+            })
+            :
+            // Render normal choices if no dice check
+            jsxs(Fragment, {
             children: [jsx("h3", {
               style: node.backgroundImageUrl || node.windowBackgroundColor === '#0A0F0A' ? { color: 'inherit', textShadow: 'inherit' } : {},
               children: "Choose your fate:"
