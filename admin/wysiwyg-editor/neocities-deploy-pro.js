@@ -36,6 +36,27 @@ function escapeHtml(str = '') {
     return htmlEscaper.innerHTML;
 }
 
+function formatNumberSafe(value, fallback = '0') {
+    const num = Number(value);
+    return Number.isFinite(num) ? num.toLocaleString() : fallback;
+}
+
+function formatDateSafe(value, type = 'datetime', fallback = 'Unknown') {
+    if (!value) return fallback;
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return fallback;
+
+    switch (type) {
+        case 'date':
+            return date.toLocaleDateString();
+        case 'time':
+            return date.toLocaleTimeString();
+        default:
+            return date.toLocaleString();
+    }
+}
+
 // ============================================
 // INITIALIZATION
 // ============================================
@@ -387,6 +408,12 @@ window.testConnection = async function() {
             statusDiv.style.background = 'rgba(72, 199, 116, 0.2)';
             statusDiv.style.color = '#48c774';
             const reminder = testingUnsavedKey ? '<br><small>Tip: Click 💾 Save to use this key for deploys.</small>' : '';
+
+            const safeSitename = escapeHtml(data.info?.sitename || 'Unknown site');
+            const safeHits = escapeHtml(formatNumberSafe(data.info?.hits, '0'));
+            const safeLastUpdated = escapeHtml(formatDateSafe(data.info?.last_updated));
+
+            statusDiv.innerHTML = `✅ Connected to <strong>${safeSitename}</strong> | Hits: ${safeHits} | Last updated: ${safeLastUpdated}${reminder}`;
             statusDiv.innerHTML = `✅ Connected to <strong>${data.info.sitename}</strong> | Hits: ${data.info.hits.toLocaleString()} | Last updated: ${new Date(data.info.last_updated).toLocaleString()}${reminder}`;
 
             // Load site stats
@@ -730,6 +757,7 @@ function renderDeploymentHistory() {
     historyDiv.innerHTML = neocitiesConfig.deploymentHistory.map(entry => {
         const date = new Date(entry.timestamp);
         const timeAgo = getTimeAgo(date);
+        const readableDate = escapeHtml(formatDateSafe(entry.timestamp));
         const filenameValue = entry.filename || 'index.html';
         const safeFilename = escapeHtml(filenameValue);
         const safeError = entry.error ? escapeHtml(entry.error) : '';
