@@ -2027,6 +2027,24 @@ setInterval(draw, 33);`
             document.getElementById('js-snippet-grid').innerHTML = Object.keys(jsSnippets).map(name => createCard(name, 'js')).join('');
             document.querySelectorAll('[data-snippet-name]').forEach(card => card.addEventListener('click', (e) => { const { snippetType, snippetName } = e.currentTarget.dataset; const editor = document.getElementById('js-editor'); const snippets = jsSnippets; editor.value += (editor.value ? '\n\n' : '') + `/* ${snippetName} */\n` + snippets[snippetName]; playSound('pop'); }));
         }
+
+        // ============================================
+        // EXPOSE FUNCTIONS TO WINDOW FOR OTHER MODULES
+        // ============================================
+        // Other JS files (page-loader-and-components.js, neocities-deploy-pro.js, wysiwyg-enhancements.js)
+        // need to access these functions via window.functionName()
+        window.getCanvasDoc = getCanvasDoc;
+        window.initCanvas = initCanvas;
+        window.addElementHTML = addElementHTML;
+        window.saveState = saveState;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.updateStatus = updateStatus;
+        window.playSound = playSound;
+        window.showStamp = showStamp;
+        window.applyCustomCSS = applyCustomCSS;
+        window.applyCustomJS = applyCustomJS;
+        window.elementTemplates = elementTemplates;
     </script>
     <!-- EMBEDDED PAGE SOURCES - 164 HTML files for instant loading -->
     <script src="page-sources-embedded.js"></script>
