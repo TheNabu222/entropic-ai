@@ -12,9 +12,14 @@ CREATE TABLE IF NOT EXISTS personal_updates (
     media_url TEXT,
     published BOOLEAN DEFAULT false,
     featured BOOLEAN DEFAULT false,
+    color_scheme VARCHAR(50) DEFAULT 'default',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add color_scheme column if it doesn't exist (for existing tables)
+ALTER TABLE personal_updates
+ADD COLUMN IF NOT EXISTS color_scheme VARCHAR(50) DEFAULT 'default';
 
 -- Create index for efficient queries
 CREATE INDEX idx_personal_updates_created_at ON personal_updates(created_at DESC);
