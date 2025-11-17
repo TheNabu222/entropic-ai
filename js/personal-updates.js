@@ -103,8 +103,9 @@ class PersonalUpdates {
 
         const updatesHtml = this.updates.map((update, index) => {
             const animationDelay = this.options.animateIn ? `style="animation-delay: ${index * 0.1}s;"` : '';
+            const colorScheme = update.color_scheme || 'default';
             return `
-                <div class="personal-update-card ${this.options.animateIn ? 'fade-in' : ''}" ${animationDelay}>
+                <div class="personal-update-card color-${colorScheme} ${this.options.animateIn ? 'fade-in' : ''}" ${animationDelay}>
                     ${update.featured ? '<div class="featured-badge">⭐ Featured ⭐</div>' : ''}
 
                     ${update.title ? `<h3 class="update-title">${this.escapeHtml(update.title)}</h3>` : ''}

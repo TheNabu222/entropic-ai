@@ -547,21 +547,6 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="colorScheme">Card Color Scheme</label>
-                    <select id="colorScheme">
-                        <option value="default">✨ Default (Cyan/Dark)</option>
-                        <option value="magenta">💗 Magenta Dream</option>
-                        <option value="purple">💜 Purple Haze</option>
-                        <option value="cyber">🌐 Cyber Glow</option>
-                        <option value="sunset">🌅 Sunset Vibes</option>
-                        <option value="forest">🌲 Forest Night</option>
-                        <option value="neon">⚡ Neon Pulse</option>
-                        <option value="galaxy">🌌 Galaxy Drift</option>
-                        <option value="fire">🔥 Fire & Ice</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
                     <div class="toggle-group">
                         <div class="toggle-item">
                             <input type="checkbox" id="published" checked>
@@ -772,11 +757,10 @@ class PersonalUpdatesAdmin {
             const category = document.getElementById('category').value;
             const content = this.quill.root.innerHTML;
             const mediaType = document.getElementById('mediaType').value;
-            const colorScheme = document.getElementById('colorScheme').value;
             const published = document.getElementById('published').checked;
             const featured = document.getElementById('featured').checked;
 
-            console.log('Form data:', { title, category, mediaType, colorScheme, published, featured });
+            console.log('Form data:', { title, category, mediaType, published, featured });
 
             if (!category) {
                 this.showStatus('Please select a category', 'error');
@@ -805,7 +789,6 @@ class PersonalUpdatesAdmin {
                 category,
                 media_type: mediaType,
                 media_url: mediaUrl,
-                color_scheme: colorScheme,
                 published,
                 featured
             };
@@ -964,7 +947,6 @@ class PersonalUpdatesAdmin {
             document.getElementById('category').value = data.category;
             this.quill.root.innerHTML = data.content;
             document.getElementById('mediaType').value = data.media_type || 'none';
-            document.getElementById('colorScheme').value = data.color_scheme || 'default';
             document.getElementById('published').checked = data.published;
             document.getElementById('featured').checked = data.featured;
 
@@ -1108,7 +1090,6 @@ class PersonalUpdatesAdmin {
         document.getElementById('category').value = '';
         this.quill.setText('');
         document.getElementById('mediaType').value = 'none';
-        document.getElementById('colorScheme').value = 'default';
         document.getElementById('youtubeUrl').value = '';
         document.getElementById('soundcloudUrl').value = '';
         document.getElementById('imageUrl').value = '';
