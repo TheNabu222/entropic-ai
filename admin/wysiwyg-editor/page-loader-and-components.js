@@ -9,6 +9,20 @@
 // PAGE_SOURCES dynamically populated from PAGE_SOURCE_HTML after it loads
 let PAGE_SOURCES = [];
 
+const populatePageSourcesFromEmbedded = () => {
+    if (!window.PAGE_SOURCE_HTML) {
+        return false;
+    }
+    const embeddedPages = Object.keys(window.PAGE_SOURCE_HTML);
+    if (!embeddedPages.length) {
+        return false;
+    }
+    PAGE_SOURCES = embeddedPages.sort();
+    return true;
+};
+
+const PAGE_SOURCES_WAIT_LIMIT = 8000;
+
 // Rendering helpers to keep the page loader responsive
 const PAGE_LOADER_BATCH_SIZE = 24;
 const pageLoaderRenderState = {
@@ -40,11 +54,10 @@ let componentLibrary = [];
 
 window.addEventListener('DOMContentLoaded', () => {
     // Populate PAGE_SOURCES from embedded HTML
-    if (window.PAGE_SOURCE_HTML) {
-        PAGE_SOURCES = Object.keys(window.PAGE_SOURCE_HTML).sort();
+    if (populatePageSourcesFromEmbedded()) {
         console.log(`📦 Loaded ${PAGE_SOURCES.length} pages from embedded sources`);
     } else {
-        console.error('❌ PAGE_SOURCE_HTML not loaded! Make sure page-sources-embedded.js is included.');
+        console.warn('⏳ PAGE_SOURCE_HTML not ready yet. Waiting for embedded sources to finish loading...');
     }
 
     // Load saved components from localStorage
@@ -218,6 +231,27 @@ function initializePageLoaderModal(modal) {
     const grid = modal.querySelector('#page-grid');
     const emptyState = modal.querySelector('#page-loader-empty');
 
+    if (emptyState && !emptyState.dataset.defaultMarkup) {
+        emptyState.dataset.defaultMarkup = emptyState.innerHTML;
+    }
+
+    const setEmptyStateMessage = (icon, message) => {
+        if (!emptyState) return;
+        emptyState.innerHTML = `
+            <div style="font-size: 40px; margin-bottom: 10px;">${icon}</div>
+            <p>${message}</p>
+        `;
+        emptyState.hidden = false;
+        if (grid) {
+            grid.hidden = true;
+        }
+    };
+
+    const resetEmptyStateMessage = () => {
+        if (!emptyState || !emptyState.dataset.defaultMarkup) return;
+        emptyState.innerHTML = emptyState.dataset.defaultMarkup;
+    };
+
     const applyFilter = () => {
         const query = (searchInput?.value || '').trim().toLowerCase();
         const filteredPages = query
@@ -237,6 +271,85 @@ function initializePageLoaderModal(modal) {
     if (grid) {
         grid.addEventListener('click', handlePageGridClick);
     }
+
+    const startRendering = () => {
+        resetEmptyStateMessage();
+        applyFilter();
+    };
+
+    const waitForSourcesAndRender = () => {
+        if (populatePageSourcesFromEmbedded()) {
+            startRendering();
+            return;
+        }
+
+        if (countLabel) {
+            countLabel.textContent = 'Loading sources...';
+        }
+        if (grid) {
+            grid.hidden = true;
+        }
+        setEmptyStateMessage('⏳', 'Preparing the embedded source list...');
+
+        const startTime = performance.now();
+        const poll = () => {
+            if (!document.body.contains(modal)) {
+                return;
+            }
+            if (populatePageSourcesFromEmbedded()) {
+                startRendering();
+                return;
+            }
+            if (performance.now() - startTime > PAGE_SOURCES_WAIT_LIMIT) {
+                if (countLabel) {
+                    countLabel.textContent = 'Sources still loading...';
+                }
+                setEmptyStateMessage('⚠️', 'Still waiting for embedded sources to finish loading. Please try again in a moment.');
+                return;
+            }
+            scheduleFrame(poll);
+        };
+
+        scheduleFrame(poll);
+    };
+
+    waitForSourcesAndRender();
+}
+
+function updatePageLoaderCount(target, count) {
+    if (!target) return;
+    const label = count === 1 ? 'page' : 'pages';
+    target.textContent = `${count} ${label}`;
+}
+
+function renderPageLoaderGrid(grid, emptyState, pages) {
+    if (!grid || !emptyState) return;
+    cancelPendingPageLoaderRender();
+    grid.innerHTML = '';
+
+    if (!pages.length) {
+        grid.hidden = true;
+        emptyState.hidden = false;
+        return;
+    }
+
+    grid.hidden = false;
+    emptyState.hidden = true;
+
+    let index = 0;
+    const renderChunk = () => {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < PAGE_LOADER_BATCH_SIZE && index < pages.length; i += 1, index += 1) {
+            fragment.appendChild(createPageCard(pages[index]));
+        }
+        grid.appendChild(fragment);
+
+        if (index < pages.length) {
+            pageLoaderRenderState.handle = scheduleFrame(renderChunk);
+        } else {
+            pageLoaderRenderState.handle = null;
+        }
+    };
 
     applyFilter();
 }
