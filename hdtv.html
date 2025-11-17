@@ -2881,8 +2881,23 @@ if (container) {
   console.error('Failed to find the root element');
 }
   </script>
-   <iframe src="/nav.html" 
+   <iframe id="nav-iframe" src="/nav.html"
         style="position:fixed;bottom:0;left:0;width:100%;height:50px;border:none;z-index:9999;">
 </iframe>
+
+<script>
+// Listen for nav menu open/close events and resize iframe
+window.addEventListener('message', function(e) {
+  var navFrame = document.getElementById('nav-iframe');
+  if (!navFrame) return;
+
+  if (e.data.type === 'navMenuOpen') {
+    navFrame.style.height = e.data.height + 'px';
+    navFrame.style.transition = 'height 0.2s ease';
+  } else if (e.data.type === 'navMenuClose') {
+    navFrame.style.height = '50px';
+  }
+});
+</script>
 </body>
 </html>
