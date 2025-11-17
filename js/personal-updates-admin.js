@@ -5,7 +5,14 @@ class PersonalUpdatesAdmin {
     constructor() {
         this.supabaseUrl = 'https://aqxrogaltuwtlparwdkq.supabase.co';
         this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxeHJvZ2FsdHV3dGxwYXJ3ZGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2MTcxNzgsImV4cCI6MjA0NzE5MzE3OH0.p7jFJp8MUzCx_-u1P6VkWs-h_dKSwQvLF0R5lOdpGVU';
-        this.supabase = supabase.createClient(this.supabaseUrl, this.supabaseKey);
+
+        // Check if supabase is available
+        if (typeof window.supabase === 'undefined') {
+            console.error('Supabase library not loaded!');
+            return;
+        }
+
+        this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
 
         this.quill = null;
         this.editingId = null;
@@ -15,22 +22,38 @@ class PersonalUpdatesAdmin {
     }
 
     async init() {
+        console.log('Initializing Personal Updates Admin...');
+
+        // Check if Quill is available
+        if (typeof Quill === 'undefined') {
+            console.error('Quill editor library not loaded!');
+            alert('Error: Rich text editor not loaded. Please refresh the page.');
+            return;
+        }
+
         // Initialize Quill editor
-        this.quill = new Quill('#editor', {
-            theme: 'snow',
-            placeholder: 'Share your thoughts, art, poetry, or updates with the void...',
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    ['blockquote', 'code-block'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'color': [] }, { 'background': [] }],
-                    ['link'],
-                    ['clean']
-                ]
-            }
-        });
+        try {
+            this.quill = new Quill('#editor', {
+                theme: 'snow',
+                placeholder: 'Share your thoughts, art, poetry, or updates with the void...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+            console.log('Quill editor initialized successfully');
+        } catch (error) {
+            console.error('Error initializing Quill:', error);
+            alert('Error initializing editor: ' + error.message);
+            return;
+        }
 
         // Set up event listeners
         this.setupEventListeners();
@@ -46,11 +69,20 @@ class PersonalUpdatesAdmin {
     }
 
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+
         // Form submission
-        document.getElementById('updateForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleSubmit();
-        });
+        const form = document.getElementById('updateForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Form submitted');
+                this.handleSubmit();
+            });
+            console.log('Form submit listener added');
+        } else {
+            console.error('Update form not found!');
+        }
 
         // Media type selector
         document.getElementById('mediaType').addEventListener('change', (e) => {
@@ -63,19 +95,33 @@ class PersonalUpdatesAdmin {
         });
 
         // Preview button
-        document.getElementById('previewBtn').addEventListener('click', () => {
-            this.showPreview();
-        });
+        const previewBtn = document.getElementById('previewBtn');
+        if (previewBtn) {
+            previewBtn.addEventListener('click', () => {
+                console.log('Preview button clicked');
+                this.showPreview();
+            });
+        }
 
         // Clear button
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            this.clearForm();
-        });
+        const clearBtn = document.getElementById('clearBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                console.log('Clear button clicked');
+                this.clearForm();
+            });
+        }
 
         // Close preview
-        document.getElementById('closePreview').addEventListener('click', () => {
-            document.getElementById('previewModal').classList.remove('active');
-        });
+        const closePreview = document.getElementById('closePreview');
+        if (closePreview) {
+            closePreview.addEventListener('click', () => {
+                console.log('Close preview clicked');
+                document.getElementById('previewModal').classList.remove('active');
+            });
+        }
+
+        console.log('All event listeners set up successfully');
     }
 
     handleMediaTypeChange(type) {
@@ -144,6 +190,7 @@ class PersonalUpdatesAdmin {
     }
 
     async handleSubmit() {
+        console.log('handleSubmit called');
         try {
             // Get form values
             const title = document.getElementById('title').value.trim();
@@ -152,6 +199,8 @@ class PersonalUpdatesAdmin {
             const mediaType = document.getElementById('mediaType').value;
             const published = document.getElementById('published').checked;
             const featured = document.getElementById('featured').checked;
+
+            console.log('Form data:', { title, category, mediaType, published, featured });
 
             // Validate
             if (!category) {
@@ -539,5 +588,12 @@ class PersonalUpdatesAdmin {
 // Initialize admin interface
 let admin;
 document.addEventListener('DOMContentLoaded', () => {
-    admin = new PersonalUpdatesAdmin();
+    console.log('DOM loaded, initializing admin...');
+    try {
+        admin = new PersonalUpdatesAdmin();
+        console.log('Admin instance created');
+    } catch (error) {
+        console.error('Error creating admin instance:', error);
+        alert('Error initializing admin interface: ' + error.message);
+    }
 });
