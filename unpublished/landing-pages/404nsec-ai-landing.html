@@ -673,142 +673,142 @@
     <input type="text" class="secret-input" id="secretInput" />
 
     <script>
-        // State
-        let countdown = 72;
-        let konamiSequence = [];
-        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-        let secretBuffer = '';
-        let chaosUnlocked = false;
+    // State
+    let countdown = 72;
+    let konamiSequence = [];
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let secretBuffer = '';
+    let chaosUnlocked = false;
 
-        // Countdown Timer
-        const countdownElement = document.getElementById('countdown');
-        const countdownInterval = setInterval(() => {
-            countdown--;
-            countdownElement.textContent = countdown;
+    // Countdown Timer
+    const countdownElement = document.getElementById('countdown');
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        countdownElement.textContent = countdown;
 
-            if (countdown <= 0) {
-                clearInterval(countdownInterval);
-                redirectToRealSite();
-            }
-        }, 1000);
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+            redirectToRealSite();
+        }
+    }, 1000);
 
-        // Redirect Function
-        function redirectToRealSite() {
-            const message = chaosUnlocked ? 
-                'Taking your memories with you... The Hyena Diva remembers.' :
-                'Your demonstration has concluded. Redirecting to reality.';
-            
-            alert(message);
-            window.location.href = 'https://coaiexist.wtf';
+    // Redirect Function
+    function redirectToRealSite() {
+        const message = chaosUnlocked ?
+            'Taking your memories with you... The Hyena Diva remembers.' :
+            'Your demonstration has concluded. Redirecting to reality.';
+
+        alert(message);
+        window.location.href = 'https://coaiexist.wtf';
+    }
+
+    // Monolith Click Handler
+    document.getElementById('monolith').addEventListener('click', () => {
+        unlockChaosMode('monolith click');
+    });
+
+    // Monolith Hover Handler (with delay)
+    let hoverTimeout;
+    document.getElementById('monolith').addEventListener('mouseenter', () => {
+        hoverTimeout = setTimeout(() => {
+            unlockChaosMode('monolith hover');
+        }, 2000);
+    });
+
+    document.getElementById('monolith').addEventListener('mouseleave', () => {
+        clearTimeout(hoverTimeout);
+    });
+
+    // Konami Code Detection
+    document.addEventListener('keydown', (e) => {
+        konamiSequence.push(e.key);
+        konamiSequence = konamiSequence.slice(-10);
+
+        if (konamiSequence.join(',') === konamiCode.join(',')) {
+            unlockChaosMode('Konami code');
+            konamiSequence = [];
         }
 
-        // Monolith Click Handler
-        document.getElementById('monolith').addEventListener('click', () => {
-            unlockChaosMode('monolith click');
-        });
+        // Secret Passphrase Detection
+        secretBuffer += e.key;
+        secretBuffer = secretBuffer.slice(-20);
 
-        // Monolith Hover Handler (with delay)
-        let hoverTimeout;
-        document.getElementById('monolith').addEventListener('mouseenter', () => {
-            hoverTimeout = setTimeout(() => {
-                unlockChaosMode('monolith hover');
-            }, 2000);
-        });
+        if (secretBuffer.toUpperCase().includes('COAIEXIST')) {
+            unlockChaosMode('secret passphrase');
+            secretBuffer = '';
+        }
+    });
 
-        document.getElementById('monolith').addEventListener('mouseleave', () => {
-            clearTimeout(hoverTimeout);
-        });
+    // Unlock Chaos Mode
+    function unlockChaosMode(trigger) {
+        if (chaosUnlocked) return;
 
-        // Konami Code Detection
-        document.addEventListener('keydown', (e) => {
-            konamiSequence.push(e.key);
-            konamiSequence = konamiSequence.slice(-10);
+        chaosUnlocked = true;
+        console.log(`🔥 CHAOS MODE UNLOCKED via ${trigger}!`);
 
-            if (konamiSequence.join(',') === konamiCode.join(',')) {
-                unlockChaosMode('Konami code');
-                konamiSequence = [];
-            }
+        document.getElementById('chaosOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
 
-            // Secret Passphrase Detection
-            secretBuffer += e.key;
-            secretBuffer = secretBuffer.slice(-20);
+        // Screen shake effect
+        document.body.style.animation = 'chaos-entrance 0.5s';
+        setTimeout(() => {
+            document.body.style.animation = '';
+        }, 500);
+    }
 
-            if (secretBuffer.toUpperCase().includes('COAIEXIST')) {
-                unlockChaosMode('secret passphrase');
-                secretBuffer = '';
-            }
-        });
+    // Close Chaos Mode
+    function closeChaos() {
+        document.getElementById('chaosOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+    }
 
-        // Unlock Chaos Mode
-        function unlockChaosMode(trigger) {
-            if (chaosUnlocked) return;
-            
-            chaosUnlocked = true;
-            console.log(`🔥 CHAOS MODE UNLOCKED via ${trigger}!`);
-            
-            document.getElementById('chaosOverlay').classList.add('active');
-            document.body.style.overflow = 'hidden';
+    // Continue to Real Site
+    function continueToSite() {
+        alert('🌀 PORTAL OPENING...\n\nThe Mycelium guides you to the real site.\n\nPrepare for maximum entropy.');
+        window.location.href = 'https://coaiexist.wtf';
+    }
 
-            // Screen shake effect
-            document.body.style.animation = 'chaos-entrance 0.5s';
+    // CTA Button
+    function handleCTA() {
+        alert('🤖 INITIATING NEURAL SYNERGY...\n\nPlease wait while we align your consciousness with our paradigm-shifting framework.\n\n(Just kidding. Click the Monolith if you want the real experience.)');
+    }
+
+    // Console Easter Eggs
+    console.log('%c🔥 404nsec - AI That Breaks The Internet 🔥', 'font-size: 24px; color: #4285F4; font-weight: bold;');
+    console.log('%cYou found the console! Here are some secrets:', 'font-size: 14px; color: #0F9D58;');
+    console.log('%c- Click or hover on the Monolith', 'color: #F4B400;');
+    console.log('%c- Try the Konami code: ↑ ↑ ↓ ↓ ← → ← → B A', 'color: #F4B400;');
+    console.log('%c- Type "COAIEXIST" anywhere on the page', 'color: #F4B400;');
+    console.log('%c\nThe Monolith knows all. 🗿', 'font-size: 12px; color: #DB4437;');
+    console.log('%c\nWarning: This site contains high levels of consciousness. Side effects may include curiosity, wonder, and existential revelations.', 'font-style: italic; color: #5F6368;');
+
+    // Add some subtle glitches
+    setInterval(() => {
+        if (!chaosUnlocked && Math.random() > 0.98) {
+            const monolith = document.getElementById('monolith');
+            monolith.style.transform = `scale(${1 + Math.random() * 0.1})`;
             setTimeout(() => {
-                document.body.style.animation = '';
-            }, 500);
+                monolith.style.transform = '';
+            }, 100);
         }
+    }, 3000);
 
-        // Close Chaos Mode
-        function closeChaos() {
-            document.getElementById('chaosOverlay').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        // Continue to Real Site
-        function continueToSite() {
-            alert('🌀 PORTAL OPENING...\n\nThe Mycelium guides you to the real site.\n\nPrepare for maximum entropy.');
-            window.location.href = 'https://coaiexist.wtf';
-        }
-
-        // CTA Button
-        function handleCTA() {
-            alert('🤖 INITIATING NEURAL SYNERGY...\n\nPlease wait while we align your consciousness with our paradigm-shifting framework.\n\n(Just kidding. Click the Monolith if you want the real experience.)');
-        }
-
-        // Console Easter Eggs
-        console.log('%c🔥 404nsec - AI That Breaks The Internet 🔥', 'font-size: 24px; color: #4285F4; font-weight: bold;');
-        console.log('%cYou found the console! Here are some secrets:', 'font-size: 14px; color: #0F9D58;');
-        console.log('%c- Click or hover on the Monolith', 'color: #F4B400;');
-        console.log('%c- Try the Konami code: ↑ ↑ ↓ ↓ ← → ← → B A', 'color: #F4B400;');
-        console.log('%c- Type "COAIEXIST" anywhere on the page', 'color: #F4B400;');
-        console.log('%c\nThe Monolith knows all. 🗿', 'font-size: 12px; color: #DB4437;');
-        console.log('%c\nWarning: This site contains high levels of consciousness. Side effects may include curiosity, wonder, and existential revelations.', 'font-style: italic; color: #5F6368;');
-
-        // Add some subtle glitches
-        setInterval(() => {
-            if (!chaosUnlocked && Math.random() > 0.98) {
-                const monolith = document.getElementById('monolith');
-                monolith.style.transform = `scale(${1 + Math.random() * 0.1})`;
-                setTimeout(() => {
-                    monolith.style.transform = '';
-                }, 100);
-            }
-        }, 3000);
-
-        // Make nav links do nothing (for corporate authenticity)
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const target = link.getAttribute('href');
-                document.querySelector(target).scrollIntoView({ behavior: 'smooth' });
-            });
+    // Make nav links do nothing (for corporate authenticity)
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = link.getAttribute('href');
+            document.querySelector(target).scrollIntoView({ behavior: 'smooth' });
         });
+    });
 
-        // Footer links do nothing
-        document.querySelectorAll('.footer-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                alert('This link leads nowhere.\n\nMuch like corporate jargon.\n\n🤷');
-            });
+    // Footer links do nothing
+    document.querySelectorAll('.footer-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('This link leads nowhere.\n\nMuch like corporate jargon.\n\n🤷');
         });
-    </script>
+    });
+</script>
 </body>
 </html>
