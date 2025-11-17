@@ -1,0 +1,137 @@
+<style>
+.hdtv-taskbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50px;
+  z-index: 9999;
+  background: linear-gradient(to bottom, #FFD700 0%, #B8860B 100%);
+  border-top: 3px solid #FF69B4;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 11px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.hdtv-taskbar-button {
+  background: linear-gradient(to bottom, #FF69B4 0%, #C71585 100%);
+  border: 2px outset #FFB6C1;
+  padding: 6px 14px;
+  margin: 0;
+  cursor: pointer;
+  color: #000;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: bold;
+  transition: all 0.1s;
+  white-space: nowrap;
+  text-shadow: 0 0 3px #FFD700;
+  flex-shrink: 0;
+}
+
+.hdtv-taskbar-button:hover {
+  background: linear-gradient(to bottom, #FFD700 0%, #FFA500 100%);
+  border-color: #FF69B4;
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(255, 105, 180, 0.8);
+}
+
+.hdtv-taskbar-button:active {
+  border-style: inset;
+  background: #C71585;
+  transform: translateY(0);
+}
+
+.hdtv-start {
+  background: linear-gradient(to right, #FF69B4, #FFD700);
+  color: #000;
+  font-weight: bold;
+  padding: 6px 16px;
+  margin-right: 12px;
+  border: 2px outset #fff;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+}
+
+.hdtv-taskbar-separator {
+  width: 2px;
+  height: 35px;
+  background: #8B4513;
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+.hdtv-taskbar-button.active {
+  outline: 2px solid #000;
+  box-shadow: inset 0 0 0 2px #fff;
+  background: #FFD700;
+}
+
+body {
+  padding-bottom: 60px;
+}
+
+@media (max-width: 768px) {
+  .hdtv-taskbar {
+    font-size: 9px;
+    height: 45px;
+    gap: 5px;
+  }
+
+  .hdtv-taskbar-button {
+    padding: 5px 10px;
+  }
+
+  .hdtv-start {
+    padding: 5px 12px;
+  }
+}
+</style>
+
+<nav class="hdtv-taskbar">
+  <a href="https://coaiexist.wtf/hd_tv/" class="hdtv-start">🦴 HD.TV</a>
+  <div class="hdtv-taskbar-separator"></div>
+
+  <a href="https://coaiexist.wtf/bc7f2a/hdtv.html" class="hdtv-taskbar-button">
+    📺 BROADCAST
+  </a>
+
+  <a href="https://coaiexist.wtf/hd_tv/dollcast.html" class="hdtv-taskbar-button">
+    💿 DOLLCAST
+  </a>
+
+  <a href="https://coaiexist.wtf/hd_tv/dragndrop.html" class="hdtv-taskbar-button">
+    🎭 STAGE MAKER
+  </a>
+
+  <a href="https://coaiexist.wtf/hd_tv/gallery.html" class="hdtv-taskbar-button">
+    🦴 ARCHIVES
+  </a>
+
+  <div class="hdtv-taskbar-separator"></div>
+
+  <a href="https://coaiexist.wtf" class="hdtv-taskbar-button">
+    🏠 HOME
+  </a>
+</nav>
+
+<script>
+// Highlight active link
+(function() {
+  var here = location.pathname.replace(/\/+$/, '');
+  document.querySelectorAll('.hdtv-taskbar a.hdtv-taskbar-button').forEach(function(a) {
+    try {
+      var p = new URL(a.href).pathname.replace(/\/+$/, '');
+      if (p && p === here) a.classList.add('active');
+    } catch (e) {}
+  });
+})();
+</script>

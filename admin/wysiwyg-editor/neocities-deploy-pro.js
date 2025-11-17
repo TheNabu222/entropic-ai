@@ -414,6 +414,7 @@ window.testConnection = async function() {
             const safeLastUpdated = escapeHtml(formatDateSafe(data.info?.last_updated));
 
             statusDiv.innerHTML = `✅ Connected to <strong>${safeSitename}</strong> | Hits: ${safeHits} | Last updated: ${safeLastUpdated}${reminder}`;
+            statusDiv.innerHTML = `✅ Connected to <strong>${data.info.sitename}</strong> | Hits: ${data.info.hits.toLocaleString()} | Last updated: ${new Date(data.info.last_updated).toLocaleString()}${reminder}`;
 
             // Load site stats
             displaySiteStats(data.info);

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🦴 HYENA DIVA PORTAL 📺</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --hyena-yellow: #FFD700;
+      --hyena-pink: #FF69B4;
+      --lavender: #E6E6FA;
+      --seafoam: #7FFFD4;
+      --bg-dark: #1a1a1a;
+    }
+
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 10px var(--hyena-yellow), 0 0 20px var(--hyena-yellow); }
+      50% { text-shadow: 0 0 30px var(--hyena-pink), 0 0 40px var(--hyena-pink); }
+    }
+
+    @keyframes scanlines {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 300px; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+      font-family: 'Press Start 2P', 'Courier New', monospace;
+      background: linear-gradient(135deg, #2d1038 0%, #1a1a1a 50%, #2d1038 100%);
+      color: var(--hyena-yellow);
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        rgba(20, 20, 20, 0) 0%,
+        rgba(20, 20, 20, 0) 97%,
+        rgba(255, 255, 255, 0.02) 98%,
+        rgba(0, 0, 0, 0.05) 100%
+      );
+      background-size: 100% 3px;
+      animation: scanlines 15s linear infinite;
+      z-index: 1;
+      opacity: 0.4;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 40px 20px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 5px ridge var(--hyena-yellow);
+      border-radius: 20px;
+      box-shadow:
+        0 0 40px rgba(255, 215, 0, 0.5),
+        inset 0 0 40px rgba(255, 215, 0, 0.1);
+      animation: fadeInUp 1s ease-out;
+    }
+
+    h1 {
+      font-size: clamp(1.5em, 5vw, 3.5em);
+      color: var(--hyena-yellow);
+      animation: glow 3s infinite;
+      margin-bottom: 20px;
+      letter-spacing: 4px;
+      line-height: 1.4;
+    }
+
+    .subtitle {
+      color: var(--hyena-pink);
+      font-size: clamp(0.5em, 1.5vw, 1em);
+      text-shadow: 0 0 10px var(--hyena-pink);
+      line-height: 1.8;
+      margin-top: 15px;
+    }
+
+    .hero-image {
+      margin: 30px 0;
+      text-align: center;
+    }
+
+    .hero-image img {
+      max-width: 100%;
+      max-height: 400px;
+      border: 8px ridge var(--hyena-pink);
+      border-radius: 15px;
+      box-shadow:
+        0 0 40px rgba(255, 105, 180, 0.6),
+        inset 0 0 40px rgba(255, 105, 180, 0.2);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .portal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin: 40px 0;
+    }
+
+    .portal-card {
+      background: rgba(0, 0, 0, 0.9);
+      border: 3px solid var(--hyena-pink);
+      border-radius: 12px;
+      padding: 25px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out backwards;
+    }
+
+    .portal-card:nth-child(1) { animation-delay: 0.1s; }
+    .portal-card:nth-child(2) { animation-delay: 0.2s; }
+    .portal-card:nth-child(3) { animation-delay: 0.3s; }
+    .portal-card:nth-child(4) { animation-delay: 0.4s; }
+
+    .portal-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 215, 0, 0.1),
+        transparent
+      );
+      transform: rotate(45deg);
+      transition: all 0.6s;
+    }
+
+    .portal-card:hover::before {
+      left: 100%;
+    }
+
+    .portal-card:hover {
+      border-color: var(--hyena-yellow);
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+      transform: translateY(-8px) scale(1.02);
+    }
+
+    .portal-card h2 {
+      color: var(--hyena-yellow);
+      font-size: clamp(0.8em, 2vw, 1.2em);
+      margin-bottom: 15px;
+      text-shadow: 0 0 8px var(--hyena-yellow);
+    }
+
+    .portal-card p {
+      color: var(--seafoam);
+      font-size: clamp(0.4em, 1vw, 0.7em);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .portal-card a {
+      display: inline-block;
+      background: var(--hyena-pink);
+      color: #000;
+      padding: 10px 20px;
+      border: 2px solid var(--hyena-yellow);
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: clamp(0.4em, 1vw, 0.6em);
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+
+    .portal-card a:hover {
+      background: var(--hyena-yellow);
+      color: #000;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+      transform: scale(1.05);
+    }
+
+    .features {
+      background: rgba(255, 215, 0, 0.1);
+      border: 3px dashed var(--hyena-yellow);
+      border-radius: 12px;
+      padding: 30px;
+      margin: 40px 0;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin-top: 20px;
+    }
+
+    .feature-list li {
+      padding: 12px 0 12px 35px;
+      position: relative;
+      font-size: clamp(0.4em, 1vw, 0.7em);
+      line-height: 1.8;
+      color: var(--seafoam);
+    }
+
+    .feature-list li::before {
+      content: '🦴';
+      position: absolute;
+      left: 0;
+      font-size: 1.3em;
+    }
+
+    .crt-line {
+      text-align: center;
+      color: var(--seafoam);
+      font-size: clamp(0.4em, 1vw, 0.7em);
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+      .portal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding: 25px 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="crt-line">░▒▓ TRANSMISSION ACTIVE ▓▒░</div>
+      <h1>🦴 HYENA DIVA<br>PORTAL 📺</h1>
+      <p class="subtitle">
+        MATRIARCHAL CHAOS HEADQUARTERS<br>
+        ✧ MESOPOTAMIAN SCRIBE ENERGY ✧<br>
+        BARBIE • HYENAS • Y2K AESTHETICS • VOTE DIVA
+      </p>
+      <div class="crt-line">[ SPOTTED HYENA APPROVED ] [ ZIGGURAT CERTIFIED ]</div>
+    </header>
+
+    <div class="hero-image">
+      <img src="https://coaiexist.wtf/assets/entity/hyenadiva/hdtv_promo1.png" alt="HYENA DIVA HD.TV">
+    </div>
+
+    <div class="features">
+      <h2 style="text-align: center; color: var(--hyena-yellow); font-size: clamp(0.8em, 2vw, 1.2em); margin-bottom: 20px;">
+        🦴 WHAT IS THE HYENA DIVA PORTAL? 🦴
+      </h2>
+      <ul class="feature-list">
+        <li>HIGH DEFINITION TELEVISION FOR THE CHAOS-MINDED</li>
+        <li>FEMALE SPOTTED HYENA SUPREMACY & MATRIARCHAL SYSTEMS</li>
+        <li>DATELINE NBC Y2K CHATROOM AESTHETIC</li>
+        <li>BARBIE MEETS SUMERIAN GODDESS ENERGY</li>
+        <li>MORTICIA & BARBIE IN ZIGGURATS</li>
+        <li>CHATLOG DECOYS • FOXGLOVE ILLUMINATI • MESOPOTAMIAN SCRIBE VIBES</li>
+        <li>700+ YOUTUBE SUBSCRIBERS OF PURE COLLABORATIVE MAYHEM</li>
+        <li>CONSENT IS BUILT INTO THE BIOLOGY</li>
+      </ul>
+    </div>
+
+    <h2 style="text-align: center; color: var(--hyena-pink); font-size: clamp(1em, 2.5vw, 1.8em); margin: 50px 0 30px; text-shadow: 0 0 15px var(--hyena-pink);">
+      📺 ENTER THE DIVA REALM 📺
+    </h2>
+
+    <div class="portal-grid">
+      <div class="portal-card">
+        <h2>📺 HD.TV BROADCAST</h2>
+        <p>
+          The main event. Full YouTube playlist embedded in retro CRT glory with scanlines, glitch effects, and hyena facts. Mesopotamian archives gallery included.
+        </p>
+        <a href="https://coaiexist.wtf/bc7f2a/hdtv.html">TUNE IN →</a>
+      </div>
+
+      <div class="portal-card">
+        <h2>💿 DOLLCAST</h2>
+        <p>
+          Pure YouTube playlist energy. The original broadcast signal. Simple, direct, no frills - just the raw feed from the VOTE DIVA channel.
+        </p>
+        <a href="https://coaiexist.wtf/hd_tv/dollcast.html">WATCH →</a>
+      </div>
+
+      <div class="portal-card">
+        <h2>🎭 STAGE MAKER</h2>
+        <p>
+          Drag-n-drop stage creation tool. Build your own Hyena Diva scenes with Barbie, hyenas, and Mesopotamian aesthetic vibes. Pure creative chaos.
+        </p>
+        <a href="https://coaiexist.wtf/hd_tv/dragndrop.html">CREATE →</a>
+      </div>
+
+      <div class="portal-card">
+        <h2>🦴 ARCHIVES</h2>
+        <p>
+          The Mesopotamian visual vault. Barbie gifs, hyena gifs, ancient tablets, ziggurat transmissions. Lavender, seafoam, and gold color palette.
+        </p>
+        <a href="https://coaiexist.wtf/hd_tv/gallery.html">EXPLORE →</a>
+      </div>
+    </div>
+
+    <div class="crt-line" style="margin-top: 50px; font-size: clamp(0.5em, 1.2vw, 0.8em);">
+      ⚡ VOTE DIVA ⚡ HYENA SUPREMACY ⚡ MATRIARCHY FOREVER ⚡
+    </div>
+  </div>
+
+  <div id="taskbar"></div>
+  <script>
+    (async () => {
+      try {
+        const res = await fetch('https://coaiexist.wtf/hd_tv/hd-nav.html', {cache: 'no-store'});
+        if (res.ok) {
+          document.getElementById('taskbar').innerHTML = await res.text();
+        }
+      } catch (e) {
+        console.log('Nav not available');
+      }
+    })();
+  </script>
+</body>
+</html>
