@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resonance Engine - TECHATER Protocol (Rigid System)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* THEME: GRAND ARCHIVE OF INTERPLANAR CARTOGRAPHY */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'EB Garamond', 'Times New Roman', serif;
+            background-color: #0d1b2a;
+            background-image:
+                linear-gradient(to right, rgba(42, 77, 105, 0.4) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(42, 77, 105, 0.4) 1px, transparent 1px);
+            background-size: 25px 25px;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .main-archive-panel {
+            background: rgba(15, 5, 0, 0.8);
+            border-top: 3px solid #fdb833;
+            border-bottom: 3px solid #fdb833;
+            border-left: 2px solid #a16c21;
+            border-right: 2px solid #a16c21;
+            box-shadow: 0 0 25px rgba(253, 184, 51, 0.4), inset 0 0 15px rgba(253, 184, 51, 0.2);
+            padding: 2rem;
+            backdrop-filter: blur(1.5px);
+        }
+
+        header { text-align: center; margin-bottom: 2rem; padding-bottom: 1rem; }
+
+        header h1 {
+            font-family: 'IM Fell English SC', serif;
+            color: #fffb01;
+            text-shadow: 0 0 2px #000, 0 0 8px #fefcbf, 0 0 15px #fffb01, 0 0 25px #f8d800;
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: #d1c3b5;
+            font-style: italic;
+            font-size: 1.2rem;
+        }
+
+        .status-text {
+            font-family: 'VT323', monospace;
+            color: #00ffcc;
+            text-shadow: 0 0 2px #000, 0 0 5px #00ffcc, 0 0 10px #00ffcc;
+            letter-spacing: 0.1em;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .section {
+            border-top: 1px solid rgba(253, 184, 51, 0.3);
+            padding-top: 1.5rem;
+            padding-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .section:first-of-type { border-top: 0; margin-top: 0; }
+
+        .section-title {
+            font-family: 'VT323', monospace;
+            color: #00ffcc;
+            text-shadow: 0 0 5px #00ffcc;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-family: 'VT323', monospace;
+            color: #00ffcc;
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #4a3410;
+            color: #e0e0e0;
+            font-family: 'EB Garamond', serif;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        textarea::placeholder {
+            color: #888;
+        }
+
+        button {
+            font-family: 'VT323', monospace;
+            background-color: transparent;
+            border: 2px solid #fffb01;
+            color: #fffb01;
+            text-shadow: 0 0 5px #fffb01;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            margin: 0.5rem;
+        }
+
+        button:hover:not(:disabled) {
+            background: rgba(255, 251, 1, 0.1);
+            box-shadow: 0 0 10px #fffb01;
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(1px);
+            background: rgba(255, 251, 1, 0.2);
+        }
+
+        button:disabled {
+            color: #555;
+            border-color: #333;
+            text-shadow: none;
+            cursor: not-allowed;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .result-box {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #4a3410;
+            padding: 1.5rem;
+            min-height: 100px;
+            font-size: 2rem;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+            margin-top: 1rem;
+            word-wrap: break-word;
+        }
+
+        .result-box.rtl {
+            direction: rtl;
+        }
+
+        .info-text {
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .accordion {
+            border: 1px solid #5a4420;
+            background: rgba(0, 0, 0, 0.4);
+            margin-top: 1rem;
+            padding: 1rem;
+        }
+
+        .accordion-title {
+            font-family: 'VT323', monospace;
+            color: #00ffcc;
+            font-size: 1.3rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .accordion-content {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #5a4420;
+        }
+
+        .accordion-content.open {
+            display: block;
+        }
+
+        .resonance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .resonance-card {
+            border: 1px solid #5a4420;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1rem;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+        }
+
+        .resonance-card h4 {
+            color: #e0e0e0;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .resonance-card ul {
+            list-style: disc;
+            padding-left: 1.5rem;
+        }
+
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            border: 1px solid #5a4420;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.25rem 0.75rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-label {
+            font-family: 'EB Garamond', serif;
+            font-size: 1rem;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            margin-right: 0.5rem;
+            width: auto;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 2rem; }
+            .grid { grid-template-columns: 1fr; }
+            .status-text { font-size: 1.2rem; }
+        }
+
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #0d1b2a; }
+        ::-webkit-scrollbar-thumb {
+            background: #5a4420;
+            border: 2px solid #0d1b2a;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #a16c21; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-archive-panel">
+            <header>
+                <h1>Resonance Engine</h1>
+                <p>Uncover the phonetic ghosts in the machine of language.</p>
+                <p class="status-text">+++TECHATER PROTOCOL ENGAGED+++RIGID SYSTEM ONLINE+++</p>
+            </header>
+
+            <main>
+                <!-- Transliteration Section -->
+                <section class="section">
+                    <h2 class="section-title">Script Transliteration</h2>
+
+                    <div class="form-group">
+                        <label for="source-text">Source Text</label>
+                        <textarea id="source-text" placeholder="Enter text to begin...">Hello world</textarea>
+                    </div>
+
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="source-script">Source Script</label>
+                            <select id="source-script">
+                                <option value="English">English (Latin)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="target-script">Target Script</label>
+                            <select id="target-script"></select>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="transliterate-btn">Transliterate</button>
+                    </div>
+
+                    <div id="result-container" style="display: none;">
+                        <div id="result-box" class="result-box"></div>
+
+                        <div class="accordion">
+                            <div class="accordion-title" onclick="toggleAccordion('phonetic-guide')">
+                                ▸ Phonetic Guide
+                            </div>
+                            <div id="phonetic-guide" class="accordion-content"></div>
+                        </div>
+
+                        <div class="accordion">
+                            <div class="accordion-title" onclick="toggleAccordion('definitions')">
+                                ▸ Lexicon
+                            </div>
+                            <div id="definitions" class="accordion-content"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Resonance Analysis Section -->
+                <section class="section">
+                    <h2 class="section-title">Phonetic Resonance Analysis (ALS-RP)</h2>
+                    <p class="info-text">
+                        Auld Lang Syne Resonance Protocol - Find phonetic echoes across ancient languages.
+                        Select languages to search for similar-sounding words.
+                    </p>
+
+                    <div class="form-group">
+                        <label>Select Languages for Analysis</label>
+                        <div class="checkbox-group" id="language-checkboxes"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="analyze-resonance-btn">Analyze Resonance</button>
+                    </div>
+
+                    <div id="resonance-container" style="display: none;">
+                        <div id="thematic-tags" class="tag-container"></div>
+                        <div id="resonance-results" class="resonance-grid"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        // ============================================================================
+        // PHONETIC ENGINE - Convert text to phonetic representations
+        // ============================================================================
+
+        const ENGLISH_PHONETIC_MAP = {
+            // Vowels
+            'a': 'æ', 'e': 'ɛ', 'i': 'ɪ', 'o': 'ɔ', 'u': 'ʌ',
+            'ay': 'eɪ', 'ai': 'eɪ', 'ey': 'eɪ',
+            'ee': 'i', 'ea': 'i', 'ie': 'i',
+            'oo': 'u', 'ou': 'aʊ', 'ow': 'aʊ',
+            'oi': 'ɔɪ', 'oy': 'ɔɪ',
+            'au': 'ɔ', 'aw': 'ɔ',
+            // Consonants
+            'b': 'b', 'c': 'k', 'd': 'd', 'f': 'f', 'g': 'g',
+            'h': 'h', 'j': 'dʒ', 'k': 'k', 'l': 'l', 'm': 'm',
+            'n': 'n', 'p': 'p', 'q': 'k', 'r': 'r', 's': 's',
+            't': 't', 'v': 'v', 'w': 'w', 'x': 'ks', 'y': 'j', 'z': 'z',
+            // Digraphs
+            'ch': 'tʃ', 'sh': 'ʃ', 'th': 'θ', 'ph': 'f',
+            'gh': 'g', 'wh': 'w', 'ng': 'ŋ',
+            // Silent letters
+            'kn': 'n', 'gn': 'n', 'wr': 'r', 'mb': 'm',
+        };
+
+        function textToPhonemes(text) {
+            const normalized = text.toLowerCase().trim();
+            const tokens = [];
+            let i = 0;
+
+            while (i < normalized.length) {
+                if (!/[a-z]/.test(normalized[i])) {
+                    i++;
+                    continue;
+                }
+
+                const twoChar = normalized.substring(i, i + 2);
+                if (ENGLISH_PHONETIC_MAP[twoChar]) {
+                    tokens.push({
+                        grapheme: twoChar,
+                        phoneme: ENGLISH_PHONETIC_MAP[twoChar]
+                    });
+                    i += 2;
+                    continue;
+                }
+
+                const oneChar = normalized[i];
+                tokens.push({
+                    grapheme: oneChar,
+                    phoneme: ENGLISH_PHONETIC_MAP[oneChar] || oneChar
+                });
+                i++;
+            }
+
+            return tokens;
+        }
+
+        function getPhoneticSignature(text) {
+            const tokens = textToPhonemes(text);
+            return tokens.map(t => t.phoneme).join('');
+        }
+
+        function metaphone(text) {
+            let code = text.toLowerCase().replace(/[^a-z]/g, '');
+            code = code.replace(/([a-z])\1+/g, '$1');
+
+            if (code.startsWith('kn') || code.startsWith('gn') ||
+                code.startsWith('pn') || code.startsWith('wr')) {
+                code = code.substring(1);
+            }
+            if (code.startsWith('x')) code = 's' + code.substring(1);
+            if (code.startsWith('wh')) code = 'w' + code.substring(2);
+
+            code = code.replace(/sch/g, 'X');
+            code = code.replace(/ch/g, 'X');
+            code = code.replace(/sh/g, 'X');
+            code = code.replace(/th/g, 'T');
+            code = code.replace(/ph/g, 'F');
+            code = code.replace(/gh/g, 'G');
+            code = code.replace(/c([iey])/g, 'S$1');
+            code = code.replace(/c/g, 'K');
+            code = code.replace(/g([iey])/g, 'J$1');
+            code = code.replace(/[aeiouyw]/g, '');
+            code = code.replace(/([a-z])\1+/g, '$1');
+
+            return code.toUpperCase();
+        }
+
+        function soundex(text) {
+            const normalized = text.toUpperCase().replace(/[^A-Z]/g, '');
+            if (normalized.length === 0) return '';
+
+            const firstLetter = normalized[0];
+            const codeMap = {
+                'B': '1', 'F': '1', 'P': '1', 'V': '1',
+                'C': '2', 'G': '2', 'J': '2', 'K': '2', 'Q': '2', 'S': '2', 'X': '2', 'Z': '2',
+                'D': '3', 'T': '3',
+                'L': '4',
+                'M': '5', 'N': '5',
+                'R': '6',
+            };
+
+            let code = firstLetter;
+            let prevCode = codeMap[firstLetter] || '';
+
+            for (let i = 1; i < normalized.length && code.length < 4; i++) {
+                const char = normalized[i];
+                const charCode = codeMap[char] || '';
+
+                if (charCode && charCode !== prevCode) {
+                    code += charCode;
+                    prevCode = charCode;
+                } else if (!codeMap[char]) {
+                    prevCode = '';
+                }
+            }
+
+            return code.padEnd(4, '0');
+        }
+
+        function levenshteinDistance(str1, str2) {
+            const m = str1.length;
+            const n = str2.length;
+            const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+
+            for (let i = 0; i <= m; i++) dp[i][0] = i;
+            for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (str1[i - 1] === str2[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1];
+                    } else {
+                        dp[i][j] = Math.min(
+                            dp[i - 1][j] + 1,
+                            dp[i][j - 1] + 1,
+                            dp[i - 1][j - 1] + 1
+                        );
+                    }
+                }
+            }
+
+            return dp[m][n];
+        }
+
+        function phoneticSimilarity(text1, text2) {
+            const sig1 = getPhoneticSignature(text1);
+            const sig2 = getPhoneticSignature(text2);
+            const distance = levenshteinDistance(sig1, sig2);
+            const maxLen = Math.max(sig1.length, sig2.length);
+            if (maxLen === 0) return 1;
+            return 1 - (distance / maxLen);
+        }
+
+        // ============================================================================
+        // TRANSLITERATION MAPS - Character mappings for ancient scripts
+        // ============================================================================
+
+        const SCRIPT_MAPS = {
+            'Phoenician': [
+                { char: '𐤀', phoneme: 'ʔ', name: 'Aleph', meaning: 'ox' },
+                { char: '𐤁', phoneme: 'b', name: 'Bet', meaning: 'house' },
+                { char: '𐤂', phoneme: 'g', name: 'Gimel', meaning: 'camel' },
+                { char: '𐤃', phoneme: 'd', name: 'Dalet', meaning: 'door' },
+                { char: '𐤄', phoneme: 'h', name: 'He', meaning: 'window' },
+                { char: '𐤅', phoneme: 'w', name: 'Waw', meaning: 'hook' },
+                { char: '𐤆', phoneme: 'z', name: 'Zayin', meaning: 'weapon' },
+                { char: '𐤇', phoneme: 'ħ', name: 'Heth', meaning: 'fence' },
+                { char: '𐤈', phoneme: 'ṭ', name: 'Teth', meaning: 'wheel' },
+                { char: '𐤉', phoneme: 'j', name: 'Yodh', meaning: 'hand' },
+                { char: '𐤊', phoneme: 'k', name: 'Kaph', meaning: 'palm' },
+                { char: '𐤋', phoneme: 'l', name: 'Lamed', meaning: 'goad' },
+                { char: '𐤌', phoneme: 'm', name: 'Mem', meaning: 'water' },
+                { char: '𐤍', phoneme: 'n', name: 'Nun', meaning: 'fish' },
+                { char: '𐤎', phoneme: 's', name: 'Semkath', meaning: 'support' },
+                { char: '𐤏', phoneme: 'ʕ', name: 'Ayin', meaning: 'eye' },
+                { char: '𐤐', phoneme: 'p', name: 'Pe', meaning: 'mouth' },
+                { char: '𐤑', phoneme: 'ṣ', name: 'Tsade', meaning: 'hook' },
+                { char: '𐤒', phoneme: 'q', name: 'Qoph', meaning: 'needle' },
+                { char: '𐤓', phoneme: 'r', name: 'Resh', meaning: 'head' },
+                { char: '𐤔', phoneme: 'ʃ', name: 'Shin', meaning: 'tooth' },
+                { char: '𐤕', phoneme: 't', name: 'Taw', meaning: 'mark' },
+            ],
+            'Nabataean': [
+                { char: '𐢀', phoneme: 'ʔ', name: 'Alaph', meaning: 'ox' },
+                { char: '𐢁', phoneme: 'w', name: 'Waw', meaning: 'hook' },
+                { char: '𐢂', phoneme: 'g', name: 'Gamal', meaning: 'camel' },
+                { char: '𐢃', phoneme: 'd', name: 'Dalath', meaning: 'door' },
+                { char: '𐢄', phoneme: 'h', name: 'He', meaning: 'window' },
+                { char: '𐢅', phoneme: 'z', name: 'Zayn', meaning: 'weapon' },
+                { char: '𐢆', phoneme: 'ħ', name: 'Heth', meaning: 'fence' },
+                { char: '𐢇', phoneme: 'ṭ', name: 'Teth', meaning: 'wheel' },
+                { char: '𐢈', phoneme: 'j', name: 'Yodh', meaning: 'hand' },
+                { char: '𐢉', phoneme: 'k', name: 'Kaph', meaning: 'palm' },
+                { char: '𐢊', phoneme: 'l', name: 'Lamadh', meaning: 'goad' },
+                { char: '𐢋', phoneme: 'l', name: 'Lamedh', meaning: 'goad' },
+                { char: '𐢌', phoneme: 'm', name: 'Mem', meaning: 'water' },
+                { char: '𐢍', phoneme: 'n', name: 'Nun', meaning: 'fish' },
+                { char: '𐢎', phoneme: 's', name: 'Semkath', meaning: 'support' },
+                { char: '𐢏', phoneme: 'ʕ', name: 'Ayin', meaning: 'eye' },
+                { char: '𐢐', phoneme: 'p', name: 'Pe', meaning: 'mouth' },
+                { char: '𐢑', phoneme: 'ṣ', name: 'Tsade', meaning: 'hook' },
+                { char: '𐢒', phoneme: 'q', name: 'Qoph', meaning: 'needle' },
+                { char: '𐢓', phoneme: 'r', name: 'Resh', meaning: 'head' },
+                { char: '𐢔', phoneme: 'ʃ', name: 'Shin', meaning: 'tooth' },
+                { char: '𐢕', phoneme: 't', name: 'Taw', meaning: 'mark' },
+            ],
+            'Old Norse Runes': [
+                { char: 'ᚠ', phoneme: 'f', name: 'Fehu', meaning: 'cattle, wealth' },
+                { char: 'ᚢ', phoneme: 'u', name: 'Uruz', meaning: 'wild ox' },
+                { char: 'ᚦ', phoneme: 'θ', name: 'Thurisaz', meaning: 'giant' },
+                { char: 'ᚨ', phoneme: 'a', name: 'Ansuz', meaning: 'god' },
+                { char: 'ᚱ', phoneme: 'r', name: 'Raidho', meaning: 'journey' },
+                { char: 'ᚲ', phoneme: 'k', name: 'Kenaz', meaning: 'torch' },
+                { char: 'ᚷ', phoneme: 'g', name: 'Gebo', meaning: 'gift' },
+                { char: 'ᚹ', phoneme: 'w', name: 'Wunjo', meaning: 'joy' },
+                { char: 'ᚺ', phoneme: 'h', name: 'Hagalaz', meaning: 'hail' },
+                { char: 'ᚻ', phoneme: 'h', name: 'Hagall', meaning: 'hail' },
+                { char: 'ᚾ', phoneme: 'n', name: 'Nauthiz', meaning: 'need' },
+                { char: 'ᛁ', phoneme: 'i', name: 'Isa', meaning: 'ice' },
+                { char: 'ᛃ', phoneme: 'j', name: 'Jera', meaning: 'year' },
+                { char: 'ᛇ', phoneme: 'ē', name: 'Eihwaz', meaning: 'yew tree' },
+                { char: 'ᛈ', phoneme: 'p', name: 'Pertho', meaning: 'mystery' },
+                { char: 'ᛉ', phoneme: 'z', name: 'Algiz', meaning: 'protection' },
+                { char: 'ᛊ', phoneme: 's', name: 'Sowilo', meaning: 'sun' },
+                { char: 'ᛋ', phoneme: 's', name: 'Sigel', meaning: 'sun' },
+                { char: 'ᛏ', phoneme: 't', name: 'Tiwaz', meaning: 'god Tyr' },
+                { char: 'ᛒ', phoneme: 'b', name: 'Berkano', meaning: 'birch' },
+                { char: 'ᛖ', phoneme: 'e', name: 'Ehwaz', meaning: 'horse' },
+                { char: 'ᛗ', phoneme: 'm', name: 'Mannaz', meaning: 'man' },
+                { char: 'ᛚ', phoneme: 'l', name: 'Laguz', meaning: 'water' },
+                { char: 'ᛜ', phoneme: 'ŋ', name: 'Ingwaz', meaning: 'god Ing' },
+                { char: 'ᛞ', phoneme: 'd', name: 'Dagaz', meaning: 'day' },
+                { char: 'ᛟ', phoneme: 'o', name: 'Othala', meaning: 'heritage' },
+            ],
+            'Ogham': [
+                { char: 'ᚁ', phoneme: 'b', name: 'Beith', meaning: 'birch' },
+                { char: 'ᚂ', phoneme: 'l', name: 'Luis', meaning: 'rowan' },
+                { char: 'ᚃ', phoneme: 'f', name: 'Fearn', meaning: 'alder' },
+                { char: 'ᚄ', phoneme: 's', name: 'Sail', meaning: 'willow' },
+                { char: 'ᚅ', phoneme: 'n', name: 'Nion', meaning: 'ash' },
+                { char: 'ᚆ', phoneme: 'h', name: 'Uath', meaning: 'hawthorn' },
+                { char: 'ᚇ', phoneme: 'd', name: 'Dair', meaning: 'oak' },
+                { char: 'ᚈ', phoneme: 't', name: 'Tinne', meaning: 'holly' },
+                { char: 'ᚉ', phoneme: 'k', name: 'Coll', meaning: 'hazel' },
+                { char: 'ᚊ', phoneme: 'kw', name: 'Ceirt', meaning: 'apple' },
+                { char: 'ᚋ', phoneme: 'm', name: 'Muin', meaning: 'vine' },
+                { char: 'ᚌ', phoneme: 'g', name: 'Gort', meaning: 'ivy' },
+                { char: 'ᚍ', phoneme: 'ŋ', name: 'nGéadal', meaning: 'reed' },
+                { char: 'ᚎ', phoneme: 'z', name: 'Straif', meaning: 'blackthorn' },
+                { char: 'ᚏ', phoneme: 'r', name: 'Ruis', meaning: 'elder' },
+                { char: 'ᚐ', phoneme: 'a', name: 'Ailm', meaning: 'pine' },
+                { char: 'ᚑ', phoneme: 'o', name: 'Onn', meaning: 'furze' },
+                { char: 'ᚒ', phoneme: 'u', name: 'Úr', meaning: 'heather' },
+                { char: 'ᚓ', phoneme: 'e', name: 'Eadhadh', meaning: 'aspen' },
+                { char: 'ᚔ', phoneme: 'i', name: 'Iodhadh', meaning: 'yew' },
+            ],
+            'Greek': [
+                { char: 'Α', phoneme: 'a', name: 'Alpha' },
+                { char: 'α', phoneme: 'a', name: 'alpha' },
+                { char: 'Β', phoneme: 'b', name: 'Beta' },
+                { char: 'β', phoneme: 'b', name: 'beta' },
+                { char: 'Γ', phoneme: 'g', name: 'Gamma' },
+                { char: 'γ', phoneme: 'g', name: 'gamma' },
+                { char: 'Δ', phoneme: 'd', name: 'Delta' },
+                { char: 'δ', phoneme: 'd', name: 'delta' },
+                { char: 'Ε', phoneme: 'e', name: 'Epsilon' },
+                { char: 'ε', phoneme: 'e', name: 'epsilon' },
+                { char: 'Ζ', phoneme: 'z', name: 'Zeta' },
+                { char: 'ζ', phoneme: 'z', name: 'zeta' },
+                { char: 'Η', phoneme: 'ē', name: 'Eta' },
+                { char: 'η', phoneme: 'ē', name: 'eta' },
+                { char: 'Θ', phoneme: 'θ', name: 'Theta' },
+                { char: 'θ', phoneme: 'θ', name: 'theta' },
+                { char: 'Ι', phoneme: 'i', name: 'Iota' },
+                { char: 'ι', phoneme: 'i', name: 'iota' },
+                { char: 'Κ', phoneme: 'k', name: 'Kappa' },
+                { char: 'κ', phoneme: 'k', name: 'kappa' },
+                { char: 'Λ', phoneme: 'l', name: 'Lambda' },
+                { char: 'λ', phoneme: 'l', name: 'lambda' },
+                { char: 'Μ', phoneme: 'm', name: 'Mu' },
+                { char: 'μ', phoneme: 'm', name: 'mu' },
+                { char: 'Ν', phoneme: 'n', name: 'Nu' },
+                { char: 'ν', phoneme: 'n', name: 'nu' },
+                { char: 'Ξ', phoneme: 'ks', name: 'Xi' },
+                { char: 'ξ', phoneme: 'ks', name: 'xi' },
+                { char: 'Ο', phoneme: 'o', name: 'Omicron' },
+                { char: 'ο', phoneme: 'o', name: 'omicron' },
+                { char: 'Π', phoneme: 'p', name: 'Pi' },
+                { char: 'π', phoneme: 'p', name: 'pi' },
+                { char: 'Ρ', phoneme: 'r', name: 'Rho' },
+                { char: 'ρ', phoneme: 'r', name: 'rho' },
+                { char: 'Σ', phoneme: 's', name: 'Sigma' },
+                { char: 'σ', phoneme: 's', name: 'sigma' },
+                { char: 'ς', phoneme: 's', name: 'final sigma' },
+                { char: 'Τ', phoneme: 't', name: 'Tau' },
+                { char: 'τ', phoneme: 't', name: 'tau' },
+                { char: 'Υ', phoneme: 'y', name: 'Upsilon' },
+                { char: 'υ', phoneme: 'y', name: 'upsilon' },
+                { char: 'Φ', phoneme: 'f', name: 'Phi' },
+                { char: 'φ', phoneme: 'f', name: 'phi' },
+                { char: 'Χ', phoneme: 'kh', name: 'Chi' },
+                { char: 'χ', phoneme: 'kh', name: 'chi' },
+                { char: 'Ψ', phoneme: 'ps', name: 'Psi' },
+                { char: 'ψ', phoneme: 'ps', name: 'psi' },
+                { char: 'Ω', phoneme: 'ō', name: 'Omega' },
+                { char: 'ω', phoneme: 'ō', name: 'omega' },
+            ],
+            'Hebrew': [
+                { char: 'א', phoneme: 'ʔ', name: 'Aleph' },
+                { char: 'ב', phoneme: 'b', name: 'Bet' },
+                { char: 'ג', phoneme: 'g', name: 'Gimel' },
+                { char: 'ד', phoneme: 'd', name: 'Dalet' },
+                { char: 'ה', phoneme: 'h', name: 'He' },
+                { char: 'ו', phoneme: 'w', name: 'Vav' },
+                { char: 'ז', phoneme: 'z', name: 'Zayin' },
+                { char: 'ח', phoneme: 'ħ', name: 'Chet' },
+                { char: 'ט', phoneme: 'ṭ', name: 'Tet' },
+                { char: 'י', phoneme: 'j', name: 'Yod' },
+                { char: 'כ', phoneme: 'k', name: 'Kaf' },
+                { char: 'ך', phoneme: 'k', name: 'Final Kaf' },
+                { char: 'ל', phoneme: 'l', name: 'Lamed' },
+                { char: 'מ', phoneme: 'm', name: 'Mem' },
+                { char: 'ם', phoneme: 'm', name: 'Final Mem' },
+                { char: 'נ', phoneme: 'n', name: 'Nun' },
+                { char: 'ן', phoneme: 'n', name: 'Final Nun' },
+                { char: 'ס', phoneme: 's', name: 'Samekh' },
+                { char: 'ע', phoneme: 'ʕ', name: 'Ayin' },
+                { char: 'פ', phoneme: 'p', name: 'Pe' },
+                { char: 'ף', phoneme: 'p', name: 'Final Pe' },
+                { char: 'צ', phoneme: 'ṣ', name: 'Tsadi' },
+                { char: 'ץ', phoneme: 'ṣ', name: 'Final Tsadi' },
+                { char: 'ק', phoneme: 'q', name: 'Qof' },
+                { char: 'ר', phoneme: 'r', name: 'Resh' },
+                { char: 'ש', phoneme: 'ʃ', name: 'Shin' },
+                { char: 'ת', phoneme: 't', name: 'Tav' },
+            ]
+        };
+
+        const SUPPORTED_SCRIPTS = [
+            { value: 'Phoenician', label: 'Phoenician', direction: 'rtl' },
+            { value: 'Nabataean', label: 'Nabataean', direction: 'rtl' },
+            { value: 'Old Norse Runes', label: 'Old Norse (Elder Futhark)', direction: 'ltr' },
+            { value: 'Ogham', label: 'Ogham', direction: 'ltr' },
+            { value: 'Greek', label: 'Greek', direction: 'ltr' },
+            { value: 'Hebrew', label: 'Hebrew', direction: 'rtl' }
+        ];
+
+        // ============================================================================
+        // LEXICONS - Word databases for resonance analysis
+        // ============================================================================
+
+        const LEXICONS = {
+            'Basque': [
+                { word: 'lan', phonetic: 'lan', meaning: 'work, task', tags: ['labor', 'effort'] },
+                { word: 'zain', phonetic: 'sain', meaning: 'to wait, guard, bloodline', tags: ['time', 'protection', 'lineage'] },
+                { word: 'aur', phonetic: 'aur', meaning: 'old, ancient', tags: ['age', 'antiquity'] },
+                { word: 'ama', phonetic: 'ama', meaning: 'mother', tags: ['kinship', 'maternal'] },
+                { word: 'su', phonetic: 'su', meaning: 'fire', tags: ['element'] },
+                { word: 'soin', phonetic: 'soin', meaning: 'sound', tags: ['acoustic'] },
+                { word: 'oihu', phonetic: 'oihu', meaning: 'cry, shout', tags: ['voice'] },
+                { word: 'gain', phonetic: 'gain', meaning: 'summit, peak', tags: ['place'] },
+                { word: 'nahi', phonetic: 'nahi', meaning: 'desire, want', tags: ['emotion'] },
+                { word: 'naiz', phonetic: 'nais', meaning: 'I am', tags: ['identity'] },
+            ],
+            'Sumerian Cuneiform': [
+                { word: 'nu', phonetic: 'nu', meaning: 'no, not', tags: ['negation'] },
+                { word: 'uzu', phonetic: 'uzu', meaning: 'flesh, body', tags: ['mortality', 'physical'] },
+                { word: 'alal', phonetic: 'alal', meaning: 'pipe, tube', tags: ['conduit'] },
+                { word: 'an', phonetic: 'an', meaning: 'heaven, sky', tags: ['divine', 'celestial'] },
+                { word: 'ki', phonetic: 'ki', meaning: 'earth, ground', tags: ['terrestrial'] },
+                { word: 'dingir', phonetic: 'diŋir', meaning: 'god, deity', tags: ['sacred', 'divine'] },
+                { word: 'lugal', phonetic: 'lugal', meaning: 'king, ruler', tags: ['power'] },
+                { word: 'nam', phonetic: 'nam', meaning: 'fate, destiny', tags: ['metaphysical'] },
+                { word: 'me', phonetic: 'me', meaning: 'divine power, essence', tags: ['sacred', 'power'] },
+                { word: 'ama', phonetic: 'ama', meaning: 'mother', tags: ['kinship', 'maternal'] },
+                { word: 'ad', phonetic: 'ad', meaning: 'father', tags: ['kinship', 'paternal'] },
+                { word: 'kur', phonetic: 'kur', meaning: 'mountain, underworld', tags: ['boundary', 'death'] },
+                { word: 'nin', phonetic: 'nin', meaning: 'lady, queen', tags: ['power'] },
+                { word: 'sun', phonetic: 'sun', meaning: 'old', tags: ['age', 'antiquity'] },
+                { word: 'al', phonetic: 'al', meaning: 'hoe, tool', tags: ['work'] },
+            ],
+            'Igbo': [
+                { word: 'chi', phonetic: 'tʃi', meaning: 'god, spirit, life force', tags: ['sacred', 'destiny'] },
+                { word: 'nna', phonetic: 'nna', meaning: 'father', tags: ['kinship', 'paternal'] },
+                { word: 'nne', phonetic: 'nne', meaning: 'mother', tags: ['kinship', 'maternal'] },
+                { word: 'ala', phonetic: 'ala', meaning: 'earth, land, ground', tags: ['terrestrial'] },
+                { word: 'mmụọ', phonetic: 'muo', meaning: 'spirit', tags: ['supernatural'] },
+                { word: 'aka', phonetic: 'aka', meaning: 'hand', tags: ['action'] },
+                { word: 'obi', phonetic: 'obi', meaning: 'heart, mind', tags: ['emotion'] },
+                { word: 'isi', phonetic: 'isi', meaning: 'head', tags: ['thought'] },
+                { word: 'uwa', phonetic: 'uwa', meaning: 'world', tags: ['existence'] },
+                { word: 'ndu', phonetic: 'ndu', meaning: 'life', tags: ['vitality'] },
+            ],
+            'Ainu': [
+                { word: 'kamuy', phonetic: 'kamuj', meaning: 'god, deity, spirit', tags: ['sacred', 'divine'] },
+                { word: 'ainu', phonetic: 'ainu', meaning: 'human, person', tags: ['identity'] },
+                { word: 'mosir', phonetic: 'mosir', meaning: 'land, world', tags: ['earth'] },
+                { word: 'ape', phonetic: 'ape', meaning: 'fire', tags: ['element'] },
+                { word: 'wakka', phonetic: 'wakka', meaning: 'water', tags: ['element'] },
+                { word: 'mat', phonetic: 'mat', meaning: 'woman, wife', tags: ['kinship'] },
+                { word: 'hapo', phonetic: 'hapo', meaning: 'mother', tags: ['kinship', 'maternal'] },
+                { word: 'aca', phonetic: 'atʃa', meaning: 'father', tags: ['kinship', 'paternal'] },
+            ],
+            'Zuni': [
+                { word: 'son', phonetic: 'son', meaning: 'self, own', tags: ['identity'] },
+                { word: 'a:wan', phonetic: 'awan', meaning: 'person, being', tags: ['identity'] },
+                { word: 'awona:wilona', phonetic: 'awonawilona', meaning: 'all-container, creator', tags: ['cosmic'] },
+                { word: 'hon', phonetic: 'hon', meaning: 'to speak', tags: ['voice'] },
+                { word: 'kya', phonetic: 'kja', meaning: 'house', tags: ['dwelling'] },
+                { word: 'tsita', phonetic: 'tsita', meaning: 'grandmother', tags: ['kinship'] },
+                { word: 'tachchu', phonetic: 'tatʃtʃu', meaning: 'grandfather', tags: ['kinship'] },
+            ],
+            'Quechua': [
+                { word: 'ayni', phonetic: 'ajni', meaning: 'reciprocity, mutual help', tags: ['community', 'exchange', 'kinship'] },
+                { word: 'pacha', phonetic: 'patʃa', meaning: 'earth, time, world, cosmos', tags: ['temporal', 'spatial', 'sacred'] },
+                { word: 'mama', phonetic: 'mama', meaning: 'mother', tags: ['kinship', 'maternal'] },
+                { word: 'tayta', phonetic: 'tajta', meaning: 'father', tags: ['kinship', 'paternal'] },
+                { word: 'inti', phonetic: 'inti', meaning: 'sun', tags: ['celestial', 'divine'] },
+                { word: 'quilla', phonetic: 'kiʎa', meaning: 'moon', tags: ['celestial'] },
+                { word: 'sami', phonetic: 'sami', meaning: 'luck, fortune, vital energy', tags: ['vitality'] },
+                { word: 'munay', phonetic: 'munaj', meaning: 'to love, to want', tags: ['emotion'] },
+                { word: 'yachay', phonetic: 'jatʃaj', meaning: 'to know, knowledge', tags: ['wisdom'] },
+            ],
+            'Vietnamese': [
+                { word: 'lâm', phonetic: 'ləm', meaning: 'forest', tags: ['nature'] },
+                { word: 'lung', phonetic: 'luŋ', meaning: 'back, spine', tags: ['body'] },
+                { word: 'sơn', phonetic: 'sən', meaning: 'mountain', tags: ['nature'] },
+                { word: 'lan', phonetic: 'lan', meaning: 'orchid', tags: ['nature'] },
+                { word: 'lâu', phonetic: 'ləu', meaning: 'long time, tower', tags: ['time'] },
+                { word: 'sâu', phonetic: 'səu', meaning: 'deep', tags: ['depth'] },
+                { word: 'sầu', phonetic: 'səu', meaning: 'sorrow, sadness', tags: ['emotion'] },
+            ],
+            'Cherokee': [
+                { word: 'elohino', phonetic: 'elohino', meaning: 'earth, land', tags: ['terrestrial'] },
+                { word: 'ageyutsa', phonetic: 'aɡejutsa', meaning: 'to love', tags: ['affection'] },
+                { word: 'edoda', phonetic: 'edoda', meaning: 'father', tags: ['kinship', 'paternal'] },
+                { word: 'etsi', phonetic: 'etsi', meaning: 'mother', tags: ['kinship', 'maternal'] },
+                { word: 'nvwoti', phonetic: 'nəwoti', meaning: 'medicine, power', tags: ['sacred'] },
+            ],
+            'Etruscan': [
+                { word: 'ais', phonetic: 'ais', meaning: 'god', tags: ['sacred', 'divine'] },
+                { word: 'clan', phonetic: 'klan', meaning: 'son', tags: ['kinship'] },
+                { word: 'apa', phonetic: 'apa', meaning: 'father', tags: ['kinship', 'paternal'] },
+                { word: 'ati', phonetic: 'ati', meaning: 'mother', tags: ['kinship', 'maternal'] },
+                { word: 'sec', phonetic: 'sek', meaning: 'daughter', tags: ['kinship'] },
+                { word: 'avil', phonetic: 'avil', meaning: 'year', tags: ['temporal'] },
+            ]
+        };
+
+        const RESONANCE_LANGUAGES = Object.keys(LEXICONS).map(lang => ({
+            value: lang,
+            label: lang
+        }));
+
+        // ============================================================================
+        // TRANSLITERATION ENGINE
+        // ============================================================================
+
+        const PHONEME_NORMALIZATION = {
+            'æ': 'a', 'ɛ': 'e', 'ɪ': 'i', 'ɔ': 'o', 'ʌ': 'u',
+            'eɪ': 'e', 'i': 'i', 'u': 'u', 'aʊ': 'au', 'ɔɪ': 'oi',
+            'ē': 'e', 'ō': 'o',
+            'ʔ': '', 'ʕ': '',
+            'dʒ': 'j', 'tʃ': 'ch', 'ʃ': 'sh', 'θ': 'th',
+            'ħ': 'h', 'ṭ': 't', 'ṣ': 's', 'kh': 'k',
+            'ŋ': 'ng', 'ks': 'x', 'ps': 'ps',
+        };
+
+        function buildPhonemeToCharMap(scriptMap) {
+            const map = new Map();
+            for (const mapping of scriptMap) {
+                const phoneme = mapping.phoneme;
+                if (!map.has(phoneme)) {
+                    map.set(phoneme, []);
+                }
+                map.get(phoneme).push(mapping);
+            }
+            return map;
+        }
+
+        function isVowel(phoneme) {
+            return /[aeiouæɛɪɔʌ]/.test(phoneme);
+        }
+
+        function findBestMatch(phoneme, phonemeMap) {
+            if (phonemeMap.has(phoneme)) {
+                return phonemeMap.get(phoneme)[0];
+            }
+
+            const normalized = PHONEME_NORMALIZATION[phoneme];
+            if (normalized && phonemeMap.has(normalized)) {
+                return phonemeMap.get(normalized)[0];
+            }
+
+            if (phoneme.length > 1) {
+                const firstChar = phoneme[0];
+                if (phonemeMap.has(firstChar)) {
+                    return phonemeMap.get(firstChar)[0];
+                }
+            }
+
+            if (isVowel(phoneme)) {
+                if (phoneme.includes('a') && phonemeMap.has('ʔ')) {
+                    return phonemeMap.get('ʔ')[0];
+                }
+                if ((phoneme.includes('e') || phoneme.includes('i')) && phonemeMap.has('j')) {
+                    return phonemeMap.get('j')[0];
+                }
+                if ((phoneme.includes('o') || phoneme.includes('u')) && phonemeMap.has('w')) {
+                    return phonemeMap.get('w')[0];
+                }
+            }
+
+            return null;
+        }
+
+        function transliterateText(text, targetScript) {
+            const targetMap = SCRIPT_MAPS[targetScript];
+            if (!targetMap) {
+                return { success: false, error: 'Target script not supported' };
+            }
+
+            const phonemeMap = buildPhonemeToCharMap(targetMap);
+            const phonemeTokens = textToPhonemes(text);
+            const translitTokens = [];
+            const words = text.split(/\s+/);
+            const wordsOutput = [];
+
+            for (const word of words) {
+                if (!word.trim()) continue;
+                const wordPhonemes = textToPhonemes(word);
+                let wordOutput = '';
+
+                for (const token of wordPhonemes) {
+                    const targetChar = findBestMatch(token.phoneme, phonemeMap);
+                    if (targetChar) {
+                        translitTokens.push({
+                            source: token.grapheme,
+                            phoneme: token.phoneme,
+                            target: targetChar.char,
+                            targetChar: targetChar
+                        });
+                        wordOutput += targetChar.char;
+                    }
+                }
+
+                if (wordOutput) {
+                    wordsOutput.push(wordOutput);
+                }
+            }
+
+            return {
+                success: true,
+                output: wordsOutput.join(' '),
+                tokens: translitTokens
+            };
+        }
+
+        function getPhoneticGuide(translitResult) {
+            if (!translitResult.success || translitResult.tokens.length === 0) {
+                return 'No phonetic guide available';
+            }
+
+            const lines = [];
+            const seen = new Set();
+
+            for (const token of translitResult.tokens) {
+                if (token.targetChar && !seen.has(token.target)) {
+                    seen.add(token.target);
+                    const name = token.targetChar.name || '(unknown)';
+                    lines.push(`<strong>${token.target}</strong> - <strong>${name}</strong>`);
+                }
+            }
+
+            return lines.join('<br>');
+        }
+
+        function getDefinitions(translitResult) {
+            if (!translitResult.success || translitResult.tokens.length === 0) {
+                return 'No definitions available';
+            }
+
+            const lines = [];
+            const seen = new Set();
+
+            for (const token of translitResult.tokens) {
+                if (token.targetChar && !seen.has(token.target)) {
+                    seen.add(token.target);
+                    const name = token.targetChar.name || '';
+                    const meaning = token.targetChar.meaning || 'meaning unknown';
+                    if (name) {
+                        lines.push(`• ${token.target} (${name}) - ${meaning}`);
+                    } else {
+                        lines.push(`• ${token.target} - ${meaning}`);
+                    }
+                }
+            }
+
+            return lines.join('<br>');
+        }
+
+        // ============================================================================
+        // RESONANCE MATCHER (ALS-RP)
+        // ============================================================================
+
+        function analyzeResonance(text, targetLanguage, threshold = 0.5) {
+            const lexicon = LEXICONS[targetLanguage] || [];
+            if (lexicon.length === 0) {
+                return { language: targetLanguage, matches: [], thematicTags: [] };
+            }
+
+            const inputPhonetic = getPhoneticSignature(text);
+            const inputMetaphone = metaphone(text);
+            const inputSoundex = soundex(text);
+            const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+            const allMatches = [];
+
+            allMatches.push(...findMatches(text, inputPhonetic, inputMetaphone, inputSoundex, lexicon, threshold));
+
+            for (const word of words) {
+                const wordPhonetic = getPhoneticSignature(word);
+                const wordMetaphone = metaphone(word);
+                const wordSoundex = soundex(word);
+                allMatches.push(...findMatches(word, wordPhonetic, wordMetaphone, wordSoundex, lexicon, threshold));
+            }
+
+            const uniqueMatches = deduplicateMatches(allMatches);
+            const sortedMatches = uniqueMatches.sort((a, b) => b.similarity - a.similarity);
+            const thematicTags = extractThemes(sortedMatches);
+
+            return {
+                language: targetLanguage,
+                matches: sortedMatches.slice(0, 10),
+                thematicTags
+            };
+        }
+
+        function findMatches(input, inputPhonetic, inputMetaphone, inputSoundex, lexicon, threshold) {
+            const matches = [];
+
+            for (const entry of lexicon) {
+                const wordPhonetic = getPhoneticSignature(entry.word);
+                const wordMetaphone = metaphone(entry.word);
+                const wordSoundex = soundex(entry.word);
+
+                if (inputPhonetic === wordPhonetic || input.toLowerCase() === entry.word.toLowerCase()) {
+                    matches.push({
+                        word: entry.word,
+                        phonetic: entry.phonetic,
+                        meaning: entry.meaning,
+                        similarity: 1.0,
+                        matchType: 'exact',
+                        tags: entry.tags
+                    });
+                    continue;
+                }
+
+                if (inputMetaphone === wordMetaphone && inputMetaphone.length > 0) {
+                    matches.push({
+                        word: entry.word,
+                        phonetic: entry.phonetic,
+                        meaning: entry.meaning,
+                        similarity: 0.9,
+                        matchType: 'metaphone',
+                        tags: entry.tags
+                    });
+                    continue;
+                }
+
+                if (inputSoundex === wordSoundex && inputSoundex.length > 0) {
+                    matches.push({
+                        word: entry.word,
+                        phonetic: entry.phonetic,
+                        meaning: entry.meaning,
+                        similarity: 0.8,
+                        matchType: 'soundex',
+                        tags: entry.tags
+                    });
+                    continue;
+                }
+
+                const similarity = phoneticSimilarity(input, entry.word);
+                if (similarity >= threshold) {
+                    matches.push({
+                        word: entry.word,
+                        phonetic: entry.phonetic,
+                        meaning: entry.meaning,
+                        similarity: similarity,
+                        matchType: similarity >= 0.75 ? 'phonetic' : 'fuzzy',
+                        tags: entry.tags
+                    });
+                }
+
+                if (input.length > 3 && entry.word.length > 3) {
+                    if (input.toLowerCase().includes(entry.word.toLowerCase()) ||
+                        entry.word.toLowerCase().includes(input.toLowerCase())) {
+                        const containmentSimilarity = Math.min(input.length, entry.word.length) /
+                                                      Math.max(input.length, entry.word.length);
+                        if (containmentSimilarity >= threshold) {
+                            matches.push({
+                                word: entry.word,
+                                phonetic: entry.phonetic,
+                                meaning: entry.meaning,
+                                similarity: containmentSimilarity * 0.7,
+                                matchType: 'fuzzy',
+                                tags: entry.tags
+                            });
+                        }
+                    }
+                }
+            }
+
+            return matches;
+        }
+
+        function deduplicateMatches(matches) {
+            const map = new Map();
+            for (const match of matches) {
+                const key = match.word;
+                const existing = map.get(key);
+                if (!existing || match.similarity > existing.similarity) {
+                    map.set(key, match);
+                }
+            }
+            return Array.from(map.values());
+        }
+
+        function extractThemes(matches) {
+            const tagCounts = new Map();
+            for (const match of matches) {
+                if (match.tags) {
+                    for (const tag of match.tags) {
+                        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+                    }
+                }
+            }
+
+            const sortedTags = Array.from(tagCounts.entries())
+                .sort((a, b) => b[1] - a[1])
+                .map(([tag]) => tag);
+
+            return mapToArchetypalThemes(sortedTags).slice(0, 5);
+        }
+
+        function mapToArchetypalThemes(tags) {
+            const themeMap = {
+                'Memory & Legacy': ['time', 'antiquity', 'age', 'temporal', 'lineage'],
+                'Community & Kinship': ['kinship', 'family', 'maternal', 'paternal', 'community', 'exchange'],
+                'Divine & Sacred': ['sacred', 'divine', 'divinity', 'deity', 'cosmic'],
+                'Mortality & Body': ['mortality', 'physical', 'body', 'anatomy', 'flesh', 'death'],
+                'Wisdom & Knowledge': ['knowledge', 'wisdom', 'cognition', 'learning'],
+                'Nature & Elements': ['element', 'nature', 'earth', 'terrestrial', 'celestial', 'water', 'fire'],
+                'Voice & Expression': ['voice', 'vocalization', 'expression', 'communication'],
+                'Power & Authority': ['power', 'authority', 'sovereignty'],
+                'Spirit & Metaphysical': ['spirit', 'metaphysical', 'supernatural', 'destiny', 'vitality'],
+                'Place & Journey': ['place', 'journey', 'dwelling', 'realm', 'boundary'],
+            };
+
+            const themes = new Set();
+            for (const tag of tags) {
+                for (const [theme, keywords] of Object.entries(themeMap)) {
+                    if (keywords.includes(tag)) {
+                        themes.add(theme);
+                        break;
+                    }
+                }
+            }
+
+            return Array.from(themes);
+        }
+
+        // ============================================================================
+        // UI INITIALIZATION
+        // ============================================================================
+
+        function init() {
+            populateTargetScripts();
+            populateLanguageCheckboxes();
+            attachEventListeners();
+        }
+
+        function populateTargetScripts() {
+            const select = document.getElementById('target-script');
+            for (const script of SUPPORTED_SCRIPTS) {
+                const option = document.createElement('option');
+                option.value = script.value;
+                option.textContent = script.label;
+                select.appendChild(option);
+            }
+        }
+
+        function populateLanguageCheckboxes() {
+            const container = document.getElementById('language-checkboxes');
+            for (const lang of RESONANCE_LANGUAGES) {
+                const label = document.createElement('label');
+                label.className = 'checkbox-label';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = lang.value;
+                checkbox.checked = ['Basque', 'Sumerian Cuneiform'].includes(lang.value);
+
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(lang.label));
+                container.appendChild(label);
+            }
+        }
+
+        function attachEventListeners() {
+            document.getElementById('transliterate-btn').addEventListener('click', handleTransliterate);
+            document.getElementById('analyze-resonance-btn').addEventListener('click', handleResonanceAnalysis);
+        }
+
+        function handleTransliterate() {
+            const sourceText = document.getElementById('source-text').value.trim();
+            const targetScript = document.getElementById('target-script').value;
+
+            if (!sourceText) {
+                alert('Please enter some text to transliterate.');
+                return;
+            }
+
+            const result = transliterateText(sourceText, targetScript);
+
+            if (!result.success) {
+                alert('Transliteration failed: ' + result.error);
+                return;
+            }
+
+            const resultBox = document.getElementById('result-box');
+            resultBox.textContent = result.output;
+
+            const scriptInfo = SUPPORTED_SCRIPTS.find(s => s.value === targetScript);
+            if (scriptInfo && scriptInfo.direction === 'rtl') {
+                resultBox.classList.add('rtl');
+            } else {
+                resultBox.classList.remove('rtl');
+            }
+
+            document.getElementById('phonetic-guide').innerHTML = getPhoneticGuide(result);
+            document.getElementById('definitions').innerHTML = getDefinitions(result);
+            document.getElementById('result-container').style.display = 'block';
+        }
+
+        function handleResonanceAnalysis() {
+            const sourceText = document.getElementById('source-text').value.trim();
+            const checkboxes = document.querySelectorAll('#language-checkboxes input:checked');
+            const selectedLanguages = Array.from(checkboxes).map(cb => cb.value);
+
+            if (!sourceText) {
+                alert('Please enter some text to analyze.');
+                return;
+            }
+
+            if (selectedLanguages.length === 0) {
+                alert('Please select at least one language for analysis.');
+                return;
+            }
+
+            const allResults = [];
+            const allTags = new Set();
+
+            for (const lang of selectedLanguages) {
+                const result = analyzeResonance(sourceText, lang);
+                if (result.matches.length > 0) {
+                    allResults.push(result);
+                    result.thematicTags.forEach(tag => allTags.add(tag));
+                }
+            }
+
+            displayResonanceResults(allResults, Array.from(allTags));
+        }
+
+        function displayResonanceResults(results, tags) {
+            const tagsContainer = document.getElementById('thematic-tags');
+            const resultsContainer = document.getElementById('resonance-results');
+
+            tagsContainer.innerHTML = '';
+            resultsContainer.innerHTML = '';
+
+            if (tags.length > 0) {
+                tags.forEach(tag => {
+                    const tagEl = document.createElement('div');
+                    tagEl.className = 'tag';
+                    tagEl.textContent = tag;
+                    tagsContainer.appendChild(tagEl);
+                });
+            }
+
+            results.forEach(result => {
+                const card = document.createElement('div');
+                card.className = 'resonance-card';
+
+                const title = document.createElement('h4');
+                title.textContent = result.language;
+                card.appendChild(title);
+
+                const list = document.createElement('ul');
+                result.matches.forEach(match => {
+                    const item = document.createElement('li');
+                    item.textContent = `${match.word} - ${match.meaning}`;
+                    list.appendChild(item);
+                });
+                card.appendChild(list);
+
+                resultsContainer.appendChild(card);
+            });
+
+            document.getElementById('resonance-container').style.display = 'block';
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('open');
+            const title = content.previousElementSibling;
+            title.textContent = content.classList.contains('open') ? '▾ ' + title.textContent.substring(2) : '▸ ' + title.textContent.substring(2);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
