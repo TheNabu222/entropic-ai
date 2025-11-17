@@ -46,6 +46,20 @@ class PersonalUpdatesAdmin {
     }
 
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+
+        // Form submission
+        const form = document.getElementById('updateForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Form submitted');
+                this.handleSubmit();
+            });
+            console.log('Form submit listener added');
+        } else {
+            console.error('Update form not found!');
+        }
         // Form submission
         document.getElementById('updateForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -63,6 +77,33 @@ class PersonalUpdatesAdmin {
         });
 
         // Preview button
+        const previewBtn = document.getElementById('previewBtn');
+        if (previewBtn) {
+            previewBtn.addEventListener('click', () => {
+                console.log('Preview button clicked');
+                this.showPreview();
+            });
+        }
+
+        // Clear button
+        const clearBtn = document.getElementById('clearBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                console.log('Clear button clicked');
+                this.clearForm();
+            });
+        }
+
+        // Close preview
+        const closePreview = document.getElementById('closePreview');
+        if (closePreview) {
+            closePreview.addEventListener('click', () => {
+                console.log('Close preview clicked');
+                document.getElementById('previewModal').classList.remove('active');
+            });
+        }
+
+        console.log('All event listeners set up successfully');
         document.getElementById('previewBtn').addEventListener('click', () => {
             this.showPreview();
         });
@@ -144,6 +185,7 @@ class PersonalUpdatesAdmin {
     }
 
     async handleSubmit() {
+        console.log('handleSubmit called');
         try {
             // Get form values
             const title = document.getElementById('title').value.trim();
@@ -152,6 +194,8 @@ class PersonalUpdatesAdmin {
             const mediaType = document.getElementById('mediaType').value;
             const published = document.getElementById('published').checked;
             const featured = document.getElementById('featured').checked;
+
+            console.log('Form data:', { title, category, mediaType, published, featured });
 
             // Validate
             if (!category) {
@@ -539,5 +583,13 @@ class PersonalUpdatesAdmin {
 // Initialize admin interface
 let admin;
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing admin...');
+    try {
+        admin = new PersonalUpdatesAdmin();
+        console.log('Admin instance created');
+    } catch (error) {
+        console.error('Error creating admin instance:', error);
+        alert('Error initializing admin interface: ' + error.message);
+    }
     admin = new PersonalUpdatesAdmin();
 });

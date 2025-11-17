@@ -5,6 +5,14 @@ class PersonalUpdates {
     constructor(containerId, options = {}) {
         this.supabaseUrl = 'https://aqxrogaltuwtlparwdkq.supabase.co';
         this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxeHJvZ2FsdHV3dGxwYXJ3ZGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2MTcxNzgsImV4cCI6MjA0NzE5MzE3OH0.p7jFJp8MUzCx_-u1P6VkWs-h_dKSwQvLF0R5lOdpGVU';
+
+        // Check if supabase is available
+        if (typeof window.supabase === 'undefined') {
+            console.error('Supabase library not loaded!');
+            return;
+        }
+
+        this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
         this.supabase = supabase.createClient(this.supabaseUrl, this.supabaseKey);
 
         this.containerId = containerId;
