@@ -839,6 +839,8 @@
         let soundEnabled = true;
 
         const sounds = {};
+        let soundsInitialized = false;
+        let soundInitPromise = null;
 
         const dom = {
             canvasFrame: document.getElementById('canvas-frame'),
@@ -854,21 +856,80 @@
         };
 
         function initializeSounds() {
-            if (typeof Tone !== 'undefined') {
-                sounds.pop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
-                sounds.boop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
-                sounds.success = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination();
-                sounds.error = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sawtooth' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
-            } else {
+            if (soundsInitialized) return;
+            if (typeof Tone === 'undefined') {
                 console.warn("Tone.js not found. Sound effects will be disabled.");
+                return;
             }
+
+            sounds.pop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
+            sounds.boop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
+            sounds.success = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination();
+            sounds.error = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sawtooth' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
+            soundsInitialized = true;
+            console.log('🔊 Sound effects ready');
+        }
+
+        function ensureSoundInitialized() {
+            if (soundsInitialized) {
+                return Promise.resolve();
+            }
+            if (soundInitPromise) {
+                return soundInitPromise;
+            }
+            if (typeof Tone === 'undefined') {
+                console.warn("Tone.js not found. Sound effects will be disabled.");
+                return Promise.resolve();
+            }
+
+            soundInitPromise = Tone.start()
+                .then(() => {
+                    initializeSounds();
+                })
+                .catch(err => {
+                    console.warn('Unable to start audio context:', err);
+                })
+                .finally(() => {
+                    soundInitPromise = null;
+                });
+
+            return soundInitPromise;
+        }
+
+        function setupSoundInitialization() {
+            let resumed = false;
+            const resume = () => {
+                if (resumed) return;
+                resumed = true;
+                document.removeEventListener('pointerdown', resume);
+                document.removeEventListener('keydown', resume);
+                dom.canvasFrame?.removeEventListener('load', attachToIframeDoc);
+                ensureSoundInitialized();
+            };
+
+            const bindToDoc = (targetDoc) => {
+                if (!targetDoc || resumed) return;
+                targetDoc.addEventListener('pointerdown', resume, { once: true });
+                targetDoc.addEventListener('keydown', resume, { once: true });
+            };
+
+            const attachToIframeDoc = () => {
+                const iframeDoc = dom.canvasFrame?.contentDocument || dom.canvasFrame?.contentWindow?.document;
+                if (iframeDoc) {
+                    bindToDoc(iframeDoc);
+                }
+            };
+
+            bindToDoc(document);
+            dom.canvasFrame?.addEventListener('load', attachToIframeDoc);
+            attachToIframeDoc();
         }
 
         // ============================================
         // INITIALIZATION
         // ============================================
         window.addEventListener('load', () => {
-            initializeSounds();
+            setupSoundInitialization();
             initCanvas();
             loadComponents();
             updateStatus('✨ Ready to create! ✨');
@@ -970,7 +1031,15 @@
         // ============================================
         function playSound(type, note = 'C5') {
             if (!soundEnabled) return;
-            try { if (sounds[type]) { sounds[type].triggerAttackRelease(note, '16n'); } } catch (e) { console.error("Sound error:", e); }
+            ensureSoundInitialized().then(() => {
+                try {
+                    if (sounds[type]) {
+                        sounds[type].triggerAttackRelease(note, '16n');
+                    }
+                } catch (e) {
+                    console.error("Sound error:", e);
+                }
+            });
         }
         function showStamp(emoji) {
             const stamp = document.createElement('div');
