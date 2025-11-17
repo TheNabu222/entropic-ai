@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Updates Admin // COAIEXIST</title>
+
+    <!-- Quill WYSIWYG Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --magenta: #f312af;
+            --cyan: #00ffcc;
+            --yellow: #fffb01;
+            --purple: #bf5fff;
+            --dark-bg: #021313;
+            --darker-bg: #010a0a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: var(--dark-bg);
+            color: var(--cyan);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            color: var(--magenta);
+            text-shadow: 0 0 10px var(--magenta), 0 0 20px var(--magenta);
+            margin-bottom: 10px;
+            font-family: 'Uncial Antiqua', cursive;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--cyan);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+            border: 2px solid var(--cyan);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            color: var(--magenta);
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: var(--cyan);
+            font-size: 1.2em;
+            margin-top: 5px;
+        }
+
+        .form-section {
+            background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+            border: 3px solid var(--magenta);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(243, 18, 175, 0.4);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: var(--cyan);
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2em;
+            background: var(--darker-bg);
+            border: 2px solid var(--purple);
+            color: var(--cyan);
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--magenta);
+            box-shadow: 0 0 15px rgba(243, 18, 175, 0.5);
+        }
+
+        .editor-container {
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        #editor {
+            min-height: 200px;
+        }
+
+        .char-counter {
+            text-align: right;
+            color: var(--yellow);
+            font-size: 1em;
+            margin-top: 5px;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            accent-color: var(--magenta);
+        }
+
+        .media-selector {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .media-inputs {
+            display: none;
+        }
+
+        .media-inputs.active {
+            display: block;
+        }
+
+        .gif-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: var(--darker-bg);
+            border: 2px solid var(--purple);
+            border-radius: 5px;
+        }
+
+        .gif-option {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            transition: all 0.3s;
+            padding: 5px;
+        }
+
+        .gif-option:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .gif-option.selected {
+            border-color: var(--magenta);
+            box-shadow: 0 0 15px var(--magenta);
+        }
+
+        .gif-option img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 3px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-family: 'VT323', monospace;
+            font-size: 1.5em;
+            border: 2px solid;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: var(--magenta);
+            color: white;
+            border-color: var(--magenta);
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--magenta);
+            box-shadow: 0 0 20px var(--magenta);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--cyan);
+            border-color: var(--cyan);
+        }
+
+        .btn-secondary:hover {
+            background: var(--cyan);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: #ff4444;
+            border-color: #ff4444;
+        }
+
+        .btn-danger:hover {
+            background: #ff4444;
+            color: white;
+            box-shadow: 0 0 20px #ff4444;
+        }
+
+        .status-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.success {
+            background: rgba(0, 255, 204, 0.2);
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+        }
+
+        .status-message.error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 2px solid #ff4444;
+            color: #ff4444;
+        }
+
+        .updates-list {
+            margin-top: 30px;
+        }
+
+        .updates-list h2 {
+            font-size: 2em;
+            color: var(--magenta);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .update-card {
+            background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+            border: 2px solid var(--cyan);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .update-card:hover {
+            border-color: var(--magenta);
+            box-shadow: 0 0 20px rgba(243, 18, 175, 0.4);
+        }
+
+        .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .update-title {
+            font-size: 1.8em;
+            color: var(--magenta);
+            margin-bottom: 5px;
+        }
+
+        .update-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 1em;
+            color: var(--cyan);
+            opacity: 0.8;
+        }
+
+        .update-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .badge-category {
+            background: var(--purple);
+            color: white;
+        }
+
+        .badge-status {
+            background: var(--cyan);
+            color: var(--dark-bg);
+        }
+
+        .badge-featured {
+            background: var(--yellow);
+            color: var(--dark-bg);
+        }
+
+        .update-content {
+            color: var(--cyan);
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        .update-media {
+            margin: 15px 0;
+        }
+
+        .update-media img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid var(--purple);
+        }
+
+        .update-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .update-actions button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 2em;
+            color: var(--magenta);
+        }
+
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-modal.active {
+            display: block;
+        }
+
+        .preview-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--dark-bg);
+            border: 3px solid var(--magenta);
+            border-radius: 15px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .preview-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--magenta);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .media-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .toggle-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>~*~ Personal Updates Admin ~*~</h1>
+        <p class="subtitle">Cosmic content management for COAIEXIST.OS</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Total Updates</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="publishedCount">0</div>
+                <div class="stat-label">Published</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="draftCount">0</div>
+                <div class="stat-label">Drafts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="featuredCount">0</div>
+                <div class="stat-label">Featured</div>
+            </div>
+        </div>
+
+        <div class="status-message" id="statusMessage"></div>
+
+        <div class="form-section">
+            <h2 style="text-align: center; color: var(--cyan); margin-bottom: 25px; font-size: 2em;">Create New Update</h2>
+
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="title">Title (Optional)</label>
+                    <input type="text" id="title" maxlength="200" placeholder="Give your update a title...">
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" required>
+                        <option value="">Select a category...</option>
+                        <option value="artwork">🎨 Artwork</option>
+                        <option value="poetry">📝 Poetry</option>
+                        <option value="blog">💭 Blog Post</option>
+                        <option value="video">🎥 Video</option>
+                        <option value="update">✨ Update</option>
+                        <option value="announcement">📢 Announcement</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editor">Content *</label>
+                    <div class="editor-container">
+                        <div id="editor"></div>
+                    </div>
+                    <div class="char-counter">
+                        Rich text editor - Format your content with bold, italic, lists, and more!
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Media</label>
+                    <div class="media-selector">
+                        <select id="mediaType">
+                            <option value="none">None</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="soundcloud">SoundCloud</option>
+                            <option value="gif">GIF</option>
+                            <option value="image">Image URL</option>
+                        </select>
+
+                        <div>
+                            <div id="youtubeInput" class="media-inputs">
+                                <input type="text" id="youtubeUrl" placeholder="YouTube video URL or ID...">
+                            </div>
+
+                            <div id="soundcloudInput" class="media-inputs">
+                                <input type="text" id="soundcloudUrl" placeholder="SoundCloud track URL...">
+                            </div>
+
+                            <div id="gifInput" class="media-inputs">
+                                <input type="text" id="gifSearch" placeholder="Search your GIF collection...">
+                                <div class="gif-grid" id="gifGrid"></div>
+                                <input type="hidden" id="selectedGif">
+                            </div>
+
+                            <div id="imageInput" class="media-inputs">
+                                <input type="text" id="imageUrl" placeholder="Image URL...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <input type="checkbox" id="published" checked>
+                            <label for="published" style="margin: 0;">Publish Immediately</label>
+                        </div>
+                        <div class="toggle-item">
+                            <input type="checkbox" id="featured">
+                            <label for="featured" style="margin: 0;">Feature This Update</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">
+                        ✨ Post Update ✨
+                    </button>
+                    <button type="button" class="btn-secondary" id="previewBtn">
+                        👁️ Preview
+                    </button>
+                    <button type="button" class="btn-secondary" id="clearBtn">
+                        🗑️ Clear Form
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="updates-list">
+            <h2>~*~ Manage Updates ~*~</h2>
+            <div id="updatesContainer" class="loading">Loading updates...</div>
+        </div>
+    </div>
+
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <button class="preview-close" id="closePreview">×</button>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+// Personal Updates Admin JavaScript - BUNDLED VERSION
+class PersonalUpdatesAdmin {
+    constructor() {
+        this.supabaseUrl = 'https://aqxrogaltuwtlparwdkq.supabase.co';
+        this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxeHJvZ2FsdHV3dGxwYXJ3ZGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE2MTcxNzgsImV4cCI6MjA0NzE5MzE3OH0.p7jFJp8MUzCx_-u1P6VkWs-h_dKSwQvLF0R5lOdpGVU';
+
+        if (typeof window.supabase === 'undefined') {
+            console.error('Supabase library not loaded!');
+            alert('Error: Supabase not loaded. Please check your internet connection and refresh.');
+            return;
+        }
+
+        this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
+        this.quill = null;
+        this.editingId = null;
+        this.gifList = [];
+        this.init();
+    }
+
+    async init() {
+        console.log('Initializing Personal Updates Admin...');
+
+        if (typeof Quill === 'undefined') {
+            console.error('Quill editor library not loaded!');
+            alert('Error: Rich text editor not loaded. Please refresh the page.');
+            return;
+        }
+
+        try {
+            this.quill = new Quill('#editor', {
+                theme: 'snow',
+                placeholder: 'Share your thoughts, art, poetry, or updates with the void...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote', 'code-block'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+            console.log('Quill editor initialized successfully');
+        } catch (error) {
+            console.error('Error initializing Quill:', error);
+            alert('Error initializing editor: ' + error.message);
+            return;
+        }
+
+        this.setupEventListeners();
+        await this.loadGifList();
+        await this.loadUpdates();
+        await this.updateStats();
+    }
+
+    setupEventListeners() {
+        console.log('Setting up event listeners...');
+
+        const form = document.getElementById('updateForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                console.log('Form submitted');
+                this.handleSubmit();
+            });
+            console.log('Form submit listener added');
+        } else {
+            console.error('Update form not found!');
+        }
+
+        document.getElementById('mediaType').addEventListener('change', (e) => {
+            this.handleMediaTypeChange(e.target.value);
+        });
+
+        document.getElementById('gifSearch').addEventListener('input', (e) => {
+            this.filterGifs(e.target.value);
+        });
+
+        const previewBtn = document.getElementById('previewBtn');
+        if (previewBtn) {
+            previewBtn.addEventListener('click', () => {
+                console.log('Preview button clicked');
+                this.showPreview();
+            });
+        }
+
+        const clearBtn = document.getElementById('clearBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                console.log('Clear button clicked');
+                this.clearForm();
+            });
+        }
+
+        const closePreview = document.getElementById('closePreview');
+        if (closePreview) {
+            closePreview.addEventListener('click', () => {
+                console.log('Close preview clicked');
+                document.getElementById('previewModal').classList.remove('active');
+            });
+        }
+
+        console.log('All event listeners set up successfully');
+    }
+
+    handleMediaTypeChange(type) {
+        document.querySelectorAll('.media-inputs').forEach(el => {
+            el.classList.remove('active');
+        });
+
+        const mediaInputs = {
+            'youtube': 'youtubeInput',
+            'soundcloud': 'soundcloudInput',
+            'gif': 'gifInput',
+            'image': 'imageInput'
+        };
+
+        if (mediaInputs[type]) {
+            document.getElementById(mediaInputs[type]).classList.add('active');
+        }
+    }
+
+    async loadGifList() {
+        this.gifList = [
+            '/assets/misc_gif/rainbow.gif',
+            '/assets/misc_gif/wat.gif',
+            '/assets/misc_gif/hero.gif',
+            '/assets/misc_gif/bartxxx.gif',
+            '/assets/classic_gifs/1(11).gif',
+            '/assets/classic_gifs/1(10).gif',
+        ];
+        this.renderGifGrid(this.gifList);
+    }
+
+    renderGifGrid(gifs) {
+        const grid = document.getElementById('gifGrid');
+        grid.innerHTML = gifs.map(gifUrl => `
+            <div class="gif-option" data-gif="${gifUrl}">
+                <img src="${gifUrl}" alt="GIF" loading="lazy">
+            </div>
+        `).join('');
+
+        grid.querySelectorAll('.gif-option').forEach(el => {
+            el.addEventListener('click', () => {
+                grid.querySelectorAll('.gif-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                el.classList.add('selected');
+                document.getElementById('selectedGif').value = el.dataset.gif;
+            });
+        });
+    }
+
+    filterGifs(searchTerm) {
+        const filtered = this.gifList.filter(gif =>
+            gif.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        this.renderGifGrid(filtered);
+    }
+
+    async handleSubmit() {
+        console.log('handleSubmit called');
+        try {
+            const title = document.getElementById('title').value.trim();
+            const category = document.getElementById('category').value;
+            const content = this.quill.root.innerHTML;
+            const mediaType = document.getElementById('mediaType').value;
+            const published = document.getElementById('published').checked;
+            const featured = document.getElementById('featured').checked;
+
+            console.log('Form data:', { title, category, mediaType, published, featured });
+
+            if (!category) {
+                this.showStatus('Please select a category', 'error');
+                return;
+            }
+
+            if (this.quill.getText().trim().length === 0) {
+                this.showStatus('Please enter some content', 'error');
+                return;
+            }
+
+            let mediaUrl = null;
+            if (mediaType === 'youtube') {
+                mediaUrl = this.processYouTubeUrl(document.getElementById('youtubeUrl').value);
+            } else if (mediaType === 'soundcloud') {
+                mediaUrl = document.getElementById('soundcloudUrl').value;
+            } else if (mediaType === 'gif') {
+                mediaUrl = document.getElementById('selectedGif').value;
+            } else if (mediaType === 'image') {
+                mediaUrl = document.getElementById('imageUrl').value;
+            }
+
+            const updateData = {
+                title: title || null,
+                content,
+                category,
+                media_type: mediaType,
+                media_url: mediaUrl,
+                published,
+                featured
+            };
+
+            let result;
+            if (this.editingId) {
+                result = await this.supabase
+                    .from('personal_updates')
+                    .update(updateData)
+                    .eq('id', this.editingId);
+                this.editingId = null;
+            } else {
+                result = await this.supabase
+                    .from('personal_updates')
+                    .insert([updateData]);
+            }
+
+            if (result.error) throw result.error;
+
+            this.showStatus(
+                this.editingId ? 'Update saved successfully!' : 'Update posted successfully!',
+                'success'
+            );
+
+            this.clearForm();
+            await this.loadUpdates();
+            await this.updateStats();
+
+        } catch (error) {
+            console.error('Error submitting update:', error);
+            this.showStatus('Error submitting update: ' + error.message, 'error');
+        }
+    }
+
+    processYouTubeUrl(url) {
+        if (!url) return null;
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
+            /^([a-zA-Z0-9_-]{11})$/
+        ];
+        for (const pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) return match[1];
+        }
+        return url;
+    }
+
+    async loadUpdates() {
+        try {
+            const { data, error } = await this.supabase
+                .from('personal_updates')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            this.renderUpdates(data || []);
+        } catch (error) {
+            console.error('Error loading updates:', error);
+            document.getElementById('updatesContainer').innerHTML =
+                '<p style="color: #ff4444; text-align: center;">Error loading updates</p>';
+        }
+    }
+
+    renderUpdates(updates) {
+        const container = document.getElementById('updatesContainer');
+
+        if (updates.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: var(--cyan);">No updates yet. Create your first one!</p>';
+            return;
+        }
+
+        container.innerHTML = updates.map(update => `
+            <div class="update-card" data-id="${update.id}">
+                <div class="update-header">
+                    <div>
+                        ${update.title ? `<div class="update-title">${this.escapeHtml(update.title)}</div>` : ''}
+                        <div class="update-meta">
+                            <span class="update-badge badge-category">${update.category}</span>
+                            <span class="update-badge badge-status">${update.published ? 'Published' : 'Draft'}</span>
+                            ${update.featured ? '<span class="update-badge badge-featured">Featured</span>' : ''}
+                            <span>${new Date(update.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="update-content">
+                    ${update.content}
+                </div>
+
+                ${this.renderMedia(update.media_type, update.media_url)}
+
+                <div class="update-actions">
+                    <button class="btn-secondary" onclick="admin.editUpdate('${update.id}')">
+                        ✏️ Edit
+                    </button>
+                    <button class="btn-secondary" onclick="admin.togglePublish('${update.id}', ${!update.published})">
+                        ${update.published ? '📝 Unpublish' : '✅ Publish'}
+                    </button>
+                    <button class="btn-secondary" onclick="admin.toggleFeatured('${update.id}', ${!update.featured})">
+                        ${update.featured ? '⭐ Unfeature' : '⭐ Feature'}
+                    </button>
+                    <button class="btn-danger" onclick="admin.deleteUpdate('${update.id}')">
+                        🗑️ Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderMedia(mediaType, mediaUrl) {
+        if (!mediaType || mediaType === 'none' || !mediaUrl) return '';
+
+        switch (mediaType) {
+            case 'youtube':
+                return `
+                    <div class="update-media">
+                        <iframe width="100%" height="315"
+                            src="https://www.youtube.com/embed/${mediaUrl}"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                `;
+            case 'soundcloud':
+                return `
+                    <div class="update-media">
+                        <iframe width="100%" height="166" scrolling="no" frameborder="no"
+                            src="https://w.soundcloud.com/player/?url=${encodeURIComponent(mediaUrl)}&color=%23f312af&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true">
+                        </iframe>
+                    </div>
+                `;
+            case 'gif':
+            case 'image':
+                return `
+                    <div class="update-media">
+                        <img src="${mediaUrl}" alt="Media">
+                    </div>
+                `;
+            default:
+                return '';
+        }
+    }
+
+    async editUpdate(id) {
+        try {
+            const { data, error } = await this.supabase
+                .from('personal_updates')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) throw error;
+
+            document.getElementById('title').value = data.title || '';
+            document.getElementById('category').value = data.category;
+            this.quill.root.innerHTML = data.content;
+            document.getElementById('mediaType').value = data.media_type || 'none';
+            document.getElementById('published').checked = data.published;
+            document.getElementById('featured').checked = data.featured;
+
+            this.handleMediaTypeChange(data.media_type);
+            if (data.media_type === 'youtube') {
+                document.getElementById('youtubeUrl').value = data.media_url || '';
+            } else if (data.media_type === 'soundcloud') {
+                document.getElementById('soundcloudUrl').value = data.media_url || '';
+            } else if (data.media_type === 'gif') {
+                document.getElementById('selectedGif').value = data.media_url || '';
+            } else if (data.media_type === 'image') {
+                document.getElementById('imageUrl').value = data.media_url || '';
+            }
+
+            this.editingId = id;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            this.showStatus('Editing update - make changes and submit', 'success');
+        } catch (error) {
+            console.error('Error loading update:', error);
+            this.showStatus('Error loading update: ' + error.message, 'error');
+        }
+    }
+
+    async togglePublish(id, publish) {
+        try {
+            const { error } = await this.supabase
+                .from('personal_updates')
+                .update({ published: publish })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            await this.loadUpdates();
+            await this.updateStats();
+            this.showStatus(`Update ${publish ? 'published' : 'unpublished'} successfully!`, 'success');
+        } catch (error) {
+            console.error('Error toggling publish:', error);
+            this.showStatus('Error updating status: ' + error.message, 'error');
+        }
+    }
+
+    async toggleFeatured(id, featured) {
+        try {
+            const { error } = await this.supabase
+                .from('personal_updates')
+                .update({ featured: featured })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            await this.loadUpdates();
+            await this.updateStats();
+            this.showStatus(`Update ${featured ? 'featured' : 'unfeatured'} successfully!`, 'success');
+        } catch (error) {
+            console.error('Error toggling featured:', error);
+            this.showStatus('Error updating status: ' + error.message, 'error');
+        }
+    }
+
+    async deleteUpdate(id) {
+        if (!confirm('Are you sure you want to delete this update? This cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const { error } = await this.supabase
+                .from('personal_updates')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+
+            await this.loadUpdates();
+            await this.updateStats();
+            this.showStatus('Update deleted successfully', 'success');
+        } catch (error) {
+            console.error('Error deleting update:', error);
+            this.showStatus('Error deleting update: ' + error.message, 'error');
+        }
+    }
+
+    async updateStats() {
+        try {
+            const { data, error } = await this.supabase
+                .from('personal_updates')
+                .select('published, featured');
+
+            if (error) throw error;
+
+            const total = data.length;
+            const published = data.filter(u => u.published).length;
+            const drafts = total - published;
+            const featured = data.filter(u => u.featured).length;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('publishedCount').textContent = published;
+            document.getElementById('draftCount').textContent = drafts;
+            document.getElementById('featuredCount').textContent = featured;
+        } catch (error) {
+            console.error('Error updating stats:', error);
+        }
+    }
+
+    showPreview() {
+        const title = document.getElementById('title').value.trim();
+        const content = this.quill.root.innerHTML;
+        const category = document.getElementById('category').value;
+        const mediaType = document.getElementById('mediaType').value;
+
+        let mediaUrl = null;
+        if (mediaType === 'youtube') {
+            mediaUrl = this.processYouTubeUrl(document.getElementById('youtubeUrl').value);
+        } else if (mediaType === 'soundcloud') {
+            mediaUrl = document.getElementById('soundcloudUrl').value;
+        } else if (mediaType === 'gif') {
+            mediaUrl = document.getElementById('selectedGif').value;
+        } else if (mediaType === 'image') {
+            mediaUrl = document.getElementById('imageUrl').value;
+        }
+
+        const previewHtml = `
+            <h2 style="color: var(--magenta); font-size: 2.5em; margin-bottom: 20px;">
+                Preview
+            </h2>
+            ${title ? `<h3 style="color: var(--cyan); font-size: 2em; margin-bottom: 15px;">${this.escapeHtml(title)}</h3>` : ''}
+            <div style="color: var(--purple); margin-bottom: 20px;">
+                <span class="update-badge badge-category">${category || 'No category'}</span>
+            </div>
+            <div style="color: var(--cyan); font-size: 1.2em; line-height: 1.6; margin-bottom: 20px;">
+                ${content}
+            </div>
+            ${this.renderMedia(mediaType, mediaUrl)}
+        `;
+
+        document.getElementById('previewContent').innerHTML = previewHtml;
+        document.getElementById('previewModal').classList.add('active');
+    }
+
+    clearForm() {
+        document.getElementById('title').value = '';
+        document.getElementById('category').value = '';
+        this.quill.setText('');
+        document.getElementById('mediaType').value = 'none';
+        document.getElementById('youtubeUrl').value = '';
+        document.getElementById('soundcloudUrl').value = '';
+        document.getElementById('imageUrl').value = '';
+        document.getElementById('selectedGif').value = '';
+        document.getElementById('published').checked = true;
+        document.getElementById('featured').checked = false;
+        this.handleMediaTypeChange('none');
+        this.editingId = null;
+
+        document.querySelectorAll('.gif-option').forEach(el => {
+            el.classList.remove('selected');
+        });
+    }
+
+    showStatus(message, type) {
+        const statusEl = document.getElementById('statusMessage');
+        statusEl.textContent = message;
+        statusEl.className = `status-message ${type}`;
+        statusEl.style.display = 'block';
+
+        setTimeout(() => {
+            statusEl.style.display = 'none';
+        }, 5000);
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+}
+
+// Initialize admin interface
+let admin;
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing admin...');
+    try {
+        admin = new PersonalUpdatesAdmin();
+        console.log('Admin instance created');
+    } catch (error) {
+        console.error('Error creating admin instance:', error);
+        alert('Error initializing admin interface: ' + error.message);
+    }
+});
+    </script>
+</body>
+</html>
