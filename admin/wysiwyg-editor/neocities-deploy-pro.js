@@ -5,9 +5,10 @@
 
 const NEOCITIES_API = 'https://neocities.org/api';
 const RATE_LIMIT_MS = 60000; // 1 minute between deploys (Neocities rule)
+const DEFAULT_NEOCITIES_API_KEY = '95cba50ce217a25db2e85800e178044e';
 
 let neocitiesConfig = {
-    apiKey: null,
+    apiKey: DEFAULT_NEOCITIES_API_KEY,
     autoDeployEnabled: false,
     lastDeployTime: 0,
     deploymentHistory: [],
@@ -19,6 +20,42 @@ window.addEventListener('DOMContentLoaded', () => {
     setupNeocitiesDeployment();
     console.log('🚀 Neocities PRO Deployment System loaded!');
 });
+
+function getApiKeyInputValue() {
+    const input = document.getElementById('neocities-api-key');
+    return input ? input.value.trim() : '';
+}
+
+function getActiveApiKey() {
+    return getApiKeyInputValue() || neocitiesConfig.apiKey || '';
+}
+
+const htmlEscaper = document.createElement('div');
+function escapeHtml(str = '') {
+    htmlEscaper.textContent = String(str);
+    return htmlEscaper.innerHTML;
+}
+
+function formatNumberSafe(value, fallback = '0') {
+    const num = Number(value);
+    return Number.isFinite(num) ? num.toLocaleString() : fallback;
+}
+
+function formatDateSafe(value, type = 'datetime', fallback = 'Unknown') {
+    if (!value) return fallback;
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return fallback;
+
+    switch (type) {
+        case 'date':
+            return date.toLocaleDateString();
+        case 'time':
+            return date.toLocaleTimeString();
+        default:
+            return date.toLocaleString();
+    }
+}
 
 // ============================================
 // INITIALIZATION
@@ -37,8 +74,10 @@ function loadNeocitiesConfig() {
             neocitiesConfig = { ...neocitiesConfig, ...config };
         }
 
-        // DO NOT hardcode API keys - security vulnerability!
-        // Users must enter their own API key via the modal
+        // Ensure the deploy modal works out-of-the-box with the shared studio key
+        if (!neocitiesConfig.apiKey) {
+            neocitiesConfig.apiKey = DEFAULT_NEOCITIES_API_KEY;
+        }
     } catch (e) {
         console.error('Failed to load Neocities config:', e);
     }
@@ -346,20 +385,43 @@ window.testConnection = async function() {
     statusDiv.style.color = '#ffdd57';
     statusDiv.innerHTML = '⏳ Testing connection...';
 
+    const inputKey = getApiKeyInputValue();
+    const apiKeyToTest = inputKey || neocitiesConfig.apiKey;
+
+    if (!apiKeyToTest) {
+        statusDiv.style.background = 'rgba(241, 70, 104, 0.2)';
+        statusDiv.style.color = '#f14668';
+        statusDiv.innerHTML = '❌ Please enter your API key first.';
+        return;
+    }
+
+    const testingUnsavedKey = Boolean(inputKey && inputKey !== neocitiesConfig.apiKey);
+
     try {
         const data = await safeFetch(`${NEOCITIES_API}/info`, {
             headers: {
-                'Authorization': `Bearer ${neocitiesConfig.apiKey}`
+                'Authorization': `Bearer ${apiKeyToTest}`
             }
         });
 
         if (data.result === 'success') {
             statusDiv.style.background = 'rgba(72, 199, 116, 0.2)';
             statusDiv.style.color = '#48c774';
-            statusDiv.innerHTML = `✅ Connected to <strong>${data.info.sitename}</strong> | Hits: ${data.info.hits.toLocaleString()} | Last updated: ${new Date(data.info.last_updated).toLocaleString()}`;
+            const reminder = testingUnsavedKey ? '<br><small>Tip: Click 💾 Save to use this key for deploys.</small>' : '';
+
+            const safeSitename = escapeHtml(data.info?.sitename || 'Unknown site');
+            const safeHits = escapeHtml(formatNumberSafe(data.info?.hits, '0'));
+            const safeLastUpdated = escapeHtml(formatDateSafe(data.info?.last_updated));
+
+            statusDiv.innerHTML = `✅ Connected to <strong>${safeSitename}</strong> | Hits: ${safeHits} | Last updated: ${safeLastUpdated}${reminder}`;
 
             // Load site stats
             displaySiteStats(data.info);
+
+            if (testingUnsavedKey) {
+                // Update runtime config so the rest of the session can use the tested key
+                neocitiesConfig.apiKey = apiKeyToTest;
+            }
 
             if (window.playSound) window.playSound('success');
             if (window.showStamp) window.showStamp('✅');
@@ -369,7 +431,7 @@ window.testConnection = async function() {
     } catch (error) {
         statusDiv.style.background = 'rgba(241, 70, 104, 0.2)';
         statusDiv.style.color = '#f14668';
-        statusDiv.innerHTML = `❌ Error: ${error.message}`;
+        statusDiv.innerHTML = `❌ Error: ${escapeHtml(error.message)}`;
 
         if (window.playSound) window.playSound('error');
     }
@@ -379,21 +441,26 @@ function displaySiteStats(info) {
     const statsSection = document.getElementById('site-stats-section');
     const statsDiv = document.getElementById('site-stats');
 
+    const safeHits = escapeHtml(formatNumberSafe(info?.hits, '0'));
+    const safeSitename = escapeHtml(info?.sitename || 'Unknown site');
+    const safeCreated = escapeHtml(formatDateSafe(info?.created_at, 'date', 'Unknown date'));
+    const safeLastUpdated = escapeHtml(formatDateSafe(info?.last_updated, 'time', 'Unknown time'));
+
     statsDiv.innerHTML = `
         <div class="stat-card">
-            <div class="stat-card-value">${info.hits.toLocaleString()}</div>
+            <div class="stat-card-value">${safeHits}</div>
             <div class="stat-card-label">Total Hits</div>
         </div>
         <div class="stat-card">
-            <div class="stat-card-value">${info.sitename}</div>
+            <div class="stat-card-value">${safeSitename}</div>
             <div class="stat-card-label">Site Name</div>
         </div>
         <div class="stat-card">
-            <div class="stat-card-value">${new Date(info.created_at).toLocaleDateString()}</div>
+            <div class="stat-card-value">${safeCreated}</div>
             <div class="stat-card-label">Created</div>
         </div>
         <div class="stat-card">
-            <div class="stat-card-value">${new Date(info.last_updated).toLocaleTimeString()}</div>
+            <div class="stat-card-value">${safeLastUpdated}</div>
             <div class="stat-card-label">Last Updated</div>
         </div>
     `;
@@ -408,10 +475,16 @@ window.refreshNeocitiesFiles = async function() {
     const browser = document.getElementById('neocities-file-browser');
     browser.innerHTML = '<p style="color: var(--text-secondary);">⏳ Loading files...</p>';
 
+    const apiKey = getActiveApiKey();
+    if (!apiKey) {
+        browser.innerHTML = '<p style="color: #f14668;">❌ Please enter your API key first.</p>';
+        return;
+    }
+
     try {
         const data = await safeFetch(`${NEOCITIES_API}/list`, {
             headers: {
-                'Authorization': `Bearer ${neocitiesConfig.apiKey}`
+                'Authorization': `Bearer ${apiKey}`
             }
         });
 
@@ -423,7 +496,7 @@ window.refreshNeocitiesFiles = async function() {
             throw new Error(data.error_type || 'Failed to load files');
         }
     } catch (error) {
-        browser.innerHTML = `<p style="color: #f14668;">❌ Error: ${error.message}</p>`;
+        browser.innerHTML = `<p style="color: #f14668;">❌ Error: ${escapeHtml(error.message)}</p>`;
     }
 };
 
@@ -435,17 +508,10 @@ function renderFileList(files) {
         return;
     }
 
-    // HTML escape helper to prevent XSS
-    const escapeHtml = (str) => {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    };
-
     browser.innerHTML = files.map(file => {
         const icon = file.is_directory ? '📁' : getFileIcon(file.path);
         const size = file.is_directory ? '' : formatFileSize(file.size);
-        const date = new Date(file.updated_at).toLocaleString();
+        const date = escapeHtml(formatDateSafe(file.updated_at));
         const escapedPath = escapeHtml(file.path);
 
         return `
@@ -498,6 +564,12 @@ window.deleteNeocitiesFile = async function(filename) {
         return;
     }
 
+    const apiKey = getActiveApiKey();
+    if (!apiKey) {
+        alert('Please enter your API key first');
+        return;
+    }
+
     try {
         const formData = new FormData();
         formData.append('filenames[]', filename);
@@ -505,7 +577,7 @@ window.deleteNeocitiesFile = async function(filename) {
         const data = await safeFetch(`${NEOCITIES_API}/delete`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${neocitiesConfig.apiKey}`
+                'Authorization': `Bearer ${apiKey}`
             },
             body: formData
         });
@@ -535,7 +607,8 @@ window.deployCurrentPage = async function() {
         return;
     }
 
-    if (!neocitiesConfig.apiKey) {
+    const apiKey = getActiveApiKey();
+    if (!apiKey) {
         alert('Please configure your API key first');
         return;
     }
@@ -568,7 +641,7 @@ window.deployCurrentPage = async function() {
         const data = await safeFetch(`${NEOCITIES_API}/upload`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${neocitiesConfig.apiKey}`
+                'Authorization': `Bearer ${apiKey}`
             },
             body: formData
         }, 60000);
@@ -683,27 +756,39 @@ function renderDeploymentHistory() {
     historyDiv.innerHTML = neocitiesConfig.deploymentHistory.map(entry => {
         const date = new Date(entry.timestamp);
         const timeAgo = getTimeAgo(date);
+        const readableDate = escapeHtml(formatDateSafe(entry.timestamp));
+        const filenameValue = entry.filename || 'index.html';
+        const safeFilename = escapeHtml(filenameValue);
+        const safeError = entry.error ? escapeHtml(entry.error) : '';
+        const safeTimestamp = escapeHtml(entry.timestamp || '');
 
         return `
             <div class="history-item ${entry.status}">
                 <div>
                     <div style="font-weight: bold; color: var(--text-primary);">
-                        ${entry.status === 'success' ? '✅' : '❌'} ${entry.filename}
+                        ${entry.status === 'success' ? '✅' : '❌'} ${safeFilename}
                     </div>
                     <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
-                        ${date.toLocaleString()} (${timeAgo})
+                        ${readableDate} (${timeAgo})
                         ${entry.size ? ` • ${formatFileSize(entry.size)}` : ''}
-                        ${entry.error ? ` • Error: ${entry.error}` : ''}
+                        ${entry.error ? ` • Error: ${safeError}` : ''}
                     </div>
                 </div>
                 ${entry.status === 'success' ? `
-                    <button class="big-button" onclick="rollbackDeployment('${entry.filename}', '${entry.timestamp}')" style="font-size: 12px; padding: 4px 8px;">
+                    <button class="big-button rollback-btn" data-filename="${safeFilename}" data-timestamp="${safeTimestamp}" style="font-size: 12px; padding: 4px 8px;">
                         ⏪ Rollback
                     </button>
                 ` : ''}
             </div>
         `;
     }).join('');
+
+    historyDiv.querySelectorAll('.rollback-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const { filename, timestamp } = e.currentTarget.dataset;
+            window.rollbackDeployment(filename, timestamp);
+        });
+    });
 }
 
 function getTimeAgo(date) {
