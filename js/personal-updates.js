@@ -13,6 +13,7 @@ class PersonalUpdates {
         }
 
         this.supabase = window.supabase.createClient(this.supabaseUrl, this.supabaseKey);
+        this.supabase = supabase.createClient(this.supabaseUrl, this.supabaseKey);
 
         this.containerId = containerId;
         this.options = {
