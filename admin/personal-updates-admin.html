@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Updates Admin // COAIEXIST</title>
+
+    <!-- Quill WYSIWYG Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --magenta: #f312af;
+            --cyan: #00ffcc;
+            --yellow: #fffb01;
+            --purple: #bf5fff;
+            --dark-bg: #021313;
+            --darker-bg: #010a0a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: var(--dark-bg);
+            color: var(--cyan);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            color: var(--magenta);
+            text-shadow: 0 0 10px var(--magenta), 0 0 20px var(--magenta);
+            margin-bottom: 10px;
+            font-family: 'Uncial Antiqua', cursive;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--cyan);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+            border: 2px solid var(--cyan);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            color: var(--magenta);
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: var(--cyan);
+            font-size: 1.2em;
+            margin-top: 5px;
+        }
+
+        .form-section {
+            background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+            border: 3px solid var(--magenta);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(243, 18, 175, 0.4);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: var(--cyan);
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2em;
+            background: var(--darker-bg);
+            border: 2px solid var(--purple);
+            color: var(--cyan);
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--magenta);
+            box-shadow: 0 0 15px rgba(243, 18, 175, 0.5);
+        }
+
+        .editor-container {
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        #editor {
+            min-height: 200px;
+        }
+
+        .char-counter {
+            text-align: right;
+            color: var(--yellow);
+            font-size: 1em;
+            margin-top: 5px;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            accent-color: var(--magenta);
+        }
+
+        .media-selector {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .media-inputs {
+            display: none;
+        }
+
+        .media-inputs.active {
+            display: block;
+        }
+
+        .gif-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: var(--darker-bg);
+            border: 2px solid var(--purple);
+            border-radius: 5px;
+        }
+
+        .gif-option {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            transition: all 0.3s;
+            padding: 5px;
+        }
+
+        .gif-option:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .gif-option.selected {
+            border-color: var(--magenta);
+            box-shadow: 0 0 15px var(--magenta);
+        }
+
+        .gif-option img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 3px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-family: 'VT323', monospace;
+            font-size: 1.5em;
+            border: 2px solid;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: var(--magenta);
+            color: white;
+            border-color: var(--magenta);
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--magenta);
+            box-shadow: 0 0 20px var(--magenta);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--cyan);
+            border-color: var(--cyan);
+        }
+
+        .btn-secondary:hover {
+            background: var(--cyan);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: #ff4444;
+            border-color: #ff4444;
+        }
+
+        .btn-danger:hover {
+            background: #ff4444;
+            color: white;
+            box-shadow: 0 0 20px #ff4444;
+        }
+
+        .status-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            text-align: center;
+            display: none;
+        }
+
+        .status-message.success {
+            background: rgba(0, 255, 204, 0.2);
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+        }
+
+        .status-message.error {
+            background: rgba(255, 68, 68, 0.2);
+            border: 2px solid #ff4444;
+            color: #ff4444;
+        }
+
+        .updates-list {
+            margin-top: 30px;
+        }
+
+        .updates-list h2 {
+            font-size: 2em;
+            color: var(--magenta);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .update-card {
+            background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+            border: 2px solid var(--cyan);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .update-card:hover {
+            border-color: var(--magenta);
+            box-shadow: 0 0 20px rgba(243, 18, 175, 0.4);
+        }
+
+        .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .update-title {
+            font-size: 1.8em;
+            color: var(--magenta);
+            margin-bottom: 5px;
+        }
+
+        .update-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 1em;
+            color: var(--cyan);
+            opacity: 0.8;
+        }
+
+        .update-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .badge-category {
+            background: var(--purple);
+            color: white;
+        }
+
+        .badge-status {
+            background: var(--cyan);
+            color: var(--dark-bg);
+        }
+
+        .badge-featured {
+            background: var(--yellow);
+            color: var(--dark-bg);
+        }
+
+        .update-content {
+            color: var(--cyan);
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        .update-media {
+            margin: 15px 0;
+        }
+
+        .update-media img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid var(--purple);
+        }
+
+        .update-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .update-actions button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 2em;
+            color: var(--magenta);
+        }
+
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-modal.active {
+            display: block;
+        }
+
+        .preview-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--dark-bg);
+            border: 3px solid var(--magenta);
+            border-radius: 15px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .preview-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--magenta);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .media-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .toggle-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>~*~ Personal Updates Admin ~*~</h1>
+        <p class="subtitle">Cosmic content management for COAIEXIST.OS</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Total Updates</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="publishedCount">0</div>
+                <div class="stat-label">Published</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="draftCount">0</div>
+                <div class="stat-label">Drafts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="featuredCount">0</div>
+                <div class="stat-label">Featured</div>
+            </div>
+        </div>
+
+        <div class="status-message" id="statusMessage"></div>
+
+        <div class="form-section">
+            <h2 style="text-align: center; color: var(--cyan); margin-bottom: 25px; font-size: 2em;">Create New Update</h2>
+
+            <form id="updateForm">
+                <div class="form-group">
+                    <label for="title">Title (Optional)</label>
+                    <input type="text" id="title" maxlength="200" placeholder="Give your update a title...">
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" required>
+                        <option value="">Select a category...</option>
+                        <option value="artwork">🎨 Artwork</option>
+                        <option value="poetry">📝 Poetry</option>
+                        <option value="blog">💭 Blog Post</option>
+                        <option value="video">🎥 Video</option>
+                        <option value="update">✨ Update</option>
+                        <option value="announcement">📢 Announcement</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editor">Content *</label>
+                    <div class="editor-container">
+                        <div id="editor"></div>
+                    </div>
+                    <div class="char-counter">
+                        Rich text editor - Format your content with bold, italic, lists, and more!
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Media</label>
+                    <div class="media-selector">
+                        <select id="mediaType">
+                            <option value="none">None</option>
+                            <option value="youtube">YouTube</option>
+                            <option value="soundcloud">SoundCloud</option>
+                            <option value="gif">GIF</option>
+                            <option value="image">Image URL</option>
+                        </select>
+
+                        <div>
+                            <div id="youtubeInput" class="media-inputs">
+                                <input type="text" id="youtubeUrl" placeholder="YouTube video URL or ID...">
+                            </div>
+
+                            <div id="soundcloudInput" class="media-inputs">
+                                <input type="text" id="soundcloudUrl" placeholder="SoundCloud track URL...">
+                            </div>
+
+                            <div id="gifInput" class="media-inputs">
+                                <input type="text" id="gifSearch" placeholder="Search your GIF collection...">
+                                <div class="gif-grid" id="gifGrid"></div>
+                                <input type="hidden" id="selectedGif">
+                            </div>
+
+                            <div id="imageInput" class="media-inputs">
+                                <input type="text" id="imageUrl" placeholder="Image URL...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="toggle-group">
+                        <div class="toggle-item">
+                            <input type="checkbox" id="published" checked>
+                            <label for="published" style="margin: 0;">Publish Immediately</label>
+                        </div>
+                        <div class="toggle-item">
+                            <input type="checkbox" id="featured">
+                            <label for="featured" style="margin: 0;">Feature This Update</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">
+                        ✨ Post Update ✨
+                    </button>
+                    <button type="button" class="btn-secondary" id="previewBtn">
+                        👁️ Preview
+                    </button>
+                    <button type="button" class="btn-secondary" id="clearBtn">
+                        🗑️ Clear Form
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="updates-list">
+            <h2>~*~ Manage Updates ~*~</h2>
+            <div id="updatesContainer" class="loading">Loading updates...</div>
+        </div>
+    </div>
+
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-content">
+            <button class="preview-close" id="closePreview">×</button>
+            <div id="previewContent"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="/js/personal-updates-admin.js"></script>
+</body>
+</html>
