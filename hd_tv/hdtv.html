@@ -2881,8 +2881,19 @@ if (container) {
   console.error('Failed to find the root element');
 }
   </script>
-   <iframe src="/nav.html" 
-        style="position:fixed;bottom:0;left:0;width:100%;height:50px;border:none;z-index:9999;">
-</iframe>
+
+  <div id="taskbar"></div>
+  <script>
+    (async () => {
+      try {
+        const res = await fetch('/hd_tv/safari-taskbar.html', {cache: 'no-store'});
+        if (res.ok) {
+          document.getElementById('taskbar').innerHTML = await res.text();
+        }
+      } catch (e) {
+        console.log('Nav not available');
+      }
+    })();
+  </script>
 </body>
 </html>
