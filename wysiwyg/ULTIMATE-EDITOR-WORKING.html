@@ -1,0 +1,2905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ CoAIexist Pro Editor</title>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --magenta: #f312af;
+            --cyan: #00ffcc;
+            --yellow: #fffb01;
+            --purple: #bf5fff;
+            --green: #00ff00;
+            --pink: #ff69b4;
+            --red: #ff4444;
+            --blue: #4444ff;
+            --orange: #ff9944;
+
+            --dark-bg: #021313;
+            --darker-bg: #000000;
+            --panel-bg: #0a1a1a;
+            --card-bg: #0f2020;
+
+            --border-color: var(--cyan);
+            --border-radius: 8px;
+            --glow-sm: 0 0 5px;
+            --glow-md: 0 0 10px;
+            --glow-lg: 0 0 20px;
+
+            --font-main: 'VT323', monospace;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--dark-bg);
+            color: var(--cyan);
+            overflow: hidden;
+            height: 100vh;
+            font-size: 18px;
+        }
+
+        .editor-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 360px;
+            grid-template-rows: 60px 1fr 40px;
+            grid-template-areas:
+                "toolbar toolbar toolbar"
+                "library canvas sidebar"
+                "statusbar statusbar statusbar";
+            height: 100vh;
+            gap: 2px;
+            background: var(--darker-bg);
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            grid-area: toolbar;
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--cyan);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--spacing-md);
+            gap: var(--spacing-md);
+            box-shadow: var(--glow-sm) var(--cyan);
+            overflow-x: auto;
+        }
+
+        .toolbar-section {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius);
+            border: 2px solid;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .toolbar-section::before {
+            content: attr(data-label);
+            position: absolute;
+            top: -10px;
+            left: var(--spacing-sm);
+            background: var(--panel-bg);
+            padding: 0 var(--spacing-xs);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .toolbar-section.file { border-color: var(--magenta); color: var(--magenta); }
+        .toolbar-section.edit { border-color: var(--cyan); color: var(--cyan); }
+        .toolbar-section.insert { border-color: var(--yellow); color: var(--yellow); }
+        .toolbar-section.style { border-color: var(--purple); color: var(--purple); }
+        .toolbar-section.export { border-color: var(--green); color: var(--green); }
+        .toolbar-section.view { border-color: var(--orange); color: var(--orange); }
+
+        .toolbar-btn {
+            background: transparent;
+            border: 2px solid currentColor;
+            color: inherit;
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 16px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .toolbar-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-sm) currentColor;
+        }
+
+        .toolbar-btn.active {
+            background: currentColor;
+            color: var(--dark-bg);
+            box-shadow: var(--glow-md) currentColor;
+        }
+
+        /* LEFT SIDEBAR */
+        .component-library {
+            grid-area: library;
+            background: var(--panel-bg);
+            border-right: 2px solid var(--magenta);
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            box-shadow: var(--glow-sm) var(--magenta);
+        }
+
+        .library-section {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .library-section-title {
+            font-size: 20px;
+            color: var(--magenta);
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background: var(--card-bg);
+            border: 2px solid var(--magenta);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .library-section-title:hover {
+            background: var(--magenta);
+            color: var(--dark-bg);
+        }
+
+        .library-items {
+            display: grid;
+            gap: var(--spacing-sm);
+        }
+
+        .library-item {
+            background: var(--card-bg);
+            border: 2px solid var(--cyan);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            cursor: grab;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .library-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--glow-md) var(--cyan);
+            border-color: var(--magenta);
+        }
+
+        .library-item:active {
+            cursor: grabbing;
+        }
+
+        /* CENTER CANVAS */
+        .canvas-container {
+            grid-area: canvas;
+            background: var(--darker-bg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-toolbar {
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--purple);
+            padding: var(--spacing-sm) var(--spacing-md);
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        .canvas-workspace {
+            flex: 1;
+            overflow: auto;
+            padding: var(--spacing-lg);
+        }
+
+        #canvas {
+            min-height: 100%;
+            background: white;
+            color: #000;
+            border: 2px solid var(--cyan);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            position: relative;
+        }
+
+        #canvas:empty::before {
+            content: '✨ Drag components here or use ADD ELEMENT to start! ✨';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(0, 255, 204, 0.4);
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .canvas-element {
+            position: relative;
+            margin: var(--spacing-md) 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .canvas-element:hover {
+            outline: 2px solid var(--yellow);
+            outline-offset: 4px;
+        }
+
+        .canvas-element.selected {
+            outline: 3px solid var(--magenta);
+            outline-offset: 4px;
+            box-shadow: var(--glow-md) var(--magenta);
+        }
+
+        .element-controls {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            display: none;
+            gap: var(--spacing-xs);
+            background: var(--panel-bg);
+            padding: var(--spacing-xs);
+            border: 2px solid var(--magenta);
+            border-radius: var(--border-radius);
+            z-index: 100;
+        }
+
+        .canvas-element.selected .element-controls {
+            display: flex;
+        }
+
+        .control-btn {
+            background: var(--dark-bg);
+            border: 1px solid currentColor;
+            color: var(--cyan);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 14px;
+        }
+
+        .control-btn:hover {
+            background: currentColor;
+            color: var(--dark-bg);
+        }
+
+        /* RIGHT SIDEBAR */
+        .sidebar-container {
+            grid-area: sidebar;
+            background: var(--panel-bg);
+            border-left: 2px solid var(--purple);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--purple);
+            background: var(--card-bg);
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: var(--spacing-sm);
+            background: var(--card-bg);
+            border: none;
+            color: var(--purple);
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-tab:hover {
+            background: var(--panel-bg);
+        }
+
+        .sidebar-tab.active {
+            background: var(--purple);
+            color: var(--dark-bg);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-md);
+        }
+
+        .sidebar-panel {
+            display: none;
+        }
+
+        .sidebar-panel.active {
+            display: block;
+        }
+
+        /* PROPERTIES */
+        .properties-section {
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--card-bg);
+            border: 2px solid var(--purple);
+            border-radius: var(--border-radius);
+        }
+
+        .properties-section-title {
+            font-size: 18px;
+            color: var(--purple);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .property-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .property-label {
+            display: block;
+            color: var(--cyan);
+            margin-bottom: var(--spacing-xs);
+            font-size: 14px;
+        }
+
+        .property-input,
+        .property-select,
+        .property-textarea {
+            width: 100%;
+            background: var(--dark-bg);
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            font-family: var(--font-main);
+            font-size: 14px;
+        }
+
+        .property-input:focus,
+        .property-select:focus,
+        .property-textarea:focus {
+            outline: none;
+            border-color: var(--magenta);
+            box-shadow: var(--glow-sm) var(--magenta);
+        }
+
+        .property-textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* ELEMENT TREE */
+        .tree-item {
+            padding: var(--spacing-sm);
+            margin: var(--spacing-xs) 0;
+            background: var(--card-bg);
+            border: 1px solid var(--cyan);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tree-item:hover {
+            background: var(--panel-bg);
+            border-color: var(--magenta);
+        }
+
+        .tree-item.selected {
+            background: var(--magenta);
+            color: var(--dark-bg);
+        }
+
+        /* CSS PROPERTY EDITOR */
+        .css-category {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .css-category-title {
+            background: var(--card-bg);
+            border: 2px solid var(--cyan);
+            padding: var(--spacing-sm);
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .css-category-title:hover {
+            background: var(--cyan);
+            color: var(--dark-bg);
+        }
+
+        .css-properties {
+            padding-left: var(--spacing-md);
+            display: none;
+        }
+
+        .css-category.expanded .css-properties {
+            display: block;
+        }
+
+        /* MODALS */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            border: 3px solid var(--cyan);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            box-shadow: var(--glow-lg) var(--cyan);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--cyan);
+        }
+
+        .modal-title {
+            font-size: 28px;
+            color: var(--cyan);
+        }
+
+        /* STATUS BAR */
+        .status-bar {
+            grid-area: statusbar;
+            background: var(--panel-bg);
+            border-top: 2px solid var(--green);
+            padding: var(--spacing-sm) var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-message {
+            color: var(--green);
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+            border: 1px solid var(--cyan);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--cyan);
+            border-radius: var(--border-radius);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--magenta);
+        }
+
+        /* RESPONSIVE PREVIEW */
+        #canvas.mobile-view {
+            max-width: 375px;
+            margin: 0 auto;
+        }
+
+        #canvas.tablet-view {
+            max-width: 768px;
+            margin: 0 auto;
+        }
+
+        #canvas.desktop-view {
+            max-width: 100%;
+        }
+
+        /* UTILITY */
+        .btn-primary {
+            background: var(--cyan);
+            color: var(--dark-bg);
+            border: 2px solid var(--cyan);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--glow-md) var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: white;
+            border: 2px solid var(--red);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 16px;
+        }
+
+        /* PREVIEW MODE */
+        body.preview-mode .component-library,
+        body.preview-mode .sidebar-container,
+        body.preview-mode .toolbar,
+        body.preview-mode .status-bar {
+            display: none;
+        }
+
+        body.preview-mode .editor-container {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            grid-template-areas: "canvas";
+        }
+
+        body.preview-mode .canvas-toolbar {
+            display: none;
+        }
+
+        body.preview-mode .element-controls {
+            display: none !important;
+        }
+
+        body.preview-mode .canvas-element {
+            cursor: default;
+        }
+
+        body.preview-mode .canvas-element:hover {
+            outline: none;
+        }
+
+        /* Preview Exit Button */
+        .preview-exit-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--magenta);
+            color: white;
+            border: 3px solid var(--cyan);
+            padding: 15px 30px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 20px;
+            z-index: 10000;
+            box-shadow: var(--glow-lg) var(--magenta);
+            display: none;
+        }
+
+        body.preview-mode .preview-exit-btn {
+            display: block;
+        }
+
+        .preview-exit-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--glow-lg) var(--cyan);
+        }
+
+        /* SPARKLE FEEDBACK */
+        .feedback-sparkle {
+            position: fixed;
+            pointer-events: none;
+            font-size: 32px;
+            z-index: 99999;
+            animation: sparkle-float 1s ease-out forwards;
+        }
+
+        @keyframes sparkle-float {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.5) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(1.5) rotate(360deg);
+            }
+        }
+
+        /* STAMP FEEDBACK (KidPix style!) */
+        .stamp {
+            position: fixed;
+            font-size: 48px;
+            pointer-events: none;
+            animation: stamp 0.5s ease-out forwards;
+            z-index: 99999;
+        }
+
+        @keyframes stamp {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2) rotate(10deg);
+            }
+            100% {
+                transform: scale(1) rotate(5deg);
+                opacity: 0;
+            }
+        }
+
+        /* TEXT FORMATTING TOOLBAR */
+        .format-toolbar {
+            position: absolute;
+            top: -45px;
+            left: 0;
+            background: var(--panel-bg);
+            border: 2px solid var(--yellow);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-xs);
+            display: none;
+            gap: var(--spacing-xs);
+            z-index: 1000;
+            box-shadow: var(--glow-md) var(--yellow);
+        }
+
+        .format-toolbar.active {
+            display: flex;
+        }
+
+        .format-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--yellow);
+            color: var(--yellow);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .format-btn:hover {
+            background: var(--yellow);
+            color: var(--dark-bg);
+        }
+
+        .format-btn.active {
+            background: var(--yellow);
+            color: var(--dark-bg);
+        }
+    </style>
+</head>
+<body>
+    <button class="preview-exit-btn" id="exit-preview">Exit Preview</button>
+    <div class="editor-container">
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="toolbar-section file" data-label="📁 File">
+                <button class="toolbar-btn" id="btn-new">New</button>
+                <button class="toolbar-btn" id="btn-save">Save</button>
+                <button class="toolbar-btn" id="btn-load">Load</button>
+                <button class="toolbar-btn" id="btn-load-page">Load Page</button>
+            </div>
+
+            <div class="toolbar-section edit" data-label="✏️ Edit">
+                <button class="toolbar-btn" id="btn-undo">Undo</button>
+                <button class="toolbar-btn" id="btn-redo">Redo</button>
+                <button class="toolbar-btn" id="btn-copy">Copy</button>
+                <button class="toolbar-btn" id="btn-paste">Paste</button>
+                <button class="toolbar-btn" id="btn-clear">Clear</button>
+            </div>
+
+            <div class="toolbar-section insert" data-label="➕ Insert">
+                <button class="toolbar-btn" id="btn-add-element">Add Element</button>
+                <button class="toolbar-btn" id="btn-add-navbar">Navbar</button>
+                <button class="toolbar-btn" id="btn-templates">Templates</button>
+                <button class="toolbar-btn" id="btn-assets">Assets</button>
+                <button class="toolbar-btn" id="btn-ascii">ASCII Art</button>
+                <button class="toolbar-btn" id="btn-imagemap">Image Map</button>
+            </div>
+
+            <div class="toolbar-section style" data-label="🎨 Style">
+                <button class="toolbar-btn" id="btn-page-css">Page CSS</button>
+                <button class="toolbar-btn" id="btn-page-js">Page JS</button>
+                <button class="toolbar-btn" id="btn-code-view">Code View</button>
+                <button class="toolbar-btn" id="btn-animation">Animation</button>
+                <button class="toolbar-btn" id="btn-components">Components</button>
+                <button class="toolbar-btn" id="btn-extraction">🎯 Extract</button>
+            </div>
+
+            <div class="toolbar-section view" data-label="👁️ View">
+                <button class="toolbar-btn" id="btn-view-desktop" class="active">Desktop</button>
+                <button class="toolbar-btn" id="btn-view-tablet">Tablet</button>
+                <button class="toolbar-btn" id="btn-view-mobile">Mobile</button>
+                <button class="toolbar-btn" id="btn-preview">Preview</button>
+            </div>
+
+            <div class="toolbar-section export" data-label="📤 Export">
+                <button class="toolbar-btn" id="btn-export">Export HTML</button>
+                <button class="toolbar-btn" id="btn-copy-html">Copy HTML</button>
+                <button class="toolbar-btn" id="btn-copy-css">Copy CSS</button>
+                <button class="toolbar-btn" id="btn-help">Help (F1)</button>
+            </div>
+        </div>
+
+        <!-- LEFT SIDEBAR - Component Library -->
+        <div class="component-library">
+            <h2 style="color: var(--magenta); text-align: center; margin-bottom: var(--spacing-lg);">
+                ⭐ Components ⭐
+            </h2>
+
+            <div class="library-section">
+                <div class="library-section-title">Basic Elements</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="heading">Heading</div>
+                    <div class="library-item" draggable="true" data-component="paragraph">Paragraph</div>
+                    <div class="library-item" draggable="true" data-component="button">Button</div>
+                    <div class="library-item" draggable="true" data-component="link">Link</div>
+                    <div class="library-item" draggable="true" data-component="image">Image</div>
+                    <div class="library-item" draggable="true" data-component="div">Container</div>
+                </div>
+            </div>
+
+            <div class="library-section">
+                <div class="library-section-title">Layout</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="flexbox">Flexbox</div>
+                    <div class="library-item" draggable="true" data-component="grid">Grid</div>
+                    <div class="library-item" draggable="true" data-component="section">Section</div>
+                    <div class="library-item" draggable="true" data-component="hero">Hero Section</div>
+                    <div class="library-item" draggable="true" data-component="card">Card</div>
+                </div>
+            </div>
+
+            <div class="library-section">
+                <div class="library-section-title">Forms & Inputs</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="input">Text Input</div>
+                    <div class="library-item" draggable="true" data-component="textarea">Textarea</div>
+                    <div class="library-item" draggable="true" data-component="select">Select Dropdown</div>
+                    <div class="library-item" draggable="true" data-component="checkbox">Checkbox</div>
+                    <div class="library-item" draggable="true" data-component="radio">Radio Buttons</div>
+                </div>
+            </div>
+
+            <div class="library-section">
+                <div class="library-section-title">Special</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="video">Video Player</div>
+                    <div class="library-item" draggable="true" data-component="audio">Audio Player</div>
+                    <div class="library-item" draggable="true" data-component="code">Code Block</div>
+                    <div class="library-item" draggable="true" data-component="list">List</div>
+                    <div class="library-item" draggable="true" data-component="table">Table</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER CANVAS -->
+        <div class="canvas-container">
+            <div class="canvas-toolbar">
+                <span style="color: var(--purple); font-size: 20px;">
+                    🎨 <strong>Canvas</strong>
+                </span>
+            </div>
+            <div class="canvas-workspace">
+                <div id="canvas"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="sidebar-container">
+            <div class="sidebar-tabs">
+                <button class="sidebar-tab active" data-tab="properties">Properties</button>
+                <button class="sidebar-tab" data-tab="tree">Tree</button>
+                <button class="sidebar-tab" data-tab="css">CSS</button>
+            </div>
+            <div class="sidebar-content">
+                <!-- PROPERTIES PANEL -->
+                <div id="properties-panel" class="sidebar-panel active">
+                    <div style="text-align: center; color: var(--purple); margin-top: 40px;">
+                        Select an element to edit
+                    </div>
+                </div>
+
+                <!-- TREE PANEL -->
+                <div id="tree-panel" class="sidebar-panel">
+                    <h3 style="color: var(--purple); margin-bottom: var(--spacing-md);">Element Tree</h3>
+                    <div id="element-tree"></div>
+                </div>
+
+                <!-- CSS PANEL -->
+                <div id="css-panel" class="sidebar-panel">
+                    <h3 style="color: var(--purple); margin-bottom: var(--spacing-md);">Complete CSS Editor</h3>
+                    <div id="css-editor"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+            <div class="status-message" id="status-message">Ready!</div>
+            <div style="display: flex; gap: var(--spacing-md);">
+                <span id="element-count">Elements: 0</span>
+                <span id="last-action">Last: None</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD ELEMENT MODAL -->
+    <div class="modal" id="add-element-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Custom HTML Element</h2>
+                <button class="btn-danger" id="close-add-element">Close</button>
+            </div>
+            <div class="property-group">
+                <label class="property-label">Element Tag:</label>
+                <input type="text" class="property-input" id="custom-tag" placeholder="e.g., div, span, article">
+            </div>
+            <div class="property-group">
+                <label class="property-label">Content:</label>
+                <textarea class="property-textarea" id="custom-content" placeholder="Enter content or HTML"></textarea>
+            </div>
+            <div class="property-group">
+                <label class="property-label">Classes (space-separated):</label>
+                <input type="text" class="property-input" id="custom-classes" placeholder="e.g., container my-class">
+            </div>
+            <div class="property-group">
+                <label class="property-label">Inline Styles:</label>
+                <textarea class="property-textarea" id="custom-styles" placeholder="e.g., color: red; padding: 20px;"></textarea>
+            </div>
+            <button class="btn-primary" id="add-custom-element">Add Element</button>
+        </div>
+    </div>
+
+    <!-- NAVBAR MODAL -->
+    <div class="modal" id="navbar-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Navbar Builder</h2>
+                <button class="btn-danger" id="close-navbar">Close</button>
+            </div>
+            <div class="property-group">
+                <label class="property-label">Navbar Style:</label>
+                <select class="property-select" id="navbar-style">
+                    <option value="top-simple">Top Simple</option>
+                    <option value="top-dropdown">Top with Dropdown</option>
+                    <option value="sidebar-left">Sidebar Left</option>
+                    <option value="sidebar-right">Sidebar Right</option>
+                    <option value="footer-nav">Footer Nav</option>
+                    <option value="y2k-style">Y2K Style</option>
+                    <option value="retro-tabs">Retro Tabs</option>
+                    <option value="floating-menu">Floating Menu</option>
+                </select>
+            </div>
+            <div class="property-group">
+                <label class="property-label">Links (one per line: Label | URL):</label>
+                <textarea class="property-textarea" id="navbar-links">Home | /index.html
+About | /about.html
+Contact | /contact.html</textarea>
+            </div>
+            <button class="btn-primary" id="create-navbar">Create Navbar</button>
+        </div>
+    </div>
+
+    <!-- TEMPLATES MODAL -->
+    <div class="modal" id="templates-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Enhanced Templates</h2>
+                <button class="btn-danger" id="close-templates">Close</button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacing-md);">
+                <button class="btn-primary" onclick="insertTemplate('contact-form')">Contact Form</button>
+                <button class="btn-primary" onclick="insertTemplate('survey-form')">Survey Form</button>
+                <button class="btn-primary" onclick="insertTemplate('quiz')">Quiz</button>
+                <button class="btn-primary" onclick="insertTemplate('pdf-viewer')">PDF Viewer</button>
+                <button class="btn-primary" onclick="insertTemplate('gallery')">Image Gallery</button>
+                <button class="btn-primary" onclick="insertTemplate('slideshow')">Slideshow</button>
+                <button class="btn-primary" onclick="insertTemplate('accordion')">Accordion</button>
+                <button class="btn-primary" onclick="insertTemplate('tabs')">Tabs</button>
+                <button class="btn-primary" onclick="insertTemplate('modal')">Modal</button>
+                <button class="btn-primary" onclick="insertTemplate('clicker-game')">Clicker Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE CSS MODAL -->
+    <div class="modal" id="page-css-modal">
+        <div class="modal-content" style="min-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Page-Level CSS</h2>
+                <button class="btn-danger" id="close-page-css">Close</button>
+            </div>
+            <textarea id="page-css-editor" class="property-textarea" style="min-height: 400px; font-family: 'Courier New', monospace;"></textarea>
+            <button class="btn-primary" id="apply-page-css">Apply CSS</button>
+        </div>
+    </div>
+
+    <!-- PAGE JS MODAL -->
+    <div class="modal" id="page-js-modal">
+        <div class="modal-content" style="min-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Page-Level JavaScript</h2>
+                <button class="btn-danger" id="close-page-js">Close</button>
+            </div>
+            <div style="margin-bottom: var(--spacing-md);">
+                <h3 style="color: var(--cyan); margin-bottom: var(--spacing-sm);">Quick Snippets:</h3>
+                <button class="btn-primary" onclick="insertJSSnippet('click-event')">Click Event</button>
+                <button class="btn-primary" onclick="insertJSSnippet('animation')">Animation</button>
+                <button class="btn-primary" onclick="insertJSSnippet('api-call')">API Call</button>
+            </div>
+            <textarea id="page-js-editor" class="property-textarea" style="min-height: 400px; font-family: 'Courier New', monospace;"></textarea>
+            <button class="btn-primary" id="apply-page-js">Apply JavaScript</button>
+        </div>
+    </div>
+
+    <!-- ASSETS MODAL -->
+    <div class="modal" id="assets-modal">
+        <div class="modal-content" style="min-width: 700px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Assets & Resources</h2>
+                <button class="btn-danger" id="close-assets">Close</button>
+            </div>
+            <div style="margin-bottom: var(--spacing-lg);">
+                <h3 style="color: var(--cyan); margin-bottom: var(--spacing-sm);">Add Image from URL</h3>
+                <div style="display: flex; gap: var(--spacing-sm);">
+                    <input type="text" id="image-url-input" class="property-input" placeholder="https://example.com/image.jpg" style="flex: 1;">
+                    <button class="btn-primary" id="add-image-url" style="width: auto;">Add Image</button>
+                </div>
+            </div>
+            <div style="margin-bottom: var(--spacing-lg);">
+                <h3 style="color: var(--cyan); margin-bottom: var(--spacing-sm);">Quick Placeholder Images</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--spacing-sm);">
+                    <button class="btn-primary" onclick="insertAsset('https://via.placeholder.com/400x300')">400×300</button>
+                    <button class="btn-primary" onclick="insertAsset('https://via.placeholder.com/800x600')">800×600</button>
+                    <button class="btn-primary" onclick="insertAsset('https://via.placeholder.com/1200x800')">1200×800</button>
+                    <button class="btn-primary" onclick="insertAsset('https://via.placeholder.com/400x400')">400×400 Square</button>
+                </div>
+            </div>
+            <div style="margin-bottom: var(--spacing-lg);">
+                <h3 style="color: var(--cyan); margin-bottom: var(--spacing-sm);">External Libraries</h3>
+                <p style="color: var(--cyan); margin-bottom: var(--spacing-sm);">Add CDN links to your page:</p>
+                <div style="display: grid; gap: var(--spacing-sm);">
+                    <button class="btn-primary" onclick="addLibrary('tailwind')">Tailwind CSS</button>
+                    <button class="btn-primary" onclick="addLibrary('bootstrap')">Bootstrap 5</button>
+                    <button class="btn-primary" onclick="addLibrary('fontawesome')">Font Awesome</button>
+                    <button class="btn-primary" onclick="addLibrary('jquery')">jQuery</button>
+                    <button class="btn-primary" onclick="addLibrary('alpine')">Alpine.js</button>
+                </div>
+            </div>
+            <div>
+                <h3 style="color: var(--cyan); margin-bottom: var(--spacing-sm);">Icon Fonts</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--spacing-sm);">
+                    <button class="btn-primary" onclick="insertIcon('❤️')">❤️ Heart</button>
+                    <button class="btn-primary" onclick="insertIcon('⭐')">⭐ Star</button>
+                    <button class="btn-primary" onclick="insertIcon('🚀')">🚀 Rocket</button>
+                    <button class="btn-primary" onclick="insertIcon('✨')">✨ Sparkles</button>
+                    <button class="btn-primary" onclick="insertIcon('🎨')">🎨 Art</button>
+                    <button class="btn-primary" onclick="insertIcon('🔥')">🔥 Fire</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CODE VIEW MODAL -->
+    <div class="modal" id="code-view-modal">
+        <div class="modal-content" style="min-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">💻 Code View - Full HTML</h2>
+                <button class="btn-danger" id="close-code-view">Close</button>
+            </div>
+            <div style="margin-bottom: var(--spacing-md);">
+                <p style="color: var(--cyan);">Edit the complete HTML output. Be careful - this will replace everything!</p>
+            </div>
+            <textarea id="code-view-editor" class="property-textarea" style="min-height: 500px; font-family: 'Courier New', monospace;"></textarea>
+            <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-md);">
+                <button class="btn-primary" id="apply-code-view">Apply Changes</button>
+                <button class="btn-primary" id="copy-code-view" style="background: var(--purple); border-color: var(--purple);">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP/SHORTCUTS MODAL -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content" style="min-width: 700px;">
+            <div class="modal-header">
+                <h2 class="modal-title">⌨️ Keyboard Shortcuts & Help</h2>
+                <button class="btn-danger" id="close-help">Close</button>
+            </div>
+            <div style="color: var(--cyan);">
+                <h3 style="color: var(--magenta); margin-bottom: var(--spacing-md);">Keyboard Shortcuts</h3>
+                <table style="width: 100%; margin-bottom: var(--spacing-lg);">
+                    <tr><td style="padding: var(--spacing-sm);"><strong>Ctrl/Cmd + Z</strong></td><td style="padding: var(--spacing-sm);">Undo</td></tr>
+                    <tr><td style="padding: var(--spacing-sm);"><strong>Ctrl/Cmd + Shift + Z</strong></td><td style="padding: var(--spacing-sm);">Redo</td></tr>
+                    <tr><td style="padding: var(--spacing-sm);"><strong>Ctrl/Cmd + C</strong></td><td style="padding: var(--spacing-sm);">Copy selected element</td></tr>
+                    <tr><td style="padding: var(--spacing-sm);"><strong>Ctrl/Cmd + V</strong></td><td style="padding: var(--spacing-sm);">Paste element</td></tr>
+                    <tr><td style="padding: var(--spacing-sm);"><strong>Delete</strong></td><td style="padding: var(--spacing-sm);">Delete selected element</td></tr>
+                    <tr><td style="padding: var(--spacing-sm);"><strong>Escape</strong></td><td style="padding: var(--spacing-sm);">Close modals</td></tr>
+                    <tr><td style="padding: var(--spacing-sm);"><strong>F1</strong></td><td style="padding: var(--spacing-sm);">Show this help</td></tr>
+                </table>
+
+                <h3 style="color: var(--magenta); margin-bottom: var(--spacing-md);">Quick Tips</h3>
+                <ul style="padding-left: 20px;">
+                    <li style="margin-bottom: var(--spacing-sm);">Drag components from the left sidebar to the canvas</li>
+                    <li style="margin-bottom: var(--spacing-sm);">Click any element to select it and see properties</li>
+                    <li style="margin-bottom: var(--spacing-sm);">Drag elements on the canvas to reorder them</li>
+                    <li style="margin-bottom: var(--spacing-sm);">Use ↑↓ buttons to move elements up/down</li>
+                    <li style="margin-bottom: var(--spacing-sm);">Save your project to localStorage with a custom name</li>
+                    <li style="margin-bottom: var(--spacing-sm);">Load existing HTML pages to import and edit</li>
+                    <li style="margin-bottom: var(--spacing-sm);">Use Preview mode to see your page without editor UI</li>
+                    <li style="margin-bottom: var(--spacing-sm);">Export to HTML file or copy to clipboard</li>
+                </ul>
+
+                <h3 style="color: var(--magenta); margin: var(--spacing-lg) 0 var(--spacing-md);">Available Templates</h3>
+                <p>Click "Templates" to access:</p>
+                <ul style="padding-left: 20px; margin-top: var(--spacing-sm);">
+                    <li>Contact & Survey Forms</li>
+                    <li>Interactive Quiz</li>
+                    <li>PDF Viewer</li>
+                    <li>Image Gallery & Slideshow</li>
+                    <li>Accordion, Tabs, Modal</li>
+                    <li>Clicker Game (yes, really!)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASCII ART INJECTOR MODAL -->
+    <div class="modal" id="ascii-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📟 ASCII Art Injector</h2>
+                <button class="btn-danger" id="close-ascii">Close</button>
+            </div>
+            <label class="property-label">Paste ASCII Art:</label>
+            <textarea class="property-textarea" id="ascii-input" rows="10" placeholder="Paste your ASCII art here..." style="font-family: monospace;"></textarea>
+            <button class="btn-primary" id="add-ascii-btn" style="width: 100%; margin-top: var(--spacing-md);">✨ Add to Canvas</button>
+        </div>
+    </div>
+
+    <!-- IMAGE MAP CREATOR MODAL -->
+    <div class="modal" id="imagemap-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🗺️ Image Map Creator</h2>
+                <button class="btn-danger" id="close-imagemap">Close</button>
+            </div>
+            <label class="property-label">Image URL:</label>
+            <input type="text" class="property-input" id="imagemap-url" placeholder="https://via.placeholder.com/800x600">
+            <label class="property-label" style="margin-top: var(--spacing-md);">Clickable Areas (format: "x,y,width,height | URL | Title"):</label>
+            <textarea class="property-textarea" id="imagemap-areas" rows="6" placeholder="100,100,50,50 | /page1 | Click Here&#10;200,150,60,40 | /page2 | Or Here"></textarea>
+            <button class="btn-primary" id="create-imagemap-btn" style="width: 100%; margin-top: var(--spacing-md);">✨ Create Image Map</button>
+        </div>
+    </div>
+
+    <!-- ANIMATION SYSTEM MODAL -->
+    <div class="modal" id="animation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🎬 Animation System</h2>
+                <button class="btn-danger" id="close-animation">Close</button>
+            </div>
+            <p style="color: var(--cyan); margin-bottom: var(--spacing-md);">Select an element first, then choose an animation!</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md);">
+                <button class="btn-primary" onclick="applyAnimation('bounce')">🎾 Bounce</button>
+                <button class="btn-primary" onclick="applyAnimation('fade')">👻 Fade In/Out</button>
+                <button class="btn-primary" onclick="applyAnimation('slide')">➡️ Slide</button>
+                <button class="btn-primary" onclick="applyAnimation('spin')">🌀 Spin</button>
+                <button class="btn-primary" onclick="applyAnimation('pulse')">💓 Pulse</button>
+                <button class="btn-primary" onclick="applyAnimation('shake')">📳 Shake</button>
+                <button class="btn-primary" onclick="applyAnimation('glow')">✨ Glow</button>
+                <button class="btn-primary" onclick="applyAnimation('float')">☁️ Float</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMPONENT LIBRARY MODAL -->
+    <div class="modal" id="component-library-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">💾 Component Library</h2>
+                <button class="btn-danger" id="close-component-library">Close</button>
+            </div>
+            <div style="margin-bottom: var(--spacing-lg);">
+                <h3 style="color: var(--cyan); margin-bottom: var(--spacing-sm);">Save Current Selection</h3>
+                <p style="color: var(--cyan); margin-bottom: var(--spacing-sm);">Select an element first, then save it as a reusable component!</p>
+                <button class="btn-primary" id="save-component-btn" style="width: 100%;">💾 Save Selected Element</button>
+            </div>
+            <div>
+                <h3 style="color: var(--cyan); margin-bottom: var(--spacing-sm);">Saved Components</h3>
+                <div id="saved-components-list" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXTRACTION MODE OVERLAY -->
+    <div id="extraction-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(243, 18, 175, 0.2); z-index: 10000; pointer-events: none;">
+        <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--magenta); color: white; padding: 15px 30px; border: 3px solid var(--cyan); font-weight: bold; font-size: 20px; box-shadow: var(--glow-lg) var(--magenta); border-radius: var(--border-radius);">
+            🎯 EXTRACTION MODE: Click any element to extract it
+            <button id="exit-extraction" style="margin-left: 20px; background: white; color: var(--magenta); border: 2px solid var(--cyan); padding: 5px 15px; font-weight: bold; cursor: pointer; border-radius: 4px;">
+                EXIT
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SOUND SYSTEM
+        // ============================================
+        let sounds = {};
+        try {
+            if (typeof Tone !== 'undefined') {
+                sounds = {
+                    boop: new Tone.Synth({ oscillator: { type: 'sine' } }).toDestination(),
+                    pop: new Tone.Synth({ oscillator: { type: 'triangle' } }).toDestination(),
+                    success: new Tone.Synth({ oscillator: { type: 'square' } }).toDestination()
+                };
+            }
+        } catch (e) {
+            console.warn('Tone.js not loaded, sounds disabled');
+        }
+
+        function playSound(type, note = 'C5') {
+            try {
+                if (sounds[type]) {
+                    sounds[type].triggerAttackRelease(note, '16n');
+                }
+            } catch (e) {
+                // Silently fail if sound doesn't work
+            }
+        }
+
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        let state = {
+            elements: [],
+            selectedElement: null,
+            clipboard: null,
+            history: [],
+            historyIndex: -1,
+            pageCSS: '',
+            pageJS: '',
+            externalHeadTags: [],
+            externalScripts: [],
+            viewMode: 'desktop'
+        };
+
+        let elementIdCounter = 0;
+        function generateId() {
+            return 'element-' + (++elementIdCounter);
+        }
+
+        // ============================================
+        // COMPONENT TEMPLATES
+        // ============================================
+        const componentTemplates = {
+            'heading': '<h2 style="color: #000;">Your Heading</h2>',
+            'paragraph': '<p style="color: #000;">Your paragraph text here.</p>',
+            'button': '<button style="padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer;">Click Me</button>',
+            'link': '<a href="#" style="color: #0066cc; text-decoration: underline;">Link Text</a>',
+            'image': '<img src="https://via.placeholder.com/400x200" alt="Placeholder" style="max-width: 100%; border: 1px solid #ccc;">',
+            'div': '<div style="padding: 20px; border: 1px solid #ccc; background: #f5f5f5; color: #000;">Container</div>',
+            'flexbox': '<div style="display: flex; gap: 10px; padding: 20px; border: 1px solid #ccc;"><div style="flex: 1; padding: 10px; background: #e0e0e0; color: #000;">Item 1</div><div style="flex: 1; padding: 10px; background: #e0e0e0; color: #000;">Item 2</div></div>',
+            'grid': '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 20px; border: 1px solid #ccc;"><div style="padding: 10px; background: #e0e0e0; color: #000;">Item 1</div><div style="padding: 10px; background: #e0e0e0; color: #000;">Item 2</div><div style="padding: 10px; background: #e0e0e0; color: #000;">Item 3</div></div>',
+            'section': '<section style="padding: 40px; background: #f9f9f9; border: 1px solid #ddd;"><h2 style="color: #000;">Section Title</h2><p style="color: #000;">Section content goes here.</p></section>',
+            'hero': '<section style="padding: 80px 40px; background: linear-gradient(135deg, #f312af, #00ffcc); text-align: center; border-radius: 8px;"><h1 style="color: white; font-size: 48px; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Welcome to My Site</h1><p style="color: white; font-size: 24px; margin-bottom: 30px;">Build amazing things</p><button style="padding: 15px 40px; background: white; color: #f312af; border: none; border-radius: 8px; font-size: 20px; cursor: pointer; font-weight: bold;">Get Started</button></section>',
+            'card': '<div style="max-width: 300px; border: 2px solid #00ffcc; border-radius: 8px; overflow: hidden; background: white;"><img src="https://via.placeholder.com/300x200" style="width: 100%; display: block;"><div style="padding: 20px;"><h3 style="color: #f312af; margin-bottom: 10px;">Card Title</h3><p style="color: #000; margin-bottom: 15px;">Card description goes here.</p><button style="padding: 8px 16px; background: #00ffcc; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Learn More</button></div></div>',
+            'input': '<div style="margin: 10px 0;"><label style="display: block; margin-bottom: 5px; color: #000;">Label:</label><input type="text" placeholder="Enter text..." style="width: 100%; padding: 10px; border: 2px solid #00ffcc; border-radius: 4px; font-size: 16px;"></div>',
+            'textarea': '<div style="margin: 10px 0;"><label style="display: block; margin-bottom: 5px; color: #000;">Message:</label><textarea placeholder="Enter message..." style="width: 100%; padding: 10px; border: 2px solid #00ffcc; border-radius: 4px; font-size: 16px; min-height: 100px; resize: vertical;"></textarea></div>',
+            'select': '<div style="margin: 10px 0;"><label style="display: block; margin-bottom: 5px; color: #000;">Select Option:</label><select style="width: 100%; padding: 10px; border: 2px solid #00ffcc; border-radius: 4px; font-size: 16px;"><option>Option 1</option><option>Option 2</option><option>Option 3</option></select></div>',
+            'checkbox': '<div style="margin: 10px 0; color: #000;"><label style="display: flex; align-items: center; cursor: pointer;"><input type="checkbox" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"><span>Checkbox option</span></label></div>',
+            'radio': '<div style="margin: 10px 0; color: #000;"><label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;"><input type="radio" name="radio-group" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"><span>Option 1</span></label><label style="display: flex; align-items: center; margin-bottom: 8px; cursor: pointer;"><input type="radio" name="radio-group" style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;"><span>Option 2</span></label></div>',
+            'video': '<div style="margin: 20px 0;"><video controls style="width: 100%; max-width: 640px; border: 2px solid #00ffcc; border-radius: 8px;"><source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">Your browser does not support video.</video></div>',
+            'audio': '<div style="margin: 20px 0;"><audio controls style="width: 100%;"><source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg">Your browser does not support audio.</audio></div>',
+            'code': '<pre style="background: #0a1a1a; color: #00ffcc; padding: 20px; border-radius: 8px; overflow-x: auto; border: 2px solid #00ffcc;"><code>function hello() {\n    console.log("Hello, world!");\n}</code></pre>',
+            'list': '<ul style="color: #000; padding-left: 30px; margin: 20px 0;"><li style="margin-bottom: 8px;">List item 1</li><li style="margin-bottom: 8px;">List item 2</li><li style="margin-bottom: 8px;">List item 3</li></ul>',
+            'table': '<table style="width: 100%; border-collapse: collapse; margin: 20px 0;"><thead><tr style="background: #00ffcc;"><th style="padding: 10px; border: 1px solid #ccc; text-align: left;">Header 1</th><th style="padding: 10px; border: 1px solid #ccc; text-align: left;">Header 2</th><th style="padding: 10px; border: 1px solid #ccc; text-align: left;">Header 3</th></tr></thead><tbody><tr><td style="padding: 10px; border: 1px solid #ccc; color: #000;">Cell 1</td><td style="padding: 10px; border: 1px solid #ccc; color: #000;">Cell 2</td><td style="padding: 10px; border: 1px solid #ccc; color: #000;">Cell 3</td></tr><tr style="background: #f9f9f9;"><td style="padding: 10px; border: 1px solid #ccc; color: #000;">Cell 4</td><td style="padding: 10px; border: 1px solid #ccc; color: #000;">Cell 5</td><td style="padding: 10px; border: 1px solid #ccc; color: #000;">Cell 6</td></tr></tbody></table>'
+        };
+
+        // ============================================
+        // DRAG AND DROP
+        // ============================================
+        const canvas = document.getElementById('canvas');
+
+        document.querySelectorAll('.library-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                const component = e.target.getAttribute('data-component');
+                e.dataTransfer.setData('component', component);
+                playSound('boop', 'E5');
+            });
+        });
+
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const component = e.dataTransfer.getData('component');
+            if (component && componentTemplates[component]) {
+                addElement(componentTemplates[component], component);
+                playSound('success', 'C6');
+                updateStatus('Component added!');
+            }
+        });
+
+        // ============================================
+        // ELEMENT MANAGEMENT
+        // ============================================
+        function addElement(html, type = 'custom') {
+            const element = {
+                id: generateId(),
+                type: type,
+                html: html
+            };
+            state.elements.push(element);
+            saveHistory();
+            renderCanvas();
+            updateElementCount();
+        }
+
+        function renderCanvas() {
+            canvas.innerHTML = '';
+            state.elements.forEach((element, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'canvas-element';
+                wrapper.setAttribute('data-id', element.id);
+                wrapper.setAttribute('data-index', index);
+                wrapper.setAttribute('draggable', 'true');
+                wrapper.innerHTML = `
+                    <div class="element-controls">
+                        <button class="control-btn" onclick="moveElement('${element.id}', 'up')">↑</button>
+                        <button class="control-btn" onclick="moveElement('${element.id}', 'down')">↓</button>
+                        <button class="control-btn" onclick="editElement('${element.id}')">Edit</button>
+                        <button class="control-btn" onclick="duplicateElement('${element.id}')">Duplicate</button>
+                        <button class="control-btn" onclick="deleteElement('${element.id}')">Delete</button>
+                    </div>
+                    ${element.html}
+                `;
+                wrapper.addEventListener('click', (e) => {
+                    if (!e.target.closest('.element-controls')) {
+                        selectElement(element.id);
+                        playSound('pop', 'G5');
+                    }
+                });
+
+                // Drag and drop for reordering
+                wrapper.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/html', element.id);
+                    wrapper.style.opacity = '0.5';
+                });
+
+                wrapper.addEventListener('dragend', (e) => {
+                    wrapper.style.opacity = '1';
+                });
+
+                wrapper.addEventListener('dragover', (e) => {
+                    if (e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    e.dataTransfer.dropEffect = 'move';
+                    return false;
+                });
+
+                wrapper.addEventListener('drop', (e) => {
+                    if (e.stopPropagation) {
+                        e.stopPropagation();
+                    }
+                    const draggedId = e.dataTransfer.getData('text/html');
+                    if (draggedId && draggedId !== element.id) {
+                        reorderElements(draggedId, element.id);
+                    }
+                    return false;
+                });
+
+                canvas.appendChild(wrapper);
+            });
+            renderTree();
+        }
+
+        function moveElement(id, direction) {
+            const index = state.elements.findIndex(el => el.id === id);
+            if (index === -1) return;
+
+            if (direction === 'up' && index > 0) {
+                [state.elements[index], state.elements[index - 1]] = [state.elements[index - 1], state.elements[index]];
+            } else if (direction === 'down' && index < state.elements.length - 1) {
+                [state.elements[index], state.elements[index + 1]] = [state.elements[index + 1], state.elements[index]];
+            }
+
+            saveHistory();
+            renderCanvas();
+            selectElement(id);
+            playSound('pop', 'D5');
+            updateStatus('Element moved!');
+        }
+
+        function reorderElements(draggedId, targetId) {
+            const draggedIndex = state.elements.findIndex(el => el.id === draggedId);
+            const targetIndex = state.elements.findIndex(el => el.id === targetId);
+
+            if (draggedIndex !== -1 && targetIndex !== -1) {
+                const [draggedElement] = state.elements.splice(draggedIndex, 1);
+                state.elements.splice(targetIndex, 0, draggedElement);
+                saveHistory();
+                renderCanvas();
+                updateStatus('Elements reordered!');
+                playSound('success', 'E5');
+            }
+        }
+
+        function selectElement(id) {
+            document.querySelectorAll('.canvas-element').forEach(el => {
+                el.classList.remove('selected');
+            });
+            const wrapper = document.querySelector(`[data-id="${id}"]`);
+            if (wrapper) {
+                wrapper.classList.add('selected');
+                state.selectedElement = id;
+                renderProperties(id);
+            }
+        }
+
+        function editElement(id) {
+            const element = state.elements.find(el => el.id === id);
+            if (!element) return;
+            const newHtml = prompt('Edit HTML:', element.html);
+            if (newHtml !== null) {
+                element.html = newHtml;
+                saveHistory();
+                renderCanvas();
+                selectElement(id);
+                updateStatus('Element updated!');
+            }
+        }
+
+        function duplicateElement(id) {
+            const element = state.elements.find(el => el.id === id);
+            if (!element) return;
+            const duplicate = {
+                id: generateId(),
+                type: element.type,
+                html: element.html
+            };
+            state.elements.push(duplicate);
+            saveHistory();
+            renderCanvas();
+            updateElementCount();
+            playSound('pop', 'C6');
+        }
+
+        function deleteElement(id) {
+            state.elements = state.elements.filter(el => el.id !== id);
+            saveHistory();
+            renderCanvas();
+            updateElementCount();
+            playSound('boop', 'C4');
+        }
+
+        // ============================================
+        // PROPERTIES PANEL
+        // ============================================
+        function renderProperties(id) {
+            const element = state.elements.find(el => el.id === id);
+            if (!element) return;
+
+            const panel = document.getElementById('properties-panel');
+            panel.innerHTML = `
+                <div class="properties-section">
+                    <div class="properties-section-title">Element Info</div>
+                    <div class="property-group">
+                        <label class="property-label">Type:</label>
+                        <div style="color: var(--magenta);">${element.type}</div>
+                    </div>
+                    <div class="property-group">
+                        <label class="property-label">ID:</label>
+                        <div style="color: var(--cyan); font-size: 12px;">${element.id}</div>
+                    </div>
+                </div>
+
+                <div class="properties-section">
+                    <div class="properties-section-title">Edit HTML</div>
+                    <div class="property-group">
+                        <label class="property-label">HTML Source:</label>
+                        <textarea class="property-textarea" id="element-html">${element.html}</textarea>
+                    </div>
+                    <button class="btn-primary" onclick="updateElementHTML('${element.id}')">Update HTML</button>
+                </div>
+
+                <div class="properties-section">
+                    <div class="properties-section-title">Quick Actions</div>
+                    <button class="btn-primary" onclick="duplicateElement('${element.id}')">Duplicate</button>
+                    <button class="btn-danger" onclick="deleteElement('${element.id}')">Delete</button>
+                </div>
+            `;
+        }
+
+        function updateElementHTML(id) {
+            const element = state.elements.find(el => el.id === id);
+            if (!element) return;
+            const newHtml = document.getElementById('element-html').value;
+            element.html = newHtml;
+            saveHistory();
+            renderCanvas();
+            selectElement(id);
+            playSound('success', 'A5');
+            updateStatus('HTML updated!');
+        }
+
+        // ============================================
+        // ELEMENT TREE
+        // ============================================
+        function renderTree() {
+            const treePanel = document.getElementById('element-tree');
+            if (state.elements.length === 0) {
+                treePanel.innerHTML = '<div style="color: var(--cyan); text-align: center;">No elements</div>';
+                return;
+            }
+            treePanel.innerHTML = state.elements.map((el, idx) => `
+                <div class="tree-item ${el.id === state.selectedElement ? 'selected' : ''}" onclick="selectElement('${el.id}')">
+                    <div style="font-weight: bold;">${el.type}</div>
+                    <div style="font-size: 12px; opacity: 0.7;">${el.id}</div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // CSS EDITOR
+        // ============================================
+        function renderCSSEditor() {
+            const cssPanel = document.getElementById('css-editor');
+            const element = state.elements.find(el => el.id === state.selectedElement);
+
+            if (!element) {
+                cssPanel.innerHTML = '<div style="text-align: center; color: var(--cyan);">Select an element to edit CSS</div>';
+                return;
+            }
+
+            // Extract inline styles
+            const temp = document.createElement('div');
+            temp.innerHTML = element.html;
+            const firstChild = temp.firstElementChild;
+            const styles = firstChild ? firstChild.style.cssText : '';
+
+            cssPanel.innerHTML = `
+                <div class="properties-section">
+                    <div class="properties-section-title">Inline Styles</div>
+                    <textarea class="property-textarea" id="inline-styles" style="min-height: 200px;">${styles}</textarea>
+                    <button class="btn-primary" onclick="applyInlineStyles()">Apply Styles</button>
+                </div>
+
+                <div class="css-category">
+                    <div class="css-category-title" onclick="toggleCSSCategory(this)">Layout</div>
+                    <div class="css-properties">
+                        <div class="property-group">
+                            <label class="property-label">Display:</label>
+                            <select class="property-select" onchange="applyCSSProperty('display', this.value)">
+                                <option value="">Choose...</option>
+                                <option value="block">Block</option>
+                                <option value="inline">Inline</option>
+                                <option value="inline-block">Inline Block</option>
+                                <option value="flex">Flex</option>
+                                <option value="grid">Grid</option>
+                                <option value="none">None</option>
+                            </select>
+                        </div>
+                        <div class="property-group">
+                            <label class="property-label">Position:</label>
+                            <select class="property-select" onchange="applyCSSProperty('position', this.value)">
+                                <option value="">Choose...</option>
+                                <option value="static">Static</option>
+                                <option value="relative">Relative</option>
+                                <option value="absolute">Absolute</option>
+                                <option value="fixed">Fixed</option>
+                                <option value="sticky">Sticky</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="css-category">
+                    <div class="css-category-title" onclick="toggleCSSCategory(this)">Colors & Background</div>
+                    <div class="css-properties">
+                        <div class="property-group">
+                            <label class="property-label">Color:</label>
+                            <input type="color" class="property-input" onchange="applyCSSProperty('color', this.value)">
+                        </div>
+                        <div class="property-group">
+                            <label class="property-label">Background:</label>
+                            <input type="color" class="property-input" onchange="applyCSSProperty('background', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="css-category">
+                    <div class="css-category-title" onclick="toggleCSSCategory(this)">Spacing</div>
+                    <div class="css-properties">
+                        <div class="property-group">
+                            <label class="property-label">Padding:</label>
+                            <input type="text" class="property-input" placeholder="e.g., 10px 20px" onchange="applyCSSProperty('padding', this.value)">
+                        </div>
+                        <div class="property-group">
+                            <label class="property-label">Margin:</label>
+                            <input type="text" class="property-input" placeholder="e.g., 10px 20px" onchange="applyCSSProperty('margin', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="css-category">
+                    <div class="css-category-title" onclick="toggleCSSCategory(this)">Typography</div>
+                    <div class="css-properties">
+                        <div class="property-group">
+                            <label class="property-label">Font Size:</label>
+                            <input type="text" class="property-input" placeholder="e.g., 16px" onchange="applyCSSProperty('font-size', this.value)">
+                        </div>
+                        <div class="property-group">
+                            <label class="property-label">Font Weight:</label>
+                            <select class="property-select" onchange="applyCSSProperty('font-weight', this.value)">
+                                <option value="">Choose...</option>
+                                <option value="normal">Normal</option>
+                                <option value="bold">Bold</option>
+                                <option value="lighter">Lighter</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="css-category">
+                    <div class="css-category-title" onclick="toggleCSSCategory(this)">Border</div>
+                    <div class="css-properties">
+                        <div class="property-group">
+                            <label class="property-label">Border:</label>
+                            <input type="text" class="property-input" placeholder="e.g., 1px solid #000" onchange="applyCSSProperty('border', this.value)">
+                        </div>
+                        <div class="property-group">
+                            <label class="property-label">Border Radius:</label>
+                            <input type="text" class="property-input" placeholder="e.g., 5px" onchange="applyCSSProperty('border-radius', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleCSSCategory(el) {
+            el.parentElement.classList.toggle('expanded');
+        }
+
+        function applyCSSProperty(property, value) {
+            if (!state.selectedElement || !value) return;
+            const element = state.elements.find(el => el.id === state.selectedElement);
+            if (!element) return;
+
+            const temp = document.createElement('div');
+            temp.innerHTML = element.html;
+            const firstChild = temp.firstElementChild;
+            if (firstChild) {
+                firstChild.style[property] = value;
+                element.html = temp.innerHTML;
+                saveHistory();
+                renderCanvas();
+                selectElement(state.selectedElement);
+                updateStatus(`Applied ${property}: ${value}`);
+                playSound('pop', 'E5');
+            }
+        }
+
+        function applyInlineStyles() {
+            if (!state.selectedElement) return;
+            const element = state.elements.find(el => el.id === state.selectedElement);
+            if (!element) return;
+
+            const styles = document.getElementById('inline-styles').value;
+            const temp = document.createElement('div');
+            temp.innerHTML = element.html;
+            const firstChild = temp.firstElementChild;
+            if (firstChild) {
+                firstChild.style.cssText = styles;
+                element.html = temp.innerHTML;
+                saveHistory();
+                renderCanvas();
+                selectElement(state.selectedElement);
+                updateStatus('Styles applied!');
+                playSound('success', 'A5');
+            }
+        }
+
+        // ============================================
+        // HISTORY
+        // ============================================
+        function saveHistory() {
+            state.history = state.history.slice(0, state.historyIndex + 1);
+            state.history.push(JSON.stringify(state.elements));
+            state.historyIndex++;
+            if (state.history.length > 50) {
+                state.history.shift();
+                state.historyIndex--;
+            }
+        }
+
+        function undo() {
+            if (state.historyIndex > 0) {
+                state.historyIndex--;
+                state.elements = JSON.parse(state.history[state.historyIndex]);
+                renderCanvas();
+                playSound('boop', 'D5');
+                updateStatus('Undone!');
+            }
+        }
+
+        function redo() {
+            if (state.historyIndex < state.history.length - 1) {
+                state.historyIndex++;
+                state.elements = JSON.parse(state.history[state.historyIndex]);
+                renderCanvas();
+                playSound('boop', 'F5');
+                updateStatus('Redone!');
+            }
+        }
+
+        // ============================================
+        // SAVE/LOAD FUNCTIONALITY
+        // ============================================
+        document.getElementById('btn-save').addEventListener('click', () => {
+            const projectName = prompt('Project name:', 'my-project') || 'my-project';
+            const projectData = {
+                elements: state.elements,
+                pageCSS: state.pageCSS,
+                pageJS: state.pageJS,
+                externalHeadTags: state.externalHeadTags,
+                externalScripts: state.externalScripts,
+                viewMode: state.viewMode,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem('coaiexist-project-' + projectName, JSON.stringify(projectData));
+            updateStatus(`Project "${projectName}" saved!`);
+            playSound('success', 'C6');
+        });
+
+        document.getElementById('btn-load').addEventListener('click', () => {
+            const projectName = prompt('Project name to load:');
+            if (!projectName) return;
+
+            const saved = localStorage.getItem('coaiexist-project-' + projectName);
+            if (saved) {
+                const projectData = JSON.parse(saved);
+                state.elements = projectData.elements || [];
+                state.pageCSS = projectData.pageCSS || '';
+                state.pageJS = projectData.pageJS || '';
+                state.externalHeadTags = projectData.externalHeadTags || [];
+                state.externalScripts = projectData.externalScripts || [];
+                state.viewMode = projectData.viewMode || 'desktop';
+                canvas.className = `${state.viewMode}-view`;
+                state.selectedElement = null;
+                state.clipboard = null;
+                saveHistory();
+                renderCanvas();
+                updateElementCount();
+                updateStatus(`Project "${projectName}" loaded!`);
+                playSound('success', 'C6');
+            } else {
+                alert('Project not found!');
+            }
+        });
+
+        document.getElementById('btn-load-page').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.html';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const html = event.target.result;
+
+                    // Store for extraction mode!
+                    localStorage.setItem('coaiexist-loaded-page', html);
+
+                    // Parse HTML and extract body content
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // Extract CSS
+                    const styles = doc.querySelectorAll('style');
+                    state.pageCSS = Array.from(styles).map(s => s.textContent).join('\n');
+
+                    // Extract external resources
+                    state.externalHeadTags = Array.from(new Set(
+                        Array.from(doc.querySelectorAll('head link')).map(link => link.outerHTML)
+                    ));
+
+                    const scripts = Array.from(doc.querySelectorAll('script'));
+                    state.externalScripts = Array.from(new Set(
+                        scripts
+                            .filter(script => script.src)
+                            .map(script => script.outerHTML)
+                    ));
+
+                    // Extract inline JS
+                    state.pageJS = scripts
+                        .filter(script => !script.src)
+                        .map(script => script.textContent)
+                        .join('\n');
+
+                    // Extract body elements
+                    state.elements = [];
+                    const bodyChildren = doc.body.children;
+                    Array.from(bodyChildren).forEach(child => {
+                        addElement(child.outerHTML, 'imported');
+                    });
+
+                    updateStatus('Page loaded! Now you can use Extraction Mode!');
+                    playSound('success', 'C6');
+                    showStamp('📄');
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        });
+
+        // ============================================
+        // TOOLBAR ACTIONS
+        // ============================================
+        document.getElementById('btn-new').addEventListener('click', () => {
+            if (confirm('Start new project?')) {
+                state.elements = [];
+                state.selectedElement = null;
+                state.clipboard = null;
+                state.history = [];
+                state.historyIndex = -1;
+                state.pageCSS = '';
+                state.pageJS = '';
+                state.externalHeadTags = [];
+                state.externalScripts = [];
+                state.viewMode = 'desktop';
+                canvas.className = 'desktop-view';
+                saveHistory();
+                renderCanvas();
+                updateElementCount();
+                playSound('success', 'C5');
+            }
+        });
+
+        document.getElementById('btn-undo').addEventListener('click', undo);
+        document.getElementById('btn-redo').addEventListener('click', redo);
+
+        document.getElementById('btn-copy').addEventListener('click', () => {
+            if (state.selectedElement) {
+                const element = state.elements.find(el => el.id === state.selectedElement);
+                if (element) {
+                    state.clipboard = { ...element };
+                    updateStatus('Copied!');
+                    playSound('pop', 'E5');
+                }
+            }
+        });
+
+        document.getElementById('btn-paste').addEventListener('click', () => {
+            if (state.clipboard) {
+                const element = {
+                    id: generateId(),
+                    type: state.clipboard.type,
+                    html: state.clipboard.html
+                };
+                state.elements.push(element);
+                saveHistory();
+                renderCanvas();
+                updateElementCount();
+                updateStatus('Pasted!');
+                playSound('success', 'G5');
+            }
+        });
+
+        // ============================================
+        // ADD ELEMENT MODAL
+        // ============================================
+        document.getElementById('btn-add-element').addEventListener('click', () => {
+            document.getElementById('add-element-modal').classList.add('active');
+        });
+
+        document.getElementById('close-add-element').addEventListener('click', () => {
+            document.getElementById('add-element-modal').classList.remove('active');
+        });
+
+        document.getElementById('add-custom-element').addEventListener('click', () => {
+            const tag = document.getElementById('custom-tag').value || 'div';
+            const content = document.getElementById('custom-content').value;
+            const classes = document.getElementById('custom-classes').value;
+            const styles = document.getElementById('custom-styles').value;
+
+            let html = `<${tag}`;
+            if (classes) html += ` class="${classes}"`;
+            if (styles) html += ` style="${styles}"`;
+            html += `>${content}</${tag}>`;
+
+            addElement(html, 'custom');
+            document.getElementById('add-element-modal').classList.remove('active');
+            updateStatus('Custom element added!');
+            playSound('success', 'C6');
+        });
+
+        // ============================================
+        // RESPONSIVE PREVIEW
+        // ============================================
+        document.getElementById('btn-view-desktop').addEventListener('click', () => {
+            canvas.className = 'desktop-view';
+            state.viewMode = 'desktop';
+            document.querySelectorAll('[id^="btn-view-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-view-desktop').classList.add('active');
+        });
+
+        document.getElementById('btn-view-tablet').addEventListener('click', () => {
+            canvas.className = 'tablet-view';
+            state.viewMode = 'tablet';
+            document.querySelectorAll('[id^="btn-view-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-view-tablet').classList.add('active');
+        });
+
+        document.getElementById('btn-view-mobile').addEventListener('click', () => {
+            canvas.className = 'mobile-view';
+            state.viewMode = 'mobile';
+            document.querySelectorAll('[id^="btn-view-"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-view-mobile').classList.add('active');
+        });
+
+        // ============================================
+        // PREVIEW MODE
+        // ============================================
+        document.getElementById('btn-preview').addEventListener('click', () => {
+            document.body.classList.add('preview-mode');
+            playSound('success', 'C6');
+        });
+
+        document.getElementById('exit-preview').addEventListener('click', () => {
+            document.body.classList.remove('preview-mode');
+            playSound('pop', 'C5');
+        });
+
+        // ============================================
+        // PAGE CSS/JS
+        // ============================================
+        document.getElementById('btn-page-css').addEventListener('click', () => {
+            document.getElementById('page-css-editor').value = state.pageCSS;
+            document.getElementById('page-css-modal').classList.add('active');
+        });
+
+        document.getElementById('close-page-css').addEventListener('click', () => {
+            document.getElementById('page-css-modal').classList.remove('active');
+        });
+
+        document.getElementById('apply-page-css').addEventListener('click', () => {
+            state.pageCSS = document.getElementById('page-css-editor').value;
+            updateStatus('CSS saved!');
+            playSound('success', 'A5');
+        });
+
+        document.getElementById('btn-page-js').addEventListener('click', () => {
+            document.getElementById('page-js-editor').value = state.pageJS;
+            document.getElementById('page-js-modal').classList.add('active');
+        });
+
+        document.getElementById('close-page-js').addEventListener('click', () => {
+            document.getElementById('page-js-modal').classList.remove('active');
+        });
+
+        document.getElementById('apply-page-js').addEventListener('click', () => {
+            state.pageJS = document.getElementById('page-js-editor').value;
+            updateStatus('JavaScript saved!');
+            playSound('success', 'A5');
+        });
+
+        function insertJSSnippet(type) {
+            const snippets = {
+                'click-event': `document.getElementById('myElement').addEventListener('click', function() {\n    // Your code here\n    alert('Clicked!');\n});`,
+                'animation': `element.style.animation = 'bounce 1s ease';\n\n// Add CSS keyframes:\n// @keyframes bounce {\n//     0%, 100% { transform: translateY(0); }\n//     50% { transform: translateY(-20px); }\n// }`,
+                'api-call': `fetch('https://api.example.com/data')\n    .then(response => response.json())\n    .then(data => {\n        console.log(data);\n    })\n    .catch(error => console.error('Error:', error));`
+            };
+            const editor = document.getElementById('page-js-editor');
+            editor.value += '\n\n' + snippets[type];
+        }
+
+        // ============================================
+        // EXPORT
+        // ============================================
+        document.getElementById('btn-export').addEventListener('click', () => {
+            const html = exportHTML();
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'page.html';
+            a.click();
+            updateStatus('Exported!');
+            playSound('success', 'C6');
+        });
+
+        function exportHTML() {
+            const indentBlock = (block) => block
+                .split('\n')
+                .map(line => line.trim().length ? `    ${line}` : '')
+                .join('\n');
+
+            const content = state.elements.map(el => el.html).join('\n\n');
+
+            const headParts = [
+                '<meta charset="UTF-8">',
+                '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+                '<title>My Page</title>',
+                ...state.externalHeadTags
+            ];
+
+            if (state.pageCSS && state.pageCSS.trim()) {
+                headParts.push(`<style>\n${state.pageCSS}\n</style>`);
+            }
+
+            const bodyParts = [];
+            if (content.trim()) {
+                bodyParts.push(content);
+            }
+            if (state.externalScripts.length) {
+                bodyParts.push(...state.externalScripts);
+            }
+            if (state.pageJS && state.pageJS.trim()) {
+                bodyParts.push(`<script>\n${state.pageJS}\n</script>`);
+            }
+
+            const headHTML = headParts
+                .filter(Boolean)
+                .map(indentBlock)
+                .join('\n');
+
+            const bodyHTML = bodyParts.length
+                ? bodyParts.map(indentBlock).join('\n\n')
+                : '';
+
+            return `<!DOCTYPE html>
+<html lang="en">
+<head>
+${headHTML}
+</head>
+<body>
+${bodyHTML}
+</body>
+</html>`;
+        }
+
+        // ============================================
+        // ASSETS FUNCTIONALITY
+        // ============================================
+        document.getElementById('btn-assets').addEventListener('click', () => {
+            document.getElementById('assets-modal').classList.add('active');
+        });
+
+        document.getElementById('close-assets').addEventListener('click', () => {
+            document.getElementById('assets-modal').classList.remove('active');
+        });
+
+        document.getElementById('add-image-url').addEventListener('click', () => {
+            const url = document.getElementById('image-url-input').value;
+            if (url) {
+                insertAsset(url);
+                document.getElementById('image-url-input').value = '';
+            }
+        });
+
+        function insertAsset(url) {
+            const html = `<img src="${url}" alt="Image" style="max-width: 100%; height: auto; border: 2px solid #00ffcc; border-radius: 8px;">`;
+            addElement(html, 'image');
+            document.getElementById('assets-modal').classList.remove('active');
+            updateStatus('Image added!');
+            playSound('success', 'C6');
+        }
+
+        function insertIcon(emoji) {
+            const html = `<span style="font-size: 48px; display: inline-block;">${emoji}</span>`;
+            addElement(html, 'icon');
+            updateStatus('Icon added!');
+            playSound('pop', 'E5');
+        }
+
+        function addLibrary(lib) {
+            const libraries = {
+                tailwind: {
+                    head: ['<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">']
+                },
+                bootstrap: {
+                    head: ['<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">'],
+                    body: ['<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>']
+                },
+                fontawesome: {
+                    head: ['<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">']
+                },
+                jquery: {
+                    body: ['<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>']
+                },
+                alpine: {
+                    body: ['<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>']
+                }
+            };
+
+            if (libraries[lib]) {
+                const { head = [], body = [] } = libraries[lib];
+                let added = false;
+
+                head.forEach(tag => {
+                    if (!state.externalHeadTags.includes(tag)) {
+                        state.externalHeadTags.push(tag);
+                        added = true;
+                    }
+                });
+
+                body.forEach(tag => {
+                    if (!state.externalScripts.includes(tag)) {
+                        state.externalScripts.push(tag);
+                        added = true;
+                    }
+                });
+
+                if (added) {
+                    updateStatus(`${lib} library added to page!`);
+                    playSound('success', 'A5');
+                    alert(`${lib} has been added to your page! Export or copy the HTML to include the CDN tags.`);
+                } else {
+                    updateStatus(`${lib} library already added.`);
+                }
+            }
+        }
+
+        // ============================================
+        // NAVBAR & TEMPLATES
+        // ============================================
+        document.getElementById('btn-add-navbar').addEventListener('click', () => {
+            document.getElementById('navbar-modal').classList.add('active');
+        });
+
+        document.getElementById('close-navbar').addEventListener('click', () => {
+            document.getElementById('navbar-modal').classList.remove('active');
+        });
+
+        document.getElementById('create-navbar').addEventListener('click', () => {
+            const style = document.getElementById('navbar-style').value;
+            const linksText = document.getElementById('navbar-links').value;
+            const links = linksText.split('\n').map(line => {
+                const [label, url] = line.split('|').map(s => s.trim());
+                return { label, url };
+            }).filter(link => link.label && link.url);
+
+            let html = '';
+            if (style === 'top-simple') {
+                html = `<nav style="background: #333; padding: 15px; display: flex; gap: 20px;">
+                    ${links.map(link => `<a href="${link.url}" style="color: white; text-decoration: none;">${link.label}</a>`).join('')}
+                </nav>`;
+            } else if (style === 'y2k-style') {
+                html = `<nav style="background: linear-gradient(90deg, #f312af, #00ffcc); padding: 15px; display: flex; gap: 20px; border: 3px solid #fff;">
+                    ${links.map(link => `<a href="${link.url}" style="color: #fff; text-decoration: none; font-weight: bold; text-shadow: 2px 2px #000;">${link.label}</a>`).join('')}
+                </nav>`;
+            }
+
+            addElement(html, 'navbar');
+            document.getElementById('navbar-modal').classList.remove('active');
+            updateStatus('Navbar created!');
+            playSound('success', 'G5');
+        });
+
+        document.getElementById('btn-templates').addEventListener('click', () => {
+            document.getElementById('templates-modal').classList.add('active');
+        });
+
+        document.getElementById('close-templates').addEventListener('click', () => {
+            document.getElementById('templates-modal').classList.remove('active');
+        });
+
+        function insertTemplate(type) {
+            const templates = {
+                'contact-form': `<form style="max-width: 500px; margin: 20px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
+                    <h2 style="color: #000;">Contact Us</h2>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #000;">Name:</label>
+                        <input type="text" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #000;">Email:</label>
+                        <input type="email" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #000;">Message:</label>
+                        <textarea style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 100px;"></textarea>
+                    </div>
+                    <button type="submit" style="background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Send</button>
+                </form>`,
+                'survey-form': `<form style="max-width: 600px; margin: 20px auto; padding: 20px; border: 2px solid #00ffcc; border-radius: 8px; background: #f9f9f9;">
+                    <h2 style="color: #000; margin-bottom: 20px;">Quick Survey</h2>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #000; font-weight: bold;">How satisfied are you?</label>
+                        <div style="color: #000;">
+                            <label><input type="radio" name="satisfaction" value="1"> Very Unsatisfied</label><br>
+                            <label><input type="radio" name="satisfaction" value="2"> Unsatisfied</label><br>
+                            <label><input type="radio" name="satisfaction" value="3"> Neutral</label><br>
+                            <label><input type="radio" name="satisfaction" value="4"> Satisfied</label><br>
+                            <label><input type="radio" name="satisfaction" value="5"> Very Satisfied</label>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #000; font-weight: bold;">Which features do you use? (Select all)</label>
+                        <div style="color: #000;">
+                            <label><input type="checkbox" name="features" value="feature1"> Feature 1</label><br>
+                            <label><input type="checkbox" name="features" value="feature2"> Feature 2</label><br>
+                            <label><input type="checkbox" name="features" value="feature3"> Feature 3</label>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; color: #000; font-weight: bold;">Additional Comments:</label>
+                        <textarea style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 80px;"></textarea>
+                    </div>
+                    <button type="submit" style="background: #00ffcc; color: #000; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Submit Survey</button>
+                </form>`,
+                'quiz': `<div id="quiz-container" style="max-width: 600px; margin: 20px auto; padding: 20px; border: 2px solid #f312af; border-radius: 8px; background: white;">
+                    <h2 style="color: #f312af; margin-bottom: 20px;">🎯 Quick Quiz</h2>
+                    <div id="quiz-question" style="margin-bottom: 20px;">
+                        <p style="color: #000; font-size: 18px; margin-bottom: 15px;"><strong>Question 1:</strong> What is 2 + 2?</p>
+                        <button onclick="checkAnswer(3)" style="display: block; width: 100%; margin: 5px 0; padding: 10px; border: 2px solid #00ffcc; background: white; cursor: pointer; border-radius: 4px;">3</button>
+                        <button onclick="checkAnswer(4)" style="display: block; width: 100%; margin: 5px 0; padding: 10px; border: 2px solid #00ffcc; background: white; cursor: pointer; border-radius: 4px;">4</button>
+                        <button onclick="checkAnswer(5)" style="display: block; width: 100%; margin: 5px 0; padding: 10px; border: 2px solid #00ffcc; background: white; cursor: pointer; border-radius: 4px;">5</button>
+                    </div>
+                    <div id="quiz-result" style="color: #00ffcc; font-size: 20px; display: none;"></div>
+                    <script>
+                        function checkAnswer(answer) {
+                            const result = document.getElementById('quiz-result');
+                            if (answer === 4) {
+                                result.style.color = '#00ff00';
+                                result.textContent = '✓ Correct!';
+                            } else {
+                                result.style.color = '#ff4444';
+                                result.textContent = '✗ Wrong! The answer is 4.';
+                            }
+                            result.style.display = 'block';
+                        }
+                    </script>
+                </div>`,
+                'pdf-viewer': `<div style="max-width: 800px; margin: 20px auto; padding: 20px; border: 2px solid #bf5fff; border-radius: 8px;">
+                    <h2 style="color: #000; margin-bottom: 15px;">📄 PDF Viewer</h2>
+                    <input type="file" accept=".pdf" id="pdf-upload" style="margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                    <iframe id="pdf-frame" style="width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 4px;"></iframe>
+                    <script>
+                        document.getElementById('pdf-upload').addEventListener('change', function(e) {
+                            const file = e.target.files[0];
+                            if (file && file.type === 'application/pdf') {
+                                const url = URL.createObjectURL(file);
+                                document.getElementById('pdf-frame').src = url;
+                            }
+                        });
+                    </script>
+                </div>`,
+                'gallery': `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px;">
+                    <img src="https://via.placeholder.com/300" style="width: 100%; border-radius: 8px; cursor: pointer;" onclick="this.requestFullscreen()">
+                    <img src="https://via.placeholder.com/300/ff69b4" style="width: 100%; border-radius: 8px; cursor: pointer;" onclick="this.requestFullscreen()">
+                    <img src="https://via.placeholder.com/300/00ffcc" style="width: 100%; border-radius: 8px; cursor: pointer;" onclick="this.requestFullscreen()">
+                    <img src="https://via.placeholder.com/300/f312af" style="width: 100%; border-radius: 8px; cursor: pointer;" onclick="this.requestFullscreen()">
+                </div>`,
+                'slideshow': `<div style="max-width: 600px; margin: 20px auto; text-align: center;">
+                    <div id="slideshow" style="position: relative; height: 400px; border: 2px solid #00ffcc; border-radius: 8px; overflow: hidden;">
+                        <div class="slide" style="position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, #f312af, #00ffcc); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px;">Slide 1</div>
+                        <div class="slide" style="position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, #00ffcc, #bf5fff); display: none; align-items: center; justify-content: center; color: white; font-size: 32px;">Slide 2</div>
+                        <div class="slide" style="position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, #bf5fff, #fffb01); display: none; align-items: center; justify-content: center; color: #000; font-size: 32px;">Slide 3</div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button onclick="prevSlide()" style="padding: 10px 20px; margin: 5px; border: 2px solid #00ffcc; background: white; cursor: pointer; border-radius: 4px;">← Prev</button>
+                        <button onclick="nextSlide()" style="padding: 10px 20px; margin: 5px; border: 2px solid #00ffcc; background: white; cursor: pointer; border-radius: 4px;">Next →</button>
+                    </div>
+                    <script>
+                        let currentSlide = 0;
+                        const slides = document.querySelectorAll('.slide');
+                        function showSlide(n) {
+                            slides.forEach((slide, i) => {
+                                slide.style.display = i === n ? 'flex' : 'none';
+                            });
+                        }
+                        function nextSlide() {
+                            currentSlide = (currentSlide + 1) % slides.length;
+                            showSlide(currentSlide);
+                        }
+                        function prevSlide() {
+                            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                            showSlide(currentSlide);
+                        }
+                    </script>
+                </div>`,
+                'accordion': `<div style="max-width: 600px; margin: 20px auto;">
+                    <details style="margin-bottom: 10px; border: 2px solid #00ffcc; border-radius: 4px; padding: 15px; background: white;">
+                        <summary style="cursor: pointer; font-weight: bold; color: #f312af; font-size: 18px;">🎨 Section 1: Getting Started</summary>
+                        <p style="margin-top: 10px; color: #000;">Content for section 1. Click the summary to expand/collapse!</p>
+                    </details>
+                    <details style="margin-bottom: 10px; border: 2px solid #00ffcc; border-radius: 4px; padding: 15px; background: white;">
+                        <summary style="cursor: pointer; font-weight: bold; color: #f312af; font-size: 18px;">⚡ Section 2: Advanced Features</summary>
+                        <p style="margin-top: 10px; color: #000;">Content for section 2. Add more details here!</p>
+                    </details>
+                    <details style="margin-bottom: 10px; border: 2px solid #00ffcc; border-radius: 4px; padding: 15px; background: white;">
+                        <summary style="cursor: pointer; font-weight: bold; color: #f312af; font-size: 18px;">✨ Section 3: Tips & Tricks</summary>
+                        <p style="margin-top: 10px; color: #000;">Content for section 3. Customize as needed!</p>
+                    </details>
+                </div>`,
+                'tabs': `<div style="max-width: 600px; margin: 20px auto;">
+                    <div style="display: flex; border-bottom: 2px solid #00ffcc;">
+                        <button class="tab-btn" onclick="showTab(0)" style="padding: 10px 20px; border: 2px solid #00ffcc; border-bottom: none; background: #00ffcc; cursor: pointer; margin-right: 5px; border-radius: 4px 4px 0 0;">Tab 1</button>
+                        <button class="tab-btn" onclick="showTab(1)" style="padding: 10px 20px; border: 2px solid #00ffcc; border-bottom: none; background: white; cursor: pointer; margin-right: 5px; border-radius: 4px 4px 0 0;">Tab 2</button>
+                        <button class="tab-btn" onclick="showTab(2)" style="padding: 10px 20px; border: 2px solid #00ffcc; border-bottom: none; background: white; cursor: pointer; border-radius: 4px 4px 0 0;">Tab 3</button>
+                    </div>
+                    <div class="tab-content" style="padding: 20px; border: 2px solid #00ffcc; border-top: none; background: white; display: block;">
+                        <h3 style="color: #f312af;">Tab 1 Content</h3>
+                        <p style="color: #000;">This is the content for tab 1!</p>
+                    </div>
+                    <div class="tab-content" style="padding: 20px; border: 2px solid #00ffcc; border-top: none; background: white; display: none;">
+                        <h3 style="color: #f312af;">Tab 2 Content</h3>
+                        <p style="color: #000;">This is the content for tab 2!</p>
+                    </div>
+                    <div class="tab-content" style="padding: 20px; border: 2px solid #00ffcc; border-top: none; background: white; display: none;">
+                        <h3 style="color: #f312af;">Tab 3 Content</h3>
+                        <p style="color: #000;">This is the content for tab 3!</p>
+                    </div>
+                    <script>
+                        function showTab(n) {
+                            const contents = document.querySelectorAll('.tab-content');
+                            const btns = document.querySelectorAll('.tab-btn');
+                            contents.forEach((c, i) => c.style.display = i === n ? 'block' : 'none');
+                            btns.forEach((b, i) => b.style.background = i === n ? '#00ffcc' : 'white');
+                        }
+                    </script>
+                </div>`,
+                'modal': `<div>
+                    <button onclick="document.getElementById('demo-modal').style.display='flex'" style="padding: 15px 30px; background: #f312af; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 18px;">Open Modal</button>
+                    <div id="demo-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999;">
+                        <div style="background: white; padding: 30px; border-radius: 8px; max-width: 500px; border: 3px solid #00ffcc;">
+                            <h2 style="color: #f312af; margin-bottom: 15px;">Modal Title</h2>
+                            <p style="color: #000; margin-bottom: 20px;">This is a modal dialog! You can put any content here.</p>
+                            <button onclick="document.getElementById('demo-modal').style.display='none'" style="padding: 10px 20px; background: #00ffcc; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Close</button>
+                        </div>
+                    </div>
+                </div>`,
+                'clicker-game': `<div style="max-width: 400px; margin: 20px auto; padding: 30px; border: 3px solid #f312af; border-radius: 8px; text-align: center; background: linear-gradient(135deg, rgba(243,18,175,0.1), rgba(0,255,204,0.1));">
+                    <h2 style="color: #f312af; margin-bottom: 20px;">🎮 Clicker Game</h2>
+                    <div style="font-size: 48px; margin: 20px 0; color: #00ffcc;" id="click-score">0</div>
+                    <button onclick="incrementClicks()" style="width: 200px; height: 200px; border-radius: 50%; background: linear-gradient(135deg, #f312af, #bf5fff); color: white; border: 5px solid #00ffcc; cursor: pointer; font-size: 32px; transition: transform 0.1s;">CLICK ME!</button>
+                    <div style="margin-top: 20px; color: #000;">
+                        <p><strong>Clicks per second:</strong> <span id="cps">0</span></p>
+                        <button onclick="buyUpgrade()" style="margin-top: 10px; padding: 10px 20px; background: #00ffcc; color: #000; border: 2px solid #f312af; border-radius: 4px; cursor: pointer; font-weight: bold;">Buy Auto-Clicker (Cost: <span id="upgrade-cost">10</span>)</button>
+                    </div>
+                    <script>
+                        let clicks = 0;
+                        let autoClickers = 0;
+                        let upgradeCost = 10;
+
+                        function incrementClicks() {
+                            clicks++;
+                            document.getElementById('click-score').textContent = clicks;
+                        }
+
+                        function buyUpgrade() {
+                            if (clicks >= upgradeCost) {
+                                clicks -= upgradeCost;
+                                autoClickers++;
+                                upgradeCost = Math.floor(upgradeCost * 1.5);
+                                document.getElementById('click-score').textContent = clicks;
+                                document.getElementById('upgrade-cost').textContent = upgradeCost;
+                                document.getElementById('cps').textContent = autoClickers;
+                            }
+                        }
+
+                        setInterval(() => {
+                            if (autoClickers > 0) {
+                                clicks += autoClickers;
+                                document.getElementById('click-score').textContent = clicks;
+                            }
+                        }, 1000);
+                    </script>
+                </div>`
+            };
+
+            if (templates[type]) {
+                addElement(templates[type], type);
+                document.getElementById('templates-modal').classList.remove('active');
+                updateStatus('Template added!');
+                playSound('success', 'A5');
+            }
+        }
+
+        // ============================================
+        // SIDEBAR TABS
+        // ============================================
+        document.querySelectorAll('.sidebar-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.getAttribute('data-tab');
+
+                // Update tabs
+                document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Update panels
+                document.querySelectorAll('.sidebar-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById(tabName + '-panel').classList.add('active');
+
+                // Render CSS editor if CSS tab
+                if (tabName === 'css') {
+                    renderCSSEditor();
+                }
+
+                playSound('pop', 'D5');
+            });
+        });
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+        function updateStatus(message) {
+            document.getElementById('status-message').textContent = message;
+            document.getElementById('last-action').textContent = 'Last: ' + message;
+        }
+
+        function updateElementCount() {
+            document.getElementById('element-count').textContent = 'Elements: ' + state.elements.length;
+        }
+
+        // ============================================
+        // SPARKLE FEEDBACK
+        // ============================================
+        function showSparkle(x, y, emoji = '✨') {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'feedback-sparkle';
+            sparkle.textContent = emoji;
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 1000);
+        }
+
+        // KidPix-style Stamp System!
+        function showStamp(emoji) {
+            const stamp = document.createElement('div');
+            stamp.className = 'stamp';
+            stamp.textContent = emoji;
+            stamp.style.left = (Math.random() * (window.innerWidth - 100)) + 'px';
+            stamp.style.top = (Math.random() * (window.innerHeight - 100)) + 'px';
+            document.body.appendChild(stamp);
+            setTimeout(() => stamp.remove(), 500);
+            playSound('pop', 'E5');
+        }
+
+        // ============================================
+        // CLEAR CANVAS
+        // ============================================
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            if (confirm('Clear entire canvas? This cannot be undone!')) {
+                state.elements = [];
+                saveHistory();
+                renderCanvas();
+                updateElementCount();
+                updateStatus('Canvas cleared!');
+                playSound('boop', 'C4');
+            }
+        });
+
+        // ============================================
+        // CODE VIEW MODAL
+        // ============================================
+        document.getElementById('btn-code-view').addEventListener('click', () => {
+            document.getElementById('code-view-editor').value = exportHTML();
+            document.getElementById('code-view-modal').classList.add('active');
+        });
+
+        document.getElementById('close-code-view').addEventListener('click', () => {
+            document.getElementById('code-view-modal').classList.remove('active');
+        });
+
+        document.getElementById('apply-code-view').addEventListener('click', () => {
+            const html = document.getElementById('code-view-editor').value;
+            // Parse and import
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Extract CSS
+            const styles = doc.querySelectorAll('style');
+            state.pageCSS = Array.from(styles).map(s => s.textContent).join('\n');
+
+            // Extract external resources
+            state.externalHeadTags = Array.from(new Set(
+                Array.from(doc.querySelectorAll('head link')).map(link => link.outerHTML)
+            ));
+
+            const scripts = Array.from(doc.querySelectorAll('script'));
+            state.externalScripts = Array.from(new Set(
+                scripts
+                    .filter(script => script.src)
+                    .map(script => script.outerHTML)
+            ));
+
+            // Extract inline JS
+            state.pageJS = scripts
+                .filter(script => !script.src)
+                .map(script => script.textContent)
+                .join('\n');
+
+            // Extract body elements
+            state.elements = [];
+            const bodyChildren = doc.body.children;
+            Array.from(bodyChildren).forEach(child => {
+                addElement(child.outerHTML, 'imported');
+            });
+
+            document.getElementById('code-view-modal').classList.remove('active');
+            updateStatus('Code applied!');
+            playSound('success', 'C6');
+        });
+
+        document.getElementById('copy-code-view').addEventListener('click', (event) => {
+            const { clientX, clientY } = event;
+            const code = document.getElementById('code-view-editor').value;
+            navigator.clipboard.writeText(code).then(() => {
+                updateStatus('Code copied to clipboard!');
+                playSound('success', 'E6');
+                showSparkle(clientX, clientY, '📋');
+            }).catch(() => updateStatus('Clipboard copy failed.'));
+        });
+
+        // ============================================
+        // COPY HTML & CSS
+        // ============================================
+        document.getElementById('btn-copy-html').addEventListener('click', (event) => {
+            const { clientX, clientY } = event;
+            const html = exportHTML();
+            navigator.clipboard.writeText(html).then(() => {
+                updateStatus('HTML copied to clipboard!');
+                playSound('success', 'E6');
+                showSparkle(clientX, clientY, '📋');
+            }).catch(() => updateStatus('Clipboard copy failed.'));
+        });
+
+        document.getElementById('btn-copy-css').addEventListener('click', (event) => {
+            const { clientX, clientY } = event;
+            const cssBundle = [
+                state.externalHeadTags.join('\n'),
+                state.pageCSS
+            ].filter(part => part && part.trim().length).join('\n\n') || '/* No custom CSS */';
+            navigator.clipboard.writeText(cssBundle).then(() => {
+                updateStatus('CSS copied to clipboard!');
+                playSound('success', 'E6');
+                showSparkle(clientX, clientY, '🎨');
+            }).catch(() => updateStatus('Clipboard copy failed.'));
+        });
+
+        // ============================================
+        // HELP MODAL
+        // ============================================
+        document.getElementById('btn-help').addEventListener('click', () => {
+            document.getElementById('help-modal').classList.add('active');
+        });
+
+        document.getElementById('close-help').addEventListener('click', () => {
+            document.getElementById('help-modal').classList.remove('active');
+        });
+
+        // ============================================
+        // AUTO-SAVE
+        // ============================================
+        setInterval(() => {
+            if (state.elements.length > 0) {
+                const projectData = {
+                    elements: state.elements,
+                    pageCSS: state.pageCSS,
+                    pageJS: state.pageJS,
+                    externalHeadTags: state.externalHeadTags,
+                    externalScripts: state.externalScripts,
+                    viewMode: state.viewMode,
+                    savedAt: new Date().toISOString()
+                };
+                localStorage.setItem('coaiexist-auto-save', JSON.stringify(projectData));
+            }
+        }, 60000); // Auto-save every 60 seconds
+
+        // Load auto-save on startup
+        const autoSave = localStorage.getItem('coaiexist-auto-save');
+        if (autoSave && state.elements.length === 0) {
+            try {
+                const projectData = JSON.parse(autoSave);
+                    if (confirm('Found auto-saved work from ' + new Date(projectData.savedAt).toLocaleString() + '. Restore it?')) {
+                        state.elements = projectData.elements || [];
+                        state.pageCSS = projectData.pageCSS || '';
+                        state.pageJS = projectData.pageJS || '';
+                        state.externalHeadTags = projectData.externalHeadTags || [];
+                        state.externalScripts = projectData.externalScripts || [];
+                        state.viewMode = projectData.viewMode || 'desktop';
+                        canvas.className = `${state.viewMode}-view`;
+                        state.selectedElement = null;
+                        state.clipboard = null;
+                        renderCanvas();
+                    updateElementCount();
+                    updateStatus('Auto-save restored!');
+                }
+            } catch (e) {
+                console.error('Auto-save restore failed:', e);
+            }
+        }
+
+        // ============================================
+        // ASCII ART INJECTOR
+        // ============================================
+        document.getElementById('btn-ascii').addEventListener('click', () => {
+            document.getElementById('ascii-modal').classList.add('active');
+        });
+
+        document.getElementById('close-ascii').addEventListener('click', () => {
+            document.getElementById('ascii-modal').classList.remove('active');
+        });
+
+        document.getElementById('add-ascii-btn').addEventListener('click', () => {
+            const ascii = document.getElementById('ascii-input').value;
+            if (!ascii) {
+                alert('Please paste some ASCII art first!');
+                return;
+            }
+
+            const html = `<pre style="font-family: monospace; font-size: 12px; line-height: 1; border: 2px solid var(--cyan); padding: 20px; background: var(--darker-bg); color: var(--green); overflow-x: auto; border-radius: var(--border-radius);">${ascii}</pre>`;
+            addElement(html, 'ascii');
+            document.getElementById('ascii-modal').classList.remove('active');
+            document.getElementById('ascii-input').value = '';
+            updateStatus('ASCII art added!');
+            playSound('success', 'C6');
+            showStamp('📟');
+        });
+
+        // ============================================
+        // IMAGE MAP CREATOR
+        // ============================================
+        document.getElementById('btn-imagemap').addEventListener('click', () => {
+            document.getElementById('imagemap-modal').classList.add('active');
+        });
+
+        document.getElementById('close-imagemap').addEventListener('click', () => {
+            document.getElementById('imagemap-modal').classList.remove('active');
+        });
+
+        document.getElementById('create-imagemap-btn').addEventListener('click', () => {
+            const imageUrl = document.getElementById('imagemap-url').value;
+            const areasText = document.getElementById('imagemap-areas').value;
+
+            if (!imageUrl) {
+                alert('Please enter an image URL!');
+                return;
+            }
+
+            const areas = areasText.split('\n').map(line => {
+                const [coords, url, title] = line.split('|').map(s => s.trim());
+                if (!coords || !url) return null;
+                const [x, y, w, h] = coords.split(',').map(n => parseInt(n));
+                return { x, y, w, h, url, title: title || 'Click here' };
+            }).filter(a => a);
+
+            const mapName = 'map-' + Date.now();
+            const html = `
+                <div style="position: relative; display: inline-block; border: 2px solid var(--cyan); border-radius: var(--border-radius);">
+                    <img src="${imageUrl}" usemap="#${mapName}" style="max-width: 100%; display: block;">
+                    <map name="${mapName}">
+                        ${areas.map(a => `<area shape="rect" coords="${a.x},${a.y},${a.x + a.w},${a.y + a.h}" href="${a.url}" alt="${a.title}" title="${a.title}">`).join('\n')}
+                    </map>
+                </div>
+            `;
+
+            addElement(html, 'imagemap');
+            document.getElementById('imagemap-modal').classList.remove('active');
+            updateStatus('Image map created!');
+            playSound('success', 'E6');
+            showStamp('🗺️');
+        });
+
+        // ============================================
+        // ANIMATION SYSTEM
+        // ============================================
+        document.getElementById('btn-animation').addEventListener('click', () => {
+            document.getElementById('animation-modal').classList.add('active');
+        });
+
+        document.getElementById('close-animation').addEventListener('click', () => {
+            document.getElementById('animation-modal').classList.remove('active');
+        });
+
+        function applyAnimation(animName) {
+            if (!state.selectedElement) {
+                alert('Please select an element first!');
+                return;
+            }
+
+            const animations = {
+                'bounce': `@keyframes bounce-anim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } } `,
+                'fade': `@keyframes fade-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } } `,
+                'slide': `@keyframes slide-anim { 0% { transform: translateX(0); } 50% { transform: translateX(20px); } 100% { transform: translateX(0); } } `,
+                'spin': `@keyframes spin-anim { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } `,
+                'pulse': `@keyframes pulse-anim { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } } `,
+                'shake': `@keyframes shake-anim { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } } `,
+                'glow': `@keyframes glow-anim { 0%, 100% { box-shadow: 0 0 5px var(--cyan); } 50% { box-shadow: 0 0 20px var(--magenta); } } `,
+                'float': `@keyframes float-anim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } } `
+            };
+
+            const element = state.elements.find(el => el.id === state.selectedElement);
+            if (!element) return;
+
+            // Parse the HTML and add animation
+            const temp = document.createElement('div');
+            temp.innerHTML = element.html;
+            const firstChild = temp.firstElementChild;
+
+            if (firstChild) {
+                const animStyle = `<style>${animations[animName]}</style>`;
+                firstChild.style.animation = `${animName}-anim 1s ease-in-out infinite`;
+                element.html = animStyle + temp.innerHTML;
+                saveHistory();
+                renderCanvas();
+                selectElement(state.selectedElement);
+                updateStatus(`Animation "${animName}" applied!`);
+                playSound('success', 'C6');
+                showStamp('🎬');
+            }
+        }
+
+        // ============================================
+        // COMPONENT LIBRARY
+        // ============================================
+        let savedComponents = JSON.parse(localStorage.getItem('wysiwyg-components') || '[]');
+
+        document.getElementById('btn-components').addEventListener('click', () => {
+            renderComponentLibrary();
+            document.getElementById('component-library-modal').classList.add('active');
+        });
+
+        document.getElementById('close-component-library').addEventListener('click', () => {
+            document.getElementById('component-library-modal').classList.remove('active');
+        });
+
+        document.getElementById('save-component-btn').addEventListener('click', () => {
+            if (!state.selectedElement) {
+                alert('Please select an element first!');
+                return;
+            }
+
+            const element = state.elements.find(el => el.id === state.selectedElement);
+            if (!element) return;
+
+            const componentName = prompt('Name your component:', `${element.type}-component`);
+            if (!componentName) return;
+
+            savedComponents.push({
+                id: Date.now(),
+                name: componentName,
+                type: element.type,
+                html: element.html
+            });
+
+            localStorage.setItem('wysiwyg-components', JSON.stringify(savedComponents));
+            renderComponentLibrary();
+            updateStatus(`Component "${componentName}" saved!`);
+            playSound('success', 'C6');
+            showStamp('💾');
+        });
+
+        function renderComponentLibrary() {
+            const list = document.getElementById('saved-components-list');
+            if (savedComponents.length === 0) {
+                list.innerHTML = '<p style="color: var(--cyan); padding: var(--spacing-md);">No saved components yet. Select an element and save it!</p>';
+                return;
+            }
+
+            list.innerHTML = savedComponents.map(comp => `
+                <div style="background: var(--card-bg); border: 2px solid var(--cyan); padding: var(--spacing-md); margin-bottom: var(--spacing-sm); border-radius: var(--border-radius); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: var(--magenta);">${comp.name}</strong>
+                        <span style="color: var(--cyan); margin-left: 10px;">(${comp.type})</span>
+                    </div>
+                    <div>
+                        <button class="btn-primary" onclick="loadComponent(${comp.id})" style="margin-right: 5px; padding: 5px 10px;">Load</button>
+                        <button class="btn-danger" onclick="deleteComponent(${comp.id})" style="padding: 5px 10px;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadComponent(id) {
+            const comp = savedComponents.find(c => c.id === id);
+            if (!comp) return;
+
+            addElement(comp.html, comp.type);
+            document.getElementById('component-library-modal').classList.remove('active');
+            updateStatus(`Component "${comp.name}" loaded!`);
+            playSound('success', 'E6');
+            showStamp('📦');
+        }
+
+        function deleteComponent(id) {
+            if (!confirm('Delete this component?')) return;
+
+            savedComponents = savedComponents.filter(c => c.id !== id);
+            localStorage.setItem('wysiwyg-components', JSON.stringify(savedComponents));
+            renderComponentLibrary();
+            updateStatus('Component deleted');
+            playSound('boop', 'C4');
+        }
+
+        // ============================================
+        // EXTRACTION MODE - The Crown Jewel!
+        // ============================================
+        let extractionMode = false;
+        let extractionIframe = null;
+
+        document.getElementById('btn-extraction').addEventListener('click', () => {
+            enableExtractionMode();
+        });
+
+        document.getElementById('exit-extraction').addEventListener('click', () => {
+            exitExtractionMode();
+        });
+
+        function enableExtractionMode() {
+            // Check if we have a loaded page
+            const loadedPage = localStorage.getItem('coaiexist-loaded-page');
+            if (!loadedPage) {
+                alert('Please load an HTML page first using "Load Page" button!\n\nExtraction mode lets you click elements from loaded pages to extract them as components.');
+                return;
+            }
+
+            extractionMode = true;
+            document.getElementById('extraction-overlay').style.display = 'block';
+
+            // Create iframe with loaded page
+            const canvas = document.getElementById('canvas');
+            const originalContent = canvas.innerHTML;
+
+            canvas.innerHTML = `
+                <div style="padding: 20px; background: var(--panel-bg); border: 3px solid var(--magenta); border-radius: var(--border-radius); margin: 20px;">
+                    <h2 style="color: var(--magenta); margin-bottom: 15px;">🎯 EXTRACTION MODE ACTIVE</h2>
+                    <p style="color: var(--cyan); margin-bottom: 15px;">The loaded page appears below. Click any element to extract it!</p>
+                    <iframe id="extraction-iframe" style="width: 100%; height: calc(100vh - 300px); border: 2px solid var(--cyan); border-radius: var(--border-radius); background: white;"></iframe>
+                </div>
+            `;
+
+            // Load page into iframe
+            const iframe = document.getElementById('extraction-iframe');
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            iframeDoc.open();
+            iframeDoc.write(loadedPage);
+            iframeDoc.close();
+
+            // Add click handler to extract elements
+            iframe.contentWindow.document.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                extractElement(e.target);
+            });
+
+            extractionIframe = iframe;
+            updateStatus('Extraction mode enabled! Click elements to extract them.');
+            playSound('success', 'C6');
+        }
+
+        function extractElement(element) {
+            if (!element || element === extractionIframe.contentWindow.document.body) return;
+
+            const html = element.outerHTML;
+            addElement(html, 'extracted');
+
+            // Visual feedback
+            element.style.outline = '3px solid #f312af';
+            setTimeout(() => {
+                if (element.style) element.style.outline = '';
+            }, 500);
+
+            updateStatus('Element extracted! Check your canvas.');
+            playSound('success', 'E6');
+            showStamp('🎯');
+        }
+
+        function exitExtractionMode() {
+            extractionMode = false;
+            document.getElementById('extraction-overlay').style.display = 'none';
+            extractionIframe = null;
+            renderCanvas();
+            updateStatus('Extraction mode exited');
+            playSound('boop', 'C5');
+        }
+
+        // Store loaded page for extraction
+        const originalLoadPage = document.getElementById('btn-load-page');
+        if (originalLoadPage) {
+            originalLoadPage.addEventListener('click', () => {
+                // Store the loaded HTML for extraction mode
+                setTimeout(() => {
+                    const allHTML = Array.from(document.querySelectorAll('.canvas-element'))
+                        .map(el => el.innerHTML)
+                        .join('\n');
+                    // This will be set by the load page function
+                }, 1000);
+            });
+        }
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undo();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) {
+                e.preventDefault();
+                redo();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'c' && state.selectedElement) {
+                e.preventDefault();
+                document.getElementById('btn-copy').click();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'v' && state.clipboard) {
+                e.preventDefault();
+                document.getElementById('btn-paste').click();
+            }
+            if (e.key === 'Delete' && state.selectedElement) {
+                e.preventDefault();
+                deleteElement(state.selectedElement);
+            }
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+            }
+            if (e.key === 'F1') {
+                e.preventDefault();
+                document.getElementById('help-modal').classList.add('active');
+            }
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            saveHistory();
+            updateElementCount();
+            updateStatus('✨ CoAIexist Pro Editor Ready!');
+            setTimeout(() => playSound('success', 'C5'), 500);
+        }
+
+        init();
+    </script>
+</body>
+</html>
