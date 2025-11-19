@@ -629,6 +629,8 @@
           <p class="subtitle is-6" style="color:${tone.muted};">Curated paragraphs you want on the repo landing page.</p>
           <div class="content" style="color:${tone.text};">
             ${state.readmeHtml}
+            <p><strong>${state.repoName}</strong> bundles creative tooling, web experiments, and assets. Use this template to surface the highlights without touching the raw markdown.</p>
+            <p>Drop in sections for install steps, stack badges, callouts, or changelog summaries. Everything stays Bulma-native for quick publishing.</p>
           </div>
           <div class="tags" style="gap:8px;">${tags}</div>
         </div>
@@ -672,6 +674,15 @@
 
         function updatePreview() {
             const state = getCurrentState();
+            const state = {
+                repoName: document.getElementById('repoName').value || 'Untitled repo',
+                tagline: document.getElementById('tagline').value || 'Add a tagline that sells your repo.',
+                repoUrl: document.getElementById('repoUrl').value || '#',
+                accent: document.getElementById('accent').value || '#00d1b2',
+                layout: document.querySelector('input[name="layout"]:checked').value,
+                topics: document.getElementById('topics').value,
+                notes: document.getElementById('notes').value || 'Add a quick note about cadence or roadmap.'
+            };
 
             const markup = buildMarkup(state);
             preview.innerHTML = markup;
