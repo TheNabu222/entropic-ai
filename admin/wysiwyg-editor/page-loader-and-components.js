@@ -473,6 +473,9 @@ window.loadPageFromSource = function(pageName, bodyOnly = false) {
         try {
             const pageUrl = new URL(pageName, siteRoot);
             derivedBase = new URL('.', pageUrl).href;
+        let derivedBase = assetRoot;
+        try {
+            derivedBase = new URL('.', new URL(pageName, assetRoot)).href;
         } catch (err) {
             console.warn('Unable to derive base for', pageName, err);
         }
