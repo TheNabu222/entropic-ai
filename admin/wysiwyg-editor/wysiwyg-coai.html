@@ -1089,7 +1089,6 @@
             setupSoundInitialization();
             canvasBaseHref = DEFAULT_BASE_HREF;
             initCanvas('', { baseHref: DEFAULT_BASE_HREF });
-            loadComponents();
             updateStatus('✨ Ready to create! ✨');
             setupEventListeners();
             setupKeyboardShortcuts();
@@ -1903,7 +1902,17 @@
             // Action Buttons
             document.getElementById('edit-html-btn')?.addEventListener('click', openHtmlEditor);
             document.getElementById('delete-element-btn')?.addEventListener('click', deleteSelectedElement);
-            document.getElementById('save-component-btn')?.addEventListener('click', saveSelectedAsComponent);
+            const saveComponentBtn = document.getElementById('save-component-btn');
+            if (saveComponentBtn) {
+                saveComponentBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (window.saveSelectedComponent) {
+                        window.saveSelectedComponent();
+                    } else {
+                        alert('Component saving module failed to load.');
+                    }
+                });
+            }
             document.getElementById('wrap-element-btn')?.addEventListener('click', wrapSelectedElement);
 
             propsContainer.querySelector('[data-action="apply-link"]')?.addEventListener('click', (e) => {
@@ -2333,34 +2342,6 @@
         }
         
         // ============================================
-        // COMPONENT LIBRARY
-        // ============================================
-        function getComponents() { return JSON.parse(localStorage.getItem('coaiexist-studio-components') || '[]'); }
-        function saveComponents(components) { localStorage.setItem('coaiexist-studio-components', JSON.stringify(components)); }
-        function loadComponents() {
-            const components = getComponents();
-            dom.componentsLibrary.innerHTML = '';
-            if (components.length === 0) { dom.componentsLibrary.innerHTML = '<div style="font-size: 12px; color: #666; text-align: center;">Save elements as components!</div>'; return; }
-            const items = components.map((comp) => {
-                const item = document.createElement('div');
-                item.className = 'tool-item'; item.textContent = `💾 ${comp.name}`; item.title = `Add ${comp.name}`;
-                item.dataset.componentHtml = comp.html; item.draggable = true;
-                return item;
-            });
-            dom.componentsLibrary.append(...items);
-            attachToolItemListeners(items);
-        }
-        function saveSelectedAsComponent() {
-            if (!selectedElement) { alert('Please select an element to save.'); return; }
-            const name = prompt('Enter a name for your component:', 'My Component');
-            if (!name) return;
-            const components = getComponents();
-            // Using outerHTML for the wrapper, innerHTML for the content
-            components.push({ name: name, html: selectedElement.innerHTML });
-            saveComponents(components); loadComponents(); playSound('success', 'G5'); showStamp('💾');
-        }
-
-        // ============================================
         // KEYBOARD SHORTCUTS & DRAG/DROP/RESIZE
         // ============================================
         function setupKeyboardShortcuts() {
@@ -2656,6 +2637,7 @@ setInterval(draw, 33);`
         window.applyCustomJS = applyCustomJS;
         window.elementTemplates = elementTemplates;
         window.DEFAULT_BASE_HREF = DEFAULT_BASE_HREF;
+        window.attachToolItemListeners = attachToolItemListeners;
     </script>
     <!-- EMBEDDED PAGE SOURCES - 164 HTML files for instant loading -->
     <script src="page-sources-embedded.js"></script>

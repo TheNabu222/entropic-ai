@@ -51,6 +51,22 @@ const cancelPendingPageLoaderRender = () => {
 
 // Component Library Storage
 let componentLibrary = [];
+const COMPONENT_STORAGE_KEY = 'coaiexist-component-library';
+const LEGACY_COMPONENT_STORAGE_KEY = 'coaiexist-studio-components';
+
+const ensureComponentId = () => `comp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+function normalizeComponent(component, index = 0) {
+    const safeHtml = typeof component.html === 'string' ? component.html : '';
+    return {
+        id: component.id || ensureComponentId() + index,
+        name: component.name || `Component ${index + 1}`,
+        category: component.category || 'General',
+        html: safeHtml,
+        thumbnail: component.thumbnail || generateThumbnail(safeHtml),
+        created: component.created || new Date().toISOString()
+    };
+}
 
 window.addEventListener('DOMContentLoaded', () => {
     // Populate PAGE_SOURCES from embedded HTML
@@ -539,6 +555,7 @@ function setupComponentLibrary() {
     if (!existingModal) {
         const modal = createComponentLibraryModal();
         document.body.appendChild(modal);
+        renderComponentLibrary();
 
         // Attach close button event listener
         const closeBtn = modal.querySelector('[data-close-modal]');
@@ -571,8 +588,7 @@ function setupComponentLibrary() {
         toolbar.appendChild(btn);
     }
 
-    // Add "Save Component" button to sidebar when element is selected
-    enhanceElementSelection();
+    renderComponentToolbox();
 }
 
 function createComponentLibraryModal() {
@@ -606,34 +622,11 @@ function createComponentLibraryModal() {
     return modal;
 }
 
-function enhanceElementSelection() {
-    // Add save component button to properties panel
-    const checkAndAddButton = setInterval(() => {
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar && !document.getElementById('save-component-btn')) {
-            const panel = document.getElementById('properties-panel');
-            if (panel) {
-                const btn = document.createElement('button');
-                btn.id = 'save-component-btn';
-                btn.className = 'big-button purple';
-                btn.innerHTML = '💾 Save as Component';
-                btn.style.width = '100%';
-                btn.style.marginTop = '15px';
-                btn.addEventListener('click', saveSelectedComponent);
-
-                // Insert at top of properties panel
-                panel.insertBefore(btn, panel.firstChild);
-                clearInterval(checkAndAddButton);
-            }
-        }
-    }, 500);
-}
-
 function saveSelectedComponent() {
     const doc = getCanvasDoc && getCanvasDoc();
     if (!doc) return;
 
-    const selected = doc.querySelector('.selected');
+    const selected = doc.querySelector('.canvas-element.selected');
     if (!selected) {
         alert('Please select an element first!');
         return;
@@ -644,24 +637,27 @@ function saveSelectedComponent() {
 
     const category = prompt('Enter a category (optional):', 'General') || 'General';
 
-    // Clone the element and get its HTML
-    const clone = selected.cloneNode(true);
-    clone.classList.remove('selected');
-    const html = clone.outerHTML;
+    const html = selected.innerHTML.trim();
+    if (!html) {
+        alert('Nothing to save. Try selecting a richer element.');
+        return;
+    }
 
     // Create component object
-    const component = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        name: name,
-        category: category,
-        html: html,
+    const component = normalizeComponent({
+        id: ensureComponentId(),
+        name,
+        category,
+        html,
         thumbnail: generateThumbnail(html),
         created: new Date().toISOString()
-    };
+    }, componentLibrary.length);
 
     // Add to library
     componentLibrary.push(component);
     saveComponentLibrary();
+    renderComponentLibrary();
+    renderComponentToolbox();
 
     if (window.playSound) window.playSound('success');
     if (window.showStamp) window.showStamp('💾');
@@ -681,6 +677,10 @@ function generateThumbnail(html) {
 function renderComponentLibrary() {
     const grid = document.getElementById('component-library-grid');
     const empty = document.getElementById('component-library-empty');
+
+    if (!grid || !empty) {
+        return;
+    }
 
     if (componentLibrary.length === 0) {
         grid.style.display = 'none';
@@ -788,6 +788,33 @@ function renderComponentLibrary() {
     }
 }
 
+function renderComponentToolbox() {
+    const libraryContainer = document.getElementById('components-library');
+    if (!libraryContainer) return;
+
+    libraryContainer.innerHTML = '';
+
+    if (componentLibrary.length === 0) {
+        libraryContainer.innerHTML = '<div style="font-size: 12px; color: #666; text-align: center;">Save elements as components!</div>';
+        return;
+    }
+
+    const items = componentLibrary.map((comp) => {
+        const item = document.createElement('div');
+        item.className = 'tool-item';
+        item.textContent = `💾 ${comp.name}`;
+        item.title = `Add ${comp.name}`;
+        item.dataset.componentHtml = comp.html;
+        item.draggable = true;
+        return item;
+    });
+
+    libraryContainer.append(...items);
+    if (window.attachToolItemListeners) {
+        window.attachToolItemListeners(items);
+    }
+}
+
 window.insertComponent = function(componentId) {
     const component = componentLibrary.find(c => c.id === componentId);
     if (!component) return;
@@ -802,6 +829,8 @@ window.insertComponent = function(componentId) {
     if (window.updateStatus) window.updateStatus(`Inserted: ${component.name}`);
 };
 
+window.saveSelectedComponent = saveSelectedComponent;
+
 window.deleteComponent = function(componentId) {
     const component = componentLibrary.find(c => c.id === componentId);
     if (!component) return;
@@ -810,6 +839,7 @@ window.deleteComponent = function(componentId) {
         componentLibrary = componentLibrary.filter(c => c.id !== componentId);
         saveComponentLibrary();
         renderComponentLibrary();
+        renderComponentToolbox();
         if (window.playSound) window.playSound('pop');
         if (window.updateStatus) window.updateStatus(`Deleted: ${component.name}`);
     }
@@ -820,7 +850,10 @@ window.deleteComponent = function(componentId) {
 // ============================================
 function saveComponentLibrary() {
     try {
-        localStorage.setItem('coaiexist-component-library', JSON.stringify(componentLibrary));
+        localStorage.setItem(COMPONENT_STORAGE_KEY, JSON.stringify(componentLibrary));
+        // Keep legacy storage in sync so older flows remain functional
+        const legacyPayload = componentLibrary.map(comp => ({ name: comp.name, html: comp.html }));
+        localStorage.setItem(LEGACY_COMPONENT_STORAGE_KEY, JSON.stringify(legacyPayload));
     } catch (e) {
         console.error('Failed to save component library:', e);
     }
@@ -828,15 +861,30 @@ function saveComponentLibrary() {
 
 function loadComponentLibrary() {
     try {
-        const saved = localStorage.getItem('coaiexist-component-library');
+        const saved = localStorage.getItem(COMPONENT_STORAGE_KEY);
         if (saved) {
-            componentLibrary = JSON.parse(saved);
+            const parsed = JSON.parse(saved);
+            componentLibrary = Array.isArray(parsed) ? parsed.map(normalizeComponent) : [];
             console.log(`Loaded ${componentLibrary.length} components from library`);
+        } else {
+            const legacy = localStorage.getItem(LEGACY_COMPONENT_STORAGE_KEY);
+            if (legacy) {
+                const parsedLegacy = JSON.parse(legacy);
+                componentLibrary = Array.isArray(parsedLegacy) ? parsedLegacy.map((comp, idx) => normalizeComponent({
+                    name: comp.name,
+                    category: comp.category || 'Legacy',
+                    html: comp.html,
+                }, idx)) : [];
+                saveComponentLibrary();
+                console.log(`Migrated ${componentLibrary.length} legacy components`);
+            }
         }
     } catch (e) {
         console.error('Failed to load component library:', e);
         componentLibrary = [];
     }
+
+    renderComponentToolbox();
 }
 
 // ============================================
@@ -866,9 +914,11 @@ window.importComponentLibrary = function() {
         reader.onload = (e) => {
             try {
                 const imported = JSON.parse(e.target.result);
-                componentLibrary = [...componentLibrary, ...imported];
+                const normalized = Array.isArray(imported) ? imported.map((comp, idx) => normalizeComponent(comp, idx)) : [];
+                componentLibrary = [...componentLibrary, ...normalized];
                 saveComponentLibrary();
                 renderComponentLibrary();
+                renderComponentToolbox();
                 if (window.updateStatus) window.updateStatus(`Imported ${imported.length} components!`);
                 if (window.playSound) window.playSound('success');
             } catch (err) {
