@@ -3,16 +3,17 @@
 **Date:** 2025-11-19  
 **Purpose:** Track what's published (live) on https://coaiexist.wtf vs. what's in the repository
 
-⚠️ **IMPORTANT:** This document is based on repository analysis only and has NOT been verified against the live website. See [VERIFICATION_NEEDED.md](./VERIFICATION_NEEDED.md) for details on how to verify what's actually live.
+✅ **VERIFIED:** This document has been updated with actual live site data from Neocities. See [LIVE_SITE_VERIFIED.md](./LIVE_SITE_VERIFIED.md) for complete verification details.
 
 ---
 
-## 📊 Summary Statistics
+## 📊 Summary Statistics (VERIFIED)
 
+- **Total files on live site:** 251 files ✅
+- **HTML files on live site:** 110 files ✅
 - **Total HTML files in repository:** 305
-- **Published/Live files:** ~255 (83.6%)
-- **Unpublished/In-Progress:** 50+ (16.4%)
-- **Main navigation pages:** 11 pages in taskbar
+- **Unpublished in /unpublished:** 50+ files (correctly NOT deployed)
+- **Main navigation pages:** 12 pages (all verified working) ✅
 
 ---
 

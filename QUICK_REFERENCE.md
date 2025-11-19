@@ -2,11 +2,11 @@
 
 **Quick lookup guide for what's live on coaiexist.wtf vs. in the repository**
 
-⚠️ **UNVERIFIED:** This document is based on repository structure analysis only. The live site has not been accessed to confirm what's actually published. See [VERIFICATION_NEEDED.md](./VERIFICATION_NEEDED.md) for verification instructions.
+✅ **VERIFIED:** Updated with actual Neocities file listing. See [LIVE_SITE_VERIFIED.md](./LIVE_SITE_VERIFIED.md) for complete details.
 
 ---
 
-## ✅ LIVE (Published on Website)
+## ✅ LIVE (Published on Website - VERIFIED)
 
 ### Main Navigation Pages
 - ✅ **/** - Main index with OS interface
@@ -96,15 +96,18 @@
 
 ---
 
-## 🔢 By The Numbers
+## 🔢 By The Numbers (VERIFIED ✅)
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Total HTML files | 305 | - |
-| Published files | ~255 | ✅ Live |
-| Unpublished files | 50+ | 🚧 In repo |
-| Main nav pages | 11 | ✅ Live |
-| BC7F2A testaments | 12+ | ✅ Live |
+| Files on live site | 251 | ✅ Verified |
+| HTML on live site | 110 | ✅ Verified |
+| Total HTML files in repo | 305 | - |
+| Unpublished in /unpublished | 50+ | 🚧 Correctly not deployed |
+| Main nav pages | 12 | ✅ All working |
+| BC7F2A testaments | 12 | ✅ All live |
+| Files on live but not repo | 4 | ⚠️ Needs sync |
+| Files in repo but not live | 1 | (index-hybrid-desktop.html) |
 | Ready to publish | 23 | 🚧 Pending |
 | Needs review | 20 | 🔍 Needs selection |
 
