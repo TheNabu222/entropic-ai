@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entropic AI WYSIWYG Workbench</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="./editor.css" />
+</head>
+<body class="has-background-light">
+  <section class="hero is-link">
+    <div class="hero-body">
+      <p class="subtitle is-6 has-text-weight-semibold">Bulma × RtfEditor</p>
+      <p class="title is-2">Repository WYSIWYG Studio</p>
+      <p class="subtitle is-5">Browse every HTML artifact, load it into a rich-text canvas, and keep a CSS property toolbox within reach.</p>
+      <div class="tags mt-3">
+        <span class="tag is-light">307 HTML files indexed</span>
+        <span class="tag is-white">Copy / download snippets</span>
+        <span class="tag is-white">Bulma layout</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="columns is-variable is-6">
+      <div class="column is-one-quarter">
+        <div class="box editor-shell">
+          <p class="title is-5">HTML inventory</p>
+          <p class="content is-size-6">Select a document to load its body into the WYSIWYG canvas. You can also filter by filename.</p>
+          <div class="field css-search">
+            <label class="label is-size-7 has-text-grey">Filter files</label>
+            <div class="control has-icons-left">
+              <input id="fileSearch" class="input is-small" type="search" placeholder="Type to filter" />
+              <span class="icon is-small is-left"><i class="fas fa-search"></i></span>
+            </div>
+          </div>
+          <nav class="panel is-link" id="fileList" aria-label="HTML files"></nav>
+          <div class="buttons mt-3">
+            <button id="loadFile" class="button is-link is-fullwidth"><span class="icon"><i class="fas fa-download"></i></span><span>Load into editor</span></button>
+            <button id="openFile" class="button is-light is-fullwidth"><span class="icon"><i class="fas fa-up-right-from-square"></i></span><span>Open in new tab</span></button>
+          </div>
+          <p class="help">Note: loading requires running this page from a local server so the fetch API can read the files.</p>
+        </div>
+      </div>
+
+      <div class="column is-half">
+        <div class="box editor-shell">
+          <div class="level mb-2">
+            <div class="level-left">
+              <p class="title is-4">RtfEditor canvas</p>
+            </div>
+            <div class="level-right status-bar" id="statusBar">Ready</div>
+          </div>
+
+          <div class="buttons toolbar is-flex is-flex-wrap-wrap">
+            <button class="button is-light is-outlined is-small" data-command="bold"><span class="icon"><i class="fas fa-bold"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="italic"><span class="icon"><i class="fas fa-italic"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="underline"><span class="icon"><i class="fas fa-underline"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="strikeThrough"><span class="icon"><i class="fas fa-strikethrough"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="insertUnorderedList"><span class="icon"><i class="fas fa-list"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="insertOrderedList"><span class="icon"><i class="fas fa-list-ol"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="justifyLeft"><span class="icon"><i class="fas fa-align-left"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="justifyCenter"><span class="icon"><i class="fas fa-align-center"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="justifyRight"><span class="icon"><i class="fas fa-align-right"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="createLink" data-prompt="true" data-prompt-label="Enter URL"><span class="icon"><i class="fas fa-link"></i></span></button>
+            <button class="button is-light is-outlined is-small" data-command="removeFormat"><span class="icon"><i class="fas fa-eraser"></i></span></button>
+          </div>
+
+          <div class="field is-grouped is-grouped-multiline mb-3">
+            <div class="control">
+              <div class="select is-small">
+                <select id="headingPicker">
+                  <option value="p">Paragraph</option>
+                  <option value="1">Heading 1</option>
+                  <option value="2">Heading 2</option>
+                  <option value="3">Heading 3</option>
+                  <option value="4">Heading 4</option>
+                  <option value="5">Heading 5</option>
+                </select>
+              </div>
+            </div>
+            <div class="control">
+              <div class="select is-small">
+                <select id="fontPicker">
+                  <option value="inherit">System font</option>
+                  <option value="Inter">Inter</option>
+                  <option value="Helvetica">Helvetica</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Monaco">Monaco</option>
+                </select>
+              </div>
+            </div>
+            <div class="control">
+              <div class="select is-small">
+                <select id="fontSizePicker">
+                  <option value="3">Default</option>
+                  <option value="2">Small</option>
+                  <option value="4">Medium</option>
+                  <option value="5">Large</option>
+                  <option value="6">XL</option>
+                </select>
+              </div>
+            </div>
+            <div class="control is-flex is-align-items-center">
+              <span class="tag is-light is-size-7 mr-2">Text color</span>
+              <input id="colorPicker" class="input is-small" type="color" value="#111827" style="width:120px;" />
+            </div>
+            <div class="control">
+              <div class="buttons has-addons">
+                <button id="clearEditor" class="button is-warning is-light is-small">Clear</button>
+                <button id="copyHtml" class="button is-primary is-light is-small">Copy HTML</button>
+                <button id="downloadHtml" class="button is-link is-light is-small">Download</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="editorCanvas" contenteditable="true" aria-label="Rich text editor">
+            <h2 class="title is-4">Welcome to the Entropic AI RtfEditor</h2>
+            <p class="content">Use the controls above to format text, paste snippets from any page in the repo, and attach CSS properties from the toolbox.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="box editor-shell">
+          <p class="title is-5">CSS property toolbox</p>
+          <p class="content is-size-6">Click any property to copy it into the notes pad. The categories mirror the request: flexbox, animations, backgrounds, box-model, typography, and more.</p>
+          <div class="field css-search">
+            <label class="label is-size-7 has-text-grey">Search properties</label>
+            <div class="control has-icons-left">
+              <input id="propertySearch" class="input is-small" type="search" placeholder="align-content, animation, grid..." />
+              <span class="icon is-small is-left"><i class="fas fa-filter"></i></span>
+            </div>
+          </div>
+          <div id="propertyCloud" class="is-flex is-flex-wrap-wrap mb-3"></div>
+          <label class="label is-size-6">CSS notes</label>
+          <textarea id="cssNotes" class="textarea" placeholder="Clicked properties will be appended here for quick copy/paste."></textarea>
+          <div class="helper-pill mt-3">
+            <span class="icon is-small"><i class="fas fa-swatchbook"></i></span>
+            <span>Includes align-content, flexbox, animations, backgrounds, positioning, typography, and z-index.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { RtfEditor } from './rtfeditor.js';
+
+    const fileListEl = document.getElementById('fileList');
+    const fileSearch = document.getElementById('fileSearch');
+    const propertySearch = document.getElementById('propertySearch');
+    const cssNotes = document.getElementById('cssNotes');
+    const loadButton = document.getElementById('loadFile');
+    const openButton = document.getElementById('openFile');
+    let files = [];
+    let activeFile = null;
+
+    const cssProperties = [
+      ['align-content', 'flexbox'],
+      ['align-items', 'flexbox'],
+      ['align-self', 'flexbox'],
+      ['animation-delay', 'animations'],
+      ['animation-direction', 'animations'],
+      ['animation-duration', 'animations'],
+      ['animation-fill-mode', 'animations'],
+      ['animation-iteration-count', 'animations'],
+      ['animation-name', 'animations'],
+      ['animation-play-state', 'animations'],
+      ['animation-timing-function', 'animations'],
+      ['animation', 'animations'],
+      ['background-attachment', 'backgrounds'],
+      ['background-clip', 'backgrounds'],
+      ['background-color', 'backgrounds'],
+      ['background-image', 'backgrounds'],
+      ['background-origin', 'backgrounds'],
+      ['background-position', 'backgrounds'],
+      ['background-repeat', 'backgrounds'],
+      ['background-size', 'backgrounds'],
+      ['background', 'backgrounds'],
+      ['border-bottom-color', 'box-model'],
+      ['border-bottom-left-radius', 'box-model'],
+      ['border-bottom-right-radius', 'box-model'],
+      ['border-bottom-style', 'box-model'],
+      ['border-bottom-width', 'box-model'],
+      ['border-bottom', 'box-model'],
+      ['border-collapse', 'box-model'],
+      ['border-color', 'box-model'],
+      ['border-left-color', 'box-model'],
+      ['border-left-style', 'box-model'],
+      ['border-left-width', 'box-model'],
+      ['border-left', 'box-model'],
+      ['border-radius', 'box-model'],
+      ['border-right-color', 'box-model'],
+      ['border-right-style', 'box-model'],
+      ['border-right-width', 'box-model'],
+      ['border-right', 'box-model'],
+      ['border-style', 'box-model'],
+      ['border-top-color', 'box-model'],
+      ['border-top-left-radius', 'box-model'],
+      ['border-top-right-radius', 'box-model'],
+      ['border-top-style', 'box-model'],
+      ['border-top-width', 'box-model'],
+      ['border-top', 'box-model'],
+      ['border-width', 'box-model'],
+      ['border', 'box-model'],
+      ['bottom', 'positioning'],
+      ['box-shadow', 'box-model'],
+      ['box-sizing', 'box-model'],
+      ['clear', 'flow'],
+      ['color', 'typography'],
+      ['column-count', 'layout'],
+      ['column-gap', 'layout'],
+      ['column-width', 'layout'],
+      ['content', 'generated'],
+      ['cursor', 'interactions'],
+      ['display', 'layout'],
+      ['flex-basis', 'flexbox'],
+      ['flex-direction', 'flexbox'],
+      ['flex-flow', 'flexbox'],
+      ['flex-grow', 'flexbox'],
+      ['flex-shrink', 'flexbox'],
+      ['flex-wrap', 'flexbox'],
+      ['float', 'flow'],
+      ['font-family', 'typography'],
+      ['font-size', 'typography'],
+      ['font-style', 'typography'],
+      ['font-variant', 'typography'],
+      ['font-weight', 'typography'],
+      ['font', 'typography'],
+      ['grid-area', 'css-grid'],
+      ['grid-auto-columns', 'css-grid'],
+      ['grid-auto-flow', 'css-grid'],
+      ['grid-auto-rows', 'css-grid'],
+      ['grid-column-end', 'css-grid'],
+      ['grid-column-gap', 'css-grid'],
+      ['grid-column-start', 'css-grid'],
+      ['grid-column', 'css-grid'],
+      ['grid-gap', 'css-grid'],
+      ['grid-row-end', 'css-grid'],
+      ['grid-row-gap', 'css-grid'],
+      ['grid-row-start', 'css-grid'],
+      ['grid-row', 'css-grid'],
+      ['grid-template-areas', 'css-grid'],
+      ['grid-template-columns', 'css-grid'],
+      ['grid-template-rows', 'css-grid'],
+      ['grid-template', 'css-grid'],
+      ['grid', 'css-grid'],
+      ['height', 'box-model'],
+      ['justify-content', 'flexbox'],
+      ['left', 'positioning'],
+      ['letter-spacing', 'typography'],
+      ['line-height', 'typography'],
+      ['list-style-image', 'typography'],
+      ['list-style-position', 'typography'],
+      ['list-style-type', 'typography'],
+      ['list-style', 'typography'],
+      ['margin-bottom', 'box-model'],
+      ['margin-left', 'box-model'],
+      ['margin-right', 'box-model'],
+      ['margin-top', 'box-model'],
+      ['margin', 'box-model'],
+      ['max-height', 'box-model'],
+      ['max-width', 'box-model'],
+      ['min-height', 'box-model'],
+      ['min-width', 'box-model'],
+      ['mix-blend-mode', 'blend'],
+      ['opacity', 'effects'],
+      ['order', 'flexbox'],
+      ['outline-color', 'outline'],
+      ['outline-style', 'outline'],
+      ['outline-width', 'outline'],
+      ['outline', 'outline'],
+      ['overflow-wrap', 'overflow'],
+      ['overflow-x', 'overflow'],
+      ['overflow-y', 'overflow'],
+      ['overflow', 'overflow'],
+      ['padding-bottom', 'box-model'],
+      ['padding-left', 'box-model'],
+      ['padding-right', 'box-model'],
+      ['padding-top', 'box-model'],
+      ['padding', 'box-model'],
+      ['pointer-events', 'interactions'],
+      ['position', 'positioning'],
+      ['resize', 'interactions'],
+      ['right', 'positioning'],
+      ['text-align', 'typography'],
+      ['text-decoration', 'typography'],
+      ['text-indent', 'typography'],
+      ['text-overflow', 'typography'],
+      ['text-shadow', 'typography'],
+      ['text-transform', 'typography'],
+      ['top', 'positioning'],
+      ['transform-origin', 'transform'],
+      ['transition-delay', 'transitions'],
+      ['transition-duration', 'transitions'],
+      ['transition-property', 'transitions'],
+      ['transition-timing-function', 'transitions'],
+      ['transition', 'transitions'],
+      ['vertical-align', 'typography'],
+      ['white-space', 'typography'],
+      ['width', 'box-model'],
+      ['will-change', 'performance'],
+      ['word-break', 'typography'],
+      ['word-spacing', 'typography'],
+      ['z-index', 'positioning']
+    ];
+
+    const renderProperties = (filter = '') => {
+      const cloud = document.getElementById('propertyCloud');
+      cloud.innerHTML = '';
+      cssProperties
+        .filter(([property, category]) =>
+          property.toLowerCase().includes(filter.toLowerCase()) ||
+          category.toLowerCase().includes(filter.toLowerCase())
+        )
+        .forEach(([property, category]) => {
+          const tag = document.createElement('span');
+          tag.className = 'tag is-info is-light property-chip';
+          tag.innerHTML = `${property} <span class="tag is-rounded is-white is-size-7 ml-1">${category}</span>`;
+          tag.addEventListener('click', () => {
+            cssNotes.value += `${property}: ;\n`;
+            cssNotes.focus();
+            navigator.clipboard?.writeText(property);
+          });
+          cloud.appendChild(tag);
+        });
+    };
+
+    const renderFiles = (filter = '') => {
+      fileListEl.innerHTML = '';
+      const filtered = files.filter((file) => file.toLowerCase().includes(filter.toLowerCase()));
+      filtered.forEach((file) => {
+        const block = document.createElement('a');
+        block.className = 'panel-block';
+        block.innerHTML = `<span class="panel-icon"><i class="fas fa-file-code"></i></span>${file}`;
+        block.addEventListener('click', () => {
+          fileListEl.querySelectorAll('.panel-block').forEach((n) => n.classList.remove('is-active'));
+          block.classList.add('is-active');
+          activeFile = file;
+        });
+        fileListEl.appendChild(block);
+      });
+      if (!activeFile && filtered.length) {
+        fileListEl.firstChild?.classList.add('is-active');
+        activeFile = filtered[0];
+      }
+    };
+
+    const loadInventory = async () => {
+      const response = await fetch('./html-files.json');
+      files = await response.json();
+      renderFiles('');
+    };
+
+    const editor = new RtfEditor({
+      editorId: 'editorCanvas',
+      toolbarSelector: '.toolbar',
+      statusSelector: '#statusBar'
+    });
+
+    fileSearch.addEventListener('input', (event) => renderFiles(event.target.value));
+    propertySearch.addEventListener('input', (event) => renderProperties(event.target.value));
+
+    loadButton.addEventListener('click', async () => {
+      if (!activeFile) return;
+      try {
+        const res = await fetch(`../${activeFile}`);
+        const text = await res.text();
+        const parsed = new DOMParser().parseFromString(text, 'text/html');
+        const html = parsed.body ? parsed.body.innerHTML : text;
+        editor.setContent(html);
+      } catch (error) {
+        editor.setContent(`<p class="has-text-danger">Unable to load ${activeFile}: ${error.message}</p>`);
+      }
+    });
+
+    openButton.addEventListener('click', () => {
+      if (!activeFile) return;
+      window.open(`../${activeFile}`, '_blank');
+    });
+
+    document.getElementById('clearEditor').addEventListener('click', () => editor.clear());
+    document.getElementById('copyHtml').addEventListener('click', () => editor.copyHtml());
+    document.getElementById('downloadHtml').addEventListener('click', () => editor.downloadHtml('entropic-snippet.html'));
+
+    renderProperties('');
+    loadInventory();
+  </script>
+</body>
+</html>
