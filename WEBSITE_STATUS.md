@@ -3,6 +3,8 @@
 **Date:** 2025-11-19  
 **Purpose:** Track what's published (live) on https://coaiexist.wtf vs. what's in the repository
 
+⚠️ **IMPORTANT:** This document is based on repository analysis only and has NOT been verified against the live website. See [VERIFICATION_NEEDED.md](./VERIFICATION_NEEDED.md) for details on how to verify what's actually live.
+
 ---
 
 ## 📊 Summary Statistics

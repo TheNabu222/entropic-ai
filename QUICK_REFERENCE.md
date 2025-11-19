@@ -2,6 +2,8 @@
 
 **Quick lookup guide for what's live on coaiexist.wtf vs. in the repository**
 
+⚠️ **UNVERIFIED:** This document is based on repository structure analysis only. The live site has not been accessed to confirm what's actually published. See [VERIFICATION_NEEDED.md](./VERIFICATION_NEEDED.md) for verification instructions.
+
 ---
 
 ## ✅ LIVE (Published on Website)
