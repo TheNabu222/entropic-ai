@@ -355,9 +355,82 @@
         }
         
         .property-textarea { min-height: 100px; resize: vertical; }
-        
+
         .property-compound { display: flex; gap: 8px; align-items: center; margin-bottom: var(--spacing); }
         .property-compound input[type="range"] { flex: 1; margin: 0; }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: var(--spacing);
+        }
+
+        .property-grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .property-input-small {
+            max-width: 120px;
+        }
+
+        .property-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 6px 0;
+        }
+
+        .custom-css-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 6px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .mini-button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: var(--border-radius);
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .css-cheatsheet {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 250px;
+            overflow: auto;
+        }
+
+        .css-cheatsheet details {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 6px;
+            background: var(--bg);
+        }
+
+        .css-prop-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed var(--border-color);
+            border-radius: 999px;
+            padding: 2px 10px;
+            margin: 3px;
+            font-size: 12px;
+            background: transparent;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .css-prop-chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
         .property-compound input[type="color"] { min-width: 36px; height: 36px; padding: 2px; border: 1px solid var(--border-color); background: transparent; cursor: pointer; border-radius: var(--border-radius);}
         .property-compound .property-input { margin-bottom: 0; }
         .property-input-small { width: 70px; }
@@ -671,7 +744,12 @@
             <div class="modal-header"><div class="modal-title">🎨 CSS Lab</div><button class="big-button" data-close-modal="css-modal">✖️</button></div>
             <textarea id="css-editor" class="property-input" rows="10" style="font-family: monospace;"></textarea>
             <button id="apply-css-btn" class="big-button green" style="width: 100%; margin-bottom: 16px;">Apply to Page</button>
-            
+            <div class="experiment-box">
+                <h4>CSS Property Palette</h4>
+                <p class="property-hint">Click any property to insert a ready-to-edit line into the CSS Lab editor.</p>
+                <div id="css-cheatsheet" class="css-cheatsheet"></div>
+            </div>
+
             <div class="experiment-box">
                 <h4>Animation Builder</h4>
                 <div id="animation-builder">
@@ -827,6 +905,7 @@
         // ============================================
         // STATE & SETUP
         // ============================================
+        const DEFAULT_BASE_HREF = 'https://coaiexist.wtf/assets/';
         const DEFAULT_BASE_HREF = 'https://coaiexist.wtf/';
         let canvasBaseHref = DEFAULT_BASE_HREF;
         let selectedElement = null;
@@ -844,6 +923,15 @@
         let soundsInitialized = false;
         let soundInitPromise = null;
 
+        const CSS_PROPERTY_GROUPS = [
+            { title: 'Typography', properties: ['font-family', 'font-size', 'font-weight', 'letter-spacing', 'line-height', 'text-transform', 'text-decoration', 'text-shadow'] },
+            { title: 'Layout', properties: ['display', 'position', 'top', 'right', 'bottom', 'left', 'z-index', 'flex-direction', 'justify-content', 'align-items', 'gap'] },
+            { title: 'Spacing', properties: ['margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left'] },
+            { title: 'Borders & Effects', properties: ['border', 'border-radius', 'box-shadow', 'filter', 'backdrop-filter', 'mix-blend-mode', 'opacity'] },
+            { title: 'Background', properties: ['background', 'background-color', 'background-image', 'background-size', 'background-repeat', 'background-position'] },
+            { title: 'Transforms', properties: ['transform', 'transform-origin', 'perspective', 'animation', 'transition'] }
+        ];
+
         const dom = {
             canvasFrame: document.getElementById('canvas-frame'),
             propertiesContainer: document.getElementById('properties-container'),
@@ -856,6 +944,47 @@
             componentsLibrary: document.getElementById('components-library'),
             layerList: document.getElementById('layer-list'),
         };
+
+        function isDirectCanvasElement(el) {
+            return Boolean(el?.dataset?.directCanvasElement === 'true');
+        }
+
+        function getElementContentNode(el) {
+            if (!el) return null;
+            return isDirectCanvasElement(el) ? el : el.firstElementChild;
+        }
+
+        function ensureElementIsEditable(target) {
+            const doc = getCanvasDoc();
+            if (!doc || !target) return target;
+            if (target.classList.contains('canvas-element')) return target;
+            const ancestorWrapper = target.closest('.canvas-element');
+            if (ancestorWrapper) return ancestorWrapper;
+            target.classList.add('canvas-element');
+            target.dataset.elementId = target.dataset.elementId || generateUID();
+            target.dataset.directCanvasElement = 'true';
+            return target;
+        }
+
+        function convertElementToAbsolute(el) {
+            if (!el) return;
+            const doc = el.ownerDocument;
+            const computedPosition = doc?.defaultView?.getComputedStyle(el)?.position || '';
+            if (computedPosition === 'absolute') return;
+            const left = el.offsetLeft;
+            const top = el.offsetTop;
+            const width = el.offsetWidth;
+            const height = el.offsetHeight;
+            el.style.position = 'absolute';
+            el.style.left = `${left}px`;
+            el.style.top = `${top}px`;
+            if (!el.style.width && width) el.style.width = `${width}px`;
+            if (!el.style.height && height) el.style.height = `${height}px`;
+        }
+
+        function getSelectedContentNode() {
+            return getElementContentNode(selectedElement);
+        }
 
         function initializeSounds() {
             if (soundsInitialized) return;
@@ -972,6 +1101,7 @@
             populatePageLoader();
             populateStickers();
             setupCssLabListeners();
+            renderCssCheatsheet();
             setupJsEngineListeners();
         });
 
@@ -1117,6 +1247,78 @@
             return "#" + ((1 << 24) + (+match[1] << 16) + (+match[2] << 8) + +match[3]).toString(16).slice(1).toUpperCase();
         }
         function generateUID() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/\n/g, '&#10;');
+        }
+        function getInlineStyleEntries(element) {
+            if (!element) return [];
+            const styleAttr = element.getAttribute('style');
+            if (!styleAttr) return [];
+            return styleAttr
+                .split(';')
+                .map(entry => entry.trim())
+                .filter(Boolean)
+                .map(entry => {
+                    const [prop, ...rest] = entry.split(':');
+                    return { property: prop.trim(), value: rest.join(':').trim() };
+                });
+        }
+        function renderCustomCssRowsHtml(element) {
+            const entries = getInlineStyleEntries(element);
+            if (!entries.length) {
+                return `<p class="property-hint">No inline CSS yet. Click "Add Property" to start layering custom styles.</p>`;
+            }
+            return entries.map((entry, index) => `
+                <div class="custom-css-row" data-index="${index}">
+                    <input type="text" class="property-input property-input-small" data-custom-css-prop value="${escapeHtml(entry.property)}">
+                    <input type="text" class="property-input" data-custom-css-value value="${escapeHtml(entry.value)}">
+                    <button class="mini-button" data-action="remove-css-row">✖</button>
+                </div>`).join('');
+        }
+        function getLinkInfo(wrapper, content) {
+            if (!wrapper || !content) {
+                return { url: '', target: '_self', isAnchor: false };
+            }
+            const isAnchor = content.tagName === 'A';
+            const url = isAnchor ? (content.getAttribute('href') || '') : (wrapper.dataset.linkUrl || '');
+            const target = isAnchor ? (content.getAttribute('target') || '_self') : (wrapper.dataset.linkTarget || '_self');
+            return { url, target, isAnchor };
+        }
+        function convertNodeTag(node, newTagName) {
+            if (!node || node.tagName === newTagName.toUpperCase()) return node;
+            const doc = node.ownerDocument;
+            if (!doc) return node;
+            const replacement = doc.createElement(newTagName);
+            Array.from(node.attributes).forEach(attr => {
+                replacement.setAttribute(attr.name, attr.value);
+            });
+            while (node.firstChild) {
+                replacement.appendChild(node.firstChild);
+            }
+            node.parentNode.replaceChild(replacement, node);
+            if (selectedElement === node) {
+                selectedElement = replacement;
+            }
+            setupCanvasInteraction();
+            return replacement;
+        }
+        function addBlankCustomCssRow(container) {
+            if (!container) return;
+            const row = document.createElement('div');
+            row.className = 'custom-css-row';
+            row.innerHTML = `
+                <input type="text" class="property-input property-input-small" data-custom-css-prop placeholder="property">
+                <input type="text" class="property-input" data-custom-css-value placeholder="value">
+                <button class="mini-button" data-action="remove-css-row">✖</button>`;
+            container.appendChild(row);
+        }
 
         // ============================================
         // CANVAS & PAGE MANAGEMENT
@@ -1192,18 +1394,15 @@
             }
         }
 
-        function getEditorStyles() { return `body { min-height: 100%; } .canvas-element { position: relative; border: 1px dashed transparent; transition: border-color 0.2s; min-height: 20px; } .canvas-element:hover { border-color: #00FFFF; } .canvas-element.selected { border: 2px solid #f312af !important; z-index: 1000 !important; } .canvas-element.highlight { border: 2px dashed #00ffcc !important; } .canvas-element.free-mode { cursor: move; } .canvas-element.flow-mode { cursor: grab; } .canvas-element.flow-mode.dragging { opacity: 0.5; border-style: solid; } .canvas-element.drag-over { border-top: 3px solid #f312af; } .resize-handle { position: absolute; width: 10px; height: 10px; background: #f312af; border: 1px solid var(--white); z-index: 1001; border-radius: 50%; } .resize-handle-nw { top: -5px; left: -5px; cursor: nwse-resize; } .resize-handle-ne { top: -5px; right: -5px; cursor: nesw-resize; } .resize-handle-sw { bottom: -5px; left: -5px; cursor: nesw-resize; } .resize-handle-se { bottom: -5px; right: -5px; cursor: nwse-resize; } .resize-handle-n { top: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; } .resize-handle-s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; } .resize-handle-w { top: 50%; left: -5px; transform: translateY(-50%); cursor: ew-resize; } .resize-handle-e { top: 50%; right: -5px; transform: translateY(-50%); cursor: ew-resize; } [contenteditable="true"] { outline: 1px solid #00FFFF; background: rgba(0, 255, 255, 0.1); }`; }
+        function getEditorStyles() { return `body { min-height: 100%; } .canvas-element { border: 1px dashed transparent; transition: border-color 0.2s; } .canvas-element:not([data-direct-canvas-element="true"]) { position: relative; min-height: 20px; } .canvas-element[data-direct-canvas-element="true"] { border-color: transparent; min-height: auto; } .canvas-element:hover { border-color: #00FFFF; } .canvas-element[data-direct-canvas-element="true"]:hover { border-color: transparent; outline: 1px dashed #00FFFF; outline-offset: 2px; } .canvas-element.selected { border: 2px solid #f312af !important; z-index: 1000 !important; } .canvas-element[data-direct-canvas-element="true"].selected { border-color: transparent !important; outline: 2px solid #f312af !important; } .canvas-element.highlight { border: 2px dashed #00ffcc !important; } .canvas-element[data-direct-canvas-element="true"].highlight { border-color: transparent !important; outline: 2px dashed #00ffcc !important; } .canvas-element.free-mode { cursor: move; } .canvas-element.flow-mode { cursor: grab; } .canvas-element.flow-mode.dragging { opacity: 0.5; border-style: solid; } .canvas-element.drag-over { border-top: 3px solid #f312af; } .resize-handle { position: absolute; width: 10px; height: 10px; background: #f312af; border: 1px solid var(--white); z-index: 1001; border-radius: 50%; } .resize-handle-nw { top: -5px; left: -5px; cursor: nwse-resize; } .resize-handle-ne { top: -5px; right: -5px; cursor: nesw-resize; } .resize-handle-sw { bottom: -5px; left: -5px; cursor: nesw-resize; } .resize-handle-se { bottom: -5px; right: -5px; cursor: nwse-resize; } .resize-handle-n { top: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; } .resize-handle-s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: ns-resize; } .resize-handle-w { top: 50%; left: -5px; transform: translateY(-50%); cursor: ew-resize; } .resize-handle-e { top: 50%; right: -5px; transform: translateY(-50%); cursor: ew-resize; } [contenteditable="true"] { outline: 1px solid #00FFFF; background: rgba(0, 255, 255, 0.1); }`; }
         function setupCanvasInteraction() {
             const doc = getCanvasDoc();
             if (!doc || !doc.body) return;
             const selector = 'p, h1, h2, h3, h4, h5, h6, div, section, article, header, footer, nav, main, img, button, a, ul, ol, li, blockquote, figure, table, marquee, pre, span, audio';
+            const skipTags = new Set(['BODY', 'HTML', 'SCRIPT', 'STYLE']);
             doc.body.querySelectorAll(selector).forEach(el => {
-                if (el.closest('.canvas-element') || el.classList.contains('canvas-element')) return;
-                if (['BODY', 'HTML', 'SCRIPT', 'STYLE'].includes(el.tagName)) return;
-                const wrapper = doc.createElement('div');
-                wrapper.classList.add('canvas-element');
-                el.parentNode.insertBefore(wrapper, el);
-                wrapper.appendChild(el);
+                if (skipTags.has(el.tagName)) return;
+                ensureElementIsEditable(el);
             });
             Array.from(doc.body.querySelectorAll('.canvas-element')).forEach(el => {
                 if (!el.dataset.elementId) el.dataset.elementId = generateUID();
@@ -1211,17 +1410,35 @@
                 el.addEventListener('dblclick', (e) => {
                     e.stopPropagation(); e.preventDefault();
                     let target = e.target;
-                    if (target.classList.contains('canvas-element')) { target = target.querySelector('p, h1, h2, h3, h4, span, a, li, button') || target.firstElementChild || target; }
-                    if (['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'SPAN', 'A', 'LI', 'BUTTON', 'DIV'].includes(target.tagName)) { makeTextEditable(target); }
+                    if (target.classList.contains('canvas-element')) {
+                        target = getElementContentNode(target) || target;
+                    }
+                    if (['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'SPAN', 'A', 'LI', 'BUTTON', 'DIV'].includes(target.tagName)) {
+                        makeTextEditable(target);
+                    }
                 });
                 el.removeEventListener('mousedown', initDrag);
                 el.removeEventListener('dragstart', handleDragStart);
+                el.removeEventListener('dragover', handleDragOver);
+                el.removeEventListener('dragleave', handleDragLeave);
+                el.removeEventListener('drop', handleDrop);
+                el.removeEventListener('dragend', handleDragEnd);
                 if (positionMode === 'free') {
-                    el.classList.add('free-mode'); el.classList.remove('flow-mode'); el.setAttribute('draggable', 'false'); el.addEventListener('mousedown', initDrag);
+                    el.classList.add('free-mode');
+                    el.classList.remove('flow-mode');
+                    el.setAttribute('draggable', 'false');
+                    if (!isDirectCanvasElement(el)) {
+                        convertElementToAbsolute(el);
+                    }
+                    el.addEventListener('mousedown', initDrag);
                 } else {
-                    el.classList.add('flow-mode'); el.classList.remove('free-mode'); el.setAttribute('draggable', 'true');
-                    el.addEventListener('dragstart', handleDragStart); el.addEventListener('dragover', handleDragOver);
-                    el.addEventListener('dragleave', handleDragLeave); el.addEventListener('drop', handleDrop);
+                    el.classList.add('flow-mode');
+                    el.classList.remove('free-mode');
+                    el.setAttribute('draggable', 'true');
+                    el.addEventListener('dragstart', handleDragStart);
+                    el.addEventListener('dragover', handleDragOver);
+                    el.addEventListener('dragleave', handleDragLeave);
+                    el.addEventListener('drop', handleDrop);
                     el.addEventListener('dragend', handleDragEnd);
                 }
             });
@@ -1330,7 +1547,7 @@
             if (selectedElement) { selectedElement.classList.remove('selected'); }
             if (el) {
                 el.classList.add('selected'); selectedElement = el; renderProperties(el);
-                if (positionMode === 'free') {
+                if (positionMode === 'free' && !isDirectCanvasElement(el)) {
                     ['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se'].forEach(dir => {
                         const handle = doc.createElement('div');
                         handle.className = `resize-handle resize-handle-${dir}`; handle.dataset.direction = dir;
@@ -1362,16 +1579,36 @@
         // PROPERTIES PANEL
         // ============================================
         function renderProperties(el) {
-            const content = el.firstElementChild; if (!content) return;
+            const content = getElementContentNode(el); if (!content) return;
             const canvasWindow = dom.canvasFrame.contentWindow; if (!canvasWindow) return;
             const computedStyle = canvasWindow.getComputedStyle(content);
             const computedContainerStyle = canvasWindow.getComputedStyle(el);
-            
+
             let attributesHtml = ''; let intelligentHtml = '';
             const tagName = content.tagName.toUpperCase();
-            if (tagName === 'IMG' || tagName === 'AUDIO') { attributesHtml += `<label class="property-label">Source URL (src)</label><input type="text" class="property-input" value="${content.getAttribute('src') || ''}" data-prop="src">`; }
-            if (tagName === 'A') { attributesHtml += `<label class="property-label">Link URL (href)</label><input type="text" class="property-input" value="${content.getAttribute('href') || ''}" data-prop="href">`; }
+            if (tagName === 'IMG' || tagName === 'AUDIO') {
+                attributesHtml += `<label class="property-label">Source URL (src)</label><input type="text" class="property-input" value="${escapeHtml(content.getAttribute('src') || '')}" data-prop="src">`;
+            }
+            if (tagName === 'A') {
+                attributesHtml += `<label class="property-label">Link URL (href)</label><input type="text" class="property-input" value="${escapeHtml(content.getAttribute('href') || '')}" data-prop="href">`;
+            }
             if (content.querySelector('nav a')) { intelligentHtml = renderNavbarProperties(content); }
+            const linkInfo = getLinkInfo(el, content);
+            const customCssHtml = renderCustomCssRowsHtml(content);
+            const paddingTop = escapeHtml(computedStyle.paddingTop);
+            const paddingRight = escapeHtml(computedStyle.paddingRight);
+            const paddingBottom = escapeHtml(computedStyle.paddingBottom);
+            const paddingLeft = escapeHtml(computedStyle.paddingLeft);
+            const marginTop = escapeHtml(computedContainerStyle.marginTop);
+            const marginRight = escapeHtml(computedContainerStyle.marginRight);
+            const marginBottom = escapeHtml(computedContainerStyle.marginBottom);
+            const marginLeft = escapeHtml(computedContainerStyle.marginLeft);
+            const widthValue = escapeHtml(computedContainerStyle.width);
+            const heightValue = escapeHtml(computedContainerStyle.height);
+            const topValue = escapeHtml(selectedElement?.style?.top || computedContainerStyle.top);
+            const leftValue = escapeHtml(selectedElement?.style?.left || computedContainerStyle.left);
+            const zIndexValue = escapeHtml(selectedElement?.style?.zIndex || computedContainerStyle.zIndex);
+            const gapValue = escapeHtml(computedStyle.gap);
 
             dom.propertiesContainer.innerHTML = `
                 ${intelligentHtml}
@@ -1379,7 +1616,24 @@
                     <summary>Content</summary>
                     <div class="property-content">
                         <label class="property-label">Inner Text</label>
-                        <textarea class="property-textarea" data-prop-content="innerText">${content.innerText}</textarea>
+                        <textarea class="property-textarea" data-prop-content="innerText">${escapeHtml(content.innerText)}</textarea>
+                    </div>
+                </details>
+                <details class="property-box" open>
+                    <summary>Linking</summary>
+                    <div class="property-content">
+                        <label class="property-label">Link URL</label>
+                        <input type="text" class="property-input" data-link-url-input value="${escapeHtml(linkInfo.url)}" placeholder="https://...">
+                        <label class="property-label">Open Behaviour</label>
+                        <select class="property-select" data-link-target-input>
+                            <option value="_self" ${linkInfo.target === '_self' ? 'selected' : ''}>Same Tab</option>
+                            <option value="_blank" ${linkInfo.target === '_blank' ? 'selected' : ''}>New Tab</option>
+                        </select>
+                        <p class="property-hint">Works for buttons, cards, and any element. We'll auto-convert it into a proper link.</p>
+                        <div class="property-compound" style="gap: 12px;">
+                            <button class="big-button" data-action="apply-link" style="flex:1;">${linkInfo.isAnchor ? 'Update Link' : 'Make Clickable Link'}</button>
+                            <button class="big-button" data-action="remove-link" style="flex:1; background:#ef4444; color:#fff;" ${linkInfo.url ? '' : 'disabled'}>Remove</button>
+                        </div>
                     </div>
                 </details>
                 <details class="property-box" open>
@@ -1388,11 +1642,29 @@
                         <label class="property-label">Font Family</label>
                         <select class="property-select" data-style="fontFamily"><option value="">(default)</option><option value="VT323, monospace">VT323</option><option value="Courier New, monospace">Courier New</option><option value="'Inter', sans-serif">Inter</option><option value="Arial, sans-serif">Arial</option><option value="Times New Roman, serif">Times New Roman</option></select>
                         <label class="property-label">Font Size</label>
-                        <div class="property-compound"><input type="range" min="8" max="120" value="${parseInt(computedStyle.fontSize)}" data-style-slider="fontSize"><input type="text" class="property-input property-input-small" value="${computedStyle.fontSize}" data-style-text="fontSize"></div>
+                        <div class="property-compound"><input type="range" min="8" max="120" value="${parseInt(computedStyle.fontSize)}" data-style-slider="fontSize"><input type="text" class="property-input property-input-small" value="${escapeHtml(computedStyle.fontSize)}" data-style-text="fontSize"></div>
                         <label class="property-label">Color</label>
-                        <div class="property-compound"><input type="color" value="${rgbToHex(computedStyle.color)}" data-style-color="color"><input type="text" class="property-input" value="${computedStyle.color}" data-style-text="color"></div>
+                        <div class="property-compound"><input type="color" value="${rgbToHex(computedStyle.color)}" data-style-color="color"><input type="text" class="property-input" value="${escapeHtml(computedStyle.color)}" data-style-text="color"></div>
                         <label class="property-label">Text Align</label>
                         <div class="align-buttons" data-style-buttons="textAlign"><button data-value="left" title="Left">⬅️</button><button data-value="center" title="Center">↔️</button><button data-value="right" title="Right">➡️</button><button data-value="justify" title="Justify">🟰</button></div>
+                        <label class="property-label">Letter Spacing</label>
+                        <input type="text" class="property-input" data-style="letterSpacing" value="${escapeHtml(computedStyle.letterSpacing)}" placeholder="e.g., 2px">
+                        <label class="property-label">Line Height</label>
+                        <input type="text" class="property-input" data-style="lineHeight" value="${escapeHtml(computedStyle.lineHeight)}" placeholder="e.g., 1.4">
+                        <label class="property-label">Text Transform</label>
+                        <select class="property-select" data-style="textTransform">
+                            <option value="">(default)</option>
+                            <option value="uppercase">Uppercase</option>
+                            <option value="lowercase">Lowercase</option>
+                            <option value="capitalize">Capitalize</option>
+                        </select>
+                        <label class="property-label">Text Decoration</label>
+                        <select class="property-select" data-style="textDecoration">
+                            <option value="">(none)</option>
+                            <option value="underline">Underline</option>
+                            <option value="line-through">Line Through</option>
+                            <option value="overline">Overline</option>
+                        </select>
                     </div>
                 </details>
                  <details class="property-box" open>
@@ -1400,15 +1672,99 @@
                     <div class="property-content" id="background-editor-container"></div>
                 </details>
                  <details class="property-box">
-                    <summary>Layout</summary>
+                    <summary>Layout & Spacing</summary>
                     <div class="property-content">
-                        <label class="property-label">Width:</label><input type="text" class="property-input" value="${computedContainerStyle.width}" data-container-style="width">
-                        <label class="property-label">Height:</label><input type="text" class="property-input" value="${computedContainerStyle.height}" data-container-style="height">
-                        <label class="property-label">Padding:</label><input type="text" class="property-input" value="${computedStyle.padding}" data-style="padding">
-                        <label class="property-label">Margin:</label><input type="text" class="property-input" value="${computedContainerStyle.margin}" data-container-style="margin">
+                        <label class="property-label">Display</label>
+                        <select class="property-select" data-style="display">
+                            <option value="">(auto)</option>
+                            <option value="block">Block</option>
+                            <option value="inline-block">Inline Block</option>
+                            <option value="flex">Flex</option>
+                            <option value="grid">Grid</option>
+                        </select>
+                        <div class="property-grid">
+                            <div>
+                                <label class="property-label">Flex Direction</label>
+                                <select class="property-select" data-style="flexDirection">
+                                    <option value="">(default)</option>
+                                    <option value="row">Row</option>
+                                    <option value="column">Column</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="property-label">Justify Content</label>
+                                <select class="property-select" data-style="justifyContent">
+                                    <option value="">(default)</option>
+                                    <option value="flex-start">Start</option>
+                                    <option value="center">Center</option>
+                                    <option value="flex-end">End</option>
+                                    <option value="space-between">Space Between</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="property-label">Align Items</label>
+                                <select class="property-select" data-style="alignItems">
+                                    <option value="">(default)</option>
+                                    <option value="flex-start">Start</option>
+                                    <option value="center">Center</option>
+                                    <option value="flex-end">End</option>
+                                    <option value="stretch">Stretch</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="property-label">Gap</label>
+                                <input type="text" class="property-input" data-style="gap" value="${gapValue}" placeholder="e.g., 10px">
+                            </div>
+                        </div>
+                        <div class="property-grid">
+                            <div>
+                                <label class="property-label">Width</label>
+                                <input type="text" class="property-input" value="${widthValue}" data-container-style="width" placeholder="auto">
+                            </div>
+                            <div>
+                                <label class="property-label">Height</label>
+                                <input type="text" class="property-input" value="${heightValue}" data-container-style="height" placeholder="auto">
+                            </div>
+                        </div>
+                        <label class="property-label">Padding</label>
+                        <div class="property-grid property-grid-4">
+                            <input type="text" class="property-input property-input-small" value="${paddingTop}" data-style="paddingTop" placeholder="Top">
+                            <input type="text" class="property-input property-input-small" value="${paddingRight}" data-style="paddingRight" placeholder="Right">
+                            <input type="text" class="property-input property-input-small" value="${paddingBottom}" data-style="paddingBottom" placeholder="Bottom">
+                            <input type="text" class="property-input property-input-small" value="${paddingLeft}" data-style="paddingLeft" placeholder="Left">
+                        </div>
+                        <label class="property-label">Margin</label>
+                        <div class="property-grid property-grid-4">
+                            <input type="text" class="property-input property-input-small" value="${marginTop}" data-container-style="marginTop" placeholder="Top">
+                            <input type="text" class="property-input property-input-small" value="${marginRight}" data-container-style="marginRight" placeholder="Right">
+                            <input type="text" class="property-input property-input-small" value="${marginBottom}" data-container-style="marginBottom" placeholder="Bottom">
+                            <input type="text" class="property-input property-input-small" value="${marginLeft}" data-container-style="marginLeft" placeholder="Left">
+                        </div>
+                        <label class="property-label">Positioning</label>
+                        <div class="property-grid">
+                            <select class="property-select" data-container-style="position">
+                                <option value="">(default)</option>
+                                <option value="relative">Relative</option>
+                                <option value="absolute">Absolute</option>
+                                <option value="fixed">Fixed</option>
+                                <option value="sticky">Sticky</option>
+                            </select>
+                            <input type="text" class="property-input" data-container-style="top" value="${topValue}" placeholder="Top">
+                            <input type="text" class="property-input" data-container-style="left" value="${leftValue}" placeholder="Left">
+                            <input type="text" class="property-input" data-container-style="zIndex" value="${zIndexValue}" placeholder="z-index">
+                        </div>
                          <label class="property-label">Opacity</label>
                          <div class="property-compound"><input type="range" min="0" max="1" step="0.05" value="${computedStyle.opacity}" data-style-slider="opacity"><input type="text" class="property-input property-input-small" value="${computedStyle.opacity}" data-style-text="opacity"></div>
-                        <label class="property-label">Border</label><input type="text" class="property-input" placeholder="e.g., 3px solid black" value="${computedStyle.border}" data-style="border">
+                    </div>
+                </details>
+                <details class="property-box">
+                    <summary>Borders & Effects</summary>
+                    <div class="property-content">
+                        <label class="property-label">Border</label><input type="text" class="property-input" placeholder="e.g., 3px solid black" value="${escapeHtml(computedStyle.border)}" data-style="border">
+                        <label class="property-label">Border Radius</label><input type="text" class="property-input" value="${escapeHtml(computedStyle.borderRadius)}" data-style="borderRadius" placeholder="e.g., 12px">
+                        <label class="property-label">Box Shadow</label><input type="text" class="property-input" value="${escapeHtml(computedStyle.boxShadow)}" data-style="boxShadow" placeholder="e.g., 0 4px 20px rgba(0,0,0,0.3)">
+                        <label class="property-label">Text Shadow</label><input type="text" class="property-input" value="${escapeHtml(computedStyle.textShadow)}" data-style="textShadow" placeholder="e.g., 0 0 10px #f0f">
+                        <label class="property-label">Filter</label><input type="text" class="property-input" value="${escapeHtml(computedStyle.filter)}" data-style="filter" placeholder="e.g., blur(2px)">
                     </div>
                 </details>
                  <details class="property-box">
@@ -1416,8 +1772,16 @@
                     <div class="property-content">
                         <p><strong>Tag:</strong> &lt;${content.tagName.toLowerCase()}&gt;</p>
                         ${attributesHtml}
-                        <label class="property-label">ID:</label><input type="text" class="property-input" value="${content.id || ''}" data-prop="id">
-                        <label class="property-label">Classes:</label><input type="text" class="property-input" value="${content.className.replace('canvas-element','').trim() || ''}" data-prop="className">
+                        <label class="property-label">ID:</label><input type="text" class="property-input" value="${escapeHtml(content.id || '')}" data-prop="id">
+                        <label class="property-label">Classes:</label><input type="text" class="property-input" value="${escapeHtml(content.className.replace('canvas-element','').trim() || '')}" data-prop="className">
+                    </div>
+                </details>
+                <details class="property-box">
+                    <summary>Advanced CSS</summary>
+                    <div class="property-content">
+                        <div id="custom-css-rows">${customCssHtml}</div>
+                        <button class="big-button" data-action="add-css-row" style="width:100%;">➕ Add Property</button>
+                        <p class="property-hint">Need something wild? Add any CSS property/value pair and we'll apply it inline.</p>
                     </div>
                 </details>
                 <div class="property-content" style="display: flex; flex-direction: column; gap: 8px;">
@@ -1433,23 +1797,210 @@
 
         function setupPropertyListeners() {
             const propsContainer = dom.propertiesContainer;
-            propsContainer.querySelector('[data-prop-content]')?.addEventListener('input', e => { if (selectedElement) selectedElement.firstElementChild[e.target.dataset.propContent] = e.target.value; });
+            propsContainer.querySelector('[data-prop-content]')?.addEventListener('input', e => {
+                const contentNode = getSelectedContentNode();
+                if (contentNode) contentNode[e.target.dataset.propContent] = e.target.value;
+            });
             propsContainer.querySelector('[data-prop-content]')?.addEventListener('change', saveState);
-            propsContainer.querySelectorAll('[data-style-color]').forEach(colorInput => { const textInput = propsContainer.querySelector(`[data-style-text="${colorInput.dataset.styleColor}"]`); colorInput.addEventListener('input', e => { textInput.value = e.target.value; if (selectedElement) selectedElement.firstElementChild.style[colorInput.dataset.styleColor] = e.target.value; }); textInput.addEventListener('change', e => { if (selectedElement) { selectedElement.firstElementChild.style[colorInput.dataset.styleColor] = e.target.value; saveState(); } }); colorInput.addEventListener('change', saveState); });
-            propsContainer.querySelectorAll('[data-style-slider]').forEach(slider => { const textInput = propsContainer.querySelector(`[data-style-text="${slider.dataset.styleSlider}"]`); const isPixel = slider.dataset.styleSlider === 'fontSize'; slider.addEventListener('input', e => { textInput.value = isPixel ? `${e.target.value}px` : e.target.value; if (selectedElement) selectedElement.firstElementChild.style[slider.dataset.styleSlider] = textInput.value; }); textInput.addEventListener('change', e => { if (selectedElement) { selectedElement.firstElementChild.style[slider.dataset.styleSlider] = e.target.value; saveState(); } }); slider.addEventListener('change', saveState); });
-            propsContainer.querySelectorAll('.property-select[data-style]').forEach(select => { select.value = selectedElement.firstElementChild.style[select.dataset.style].replace(/"/g, ''); select.addEventListener('change', e => { if (selectedElement) { selectedElement.firstElementChild.style[select.dataset.style] = e.target.value; saveState(); } }); });
-            propsContainer.querySelectorAll('[data-style-buttons]').forEach(group => { const property = group.dataset.styleButtons; const currentVal = selectedElement.firstElementChild.style[property]; group.querySelectorAll('button').forEach(btn => { if (btn.dataset.value === currentVal) btn.classList.add('active'); btn.addEventListener('click', () => { if (selectedElement) { group.querySelectorAll('button').forEach(b => b.classList.remove('active')); btn.classList.add('active'); selectedElement.firstElementChild.style[property] = btn.dataset.value; saveState(); } }); }); });
-            propsContainer.querySelectorAll('input[data-style], input[data-container-style], input[data-prop]').forEach(input => { input.addEventListener('change', (e) => { if (!selectedElement) return; const target = e.target; const elToStyle = target.hasAttribute('data-container-style') ? selectedElement : selectedElement.firstElementChild; const prop = target.dataset.style || target.dataset.containerStyle || target.dataset.prop; const value = target.value; if (target.hasAttribute('data-prop')) { if (prop === 'className') { elToStyle.className = value; } else { elToStyle.setAttribute(prop, value); } } else { elToStyle.style.setProperty(prop, value); } saveState(); }); });
-            
+            propsContainer.querySelectorAll('[data-style-color]').forEach(colorInput => {
+                const textInput = propsContainer.querySelector(`[data-style-text="${colorInput.dataset.styleColor}"]`);
+                colorInput.addEventListener('input', e => {
+                    textInput.value = e.target.value;
+                    const contentNode = getSelectedContentNode();
+                    if (contentNode) contentNode.style[colorInput.dataset.styleColor] = e.target.value;
+                });
+                textInput.addEventListener('change', e => {
+                    const contentNode = getSelectedContentNode();
+                    if (contentNode) { contentNode.style[colorInput.dataset.styleColor] = e.target.value; saveState(); }
+                });
+                colorInput.addEventListener('change', saveState);
+            });
+            propsContainer.querySelectorAll('[data-style-slider]').forEach(slider => {
+                const textInput = propsContainer.querySelector(`[data-style-text="${slider.dataset.styleSlider}"]`);
+                const isPixel = slider.dataset.styleSlider === 'fontSize';
+                slider.addEventListener('input', e => {
+                    textInput.value = isPixel ? `${e.target.value}px` : e.target.value;
+                    const contentNode = getSelectedContentNode();
+                    if (contentNode) contentNode.style[slider.dataset.styleSlider] = textInput.value;
+                });
+                textInput.addEventListener('change', e => {
+                    const contentNode = getSelectedContentNode();
+                    if (contentNode) { contentNode.style[slider.dataset.styleSlider] = e.target.value; saveState(); }
+                });
+                slider.addEventListener('change', saveState);
+            });
+            propsContainer.querySelectorAll('.property-select[data-style]').forEach(select => {
+                const contentNode = getSelectedContentNode();
+                if (contentNode) {
+                    const inlineVal = (contentNode.style[select.dataset.style] || '').replace(/"/g, '');
+                    if (inlineVal) { select.value = inlineVal; }
+                    else {
+                        const view = contentNode.ownerDocument?.defaultView;
+                        const computed = view ? view.getComputedStyle(contentNode) : null;
+                        const computedVal = computed ? computed[select.dataset.style] : '';
+                        if (computedVal) select.value = computedVal;
+                    }
+                }
+                select.addEventListener('change', e => {
+                    const targetNode = getSelectedContentNode();
+                    if (targetNode) { targetNode.style[select.dataset.style] = e.target.value; saveState(); }
+                });
+            });
+            propsContainer.querySelectorAll('.property-select[data-container-style]').forEach(select => {
+                if (selectedElement) {
+                    const inlineVal = (selectedElement.style[select.dataset.containerStyle] || '').replace(/"/g, '');
+                    if (inlineVal) { select.value = inlineVal; }
+                    else {
+                        const view = selectedElement.ownerDocument?.defaultView;
+                        const computed = view ? view.getComputedStyle(selectedElement) : null;
+                        const computedVal = computed ? computed[select.dataset.containerStyle] : '';
+                        if (computedVal) select.value = computedVal;
+                    }
+                }
+                select.addEventListener('change', e => {
+                    if (!selectedElement) return;
+                    selectedElement.style[select.dataset.containerStyle] = e.target.value;
+                    saveState();
+                });
+            });
+            propsContainer.querySelectorAll('[data-style-buttons]').forEach(group => {
+                const property = group.dataset.styleButtons;
+                const contentNode = getSelectedContentNode();
+                const currentVal = contentNode ? contentNode.style[property] : '';
+                group.querySelectorAll('button').forEach(btn => {
+                    if (btn.dataset.value === currentVal) btn.classList.add('active');
+                    btn.addEventListener('click', () => {
+                        const targetNode = getSelectedContentNode();
+                        if (!targetNode) return;
+                        group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        targetNode.style[property] = btn.dataset.value;
+                        saveState();
+                    });
+                });
+            });
+            propsContainer.querySelectorAll('input[data-style], input[data-container-style], input[data-prop], textarea[data-style], textarea[data-container-style], textarea[data-prop]').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    if (!selectedElement) return;
+                    const target = e.target;
+                    const contentNode = getSelectedContentNode();
+                    const elToStyle = target.hasAttribute('data-container-style') ? selectedElement : contentNode;
+                    if (!elToStyle) return;
+                    const prop = target.dataset.style || target.dataset.containerStyle || target.dataset.prop;
+                    const value = target.value;
+                    if (target.hasAttribute('data-prop')) {
+                        if (prop === 'className') { elToStyle.className = value; }
+                        else { elToStyle.setAttribute(prop, value); }
+                    } else {
+                        elToStyle.style.setProperty(prop, value);
+                    }
+                    saveState();
+                });
+            });
+
             // Action Buttons
             document.getElementById('edit-html-btn')?.addEventListener('click', openHtmlEditor);
             document.getElementById('delete-element-btn')?.addEventListener('click', deleteSelectedElement);
             document.getElementById('save-component-btn')?.addEventListener('click', saveSelectedAsComponent);
             document.getElementById('wrap-element-btn')?.addEventListener('click', wrapSelectedElement);
 
+            propsContainer.querySelector('[data-action="apply-link"]')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = propsContainer.querySelector('[data-link-url-input]')?.value || '';
+                const target = propsContainer.querySelector('[data-link-target-input]')?.value || '_self';
+                applyLinkToSelection(url, target);
+            });
+            propsContainer.querySelector('[data-action="remove-link"]')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                removeLinkFromSelection();
+            });
+            propsContainer.querySelector('[data-action="add-css-row"]')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                addBlankCustomCssRow(propsContainer.querySelector('#custom-css-rows'));
+            });
+            const cssRows = propsContainer.querySelector('#custom-css-rows');
+            if (cssRows) {
+                cssRows.addEventListener('input', (e) => {
+                    const row = e.target.closest('.custom-css-row');
+                    if (!row) return;
+                    const prop = row.querySelector('[data-custom-css-prop]')?.value.trim();
+                    const value = row.querySelector('[data-custom-css-value]')?.value || '';
+                    const contentNode = getSelectedContentNode();
+                    if (!contentNode || !prop) return;
+                    if (value) { contentNode.style.setProperty(prop, value); }
+                    else { contentNode.style.removeProperty(prop); }
+                });
+                cssRows.addEventListener('change', saveState);
+                cssRows.addEventListener('click', (e) => {
+                    if (e.target.matches('[data-action="remove-css-row"]')) {
+                        e.preventDefault();
+                        const row = e.target.closest('.custom-css-row');
+                        const prop = row?.querySelector('[data-custom-css-prop]')?.value.trim();
+                        const contentNode = getSelectedContentNode();
+                        if (contentNode && prop) { contentNode.style.removeProperty(prop); }
+                        row?.remove();
+                        saveState();
+                    }
+                });
+            }
+
             // Intellisense listeners
             document.getElementById('intelligent-nav-editor')?.addEventListener('input', e => { if(e.target.matches('input')) updateNavbarFromIntelligentEditor(); });
             document.getElementById('intelligent-nav-editor')?.addEventListener('click', e => { if(e.target.matches('button')) updateNavbarFromIntelligentEditor(e.target); });
+        }
+
+        function applyLinkToSelection(url, target = '_self') {
+            if (!selectedElement) return;
+            const trimmedUrl = (url || '').trim();
+            if (!trimmedUrl) {
+                alert('Enter a URL to make this element clickable.');
+                return;
+            }
+            let contentNode = getSelectedContentNode();
+            if (!contentNode) return;
+            const originalTag = contentNode.tagName.toLowerCase();
+            if (contentNode.tagName !== 'A') {
+                contentNode = convertNodeTag(contentNode, 'a');
+                if (!contentNode) return;
+                contentNode.dataset.originalTag = originalTag;
+                if (!contentNode.style.textDecoration) {
+                    contentNode.style.textDecoration = 'none';
+                }
+            }
+            contentNode.setAttribute('href', trimmedUrl);
+            if (target === '_blank') {
+                contentNode.setAttribute('target', '_blank');
+                contentNode.setAttribute('rel', 'noopener noreferrer');
+            } else {
+                contentNode.setAttribute('target', '_self');
+                contentNode.removeAttribute('rel');
+            }
+            saveState();
+            renderProperties(selectedElement);
+            playSound('success', 'A5');
+            showStamp('🔗');
+        }
+
+        function removeLinkFromSelection() {
+            if (!selectedElement) return;
+            let contentNode = getSelectedContentNode();
+            if (!contentNode) return;
+            if (contentNode.tagName === 'A') {
+                const originalTag = contentNode.dataset.originalTag;
+                contentNode.removeAttribute('href');
+                contentNode.removeAttribute('target');
+                contentNode.removeAttribute('rel');
+                if (originalTag) {
+                    contentNode = convertNodeTag(contentNode, originalTag);
+                    if (contentNode) {
+                        delete contentNode.dataset.originalTag;
+                    }
+                }
+            }
+            delete selectedElement.dataset.linkUrl;
+            delete selectedElement.dataset.linkTarget;
+            saveState();
+            renderProperties(selectedElement);
         }
         
         function renderBackgroundEditor(element, computedStyle) {
@@ -1483,7 +2034,8 @@
             if (!selectedElement) return; const type = document.getElementById('gradient-type').value; const angle = document.getElementById('gradient-angle').value; const stops = Array.from(document.querySelectorAll('#gradient-stops .gradient-stop')).map(stopDiv => `${stopDiv.querySelector('input[type="color"]').value} ${stopDiv.querySelector('input[type="range"]').value}%`);
             let gradientString = '';
             if (type === 'linear-gradient') { const angleText = document.getElementById('gradient-angle-text'); angleText.value = `${angle}deg`; gradientString = `linear-gradient(${angle}deg, ${stops.join(', ')})`; } else { gradientString = `radial-gradient(circle, ${stops.join(', ')})`; }
-            selectedElement.firstElementChild.style.background = gradientString;
+            const contentNode = getSelectedContentNode();
+            if (contentNode) contentNode.style.background = gradientString;
         }
 
         function parseGradient(str) {
@@ -1499,13 +2051,15 @@
             dom.propertiesContainer.innerHTML = `<div style="text-align: center; color: var(--text-secondary); opacity: 0.8; margin-top: 40px; font-size: 16px;">Select an element to begin editing.</div>`;
         }
         function openHtmlEditor() {
-            if (!selectedElement || !selectedElement.firstElementChild) return;
-            document.getElementById('html-editor-textarea').value = selectedElement.firstElementChild.innerHTML;
+            const contentNode = getSelectedContentNode();
+            if (!selectedElement || !contentNode) return;
+            document.getElementById('html-editor-textarea').value = contentNode.innerHTML;
             openModal('html-editor-modal');
         }
         function applyCustomHTML() {
-            if (!selectedElement || !selectedElement.firstElementChild) return;
-            selectedElement.firstElementChild.innerHTML = document.getElementById('html-editor-textarea').value;
+            const contentNode = getSelectedContentNode();
+            if (!selectedElement || !contentNode) return;
+            contentNode.innerHTML = document.getElementById('html-editor-textarea').value;
             saveState(); closeModal('html-editor-modal'); playSound('success'); showStamp('⚙️');
         }
         function wrapSelectedElement() {
@@ -1520,6 +2074,11 @@
                 selectedElement.style.left = '0'; selectedElement.style.top = '0'; selectedElement.style.position = 'relative';
             } else { wrapperContainer.classList.add('flow-mode'); }
             wrapperContainer.appendChild(newWrapper); selectedElement.parentNode.insertBefore(wrapperContainer, selectedElement);
+            if (isDirectCanvasElement(selectedElement)) {
+                selectedElement.classList.remove('canvas-element');
+                delete selectedElement.dataset.directCanvasElement;
+                delete selectedElement.dataset.elementId;
+            }
             newWrapper.appendChild(selectedElement);
             setupCanvasInteraction(); handleElementSelect(wrapperContainer); saveState(); playSound('success'); showStamp('🎁');
         }
@@ -1539,7 +2098,8 @@
         }
         function updateNavbarFromIntelligentEditor(buttonClicked) {
             if (!selectedElement) return;
-            const navContainer = selectedElement.firstElementChild;
+            const navContainer = getSelectedContentNode();
+            if (!navContainer) return;
             const nav = navContainer.querySelector('nav') || navContainer;
             
             if (buttonClicked) { // Handle add/remove
@@ -1653,6 +2213,38 @@
         // ============================================
         // CSS LAB & JS ENGINE
         // ============================================
+        function renderCssCheatsheet() {
+            const container = document.getElementById('css-cheatsheet');
+            if (!container) return;
+            container.innerHTML = CSS_PROPERTY_GROUPS.map(group => `
+                <details open>
+                    <summary>${group.title}</summary>
+                    <div>
+                        ${group.properties.map(prop => `<button type="button" class="css-prop-chip" data-css-prop="${prop}">${prop}</button>`).join('')}
+                    </div>
+                </details>
+            `).join('');
+            if (container.dataset.listenerAttached === 'true') return;
+            container.dataset.listenerAttached = 'true';
+            container.addEventListener('click', (e) => {
+                if (!e.target.matches('.css-prop-chip')) return;
+                const prop = e.target.dataset.cssProp;
+                const editor = document.getElementById('css-editor');
+                if (!prop || !editor) return;
+                insertCssSnippetAtCursor(editor, `${prop}: ;\n`);
+                editor.focus();
+                playSound('pop', 'D5');
+            });
+        }
+        function insertCssSnippetAtCursor(textarea, snippet) {
+            const start = textarea.selectionStart ?? textarea.value.length;
+            const end = textarea.selectionEnd ?? textarea.value.length;
+            const before = textarea.value.slice(0, start);
+            const after = textarea.value.slice(end);
+            textarea.value = `${before}${snippet}${after}`;
+            const cursor = start + snippet.length;
+            textarea.selectionStart = textarea.selectionEnd = cursor;
+        }
         function setupCssLabListeners() {
             document.getElementById('add-keyframe-btn').addEventListener('click', () => { const container = document.getElementById('anim-keyframes'); const newRow = document.createElement('div'); newRow.className = 'anim-keyframe-row'; newRow.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 8px;'; newRow.innerHTML = `<input type="text" class="property-input" placeholder="50%" style="flex-basis: 50px;"><input type="text" class="property-input" placeholder="e.g., opacity: 0.5;" style="flex-grow: 1;">`; container.appendChild(newRow); });
             document.getElementById('animation-builder').addEventListener('input', updateAnimationPreview);
@@ -1698,7 +2290,7 @@
                 li.draggable = true;
                 li.dataset.elementId = el.dataset.elementId;
 
-                const content = el.firstElementChild;
+                const content = getElementContentNode(el);
                 let name = `&lt;${content?.tagName.toLowerCase() || 'div'}&gt;`;
                 if(content?.id) name += ` #${content.id}`;
                 else if (content?.innerText) name += ` - ${content.innerText.substring(0,15)}...`;
@@ -2061,6 +2653,7 @@ setInterval(draw, 33);`
         window.applyCustomCSS = applyCustomCSS;
         window.applyCustomJS = applyCustomJS;
         window.elementTemplates = elementTemplates;
+        window.DEFAULT_BASE_HREF = DEFAULT_BASE_HREF;
     </script>
     <!-- EMBEDDED PAGE SOURCES - 164 HTML files for instant loading -->
     <script src="page-sources-embedded.js"></script>

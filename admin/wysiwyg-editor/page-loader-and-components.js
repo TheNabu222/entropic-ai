@@ -458,10 +458,18 @@ window.loadPageFromSource = function(pageName, bodyOnly = false) {
         // Extract body content (always needed for canvas)
         const bodyContent = doc.body.innerHTML;
 
+        const assetRoot = window.DEFAULT_BASE_HREF || 'https://coaiexist.wtf/assets/';
+        let derivedBase = assetRoot;
+        try {
+            derivedBase = new URL('.', new URL(pageName, assetRoot)).href;
+        } catch (err) {
+            console.warn('Unable to derive base for', pageName, err);
+        }
+
         if (bodyOnly) {
             // Just load body content - ignore CSS/JS
             if (window.initCanvas) {
-                window.initCanvas(bodyContent);
+                window.initCanvas(bodyContent, { baseHref: derivedBase });
             }
             if (window.updateStatus) window.updateStatus(`Loaded body from ${pageName}`);
         } else {
@@ -490,7 +498,7 @@ window.loadPageFromSource = function(pageName, bodyOnly = false) {
 
             // Load body content into canvas
             if (window.initCanvas) {
-                window.initCanvas(bodyContent);
+                window.initCanvas(bodyContent, { baseHref: derivedBase });
             }
 
             // Apply the CSS and JS
