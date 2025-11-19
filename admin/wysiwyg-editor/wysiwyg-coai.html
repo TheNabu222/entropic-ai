@@ -827,6 +827,8 @@
         // ============================================
         // STATE & SETUP
         // ============================================
+        const DEFAULT_BASE_HREF = 'https://coaiexist.wtf/';
+        let canvasBaseHref = DEFAULT_BASE_HREF;
         let selectedElement = null;
         let copiedElementHtml = null;
         let history = [];
@@ -862,27 +864,22 @@
                 return;
             }
 
-            sounds.pop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
-            sounds.boop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
-            sounds.success = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination();
-            sounds.error = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sawtooth' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
-            soundsInitialized = true;
-            console.log('🔊 Sound effects ready');
-        }
-
-        function ensureSoundInitialized() {
-            if (soundsInitialized) {
-                return Promise.resolve();
-            }
-            if (soundInitPromise) {
-                return soundInitPromise;
-            }
-            }
-
-            sounds.pop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
-            sounds.boop = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
-            sounds.success = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination();
-            sounds.error = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'sawtooth' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
+            sounds.pop = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: 'triangle' },
+                envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
+            }).toDestination();
+            sounds.boop = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: 'sine' },
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 }
+            }).toDestination();
+            sounds.success = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: 'square' },
+                envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 }
+            }).toDestination();
+            sounds.error = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: 'sawtooth' },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 }
+            }).toDestination();
             soundsInitialized = true;
             console.log('🔊 Sound effects ready');
         }
@@ -915,39 +912,46 @@
 
         function setupSoundInitialization() {
             let resumed = false;
-            const resume = () => {
+            let iframeDoc = null;
+
+            const detachIframeListeners = () => {
+                if (!iframeDoc) return;
+                iframeDoc.removeEventListener('pointerdown', requestInit);
+                iframeDoc.removeEventListener('keydown', requestInit);
+                iframeDoc = null;
+            };
+
+            const cleanup = () => {
+                document.removeEventListener('pointerdown', requestInit);
+                document.removeEventListener('keydown', requestInit);
+                detachIframeListeners();
+                dom.canvasFrame?.removeEventListener('load', handleIframeLoad);
+            };
+
+            const requestInit = () => {
                 if (resumed) return;
                 resumed = true;
-                document.removeEventListener('pointerdown', resume);
-                document.removeEventListener('keydown', resume);
-                dom.canvasFrame?.removeEventListener('load', attachToIframeDoc);
+                cleanup();
                 ensureSoundInitialized();
             };
 
             const bindToDoc = (targetDoc) => {
                 if (!targetDoc || resumed) return;
-                targetDoc.addEventListener('pointerdown', resume, { once: true });
-                targetDoc.addEventListener('keydown', resume, { once: true });
+                targetDoc.addEventListener('pointerdown', requestInit, { once: true });
+                targetDoc.addEventListener('keydown', requestInit, { once: true });
             };
 
-            const attachToIframeDoc = () => {
-                const iframeDoc = dom.canvasFrame?.contentDocument || dom.canvasFrame?.contentWindow?.document;
-                if (iframeDoc) {
-                    bindToDoc(iframeDoc);
-                }
+            const handleIframeLoad = () => {
+                const doc = dom.canvasFrame?.contentDocument || dom.canvasFrame?.contentWindow?.document;
+                if (!doc || doc === iframeDoc || resumed) return;
+                detachIframeListeners();
+                iframeDoc = doc;
+                bindToDoc(iframeDoc);
             };
 
             bindToDoc(document);
-            dom.canvasFrame?.addEventListener('load', attachToIframeDoc);
-            attachToIframeDoc();
-            const resume = () => {
-                document.removeEventListener('pointerdown', resume);
-                document.removeEventListener('keydown', resume);
-                ensureSoundInitialized();
-            };
-
-            document.addEventListener('pointerdown', resume, { once: true });
-            document.addEventListener('keydown', resume, { once: true });
+            dom.canvasFrame?.addEventListener('load', handleIframeLoad);
+            handleIframeLoad();
         }
 
         // ============================================
@@ -955,7 +959,8 @@
         // ============================================
         window.addEventListener('load', () => {
             setupSoundInitialization();
-            initCanvas();
+            canvasBaseHref = DEFAULT_BASE_HREF;
+            initCanvas('', { baseHref: DEFAULT_BASE_HREF });
             loadComponents();
             updateStatus('✨ Ready to create! ✨');
             setupEventListeners();
@@ -973,7 +978,8 @@
         function setupEventListeners() {
             document.getElementById('new-btn').addEventListener('click', () => {
                 if (confirm('Are you sure you want to start a new page? Any unsaved work will be lost.')) {
-                    initCanvas();
+                    canvasBaseHref = DEFAULT_BASE_HREF;
+                    initCanvas('', { baseHref: DEFAULT_BASE_HREF });
                 }
             });
             document.getElementById('templates-btn').addEventListener('click', () => openModal('templates-modal'));
@@ -1115,14 +1121,23 @@
         // ============================================
         // CANVAS & PAGE MANAGEMENT
         // ============================================
-        function initCanvas(htmlContent = '') {
+        function initCanvas(htmlContent = '', options = {}) {
             const doc = getCanvasDoc();
             if (!doc) return;
+            const requestedBase = typeof options.baseHref === 'string' ? options.baseHref : null;
+            let baseHref = requestedBase || canvasBaseHref || DEFAULT_BASE_HREF;
+            try {
+                baseHref = new URL(baseHref, window.location.href).href;
+            } catch (err) {
+                console.warn('Invalid base href provided, falling back to default.', err);
+                baseHref = DEFAULT_BASE_HREF;
+            }
+            canvasBaseHref = baseHref;
             const content = htmlContent || '<div style="padding: 40px; text-align: center; color: #999;">🎨 Drag stuff here to start creating! 🎨</div>';
             doc.open();
             doc.write(`
                 <!DOCTYPE html>
-                <html><head><base href="https://coaiexist.wtf/"><style id="custom-styles"></style><style id="editor-styles">${getEditorStyles()}</style></head>
+                <html><head><base href="${baseHref}"><style id="custom-styles"></style><style id="editor-styles">${getEditorStyles()}</style></head>
                 <body style="height: 100%; position: relative;">${content}<script id="custom-scripts"><\/script></body></html>`);
             doc.close();
             setTimeout(() => {
@@ -1136,7 +1151,8 @@
         async function loadPage(url) {
             updateStatus(`Loading page from ${url}...`);
             try {
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                const resolvedUrl = new URL(url, window.location.href);
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(resolvedUrl.href)}`;
 
                 // Fetch with timeout (30 seconds)
                 const controller = new AbortController();
@@ -1155,7 +1171,8 @@
                 const jsContent = Array.from(fetchedDoc.querySelectorAll('script:not([src])')).map(s => s.textContent).join('\n\n');
                 document.getElementById('css-editor').value = cssContent;
                 document.getElementById('js-editor').value = jsContent;
-                initCanvas(fetchedDoc.body.innerHTML);
+                const baseHref = new URL('.', resolvedUrl).href;
+                initCanvas(fetchedDoc.body.innerHTML, { baseHref });
                 applyCustomCSS();
                 applyCustomJS();
                 updateStatus(`✅ Page loaded successfully!`);
@@ -1593,7 +1610,7 @@
             const html = document.getElementById('ai-preview').innerHTML; if (!html) return;
             const aiMode = document.querySelector('input[name="ai-mode"]:checked').value;
             if (aiMode === 'element') { addElementHTML(html); playSound('success', 'A5'); showStamp('✨');
-            } else { if (confirm('This will replace the entire page with the AI-generated content. Are you sure?')) { initCanvas(html); playSound('success', 'B5'); showStamp('📄'); } else { return; } }
+            } else { if (confirm('This will replace the entire page with the AI-generated content. Are you sure?')) { initCanvas(html, { baseHref: DEFAULT_BASE_HREF }); playSound('success', 'B5'); showStamp('📄'); } else { return; } }
             closeModal('ai-modal');
         }
 
@@ -1854,7 +1871,7 @@
         function handleDragLeave(e) { const target = e.target.closest('.canvas-element'); if(target) target.classList.remove('drag-over'); }
         function handleDrop(e) { e.preventDefault(); const dropTarget = e.target.closest('.canvas-element'); if (dropTarget && dropTarget !== draggedFlowElement) { const parent = dropTarget.parentNode, rect = dropTarget.getBoundingClientRect(); if (e.clientY - rect.top < rect.height / 2) { parent.insertBefore(draggedFlowElement, dropTarget); } else { parent.insertBefore(draggedFlowElement, dropTarget.nextSibling); } saveState(); } }
         function toggleGrid() { gridEnabled = !gridEnabled; document.getElementById('grid-overlay').style.display = gridEnabled ? 'block' : 'none'; dom.gridBtn.textContent = `Grid: ${gridEnabled ? 'ON' : 'OFF'}`; playSound('pop'); }
-        function togglePositionMode() { positionMode = positionMode === 'flow' ? 'free' : 'flow'; dom.positionBtn.textContent = `Mode: ${positionMode.toUpperCase()}`; alert(`Position mode changed to ${positionMode}. This will apply to all elements after reload.`); const currentHtml = getCanvasDoc().body.innerHTML; initCanvas(currentHtml); playSound('pop'); }
+        function togglePositionMode() { positionMode = positionMode === 'flow' ? 'free' : 'flow'; dom.positionBtn.textContent = `Mode: ${positionMode.toUpperCase()}`; alert(`Position mode changed to ${positionMode}. This will apply to all elements after reload.`); const currentDoc = getCanvasDoc(); const currentHtml = currentDoc?.body.innerHTML || ''; initCanvas(currentHtml, { baseHref: canvasBaseHref || currentDoc?.querySelector('base')?.href || DEFAULT_BASE_HREF }); playSound('pop'); }
 
         // ============================================
         // TEMPLATES & DATA
@@ -1892,9 +1909,8 @@
                 return;
             }
             if (confirm('This will replace your current page. Continue?')) {
-                getCanvasDoc().body.innerHTML = pageTemplates[templateKey];
+                initCanvas(pageTemplates[templateKey], { baseHref: DEFAULT_BASE_HREF });
                 closeModal('templates-modal');
-                setupCanvasInteraction();
                 saveState();
                 playSound('success');
                 showStamp('🎉');
