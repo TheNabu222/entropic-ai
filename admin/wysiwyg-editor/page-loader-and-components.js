@@ -68,6 +68,51 @@ function normalizeComponent(component, index = 0) {
     };
 }
 
+function dedupeComponents(list) {
+    if (!Array.isArray(list)) return [];
+    const deduped = [];
+    const idIndex = new Map();
+    const signatureIndex = new Map();
+
+    list.forEach((component) => {
+        if (!component) return;
+        const normalized = normalizeComponent(component, deduped.length);
+        const signature = `${normalized.name}::${normalized.html}`;
+        const existingIndex = idIndex.has(normalized.id)
+            ? idIndex.get(normalized.id)
+            : signatureIndex.get(signature);
+
+        if (existingIndex != null) {
+            const merged = {
+                ...deduped[existingIndex],
+                ...normalized,
+                id: deduped[existingIndex].id || normalized.id,
+            };
+            deduped[existingIndex] = merged;
+            idIndex.set(merged.id, existingIndex);
+            signatureIndex.set(signature, existingIndex);
+        } else {
+            const idx = deduped.push(normalized) - 1;
+            idIndex.set(normalized.id, idx);
+            signatureIndex.set(signature, idx);
+        }
+    });
+
+    return deduped;
+}
+
+function mergeWithStoredComponents(current = []) {
+    try {
+        const saved = localStorage.getItem(COMPONENT_STORAGE_KEY);
+        if (!saved) return dedupeComponents(current);
+        const parsed = JSON.parse(saved);
+        return dedupeComponents([...(Array.isArray(parsed) ? parsed : []), ...current]);
+    } catch (e) {
+        console.warn('Component library merge failed, falling back to current snapshot.', e);
+        return dedupeComponents(current);
+    }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     // Populate PAGE_SOURCES from embedded HTML
     if (populatePageSourcesFromEmbedded()) {
@@ -655,6 +700,7 @@ function saveSelectedComponent() {
 
     // Add to library
     componentLibrary.push(component);
+    componentLibrary = dedupeComponents(componentLibrary);
     saveComponentLibrary();
     renderComponentLibrary();
     renderComponentToolbox();
@@ -850,6 +896,7 @@ window.deleteComponent = function(componentId) {
 // ============================================
 function saveComponentLibrary() {
     try {
+        componentLibrary = mergeWithStoredComponents(componentLibrary);
         localStorage.setItem(COMPONENT_STORAGE_KEY, JSON.stringify(componentLibrary));
         // Keep legacy storage in sync so older flows remain functional
         const legacyPayload = componentLibrary.map(comp => ({ name: comp.name, html: comp.html }));
@@ -884,6 +931,7 @@ function loadComponentLibrary() {
         componentLibrary = [];
     }
 
+    componentLibrary = dedupeComponents(componentLibrary);
     renderComponentToolbox();
 }
 
@@ -915,11 +963,16 @@ window.importComponentLibrary = function() {
             try {
                 const imported = JSON.parse(e.target.result);
                 const normalized = Array.isArray(imported) ? imported.map((comp, idx) => normalizeComponent(comp, idx)) : [];
-                componentLibrary = [...componentLibrary, ...normalized];
+                const beforeCount = componentLibrary.length;
+                componentLibrary = dedupeComponents([...componentLibrary, ...normalized]);
                 saveComponentLibrary();
                 renderComponentLibrary();
                 renderComponentToolbox();
-                if (window.updateStatus) window.updateStatus(`Imported ${imported.length} components!`);
+                const added = componentLibrary.length - beforeCount;
+                const statusMessage = added === imported.length
+                    ? `Imported ${imported.length} components!`
+                    : `Imported ${added} of ${imported.length} components (duplicates skipped).`;
+                if (window.updateStatus) window.updateStatus(statusMessage);
                 if (window.playSound) window.playSound('success');
             } catch (err) {
                 alert('Failed to import: Invalid JSON file');
