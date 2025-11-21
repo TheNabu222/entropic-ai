@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antinet Mesopotamian XP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&family=Comic+Sans+MS&family=Tahoma:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            xp: {
+              blue: '#245EDC',
+              bluelight: '#3084F0',
+              green: '#35AC48',
+              start: '#40B546',
+              taskbar: '#0C59DF',
+              cyan: '#00FFFF',
+              magenta: '#FF00CC',
+              yellow: '#FFCC00',
+              window: '#ECE9D8', 
+              accent: '#FF3399'
+            },
+            cmy: {
+              cyan: '#00CCFF',
+              magenta: '#FF00CC',
+              yellow: '#FFCC00',
+              darkCyan: '#0099CC',
+              darkMagenta: '#CC0099',
+              darkYellow: '#CC9900'
+            },
+            antinet: {
+              trunk: '#8B4513',
+              branch: '#556B2F',
+              leaf: '#228B22',
+              bud: '#9ACD32',
+              flower: '#FF69B4',
+              fruit: '#FF4500'
+            },
+            dark: {
+              desktop: '#000F3C',
+              window: '#192153',
+              blue: '#0F3A9C',
+              text: '#FFFFFF'
+            }
+          },
+          fontFamily: {
+            xp: ['Tahoma', 'Verdana', 'Arial', 'sans-serif'],
+            barbie: ['Comic Sans MS', 'Arial', 'sans-serif'],
+            code: ['Inconsolata', 'Courier New', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom cursor */
+    body {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M12 2L14.2 7.4H20L15.2 10.9L16.9 16.6L12 13.2L7.1 16.6L8.8 10.9L4 7.4H9.8L12 2Z' fill='%23FF00CC' stroke='%23FFFFFF' stroke-width='1'/%3E%3C/svg%3E"), auto;
+    }
+    
+    /* Windows XP + Y2K + Mesopotamian Style Mix */
+    @keyframes xp-shimmer {
+      0% { background-position: -100% 0; }
+      100% { background-position: 100% 0; }
+    }
+    
+    @keyframes sparkle {
+      0% { opacity: 0; transform: scale(0); }
+      50% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0); }
+    }
+    
+    /* Windows XP Luna theme styling */
+    .xp-window {
+      border: 1px solid #0055E5;
+      border-radius: 8px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      background-color: #ECE9D8;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .xp-titlebar {
+      background: linear-gradient(to right, #0078D7, #3C90DC, #6AA5E5);
+      padding: 5px 8px;
+      color: white;
+      font-weight: bold;
+      font-family: 'Tahoma', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .xp-button {
+      background: linear-gradient(to bottom, #F6F6F6, #DEDEDE);
+      border: 1px solid #919191;
+      border-radius: 3px;
+      padding: 4px 12px;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+      color: #000000;
+      cursor: pointer;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .xp-button:hover {
+      background: linear-gradient(to bottom, #F0F0F0, #D8D8D8);
+    }
+    
+    .xp-button:active {
+      background: linear-gradient(to bottom, #D8D8D8, #F0F0F0);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    
+    .xp-input {
+      border: 1px solid #7A7A7A;
+      border-radius: 2px;
+      background: white;
+      padding: 4px 8px;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+    }
+    
+    .xp-input:focus {
+      border-color: #0078D7;
+      outline: none;
+    }
+    
+    /* Y2K Barbie customization */
+    .barbie-gradient {
+      background: linear-gradient(45deg, #FF00CC, #00CCFF, #FFCC00);
+      background-size: 200% 200%;
+      animation: xp-shimmer 5s infinite;
+      color: white;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    }
+    
+    .y2k-border {
+      position: relative;
+      border: 2px solid;
+      border-image: linear-gradient(to right, #FF00CC, #00CCFF, #FFCC00) 1;
+    }
+    
+    .xp-card {
+      border: 1px solid #919191;
+      border-radius: 3px;
+      background: white;
+      padding: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .xp-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 L10 0 L5 5 L0 0 M30 0 L40 0 L40 10 L35 5 L30 0 M0 30 L0 40 L10 40 L5 35 L0 30 M40 30 L40 40 L30 40 L35 35 L40 30' fill='%23FF00CC' fill-opacity='0.05'/%3E%3C/svg%3E");
+      z-index: 0;
+      opacity: 0.3;
+    }
+    
+    .xp-card:hover {
+      border-color: #0078D7;
+      box-shadow: 0 0 5px rgba(0, 120, 215, 0.4);
+    }
+    
+    .xp-card.dragging {
+      opacity: 0.7;
+      transform: scale(0.98);
+      border: 2px dashed #0078D7;
+    }
+    
+    .xp-link {
+      color: #0066CC;
+      text-decoration: none;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    
+    .xp-link:hover {
+      text-decoration: underline;
+      color: #FF00CC;
+    }
+    
+    .drop-target {
+      border: 2px dashed #919191;
+      border-radius: 3px;
+      background-color: #F0F0F0;
+      padding: 12px;
+      margin: 8px 0;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666666;
+      background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 L10 0 L5 5 L0 0 M30 0 L40 0 L40 10 L35 5 L30 0 M0 30 L0 40 L10 40 L5 35 L0 30 M40 30 L40 40 L30 40 L35 35 L40 30' fill='%230078D7' fill-opacity='0.1'/%3E%3C/svg%3E");
+    }
+    
+    .drop-target.active {
+      border-color: #0078D7;
+      background-color: #E5F1FB;
+    }
+    
+    /* Mesopotamian elements */
+    .cuneiform {
+      font-family: 'Inconsolata', monospace;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+    
+    .ziggurat-icon {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M2 22 L22 22 L22 18 L18 18 L18 14 L14 14 L14 10 L10 10 L10 6 L6 6 L6 2 L2 2 Z' fill='%23FFCC00'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+    }
+    
+    .babylonian-pattern {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 10 L40 20 L30 30 L20 20 Z M10 30 L20 40 L10 50 L0 40 Z M50 30 L60 40 L50 50 L40 40 Z M30 30 L40 40 L30 50 L20 40 Z' stroke='%23FF00CC' stroke-width='1' fill='none' opacity='0.1'/%3E%3C/svg%3E");
+    }
+    
+    /* Windows XP desktop */
+    .xp-desktop {
+      background: linear-gradient(to bottom right, #235CDB, #72B5FF);
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+    }
+    
+    .xp-desktop::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 20 L55 35 L70 35 L60 45 L65 60 L50 50 L35 60 L40 45 L30 35 L45 35 Z' stroke='%23FFFFFF' stroke-width='1' fill='none' opacity='0.1'/%3E%3C/svg%3E");
+      z-index: 0;
+      opacity: 0.1;
+    }
+    
+    .xp-taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: linear-gradient(to bottom, #0C59DF, #1061E7);
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      color: white;
+      box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+    
+    .xp-start-button {
+      background: linear-gradient(to bottom, #4CC114, #40B546);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: bold;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    .xp-clock {
+      margin-left: auto;
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+    
+    /* Sparkle effect */
+    .sparkle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100;
+    }
+    
+    /* Tab styling */
+    .xp-tab {
+      padding: 6px 12px;
+      background-color: #DEDEDE;
+      border: 1px solid #919191;
+      border-bottom: none;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+      margin-right: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .xp-tab.active {
+      background-color: #FFFFFF;
+      font-weight: bold;
+    }
+    
+    /* Hashtag styling */
+    .hashtag {
+      display: inline-block;
+      background-color: #E5F1FB;
+      padding: 2px 5px;
+      margin: 2px;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #0066CC;
+      cursor: pointer;
+    }
+    
+    .hashtag:hover {
+      background-color: #CCE4F7;
+    }
+    
+    /* Antinet card type markers */
+    .antinet-marker {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 4px;
+    }
+    
+    .antinet-trunk { background-color: #8B4513; }
+    .antinet-branch { background-color: #556B2F; }
+    .antinet-leaf { background-color: #228B22; }
+    .antinet-bud { background-color: #9ACD32; }
+    .antinet-flower { background-color: #FF69B4; }
+    .antinet-fruit { background-color: #FF4500; }
+    
+    /* Dark mode overrides */
+    .dark .xp-window {
+      background-color: #192153;
+      border-color: #0044CC;
+    }
+    
+    .dark .xp-titlebar {
+      background: linear-gradient(to right, #0F3A9C, #2857BE, #4371DC);
+    }
+    
+    .dark .xp-button {
+      background: linear-gradient(to bottom, #333333, #222222);
+      border-color: #444444;
+      color: #FFFFFF;
+    }
+    
+    .dark .xp-button:hover {
+      background: linear-gradient(to bottom, #444444, #333333);
+    }
+    
+    .dark .xp-input {
+      background-color: #252850;
+      border-color: #444444;
+      color: #FFFFFF;
+    }
+    
+    .dark .xp-card {
+      background-color: #192153;
+      border-color: #333355;
+      color: #FFFFFF;
+    }
+    
+    .dark .xp-link {
+      color: #66AAFF;
+    }
+    
+    .dark .xp-link:hover {
+      color: #FF66CC;
+    }
+    
+    .dark .drop-target {
+      background-color: #252850;
+      border-color: #444466;
+      color: #AAAAAA;
+    }
+    
+    .dark .drop-target.active {
+      border-color: #66AAFF;
+      background-color: #303870;
+    }
+    
+    .dark .xp-tab {
+      background-color: #252850;
+      border-color: #444466;
+      color: #CCCCCC;
+    }
+    
+    .dark .xp-tab.active {
+      background-color: #303870;
+      color: #FFFFFF;
+    }
+    
+    .dark .hashtag {
+      background-color: #252850;
+      color: #66AAFF;
+    }
+    
+    .dark .hashtag:hover {
+      background-color: #303870;
+    }
+    
+    /* Ishtar symbols */
+    .ishtar-symbol {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='4' fill='none' stroke='%23FFCC00' stroke-width='1'/%3E%3Cpath d='M8 0 L8 16 M0 8 L16 8' stroke='%23FFCC00' stroke-width='1'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+    }
+  </style>
+</head>
+<body class="font-xp">
+  <div class="xp-desktop">
+    <div id="sparkles"></div>
+    <div class="xp-window max-w-5xl mx-auto shadow-lg mb-12">
+      <div class="xp-titlebar barbie-gradient">
+        <div class="flex items-center">
+          <div class="ziggurat-icon mr-2"></div>
+          <span class="cuneiform tracking-wide">&#11088; Antinet Mesopotamian Zettelkasten XP &#11088;</span>
+        </div>
+        <div class="flex">
+          <button class="ml-1 px-2 text-white font-bold">_</button>
+          <button class="ml-1 px-2 text-white font-bold">&#9633;</button>
+          <button class="ml-1 px-2 text-white font-bold">X</button>
+        </div>
+      </div>
+      
+      <div class="p-2 flex flex-col md:flex-row">
+        <!-- Left Panel - Card list with Babylonian pattern background -->
+        <div class="md:w-1/3 p-1">
+          <div class="xp-window h-full flex flex-col babylonian-pattern">
+            <div class="xp-titlebar">
+              <span class="flex items-center">
+                <span class="ishtar-symbol mr-1"></span>
+                <span>Tablet Collection</span>
+              </span>
+            </div>
+            <div class="p-2 bg-white dark:bg-dark-window">
+              <div class="flex mb-2">
+                <input type="text" id="searchInput" placeholder="Search tablets..." class="xp-input flex-1 mr-2">
+                <button id="searchButton" class="xp-button">Search</button>
+              </div>
+              <div class="flex mb-2">
+                <button id="newCardButton" class="xp-button w-full">New Tablet</button>
+              </div>
+              
+              <!-- View Tabs -->
+              <div class="flex border-b border-gray-300 mb-2">
+                <div id="tabRecent" class="xp-tab active">Recent</div>
+                <div id="tabAntinet" class="xp-tab">Antinet</div>
+                <div id="tabAlphabetical" class="xp-tab">A-Z</div>
+                <div id="tabHashtags" class="xp-tab">Hashtags</div>
+              </div>
+              
+              <!-- Hashtag Cloud (initially hidden) -->
+              <div id="hashtagCloud" class="mb-2 p-2 border border-gray-300 rounded hidden">
+                <!-- Hashtags will be displayed here -->
+              </div>
+              
+              <!-- Antinet Filter (initially hidden) -->
+              <div id="antinetFilter" class="mb-2 flex flex-wrap hidden">
+                <div class="flex items-center mr-2 mb-1">
+                  <div class="antinet-marker antinet-trunk"></div>
+                  <label class="cursor-pointer text-xs">
+                    <input type="checkbox" class="antinet-filter" value="trunk" checked> Trunk
+                  </label>
+                </div>
+                <div class="flex items-center mr-2 mb-1">
+                  <div class="antinet-marker antinet-branch"></div>
+                  <label class="cursor-pointer text-xs">
+                    <input type="checkbox" class="antinet-filter" value="branch" checked> Branch
+                  </label>
+                </div>
+                <div class="flex items-center mr-2 mb-1">
+                  <div class="antinet-marker antinet-leaf"></div>
+                  <label class="cursor-pointer text-xs">
+                    <input type="checkbox" class="antinet-filter" value="leaf" checked> Leaf
+                  </label>
+                </div>
+                <div class="flex items-center mr-2 mb-1">
+                  <div class="antinet-marker antinet-bud"></div>
+                  <label class="cursor-pointer text-xs">
+                    <input type="checkbox" class="antinet-filter" value="bud" checked> Bud
+                  </label>
+                </div>
+                <div class="flex items-center mr-2 mb-1">
+                  <div class="antinet-marker antinet-flower"></div>
+                  <label class="cursor-pointer text-xs">
+                    <input type="checkbox" class="antinet-filter" value="flower" checked> Flower
+                  </label>
+                </div>
+                <div class="flex items-center mr-2 mb-1">
+                  <div class="antinet-marker antinet-fruit"></div>
+                  <label class="cursor-pointer text-xs">
+                    <input type="checkbox" class="antinet-filter" value="fruit" checked> Fruit
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div id="cardList" class="overflow-y-auto p-2 flex-1 bg-white dark:bg-dark-window" style="max-height: 60vh;">
+              <!-- Cards will be listed here -->
+              <div class="text-center text-gray-600 dark:text-gray-400 mt-4">
+                <span class="cuneiform">No tablets yet.</span><br>
+                Create your first tablet by clicking "New Tablet".
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right Panel - Card content -->
+        <div class="md:w-2/3 p-1 mt-2 md:mt-0">
+          <div class="xp-window h-full flex flex-col">
+            <div class="xp-titlebar">
+              <span id="currentCardTitle" class="cuneiform">Tablet Viewer</span>
+            </div>
+            <div class="p-2 flex flex-col h-full bg-white dark:bg-dark-window">
+              <!-- Card Editor -->
+              <div class="mb-2">
+                <div class="flex mb-2">
+                  <div class="mr-2">
+                    <label class="block mb-1 font-bold text-xs">Tablet ID:</label>
+                    <input type="text" id="cardIdInput" class="xp-input w-24" readonly>
+                  </div>
+                  <div class="flex-1">
+                    <label class="block mb-1 font-bold text-xs">Tablet Title:</label>
+                    <input type="text" id="cardTitleInput" class="xp-input w-full" placeholder="Enter tablet title">
+                  </div>
+                </div>
+                
+                <!-- ANTINET Classification -->
+                <div class="mb-2">
+                  <label class="block mb-1 font-bold text-xs">Antinet Classification:</label>
+                  <select id="cardTypeInput" class="xp-input w-full">
+                    <option value="trunk">Trunk (Main Category)</option>
+                    <option value="branch">Branch (Major Subcategory)</option>
+                    <option value="leaf">Leaf (Minor Subcategory)</option>
+                    <option value="bud">Bud (Developing Idea)</option>
+                    <option value="flower">Flower (Refined Idea)</option>
+                    <option value="fruit">Fruit (Final Output)</option>
+                  </select>
+                </div>
+                
+                <div class="mb-2">
+                  <label class="block mb-1 font-bold text-xs">Content:</label>
+                  <textarea id="cardContentInput" class="xp-input w-full" style="height: 180px; resize: none;" placeholder="Enter tablet content"></textarea>
+                </div>
+                
+                <!-- Hashtags Section -->
+                <div class="mb-2">
+                  <label class="block mb-1 font-bold text-xs">Hashtags (separated by spaces):</label>
+                  <input type="text" id="cardHashtagsInput" class="xp-input w-full" placeholder="e.g. #mesopotamia #ishtar #cuneiform">
+                  <div id="cardHashtagDisplay" class="mt-1 flex flex-wrap"></div>
+                </div>
+                
+                <div class="mb-2">
+                  <label class="block mb-1 font-bold text-xs">Links to other tablets:</label>
+                  <div id="cardLinks" class="xp-input w-full min-h-8 p-1 overflow-y-auto" style="max-height: 80px;">
+                    <!-- Links will be displayed here -->
+                  </div>
+                  <div id="dropZone" class="drop-target mt-2 hidden">
+                    <div class="text-center">Drop tablet here to add link</div>
+                  </div>
+                </div>
+                <div class="mb-2">
+                  <label class="block mb-1 font-bold text-xs">Add Link:</label>
+                  <div class="flex">
+                    <select id="linkSelect" class="xp-input flex-1 mr-2">
+                      <option value="">-- Select Tablet --</option>
+                    </select>
+                    <button id="addLinkButton" class="xp-button">Add Link</button>
+                  </div>
+                  <div class="text-xs mt-1 text-gray-600 dark:text-gray-400">
+                    Tip: You can also drag and drop tablets from the list to create links.
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Action Buttons -->
+              <div class="mt-auto flex flex-wrap">
+                <button id="saveCardButton" class="xp-button mr-2 mb-2">Save Tablet</button>
+                <button id="deleteCardButton" class="xp-button mr-2 mb-2">Delete Tablet</button>
+                <button id="exportButton" class="xp-button mr-2 mb-2">Export All Tablets</button>
+                <button id="importButton" class="xp-button mb-2">Import Tablets</button>
+                <input type="file" id="importFile" accept=".json" class="hidden">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="xp-taskbar mt-1 py-1 text-xs flex justify-between">
+        <span>Ready</span>
+        <span id="clock">00:00:00</span>
+      </div>
+    </div>
+    
+    <div class="xp-taskbar">
+      <div class="xp-start-button">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16'%3E%3Cpath d='M0 12 L12 0 L24 12 L12 24 Z' fill='%23FFFFFF'/%3E%3C/svg%3E" alt="Start" class="mr-1" width="16" height="16">
+        start
+      </div>
+      <div class="xp-clock" id="taskbarClock">12:00 PM</div>
+    </div>
+  </div>
+  
+  <!-- Windows XP startup sound -->
+  <audio id="startupSound">
+    <source src="data:audio/wav;base64,UklGRigBAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQBAACA/r8BgAKAAoACgAGAAID/v/6//r/+v/6//r/+v/6//r/+v/6//r/+v/6//r/+v/6//r/+v/6//r/+v/6/AYACAAKAA4ADgAOAA4ADgAOAA4ADgAOAA4ADgAOAA4ADgAKAAYAAgP+//r/9v/y/+7/6v/m/+L/3v/a/9b/0v/O/8r/xv/C/77/uv+2/7L/sv+y/7L/sv+2/7r/wv/K/9L/2v/i/+r/8v/6/AIAEAAZACAAKAA0ADwARABMAFQAXABkAGwAdAB4AIAAhACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADcAOAA5ADoAOwA8AD0APgA+AD8AQABBAEIAPQA4ADMALgApACQAHwAaABUAEAALAAYAAQD8v/e/8r/tv+i/47/fvw==">
+  </audio>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check for dark mode preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      }
+      
+      // Listen for changes in color scheme
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+        if (event.matches) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      });
+      
+      // Y2K Sparkle effect
+      const sparklesContainer = document.getElementById('sparkles');
+      const maxSparkles = 30;
+      
+      function createSparkle() {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        
+        // Random position
+        const posX = Math.random() * window.innerWidth;
+        const posY = Math.random() * window.innerHeight;
+        
+        // Random size and color from CMY
+        const size = Math.random() * 4 + 2;
+        const colors = ['#FF00CC', '#00CCFF', '#FFCC00'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        sparkle.style.width = `${size}px`;
+        sparkle.style.height = `${size}px`;
+        sparkle.style.left = `${posX}px`;
+        sparkle.style.top = `${posY}px`;
+        sparkle.style.backgroundColor = color;
+        sparkle.style.boxShadow = `0 0 ${Math.floor(size)}px ${color}`;
+        
+        // Animation
+        sparkle.style.opacity = '0';
+        sparkle.style.transform = 'scale(0)';
+        sparkle.style.transition = `opacity ${Math.random() * 2 + 1}s ease, transform ${Math.random() * 2 + 1}s ease`;
+        
+        sparklesContainer.appendChild(sparkle);
+        
+        // Start animation
+        setTimeout(() => {
+          sparkle.style.opacity = Math.random() * 0.7 + 0.3;
+          sparkle.style.transform = 'scale(1)';
+        }, 10);
+        
+        // Remove after animation
+        setTimeout(() => {
+          sparkle.style.opacity = '0';
+          sparkle.style.transform = 'scale(0)';
+          setTimeout(() => sparkle.remove(), 2000);
+        }, Math.random() * 4000 + 1000);
+      }
+      
+      // Create initial sparkles
+      for (let i = 0; i < maxSparkles; i++) {
+        setTimeout(createSparkle, Math.random() * 1000);
+      }
+      
+      // Continuously create sparkles
+      setInterval(createSparkle, 500);
+      
+      // Mouse movement sparkles
+      document.addEventListener('mousemove', (e) => {
+        if (Math.random() > 0.9) {
+          const sparkle = document.createElement('div');
+          sparkle.className = 'sparkle';
+          
+          const size = Math.random() * 3 + 1;
+          const colors = ['#FF00CC', '#00CCFF', '#FFCC00'];
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          
+          sparkle.style.width = `${size}px`;
+          sparkle.style.height = `${size}px`;
+          sparkle.style.left = `${e.clientX}px`;
+          sparkle.style.top = `${e.clientY}px`;
+          sparkle.style.backgroundColor = color;
+          sparkle.style.boxShadow = `0 0 ${Math.floor(size)}px ${color}`;
+          
+          sparklesContainer.appendChild(sparkle);
+          
+          setTimeout(() => {
+            sparkle.style.opacity = '0';
+            setTimeout(() => sparkle.remove(), 1000);
+          }, 1000);
+        }
+      });
+      
+      // Update taskbar clock
+      function updateClock() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // Convert 0 to 12
+        
+        document.getElementById('clock').textContent = `${hours}:${minutes} ${ampm}`;
+        document.getElementById('taskbarClock').textContent = `${hours}:${minutes} ${ampm}`;
+      }
+      
+      // Play startup sound
+      window.addEventListener('load', function() {
+        try {
+          const startupSound = document.getElementById('startupSound');
+          startupSound.volume = 0.3;
+          startupSound.play().catch(e => console.log('Failed to play startup sound:', e));
+        } catch (e) {
+          console.log('Failed to initialize startup sound:', e);
+        }
+        
+        updateClock();
+        setInterval(updateClock, 1000);
+      });
+      
+      // Main application code
+      // DOM elements
+      const cardList = document.getElementById('cardList');
+      const cardIdInput = document.getElementById('cardIdInput');
+      const cardTitleInput = document.getElementById('cardTitleInput');
+      const cardTypeInput = document.getElementById('cardTypeInput');
+      const cardContentInput = document.getElementById('cardContentInput');
+      const cardHashtagsInput = document.getElementById('cardHashtagsInput');
+      const cardHashtagDisplay = document.getElementById('cardHashtagDisplay');
+      const cardLinks = document.getElementById('cardLinks');
+      const linkSelect = document.getElementById('linkSelect');
+      const currentCardTitle = document.getElementById('currentCardTitle');
+      const searchInput = document.getElementById('searchInput');
+      const hashtagCloud = document.getElementById('hashtagCloud');
+      const antinetFilter = document.getElementById('antinetFilter');
+      
+      // View tabs
+      const tabRecent = document.getElementById('tabRecent');
+      const tabAntinet = document.getElementById('tabAntinet');
+      const tabAlphabetical = document.getElementById('tabAlphabetical');
+      const tabHashtags = document.getElementById('tabHashtags');
+      
+      // Buttons
+      const newCardButton = document.getElementById('newCardButton');
+      const saveCardButton = document.getElementById('saveCardButton');
+      const deleteCardButton = document.getElementById('deleteCardButton');
+      const searchButton = document.getElementById('searchButton');
+      const addLinkButton = document.getElementById('addLinkButton');
+      const exportButton = document.getElementById('exportButton');
+      const importButton = document.getElementById('importButton');
+      const importFile = document.getElementById('importFile');
+      
+      // State variables
+      let cards = [];
+      let currentCardId = null;
+      let currentView = 'recent'; // 'recent', 'antinet', 'alphabetical', 'hashtags'
+      let selectedHashtag = null;
+      let antinetFilters = ['trunk', 'branch', 'leaf', 'bud', 'flower', 'fruit'];
+      
+      // Tab event listeners
+      tabRecent.addEventListener('click', () => {
+        setActiveTab('recent');
+      });
+      
+      tabAntinet.addEventListener('click', () => {
+        setActiveTab('antinet');
+      });
+      
+      tabAlphabetical.addEventListener('click', () => {
+        setActiveTab('alphabetical');
+      });
+      
+      tabHashtags.addEventListener('click', () => {
+        setActiveTab('hashtags');
+      });
+      
+      // Antinet filter event listeners
+      document.querySelectorAll('.antinet-filter').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          updateAntinetFilters();
+          renderCardList();
+        });
+      });
+      
+      function setActiveTab(view) {
+        currentView = view;
+        
+        // Update tab UI
+        document.querySelectorAll('.xp-tab').forEach(tab => tab.classList.remove('active'));
+        
+        // Show/hide relevant UI elements based on view
+        hashtagCloud.classList.add('hidden');
+        antinetFilter.classList.add('hidden');
+        
+        switch(view) {
+          case 'recent':
+            tabRecent.classList.add('active');
+            break;
+          case 'antinet':
+            tabAntinet.classList.add('active');
+            antinetFilter.classList.remove('hidden');
+            break;
+          case 'alphabetical':
+            tabAlphabetical.classList.add('active');
+            break;
+          case 'hashtags':
+            tabHashtags.classList.add('active');
+            hashtagCloud.classList.remove('hidden');
+            break;
+        }
+        
+        renderCardList();
+        updateHashtagCloud();
+      }
+      
+      function updateAntinetFilters() {
+        antinetFilters = Array.from(document.querySelectorAll('.antinet-filter:checked')).map(checkbox => checkbox.value);
+      }
+      
+      // Initialize the application
+      initApp();
+      
+      // Event listeners
+      newCardButton.addEventListener('click', createNewCard);
+      saveCardButton.addEventListener('click', saveCurrentCard);
+      deleteCardButton.addEventListener('click', deleteCurrentCard);
+      searchButton.addEventListener('click', searchCards);
+      cardHashtagsInput.addEventListener('input', updateCardHashtagDisplay);
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchCards();
+      });
+      addLinkButton.addEventListener('click', addLinkToCurrentCard);
+      exportButton.addEventListener('click', exportCards);
+      importButton.addEventListener('click', () => importFile.click());
+      importFile.addEventListener('change', importCards);
+      
+      // Initialize app
+      function initApp() {
+        loadCardsFromStorage();
+        renderCardList();
+        updateLinkSelect();
+        clearCardEditor();
+        setupDropZone();
+        updateHashtagCloud();
+      }
+      
+      // Extract hashtags from content
+      function extractHashtags(content) {
+        if (!content) return [];
+        
+        // Match hashtags in the content
+        const hashtagRegex = /#[a-zA-Z0-9_]+/g;
+        const matches = content.match(hashtagRegex);
+        
+        // Return unique hashtags or empty array if none found
+        return matches ? [...new Set(matches.map(tag => tag.toLowerCase()))] : [];
+      }
+      
+      // Parse hashtag input
+      function parseHashtags(input) {
+        if (!input) return [];
+        
+        // Split by spaces and ensure each tag starts with #
+        const tags = input.split(/\s+/).map(tag => {
+          tag = tag.trim();
+          return tag.startsWith('#') ? tag.toLowerCase() : '#' + tag.toLowerCase();
+        });
+        
+        // Return unique hashtags
+        return [...new Set(tags.filter(tag => tag.length > 1))];
+      }
+      
+      // Update card hashtag display
+      function updateCardHashtagDisplay() {
+        const tags = parseHashtags(cardHashtagsInput.value);
+        
+        cardHashtagDisplay.innerHTML = '';
+        tags.forEach(tag => {
+          const tagElement = document.createElement('div');
+          tagElement.className = 'hashtag';
+          tagElement.textContent = tag;
+          cardHashtagDisplay.appendChild(tagElement);
+        });
+      }
+      
+      // Update hashtag cloud
+      function updateHashtagCloud() {
+        if (currentView !== 'hashtags') return;
+        
+        // Collect all hashtags from all cards
+        const allTags = {};
+        cards.forEach(card => {
+          // Get hashtags from dedicated hashtags array
+          if (card.hashtags) {
+            card.hashtags.forEach(tag => {
+              allTags[tag] = (allTags[tag] || 0) + 1;
+            });
+          }
+          
+          // Also get hashtags from content
+          const contentTags = extractHashtags(card.content);
+          contentTags.forEach(tag => {
+            allTags[tag] = (allTags[tag] || 0) + 1;
+          });
+        });
+        
+        // Sort tags by frequency
+        const sortedTags = Object.entries(allTags).sort((a, b) => b[1] - a[1]);
+        
+        // Render hashtag cloud
+        hashtagCloud.innerHTML = '';
+        if (sortedTags.length === 0) {
+          hashtagCloud.innerHTML = '<div class="text-gray-500 dark:text-gray-400 text-center">No hashtags found</div>';
+          return;
+        }
+        
+        sortedTags.forEach(([tag, count]) => {
+          const tagElement = document.createElement('div');
+          tagElement.className = 'hashtag';
+          if (tag === selectedHashtag) {
+            tagElement.style.backgroundColor = '#CCE4F7';
+            tagElement.style.fontWeight = 'bold';
+          }
+          tagElement.textContent = `${tag} (${count})`;
+          
+          tagElement.addEventListener('click', () => {
+            if (selectedHashtag === tag) {
+              // Clicking the selected hashtag again deselects it
+              selectedHashtag = null;
+            } else {
+              selectedHashtag = tag;
+            }
+            updateHashtagCloud();
+            renderCardList();
+          });
+          
+          hashtagCloud.appendChild(tagElement);
+        });
+      }
+      
+      // Set up drop zone
+      function setupDropZone() {
+        const dropZone = document.getElementById('dropZone');
+        
+        dropZone.addEventListener('dragover', (e) => {
+          e.preventDefault(); // Allow drop
+          dropZone.classList.add('active');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+          dropZone.classList.remove('active');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          
+          // Get the dropped card ID
+          const droppedCardId = e.dataTransfer.getData('text/plain');
+          
+          // Add link if we have a current card and it's not the same as the dropped card
+          if (currentCardId && droppedCardId && currentCardId !== droppedCardId) {
+            const cardIndex = cards.findIndex(card => card.id === currentCardId);
+            if (cardIndex !== -1 && !cards[cardIndex].links.includes(droppedCardId)) {
+              // Play a "link created" sound
+              const audio = new Audio('data:audio/wav;base64,UklGRpADAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YWwDAAAAwADAAJsAcQA3AAEA0/+o/3z/Vf82/xr/A//z/uv+5P7v/vr+D/8k/zz/Yf+I/7L/4/8TAEcAfwCwAOAACwE4AVgBegGUAaoBvAHBAcEBuwGnAY0BbgFMAScB9wDGAJMAXgArAPT/vP+I/1T/Jf/1/sb+nP5y/k/+M/4a/gX+9/3q/ef95/3t/fT9AP4P/if+QP5c/oP+qf7T/gP/Nf9n/6H/3P8aAFcAkQDNAAcBQQF4AbUB7AEmAl0CkwLIAv0CKwNYA34DowPGA+ID9gMIBBAEFAQUBA0EBATyp41NRSxS9BzqTlAvQcpG40PXPrc5jjYuMC8ibxYzGM0cUhfFC6EGG/9W7ePZXdTi1k3WRsKLlqKPBYtVeWN1UoLph0B4lFtf9ZkozSQJHNMaqyUyJ0YpKiuXMiM0PDSgNQQ5Dzk/Nb8yWDJtM9sw1SdYHbEV4BEtDYgGQ/6/9yTvyO5a7XXlhZ/QkVmN04Nua0N5S5L2iXFzGO6QOaorNRC/DsgWchVIG5cdnRzpJCwsZCbfHzkgbR/ZGt0W8w7WB9UCz/ss9Z7wV+lj41TfvdcK26vbQtPpxQ6xuKHJmlucTKIBrQq0JLWsxe3RIsYSn3+VJKAHwfPIZ7h6i/eKLaEjsJi+DdMLxnrEj8n/y0bSgdmw0QPJBb8ytxG07LSitQGz86yRpheZNpWWk1aOTox1jtSQw5KtkBCM34YsgrWAKn/KfWd6jXfldOxwNnBWbxhuiGzRaMFi9l2xWTdYu1WUU2ZRFVAcT0VOi00NTPJJhkcHRmhDfEFPPx87tjeDM9UtSiplJj0jYCLsIZogch7IGxgZgBaOFCkSLg+qCzAI3QR7AsUBSQGPAAD/TPw1+qX3Z/TM8JTqIOS/3WHV/9BbzQjJl8ejymfMAcfIvFOxDK04qP2gVZkSltaXKJyjoCWlqaeOqa+pL6ohrEyv97LJt/G5ZLl3ue25tLnCugS98L6fw5nGgsU1xz3InsfwxsjHyskszLrN0M0HzHrKHsinxDnCRMA+v+2+0751vku+h72IvPy6c7kqt2i1xLNFsluwwK4arU2sn6srrRWvErHPsXGyNrI+sh6ydLFAsYOx2LHGsn2z7bN9tAe1Z7U8tqK237YQt/C2jLYOtpm1NrVctcO1WLYEtzO357eQtzO33LaktgO2hLXBtPe0');
+              audio.volume = 0.3;
+              audio.play().catch(e => console.log('Failed to play link sound:', e));
+              
+              // Add the link
+              cards[cardIndex].links.push(droppedCardId);
+              cards[cardIndex].modified = new Date().getTime();
+              saveCardsToStorage();
+              loadCardIntoEditor(cards[cardIndex]);
+              
+              // Add a visual effect to show the link was created
+              dropZone.classList.add('bg-green-100');
+              setTimeout(() => {
+                dropZone.classList.remove('bg-green-100');
+              }, 500);
+            }
+          }
+          
+          // Reset drop zone
+          dropZone.classList.remove('active');
+          dropZone.classList.add('hidden');
+        });
+      }
+      
+      // Local storage functions
+      function loadCardsFromStorage() {
+        try {
+          const storedCards = localStorage.getItem('antinetZettelkasten');
+          if (storedCards) {
+            cards = JSON.parse(storedCards);
+            
+            // Migrate old cards to new format if needed
+            cards = cards.map(card => {
+              // Add type if not present
+              if (!card.type) {
+                card.type = 'trunk';
+              }
+              
+              // Extract hashtags from content if not present
+              if (!card.hashtags) {
+                card.hashtags = extractHashtags(card.content);
+              }
+              
+              return card;
+            });
+            
+            saveCardsToStorage(); // Save migrated cards
+          }
+        } catch (e) {
+          console.error('Failed to load cards from storage:', e);
+          cards = [];
+        }
+      }
+      
+      function saveCardsToStorage() {
+        try {
+          localStorage.setItem('antinetZettelkasten', JSON.stringify(cards));
+        } catch (e) {
+          console.error('Failed to save cards to storage:', e);
+          alert('Failed to save cards. Local storage may be full or unavailable.');
+        }
+      }
+      
+      // Card management functions
+      function createNewCard() {
+        const timestamp = new Date().getTime();
+        const newId = generateCardId();
+        
+        const newCard = {
+          id: newId,
+          title: 'New Tablet',
+          content: '',
+          type: 'leaf', // Default to leaf for new cards
+          hashtags: [],
+          links: [],
+          created: timestamp,
+          modified: timestamp
+        };
+        
+        cards.push(newCard);
+        saveCardsToStorage();
+        renderCardList();
+        updateLinkSelect();
+        loadCardIntoEditor(newCard);
+        updateHashtagCloud();
+      }
+      
+      function generateCardId() {
+        // Generate a unique ID based on the timestamp and existing cards
+        const base = Math.floor(Date.now() / 1000).toString().substr(-6);
+        let idNum = 1;
+        
+        // Find the highest existing ID number
+        cards.forEach(card => {
+          const match = card.id.match(/^(\d+)([a-z])?$/);
+          if (match) {
+            const num = parseInt(match[1]);
+            if (num >= idNum) {
+              idNum = num + 1;
+            }
+          }
+        });
+        
+        return idNum.toString();
+      }
+      
+      function saveCurrentCard() {
+        if (!currentCardId) return;
+        
+        const cardIndex = cards.findIndex(card => card.id === currentCardId);
+        if (cardIndex === -1) return;
+        
+        const title = cardTitleInput.value.trim() || 'Untitled Tablet';
+        const content = cardContentInput.value;
+        const type = cardTypeInput.value;
+        const hashtags = parseHashtags(cardHashtagsInput.value);
+        
+        cards[cardIndex].title = title;
+        cards[cardIndex].content = content;
+        cards[cardIndex].type = type;
+        cards[cardIndex].hashtags = hashtags;
+        cards[cardIndex].modified = new Date().getTime();
+        
+        saveCardsToStorage();
+        renderCardList();
+        updateLinkSelect();
+        loadCardIntoEditor(cards[cardIndex]);
+        updateHashtagCloud();
+        
+        // Visual feedback
+        saveCardButton.textContent = 'Saved!';
+        setTimeout(() => {
+          saveCardButton.textContent = 'Save Tablet';
+        }, 1000);
+      }
+      
+      function deleteCurrentCard() {
+        if (!currentCardId) return;
+        
+        if (confirm('Are you sure you want to delete this tablet?')) {
+          const cardIndex = cards.findIndex(card => card.id === currentCardId);
+          if (cardIndex === -1) return;
+          
+          // Remove links to this card from all other cards
+          cards.forEach(card => {
+            card.links = card.links.filter(link => link !== currentCardId);
+          });
+          
+          // Remove the card
+          cards.splice(cardIndex, 1);
+          saveCardsToStorage();
+          renderCardList();
+          updateLinkSelect();
+          clearCardEditor();
+          updateHashtagCloud();
+        }
+      }
+      
+      function addLinkToCurrentCard() {
+        if (!currentCardId || !linkSelect.value) return;
+        if (linkSelect.value === currentCardId) return; // Prevent self-linking
+        
+        const cardIndex = cards.findIndex(card => card.id === currentCardId);
+        if (cardIndex === -1) return;
+        
+        // Add link if it doesn't already exist
+        if (!cards[cardIndex].links.includes(linkSelect.value)) {
+          cards[cardIndex].links.push(linkSelect.value);
+          cards[cardIndex].modified = new Date().getTime();
+          saveCardsToStorage();
+          loadCardIntoEditor(cards[cardIndex]);
+        }
+      }
+      
+      // UI functions
+      function renderCardList(searchResults = null) {
+        let cardsToRender = searchResults || [...cards];
+        
+        // Apply filtering based on current view
+        switch(currentView) {
+          case 'recent':
+            // Sort by modified date (newest first)
+            cardsToRender.sort((a, b) => b.modified - a.modified);
+            break;
+            
+          case 'antinet':
+            // Filter by selected Antinet types
+            cardsToRender = cardsToRender.filter(card => antinetFilters.includes(card.type));
+            
+            // Group by type and sort within each type
+            const typeOrder = {
+              'trunk': 1,
+              'branch': 2,
+              'leaf': 3,
+              'bud': 4,
+              'flower': 5,
+              'fruit': 6
+            };
+            
+            cardsToRender.sort((a, b) => {
+              // First sort by Antinet type
+              const typeComparison = typeOrder[a.type] - typeOrder[b.type];
+              if (typeComparison !== 0) return typeComparison;
+              
+              // Then sort by title
+              return a.title.localeCompare(b.title);
+            });
+            break;
+            
+          case 'alphabetical':
+            // Sort alphabetically by title
+            cardsToRender.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+            
+          case 'hashtags':
+            // If a hashtag is selected, filter by that hashtag
+            if (selectedHashtag) {
+              cardsToRender = cardsToRender.filter(card => {
+                // Check in hashtags array
+                if (card.hashtags && card.hashtags.includes(selectedHashtag)) {
+                  return true;
+                }
+                
+                // Check in content
+                const contentTags = extractHashtags(card.content);
+                return contentTags.includes(selectedHashtag);
+              });
+            }
+            
+            // Sort by modified date (newest first)
+            cardsToRender.sort((a, b) => b.modified - a.modified);
+            break;
+        }
+        
+        // Render the cards
+        cardList.innerHTML = '';
+        
+        if (cardsToRender.length === 0) {
+          cardList.innerHTML = `
+            <div class="text-center text-gray-600 dark:text-gray-400 mt-4">
+              ${searchResults ? 'No matching tablets found.' : 'No tablets yet.<br>Create your first tablet by clicking "New Tablet".'}
+            </div>
+          `;
+          return;
+        }
+        
+        cardsToRender.forEach(card => {
+          const cardElement = document.createElement('div');
+          cardElement.className = 'xp-card';
+          if (card.id === currentCardId) {
+            cardElement.style.borderColor = '#FF00CC';
+            cardElement.style.boxShadow = '0 0 8px rgba(255, 0, 204, 0.4)';
+          }
+          
+          // Get the human-readable type
+          const typeDisplay = {
+            'trunk': 'Trunk',
+            'branch': 'Branch',
+            'leaf': 'Leaf',
+            'bud': 'Bud',
+            'flower': 'Flower',
+            'fruit': 'Fruit'
+          }[card.type] || 'Unknown';
+          
+          // Create the marker for the Antinet type
+          const typeMarker = `<div class="antinet-marker antinet-${card.type} inline-block"></div>`;
+          
+          cardElement.innerHTML = `
+            <div class="font-bold cuneiform flex items-center">
+              ${typeMarker}
+              ${card.id}: ${card.title}
+            </div>
+            <div class="text-xs truncate">${card.content.substring(0, 60)}${card.content.length > 60 ? '...' : ''}</div>
+            <div class="text-xs mt-1 flex flex-wrap">
+              ${(card.hashtags && card.hashtags.length > 0) ? 
+                card.hashtags.map(tag => `<span class="hashtag mr-1 mb-1">${tag}</span>`).join('') : 
+                '<span class="text-gray-500 dark:text-gray-400">No hashtags</span>'}
+            </div>
+            <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              ${card.links.length > 0 ? `Links: ${card.links.join(', ')}` : 'No links'}
+            </div>
+          `;
+          
+          // Make cards draggable
+          cardElement.setAttribute('draggable', 'true');
+          cardElement.setAttribute('data-card-id', card.id);
+          
+          // Add drag event listeners
+          cardElement.addEventListener('dragstart', handleDragStart);
+          cardElement.addEventListener('dragend', handleDragEnd);
+          
+          // Click event
+          cardElement.addEventListener('click', () => {
+            loadCardById(card.id);
+          });
+          
+          // Hashtag click events
+          cardElement.querySelectorAll('.hashtag').forEach(tag => {
+            tag.addEventListener('click', (e) => {
+              e.stopPropagation(); // Prevent card click
+              const tagText = tag.textContent;
+              selectedHashtag = tagText;
+              setActiveTab('hashtags');
+            });
+          });
+          
+          cardList.appendChild(cardElement);
+        });
+      }
+      
+      // Drag and drop handlers
+      function handleDragStart(e) {
+        // Store the card ID in the drag data
+        e.dataTransfer.setData('text/plain', e.target.getAttribute('data-card-id'));
+        e.dataTransfer.effectAllowed = 'link';
+        
+        // Add visual feedback
+        this.classList.add('dragging');
+        
+        // Show drop zone when drag starts if we have a current card
+        if (currentCardId) {
+          const dropZone = document.getElementById('dropZone');
+          dropZone.classList.remove('hidden');
+        }
+      }
+      
+      function handleDragEnd(e) {
+        // Remove visual feedback
+        this.classList.remove('dragging');
+        
+        // Hide drop zone when drag ends
+        const dropZone = document.getElementById('dropZone');
+        dropZone.classList.remove('active');
+        dropZone.classList.add('hidden');
+      }
+      
+      function loadCardById(cardId) {
+        const card = cards.find(c => c.id === cardId);
+        if (card) {
+          loadCardIntoEditor(card);
+        }
+      }
+      
+      function loadCardIntoEditor(card) {
+        currentCardId = card.id;
+        cardIdInput.value = card.id;
+        cardTitleInput.value = card.title;
+        cardTypeInput.value = card.type || 'leaf';
+        cardContentInput.value = card.content;
+        cardHashtagsInput.value = (card.hashtags || []).join(' ');
+        currentCardTitle.textContent = `Tablet ${card.id}: ${card.title}`;
+        
+        // Update hashtag display
+        updateCardHashtagDisplay();
+        
+        // Render links
+        renderCardLinks(card);
+        
+        // Highlight the current card in the list
+        renderCardList();
+        
+        // Show a "card being dragged" hint if it's the first card
+        if (cards.length > 1 && !sessionStorage.getItem('dragHintShown')) {
+          const dropZone = document.getElementById('dropZone');
+          dropZone.classList.remove('hidden');
+          dropZone.textContent = "Try dragging another tablet here to create a link!";
+          
+          setTimeout(() => {
+            dropZone.classList.add('hidden');
+            dropZone.textContent = "Drop tablet here to add link";
+            sessionStorage.setItem('dragHintShown', 'true');
+          }, 5000);
+        }
+      }
+      
+      function renderCardLinks(card) {
+        cardLinks.innerHTML = '';
+        
+        if (card.links.length === 0) {
+          cardLinks.innerHTML = '<div class="text-gray-500 dark:text-gray-400">No links</div>';
+          return;
+        }
+        
+        card.links.forEach(linkId => {
+          const linkedCard = cards.find(c => c.id === linkId);
+          const linkElement = document.createElement('div');
+          linkElement.className = 'xp-link mb-1';
+          
+          // Add Antinet type indicator if the linked card exists
+          let typeMarker = '';
+          if (linkedCard && linkedCard.type) {
+            typeMarker = `<div class="antinet-marker antinet-${linkedCard.type} inline-block"></div>`;
+          }
+          
+          linkElement.innerHTML = `
+            ${typeMarker}
+            ${linkId}: ${linkedCard ? linkedCard.title : '(Missing tablet)'}
+          `;
+          
+          linkElement.addEventListener('click', () => {
+            loadCardById(linkId);
+          });
+          
+          const removeButton = document.createElement('span');
+          removeButton.className = 'ml-2 text-red-600 dark:text-red-400 cursor-pointer';
+          removeButton.textContent = '[X]';
+          removeButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeLinkFromCard(card.id, linkId);
+          });
+          
+          linkElement.appendChild(removeButton);
+          cardLinks.appendChild(linkElement);
+        });
+      }
+      
+      function removeLinkFromCard(cardId, linkId) {
+        const cardIndex = cards.findIndex(card => card.id === cardId);
+        if (cardIndex === -1) return;
+        
+        cards[cardIndex].links = cards[cardIndex].links.filter(id => id !== linkId);
+        cards[cardIndex].modified = new Date().getTime();
+        saveCardsToStorage();
+        loadCardIntoEditor(cards[cardIndex]);
+      }
+      
+      function updateLinkSelect() {
+        linkSelect.innerHTML = '<option value="">-- Select Tablet --</option>';
+        
+        // Sort cards by ID for easier selection
+        const sortedCards = [...cards].sort((a, b) => {
+          return a.id.localeCompare(b.id, undefined, { numeric: true });
+        });
+        
+        sortedCards.forEach(card => {
+          if (card.id !== currentCardId) { // Don't allow linking to self
+            const option = document.createElement('option');
+            option.value = card.id;
+            
+            // Add Antinet type information
+            const typeAbbr = {
+              'trunk': '[T]',
+              'branch': '[B]',
+              'leaf': '[L]',
+              'bud': '[b]',
+              'flower': '[F]',
+              'fruit': '[f]'
+            }[card.type] || '';
+            
+            option.textContent = `${card.id}: ${typeAbbr} ${card.title}`;
+            linkSelect.appendChild(option);
+          }
+        });
+      }
+      
+      function clearCardEditor() {
+        currentCardId = null;
+        cardIdInput.value = '';
+        cardTitleInput.value = '';
+        cardTypeInput.value = 'leaf'; // Default to leaf
+        cardContentInput.value = '';
+        cardHashtagsInput.value = '';
+        cardHashtagDisplay.innerHTML = '';
+        cardLinks.innerHTML = '';
+        currentCardTitle.textContent = 'Tablet Viewer';
+      }
+      
+      function searchCards() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        
+        if (!searchTerm) {
+          renderCardList();
+          return;
+        }
+        
+        const results = cards.filter(card => {
+          // Search in ID, title, content
+          if (
+            card.id.toLowerCase().includes(searchTerm) ||
+            card.title.toLowerCase().includes(searchTerm) ||
+            card.content.toLowerCase().includes(searchTerm)
+          ) {
+            return true;
+          }
+          
+          // Search in hashtags
+          if (card.hashtags && card.hashtags.some(tag => tag.includes(searchTerm))) {
+            return true;
+          }
+          
+          // If searchTerm is a hashtag, look for exact match
+          if (searchTerm.startsWith('#') && card.hashtags && card.hashtags.includes(searchTerm)) {
+            return true;
+          }
+          
+          return false;
+        });
+        
+        renderCardList(results);
+      }
+      
+      // Export and Import
+      function exportCards() {
+        try {
+          const dataStr = JSON.stringify(cards, null, 2);
+          const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+          
+          const exportFileDefaultName = 'antinet-mesopotamian-tablets.json';
+          
+          const linkElement = document.createElement('a');
+          linkElement.setAttribute('href', dataUri);
+          linkElement.setAttribute('download', exportFileDefaultName);
+          linkElement.click();
+        } catch (e) {
+          console.error('Export failed:', e);
+          alert('Export failed: ' + e.message);
+        }
+      }
+      
+      function importCards(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const importedCards = JSON.parse(e.target.result);
+            
+            if (!Array.isArray(importedCards)) {
+              throw new Error('Invalid format: The imported data is not an array');
+            }
+            
+            if (importedCards.length === 0) {
+              alert('The imported file contains no tablets.');
+              return;
+            }
+            
+            // Check if required properties exist in each card
+            const isValid = importedCards.every(card => 
+              card.id && (typeof card.title === 'string') && 
+              (typeof card.content === 'string') && 
+              Array.isArray(card.links)
+            );
+            
+            if (!isValid) {
+              throw new Error('Invalid format: Some tablets are missing required properties');
+            }
+            
+            if (confirm(`Import ${importedCards.length} tablets? This will merge with your existing tablets.`)) {
+              // Add missing properties to imported cards
+              const processedCards = importedCards.map(card => {
+                // Add type if not present
+                if (!card.type) {
+                  card.type = 'leaf';
+                }
+                
+                // Extract hashtags from content if not present
+                if (!card.hashtags) {
+                  card.hashtags = extractHashtags(card.content);
+                }
+                
+                return card;
+              });
+              
+              // Merge imported cards with existing cards, replacing duplicates
+              processedCards.forEach(importedCard => {
+                const existingIndex = cards.findIndex(c => c.id === importedCard.id);
+                if (existingIndex !== -1) {
+                  cards[existingIndex] = importedCard;
+                } else {
+                  cards.push(importedCard);
+                }
+              });
+              
+              saveCardsToStorage();
+              renderCardList();
+              updateLinkSelect();
+              updateHashtagCloud();
+              
+              alert(`Successfully imported ${importedCards.length} tablets.`);
+            }
+          } catch (e) {
+            console.error('Import failed:', e);
+            alert('Import failed: ' + e.message);
+          }
+          
+          // Reset the file input
+          event.target.value = '';
+        };
+        
+        reader.readAsText(file);
+      }
+    });
+  </script>
+</body>
+</html>
