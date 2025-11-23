@@ -1,14 +1,14 @@
 # Comprehensive Compare/Contrast/Lump/Splitter Report
 
-**Generated:** 2025-11-23T21:30:10.162355
+**Generated:** 2025-11-23T21:36:09.994799
 **Directory:** /home/runner/work/entropic-ai/entropic-ai/unpublished
 
 ---
 
 ## Executive Summary
 
-- **Total Files:** 861
-- **Total Size:** 12.85 MB
+- **Total Files:** 863
+- **Total Size:** 12.9 MB
 - **Duplicate Groups:** 81 (88 redundant files)
 - **Version Groups:** 9
 - **Similar Name Groups:** 88
@@ -17,9 +17,9 @@
 
 | Extension | Count | Percentage |
 |-----------|-------|------------|
-| `.txt` | 500 | 58.1% |
+| `.txt` | 500 | 57.9% |
 | `.html` | 288 | 33.4% |
-| `.md` | 34 | 3.9% |
+| `.md` | 36 | 4.2% |
 | `.js` | 26 | 3.0% |
 | `.css` | 12 | 1.4% |
 | `.json` | 1 | 0.1% |
@@ -29,7 +29,7 @@
 | Directory | File Count | Total Size (KB) |
 |-----------|------------|----------------|
 | `extracted_artifacts` | 620 | 1649.0 |
-| `.` | 102 | 7000.6 |
+| `.` | 104 | 7049.0 |
 | `html_artifacts` | 72 | 1000.0 |
 | `zettelkasten-ai` | 11 | 112.3 |
 | `ackc` | 10 | 1113.4 |
@@ -486,9 +486,9 @@ No files marked as backups/old.
 - `0462_code_Account_login_cookie_problem_msg56_0.html` (47.5 KB)
 - `0359_artifact_359.txt` (46.3 KB)
 
-### `root/` (102 files, 7000.6 KB)
+### `root/` (104 files, 7049.0 KB)
 
-**File types:** 1 .css, 93 .html, 1 .js, 1 .json, 4 .md, 2 .txt
+**File types:** 1 .css, 93 .html, 1 .js, 1 .json, 6 .md, 2 .txt
 
 **Sample files:**
 - `archive_browser.html` (1753.0 KB)
@@ -636,4 +636,4 @@ No files marked as backups/old.
 
 ---
 
-**Report completed at:** 2025-11-23T21:30:10.163340
+**Report completed at:** 2025-11-23T21:36:09.995785

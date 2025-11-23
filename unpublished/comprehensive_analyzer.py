@@ -64,11 +64,12 @@ class FileAnalyzer:
         
         return info
     
-    def scan_directory(self):
+    def scan_directory(self, extensions=None):
         """Scan directory and collect all file information"""
         print(f"Scanning directory: {self.base_path}")
         
-        extensions = {'.html', '.md', '.json', '.js', '.css', '.txt'}
+        if extensions is None:
+            extensions = {'.html', '.md', '.json', '.js', '.css', '.txt'}
         
         for filepath in self.base_path.rglob('*'):
             if filepath.is_file() and filepath.suffix in extensions:
@@ -398,8 +399,11 @@ class FileAnalyzer:
         
 
 def main():
-    base_path = "/home/runner/work/entropic-ai/entropic-ai/unpublished"
-    output_file = "/home/runner/work/entropic-ai/entropic-ai/unpublished/COMPREHENSIVE_COMPARE_CONTRAST_REPORT.md"
+    import sys
+    
+    # Use command-line argument or default to script's directory
+    base_path = sys.argv[1] if len(sys.argv) > 1 else Path(__file__).parent
+    output_file = Path(base_path) / "COMPREHENSIVE_COMPARE_CONTRAST_REPORT.md"
     
     analyzer = FileAnalyzer(base_path)
     analyzer.run_full_analysis(output_file)

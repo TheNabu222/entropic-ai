@@ -382,8 +382,11 @@ class ContentAnalyzer:
 
 
 def main():
-    base_path = "/home/runner/work/entropic-ai/entropic-ai/unpublished"
-    output_file = "/home/runner/work/entropic-ai/entropic-ai/unpublished/CONTENT_ANALYSIS_REPORT.md"
+    import sys
+    
+    # Use command-line argument or default to script's directory
+    base_path = sys.argv[1] if len(sys.argv) > 1 else Path(__file__).parent
+    output_file = Path(base_path) / "CONTENT_ANALYSIS_REPORT.md"
     
     analyzer = ContentAnalyzer(base_path)
     analyzer.run_full_analysis(output_file)
