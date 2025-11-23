@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOLLZ MAKER // coaiexist.wtf</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Comic+Neue:wght@400;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Comic Neue', cursive;
+            background: linear-gradient(135deg, #ff99cc 0%, #ffccff 50%, #cc99ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sparkle-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+                radial-gradient(2px 2px at 40px 70px, #fff, transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent);
+            background-size: 200px 200px;
+            animation: sparkle 4s infinite;
+        }
+
+        @keyframes sparkle { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        .header {
+            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+            background-size: 200% 100%;
+            animation: rainbow 3s linear infinite;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 4px solid #000;
+            position: relative;
+            z-index: 100;
+        }
+
+        @keyframes rainbow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+        .header h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 24px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #ff00ff, -2px -2px 0 #00ffff, 3px 3px 0 #000;
+        }
+
+        .header-nav {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header-nav a {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: #ff00ff;
+            border: 2px solid #fff;
+        }
+
+        .header-nav a:hover { background: #00ffff; color: #000; }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 15px;
+            padding: 15px;
+            min-height: calc(100vh - 100px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel {
+            background: linear-gradient(180deg, #fff 0%, #ffe6f7 100%);
+            border: 3px solid #ff00ff;
+            border-radius: 10px;
+            box-shadow: 5px 5px 0 #ff66cc;
+        }
+
+        .panel-header {
+            background: linear-gradient(90deg, #ff66cc, #ff99ff);
+            padding: 10px 15px;
+            border-bottom: 2px solid #ff00ff;
+            border-radius: 7px 7px 0 0;
+        }
+
+        .panel-header h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .panel-content {
+            padding: 10px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        .panel-content::-webkit-scrollbar { width: 12px; }
+        .panel-content::-webkit-scrollbar-track { background: #ffccff; border-radius: 6px; }
+        .panel-content::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff66cc, #ff00ff); border-radius: 6px; }
+
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .category-tab {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 7px;
+            padding: 6px 8px;
+            background: #ffccff;
+            border: 2px solid #ff66cc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .category-tab:hover, .category-tab.active {
+            background: #ff00ff;
+            color: #fff;
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .asset-item {
+            background: #fff;
+            border: 2px solid #ff99cc;
+            border-radius: 5px;
+            padding: 4px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+            transition: all 0.2s;
+        }
+
+        .asset-item:hover {
+            border-color: #ff00ff;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(255,0,255,0.5);
+        }
+
+        .asset-item img {
+            max-width: 100%;
+            max-height: 70px;
+            image-rendering: pixelated;
+        }
+
+        .canvas-panel { display: flex; flex-direction: column; }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .doll-canvas {
+            width: 400px;
+            height: 500px;
+            background: #fff;
+            border: 4px solid #ff00ff;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255,0,255,0.3);
+        }
+
+        .doll-canvas.drag-over {
+            border-color: #00ffff;
+            box-shadow: 0 0 30px rgba(0,255,255,0.5);
+        }
+
+        .canvas-item {
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            image-rendering: pixelated;
+        }
+
+        .canvas-item:hover { outline: 2px dashed #ff00ff; }
+        .canvas-item.selected { outline: 3px solid #00ffff; box-shadow: 0 0 10px rgba(0,255,255,0.8); }
+
+        .canvas-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .control-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 9px;
+            padding: 10px 15px;
+            background: linear-gradient(180deg, #ff99ff, #ff66cc);
+            border: 2px solid #ff00ff;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0 #cc0099;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(180deg, #00ffff, #00cccc);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(180deg, #ff6666, #ff3333);
+            border-color: #ff0000;
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #fff;
+            border: 2px solid #ff99cc;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        .layer-item:hover { border-color: #ff00ff; }
+        .layer-item.selected { border-color: #00ffff; background: #e6ffff; }
+
+        .layer-thumb {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .layer-btn {
+            width: 22px;
+            height: 22px;
+            border: 1px solid #ff66cc;
+            border-radius: 3px;
+            background: #ffccff;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .layer-btn:hover { background: #ff66cc; color: #fff; }
+
+        .bg-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+
+        .bg-item {
+            border: 2px solid #ff99cc;
+            border-radius: 5px;
+            padding: 2px;
+            cursor: pointer;
+            height: 30px;
+        }
+
+        .bg-item:hover, .bg-item.active { border-color: #00ffff; }
+
+        .collection-selector {
+            padding: 10px;
+            border-bottom: 2px solid #ff99cc;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .collection-btn {
+            font-size: 11px;
+            padding: 5px 10px;
+            background: #ffccff;
+            border: 2px solid #ff66cc;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .collection-btn:hover, .collection-btn.active { background: #ff00ff; color: #fff; }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #ff00ff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+        }
+
+        .subsection { margin-bottom: 15px; }
+        .subsection-header {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 9px;
+            color: #ff00ff;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 2px dashed #ff99cc;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container { grid-template-columns: 1fr; }
+            .doll-canvas { width: 100%; max-width: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sparkle-bg"></div>
+
+    <header class="header">
+        <h1>DOLLZ MAKER</h1>
+        <nav class="header-nav">
+            <a href="/">HOME</a>
+            <a href="unpublished/portals/games-portal.html">GAMES</a>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <div class="panel" id="assetsPanel">
+            <div class="panel-header"><h2>ASSETS</h2></div>
+
+            <div class="collection-selector">
+                <button class="collection-btn active" data-collection="chubbiez">Chubbiez</button>
+                <button class="collection-btn" data-collection="gothz">Gothz</button>
+                <button class="collection-btn" data-collection="divaz">Divaz</button>
+                <button class="collection-btn" data-collection="girlz/uniquez">Uniquez</button>
+                <button class="collection-btn" data-collection="girlz/silentz">Silentz</button>
+                <button class="collection-btn" data-collection="boyz/uniquez_boi">Boyz</button>
+                <button class="collection-btn" data-collection="dumpz" style="background:#9966ff;">Room Items</button>
+            </div>
+
+            <div class="panel-content">
+                <div class="category-tabs">
+                    <button class="category-tab active" data-category="body">Body</button>
+                    <button class="category-tab" data-category="hair">Hair</button>
+                    <button class="category-tab" data-category="tops">Tops</button>
+                    <button class="category-tab" data-category="bottoms">Bottoms</button>
+                    <button class="category-tab" data-category="dresses">Dress</button>
+                    <button class="category-tab" data-category="shoes">Shoes</button>
+                    <button class="category-tab" data-category="accessories">Acc</button>
+                    <button class="category-tab" data-category="wings">Wings</button>
+                    <button class="category-tab" data-category="pets">Pets</button>
+                    <button class="category-tab" data-category="props">Props</button>
+                </div>
+
+                <div id="assetGrid" class="asset-grid">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel canvas-panel">
+            <div class="panel-header"><h2>YOUR DOLL</h2></div>
+            <div class="canvas-container">
+                <div class="doll-canvas" id="dollCanvas"></div>
+                <div class="canvas-controls">
+                    <button class="control-btn" id="bringForward">UP</button>
+                    <button class="control-btn" id="sendBackward">DOWN</button>
+                    <button class="control-btn" id="flipH">FLIP</button>
+                    <button class="control-btn" id="scaleUp">+</button>
+                    <button class="control-btn" id="scaleDown">-</button>
+                    <button class="control-btn" id="deleteItem">DEL</button>
+                    <button class="control-btn danger" id="clearCanvas">CLEAR</button>
+                    <button class="control-btn" id="saveImage">SAVE</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header"><h2>LAYERS & BG</h2></div>
+            <div class="panel-content">
+                <div class="subsection">
+                    <div class="subsection-header">BACKGROUND</div>
+                    <div class="bg-grid" id="bgGrid"></div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-header">LAYERS</div>
+                    <div id="layersList"><p style="color:#999;font-size:11px;text-align:center;padding:20px;">Drop items to see layers</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // COMPLETE ASSET DATABASE
+        const assetDB = {
+            'chubbiez': {
+                body: ['body.gif','body1.gif','body2.gif','body3.gif','body4.gif','body5.gif','body6.gif','bodya.gif','body1a.gif','body2a.gif','body3a.gif','body4a.gif','body5a.gif','body6a.gif','arm0a.gif','arm0b.gif','arm0c.gif','arm01a.gif','arm01b.gif','arm01c.gif','arm02a.gif','arm02b.gif','arm02c.gif','arm03a.gif','arm03b.gif','arm03c.gif','arm04a.gif','arm04b.gif','arm04c.gif','arm05a.gif','arm05b.gif','arm05c.gif','arm06a.gif','arm06b.gif','arm06c.gif'],
+                hair: ['blonde01.gif','blonde02.gif','blonde03.gif','blonde04.gif','blonde05.gif','blonde06.gif','blonde07.gif','blonde08.gif','blonde09.gif','blonde10.gif','blonde11.gif','blonde12.gif','blonde13.gif','blonde14.gif','blonde15.gif','blonde16.gif','blonde17.gif','blonde18.gif','blonde19.gif','blonde20.gif','blonde21.gif','blonde22.gif','black01.gif','black02.gif','black03.gif','black04.gif','black05.gif','black06.gif','black07.gif','black08.gif','black09.gif','black10.gif','black11.gif','black12.gif','black13.gif','black14.gif','black15.gif','black16.gif','black17.gif','black18.gif','black19.gif','black20.gif','black21.gif','black22.gif','brunette01.gif','brunette02.gif','brunette03.gif','brunette04.gif','brunette05.gif','brunette06.gif','brunette07.gif','brunette08.gif','brunette09.gif','brunette10.gif','brunette11.gif','brunette12.gif','brunette13.gif','brunette14.gif','brunette15.gif','brunette16.gif','brunette17.gif','brunette18.gif','brunette19.gif','brunette20.gif','brunette21.gif','brunette22.gif','red01.gif','red02.gif','red03.gif','red04.gif','red05.gif','red06.gif','red07.gif','red08.gif','red09.gif','red10.gif','red11.gif','red12.gif','red13.gif','red14.gif','red15.gif','red16.gif','red17.gif','red18.gif','red19.gif','red20.gif','red21.gif','red22.gif','dkblonde01.gif','dkblonde02.gif','dkblonde03.gif','dkblonde04.gif','dkblonde05.gif','dkblonde06.gif','dkblonde07.gif','dkblonde08.gif','dkblonde09.gif','dkblonde10.gif','dkblonde11.gif','dkblonde12.gif','dkblonde13.gif','dkblonde14.gif','dkblonde15.gif','dkblonde16.gif','dkblonde17.gif','dkblonde18.gif','dkblonde19.gif','dkblonde20.gif','dkblonde21.gif','dkblonde22.gif','ltblonde01.gif','ltblonde02.gif','ltblonde03.gif','ltblonde04.gif','ltblonde05.gif','ltblonde06.gif','ltblonde07.gif','ltblonde08.gif','ltblonde09.gif','ltblonde10.gif','ltblonde11.gif','ltblonde12.gif','ltblonde13.gif','ltblonde14.gif','ltblonde15.gif','ltblonde16.gif','ltblonde17.gif','ltblonde18.gif','ltblonde19.gif','ltblonde20.gif','ltblonde21.gif','ltblonde22.gif','dkauburn01.gif','dkauburn02.gif','dkauburn03.gif','dkauburn04.gif','dkauburn05.gif','dkauburn06.gif','dkauburn07.gif','dkauburn08.gif','dkauburn09.gif','dkauburn10.gif','dkauburn11.gif','dkauburn12.gif','dkauburn13.gif','dkauburn14.gif','dkauburn15.gif','dkauburn16.gif','dkauburn17.gif','dkauburn18.gif','dkauburn19.gif','dkauburn20.gif','dkauburn21.gif','dkauburn22.gif','ltauburn01.gif','ltauburn02.gif','ltauburn03.gif','ltauburn04.gif','ltauburn05.gif','ltauburn06.gif','ltauburn07.gif','ltauburn08.gif','ltauburn09.gif','ltauburn10.gif','ltauburn11.gif','ltauburn12.gif','ltauburn13.gif','ltauburn14.gif','ltauburn15.gif','ltauburn16.gif','ltauburn17.gif','ltauburn18.gif','ltauburn19.gif','ltauburn20.gif','ltauburn21.gif','ltauburn22.gif','ltbrunette01.gif','ltbrunette02.gif','ltbrunette03.gif','ltbrunette04.gif','ltbrunette05.gif','ltbrunette06.gif','ltbrunette07.gif','ltbrunette08.gif','ltbrunette09.gif','ltbrunette10.gif','ltbrunette11.gif','ltbrunette12.gif','ltbrunette13.gif','ltbrunette14.gif','ltbrunette15.gif','ltbrunette16.gif','ltbrunette17.gif','ltbrunette18.gif','ltbrunette19.gif','ltbrunette20.gif','ltbrunette21.gif','ltbrunette22.gif','goth01.gif','goth02.gif','goth03.gif','goth04.gif','goth05.gif','goth06.gif','goth07.gif','goth08.gif','goth09.gif','goth10.gif','goth11.gif','goth12.gif','goth13.gif','goth14.gif','goth15.gif','goth16.gif','goth17.gif','goth18.gif','goth19.gif','goth20.gif','goth21.gif','goth22.gif'],
+                tops: ['shirt01.gif','shirt02.gif','shirt03.gif','shirt04.gif','shirt05.gif','shirt06.gif','shirt07.gif','shirt08.gif','shirt09.gif','shirt10.gif','shirt11.gif','shirt12.gif','shirt13.gif','shirt14.gif','shirt15.gif','shirt16.gif','shirt17.gif','shirt18.gif','shirt19.gif','halter01.gif','halter02.gif','halter03.gif','halter04.gif','corset01.gif','corset02.gif','corset03.gif','corset04.gif','corset05.gif','corset06.gif','corset11.gif','corset12.gif','corset13.gif','corset14.gif','corset15.gif','corset16.gif','tube01.gif','tube02.gif','tube03.gif','tube04.gif','coat01.gif','bodystocking01.gif','overshirt01.gif','overshirt02.gif','strap01.gif','strap02.gif','strap03.gif','strap04.gif','strap05.gif','strap06.gif','strap11.gif','strap12.gif','strap13.gif','strap14.gif','strap15.gif','strap16.gif','strapless01.gif','strapless02.gif','shawl01.gif','shawl02.gif','shawl03.gif','shawl04.gif','shawl05.gif','shawl06.gif','gothshirt01.gif','gothshirt02.gif','gothshirt03.gif','gothshirt04.gif','gothshirt05.gif','gothshirt06.gif','gothshirt07.gif','gothshirt08.gif','gothshirt09.gif','gothtop01.gif','gothtop02.gif','gothtop03.gif','gothtop04.gif','gothtop05.gif','gothtop06.gif','gothtop07.gif','gothtop08.gif'],
+                bottoms: ['skirt01.gif','skirt02.gif','skirt03.gif','skirt04.gif','skirt05.gif','skirt06.gif','skirt07.gif','skirt08.gif','skirt09.gif','skirt10.gif','skirt11.gif','skirt12.gif','skirt13.gif','skirt14.gif','skirt15.gif','mini01.gif','mini02.gif','mini03.gif','mini04.gif','mini05.gif','mini06.gif','mini07.gif','mini08.gif','mini09.gif','mini10.gif','mini11.gif','mini12.gif','mini13.gif','capri01.gif','capri02.gif','capri03.gif','capri04.gif','capri05.gif','pants01.gif','pants02.gif','pants03.gif','pants04.gif','jeans01.gif','jeans02.gif','jeans03.gif','jeans04.gif','jeans05.gif','jeans06.gif','shorts01.gif','shorts02.gif','shorts03.gif','shorts04.gif','shorts05.gif','sarong01.gif','sarong02.gif','sarong03.gif','sarong04.gif','sarong05.gif','sarong06.gif','gothskirt01.gif','gothskirt02.gif','gothskirt03.gif','gothskirt04.gif','gothskirt05.gif','gothskirt06.gif','gothskirt07.gif','gothskirt08.gif','gothskirt09.gif','gothskirt10.gif','gothskirt11.gif','gothskirt12.gif','pantyhose01.gif','pantyhose02.gif','stockings01.gif','stockings02.gif'],
+                dresses: ['dress01.gif','dress02.gif','minidress01.gif','minidress02.gif','minidress03.gif','minidress04.gif','minidress05.gif','longdress01.gif','longdress02.gif','longdress03.gif','longdress04.gif','drapeddress01.gif','drapeddress02.gif','drapeddress03.gif','strapdress01.gif','strapdress02.gif','straplessdress01.gif','straplessdress02.gif','gdress01.gif','gdress02.gif','gdress03.gif','gdress04.gif','gdress05.gif','gothdress01.gif','gothdress02.gif','gothdress03.gif','gothdress04.gif','webdress01.gif','webdress02.gif','webdress03.gif','webdress04.gif','webdress05.gif','webdress06.gif','webdress07.gif','vdress01.gif','vdress02.gif','suit01.gif','suit02.gif','suit03.gif','suit04.gif','suit05.gif','suit06.gif','suit11.gif','suit12.gif','suit13.gif','suit14.gif','suit15.gif','suit16.gif','teddie01.gif','teddie02.gif','teddie03.gif','sexy01.gif','sexy02.gif'],
+                shoes: ['boot01.gif','boot02.gif','boot03.gif','boot04.gif','sandal01.gif','sandal02.gif','sandal03.gif','pump01.gif','pump02.gif','pump03.gif','pump04.gif','pump11.gif','pump12.gif','flat01.gif','flat02.gif','flat03.gif','platform01.gif','platform02.gif','platform03.gif','sneakers01.gif','sneakers02.gif','sneakers03.gif','gothpump01.gif','gothpump02.gif','tsandals0.gif','tsandals01.gif','tsandals02.gif','tsandals03.gif','tsandals04.gif','tsandals05.gif','tsandals1.gif','tsandals11.gif','tsandals12.gif','tsandals13.gif','tsandals14.gif','tsandals15.gif','tshoes0.gif','tshoes01.gif','tshoes02.gif','tshoes03.gif','tshoes04.gif','tshoes05.gif','tshoes1.gif','tshoes11.gif','tshoes12.gif','tshoes13.gif','tshoes2.gif','tshoes21.gif','tshoes22.gif','tshoes23.gif','tshoes3.gif','tshoes31.gif','tshoes32.gif','tshoes33.gif','tshoes34.gif','tshoes4.gif','tshoes41.gif','tshoes42.gif','tshoes43.gif','tshoes44.gif','tshoes5.gif','tshoes51.gif','tshoes52.gif','tshoes53.gif'],
+                accessories: ['belt01.gif','belt02.gif','belt03.gif','necklace01.gif','necklace02.gif','necklace03.gif','necklace04.gif','glasses01.gif','glasses02.gif','glasses03.gif','glasses04.gif','glasses05.gif','glasses06.gif','glasses07.gif','glasses08.gif','glasses09.gif','glasses10.gif','purse01.gif','purse02.gif','purse03.gif','purse04.gif','purse05.gif','purse06.gif','heart.gif','hearts.gif','heartsparkles.gif','sparkles01.gif','sparkles02.gif','sparkles03.gif','sparkles04.gif','sparkles05.gif'],
+                wings: ['wings01.gif','wings02.gif','wings03.gif','faewings01.gif','faewings02.gif','faewings03.gif','faewings04.gif','faewings05.gif','btrflywings01.gif','btrflywings02.gif','btrflywings03.gif','btryflywings04.gif','gothwings01.gif','gothwings02.gif','gothwings03.gif','gothwings04.gif','gothwings05.gif','gothwings06.gif','gothwings07.gif','gothwings08.gif','gothwings09.gif','gothwings10.gif','gothwings11.gif'],
+                pets: ['cat01.gif','cat02.gif','cat03.gif','cat04.gif','cat05.gif','dog01.gif','bunny01.gif','bunny02.gif','bunny03.gif','frog01.gif','bear01.gif','bear02.gif','hamster01.gif','penguin01.gif','penguin02.gif','turtle01.gif','chick01.gif','bee.gif','gothcat1.gif','gothcat2.gif','gothbat.gif','babyboy01.gif','babyboy02.gif','babyboy03.gif','babyboy04.gif','babyboy05.gif','babyboy06.gif','babygirl01a.gif','babygirl01b.gif','babygirl02a.gif','babygirl02b.gif','babygirl03.gif','babygirl04.gif','babygirl05.gif','babygirl06.gif','babycarrier01.gif','babycarrier02.gif','babycarrier03.gif','babycarrier04.gif','babysling01.gif','babysling02.gif','babysling03.gif','babysling04.gif','babysling11.gif','babysling12.gif','babysling13.gif','babysling14.gif'],
+                props: ['flower01.gif','flower02.gif','flower03.gif','flower04.gif','flowers01.gif','flowers02.gif','flowers03.gif','butterfly01.gif','butterfly02.gif','butterfly03.gif','butterfly04.gif','butterflies.gif','bubbles.gif','appletree.gif','fountain1.gif','fountain2.gif','fountain3.gif','gazebo.gif','pond.gif','pool1.gif','trellis.gif','waterfall.gif','wishingwell.gif','slide01.gif','slide02.gif','radio.gif','hollywood.gif','animal01.gif','bc_pumpkin.gif','bc_turkey.gif','bc_witchhat.gif','bc_happyghost.gif','bc_happyghost2.gif','gothcandlebra.gif','gothcandles.gif','gothceltcross.gif','gothdemon.gif','gothfullmoon.gif','gothgravestone01.gif','gothgravestone02.gif','gothmoon.gif','gothmoon1.gif','gothrose1.gif','gothrose2.gif','gothscry.gif','gothskull.gif','gothspider.gif','gothvampcross.gif','gothweb.gif','back1.gif','back2.gif','back4.gif','back5.gif','back7.gif','back8.gif','back9.gif','back10.gif','backfence.gif','backtrellis.gif','tinydoll.gif']
+            },
+            'gothz': {
+                body: ['body.gif','body3.gif','body4.gif','body5.gif','body6.gif','arm.gif','arm2.gif','arm3.gif','arm4.gif','arms.gif','arms2.gif','arms3.gif','gotharm1.gif','gotharm2.gif','gotharm3.gif','gotharm4.gif','gotharm5.gif','legs.gif','legs4.gif','gothlegs.gif','gothlegs2.gif','greylegs.gif','crossedarms.gif','crossedlegs.gif','chainedlegs.gif','whitebody1.gif','whitebody2.gif','whitetorso1.gif','whitetorso2.gif','whitetorso3.gif','whitetorso4.gif','hands.gif'],
+                hair: ['head.gif','head2.gif','head3.gif','head4.gif','head7.gif','head8.gif','head9.gif','head10.gif','head11.gif','head12.gif','head13.gif','head14.gif','head15.gif','head16.gif','head021.gif','head29.gif','head30.gif','gothhead.gif','gothhead2.gif','gothhead3.gif','gothhead4.gif','gothhead5.gif','gothhead9.gif','gothhead10.gif','gothhead13.gif','gothhead14.gif','gothhead15.gif','gothhead17.gif','gothhead25.gif','gothhead26.gif','gothhead31.gif','gothhead33.gif','gothhead34.gif','gothhead37.gif','gothhead39.gif','gothhead40.gif','gothhead42.gif','gothhead43.gif','gothhead44.gif','gothhead45.gif','gothhead46.gif','gothhead47.gif','blackhead.gif','blackhead2.gif','blackhead4.gif','blackhead5.gif','blackhead6.gif','blackhead7.gif','blackhead8.gif','blackhead9.gif','bluehead.gif','bluehead2.gif','bluehead3.gif','bluehead4.gif','bluehead5.gif','bluegothhead.gif','bluegothhead2.gif','bluegothhead3.gif','bluehair.gif','bluehair2.gif','redhair.gif','redhair2.gif','redgothhead.gif','redgothhead2.gif','greyhair.gif','greygothhead.gif','greygothhead2.gif','purplegothhead.gif','darkgothhead.gif','sparklygothhead.gif','blackeyedgothhead.gif','blueendsgothhead.gif','greyishgothhead.gif','gothheadcollar.gif','gothheadcollar2.gif','gothheadcollar3.gif','gothheadnecklace.gif','gothheadredeyes.gif','gothheadsmirk.gif','gothheadsmirk3.gif','redgothheadsmirk.gif'],
+                tops: ['shirt.gif','shirt2.gif','shirt5.gif','shirt10.gif','blackshirt.gif','blackshirt2.gif','blackshirt3.gif','blackshirt4.gif','blackshirt5.gif','blackshirt6.gif','blackshirt7.gif','blackshirt8.gif','blackshirt9.gif','blackshirt10.gif','blackshirt11.gif','blackshirt12.gif','blackshirt14.gif','blackshirt16.gif','blackshirt17.gif','blackshirt18.gif','blackshirt19.gif','blackshirt20.gif','blackshirt21.gif','blackshirt22.gif','blackshirt23.gif','blackshirt24.gif','blackshirt25.gif','blackshirt26.gif','blackshirt27.gif','blackshirt28.gif','blackshirt29.gif','blackshirt30.gif','blackshirt31.gif','blackshirt32.gif','redshirt.gif','redshirt2.gif','redshirt3.gif','redshirt4.gif','redshirt5.gif','redshirt6.gif','redshirt7.gif','redshirt8.gif','redshirt9.gif','redshirt10.gif','redshirt11.gif','redshirt12.gif','redshirt15.gif','redshirt16.gif','redshirt17.gif','redshirt18.gif','redshirt19.gif','redshirt20.gif','redshirt21.gif','redshirt22.gif','redshirt23.gif','redshirt24.gif','redshirt25.gif','redshirt26.gif','redshirt27.gif','redshirt28.gif','redshirt29.gif','redshirt30.gif','redshirt31.gif','redshirt32.gif','redshirt33.gif','redshirt34.gif','redshirt35.gif','redshirt36.gif','redshirt37.gif','redshirt38.gif','whiteshirt.gif','whiteshirt2.gif','whiteshirt3.gif','whiteshirt4.gif','whiteshirt5.gif','whiteshirt7.gif','whiteshirt8.gif','whiteshirt9.gif','whiteshirt10.gif','greyshirt.gif','blacktop.gif','blacktop2.gif','blacktop3.gif','blacktop4.gif','blacktop5.gif','blacktop6.gif','blacktop8.gif','blacktop9.gif','blacktop10.gif','blacktop11.gif','blacktop12.gif','blacktop13.gif','blacktop34.gif','gothshirt.gif','corset.gif','corsetthing.gif','coat.gif','blacktrenchcoat.gif','leathershirt.gif','leathershirt2.gif','leathertop.gif','top.gif','greytop.gif','greytop2.gif','whitetop.gif','redtop.gif','greyrosetop.gif','redrosetop.gif','redholetop.gif','firetop.gif','fireshirt2.gif','fireshirt3.gif','fireshirt4.gif','fireshirt5.gif','flametank.gif','butterflyshirt.gif','redbutterflyshirt.gif','bunnyshirt.gif','crossshirt.gif','crossshirt2.gif','dragonshirt.gif','skullshirt.gif','japaneseshirt.gif','roseblackshirt.gif','starryblackshirt.gif','starshirt.gif','webshirt.gif','strappyshirt.gif','strappyshirt2.gif','tasselyshirt.gif','lacyshirt.gif','poofyblackshirt.gif','rippedshirt.gif','rippedshirt2.gif','shadyshirt.gif','shawlshirt.gif','silvershirt.gif','normalblackshirt.gif','normalblackshirt2.gif','whitecollarshirt.gif','blackshirtwithcollar.gif','oneshoulderwhiteshirt.gif','sparklyblacktopthing.gif','bitchshirt.gif','cateatspreps.gif','multiflamyshirt.gif','flamyheartshirt.gif','tigershirt.gif','weirdshirt.gif','skirtshirt.gif'],
+                bottoms: ['pants.gif','blackpants.gif','blackpants2.gif','blackpants4.gif','blackpants5.gif','blackpants6.gif','whitepants.gif','whitepants2.gif','whitepants3.gif','greypants.gif','redpants.gif','redpants2.gif','redleatherpants.gif','redpantswithchain.gif','baggypants.gif','baggyblackpants.gif','kornpants.gif','stripeypants.gif','barbedwirepants.gif','blackandredpants.gif','firepants.gif','firepants2.gif','firepants3.gif','starrypants.gif','rosepants.gif','shinyblackcargoes.gif','blackcapris.gif','coolorangepants.gif','blackmini.gif','leatherminiskirt.gif','tatteredmini.gif','flamemini.gif','blackskirt2.gif','blackskirt4.gif','blackskirt5.gif','blackskirt6.gif','redskirt.gif','redskirt2.gif','greyskirt.gif','fireskirt.gif','flameskirt.gif','flamyskirt.gif','starryskirt.gif','starryskirt2.gif','roseskirt.gif','roseskirt2.gif','flowerskirt.gif','butterflyskirt.gif','webskirt.gif','vineskirt.gif','vineskirt2.gif','sunskirt.gif','ankhskirt.gif','japaneseskirt.gif','kilt.gif','miniandstockings.gif','miniwithstockings.gif','blackskirtwithleg.gif','blackcrossskirtwithshoes.gif','skirtandstrappyshoes.gif'],
+                dresses: ['dress.gif','dress3.gif','dress11.gif','dresswithcollar.gif','blackdress.gif','blackdress2.gif','blackdress3.gif','blackdress4.gif','blackdress5.gif','blackdress6.gif','blackdress7.gif','blackdress8.gif','blackdress9.gif','reddress.gif','redminidress.gif','redflamydress.gif','reddresswithtrain.gif','redsittingdress.gif','greysittingdress.gif','mostlyreddress.gif','blueblackdress.gif','blackstardress.gif','blackdragondresstrans.gif','straplessblackdress.gif','shortblackdress.gif','celticdress.gif','starrydress.gif','starrydress2.gif','tigerdress.gif','holeydress.gif','morticiadress.gif','fulldress.gif','catsuit.gif','redjumpsuit.gif','karate.gif','sleep.gif'],
+                shoes: ['shoes.gif','shoes2.gif','shoes3.gif','blackshoes.gif','blackshoes4.gif','blackshoes5.gif','blackshoes6.gif','boots.gif','boots2.gif','boots3.gif','blackboots.gif','blackboots2.gif','redboots.gif','redlaceboots.gif','platforms.gif','platforms2.gif','platforms3.gif','platforms4.gif','blackplatforms.gif','redleathershoes.gif','strappyshoes.gif','strappiershoes.gif','firesandals.gif'],
+                accessories: ['belt.gif','belt2.gif','belt3.gif','blackbelt.gif','beltandchain.gif','chain2.gif','necklace.gif','necklace2.gif','necklace3.gif','necklace4.gif','necklace5.gif','neckalce.gif','glasses.gif','shades.gif','sunglasses.gif','blackhat.gif','blackhat2.gif','blackhat3.gif','blackhat4.gif','blackhat5.gif','blackhat6.gif','hat.gif','redhat.gif','redhat2.gif','redhat3.gif','jokerhat.gif','crown.gif','devilhorns.gif','deviltail.gif','halo.gif','handcuffs.gif','bowthing.gif','coolspikything.gif','dragontattoo.gif','butterflytattoo.gif','flowertattoo.gif','hearttattoo.gif','rosetattoo.gif','tattoo.gif','hearts.gif','sparkles.gif','blackrose.gif','blackroses.gif','redrose.gif','redroses.gif','roses.gif','moreroses.gif','bleedingrose.gif','rosewreath.gif','flower.gif'],
+                wings: ['wings.gif','wings2.gif','wings3.gif','wings4.gif','wings5.gif','wings6.gif','wings7.gif','wings8.gif','wings9.gif','wings10.gif','wings11.gif','wings12.gif','wings013.gif','wing.gif','wing2.gif','batwings.gif','batwings2.gif','blackangelwings.gif','blackbutterflywings.gif','blacksparklywings.gif','blackwings2.gif','whitewings.gif','greybirdwings.gif','butterflywings.gif','butterflywings2.gif','redangelwings.gif','redangelwings2.gif','redflamywings.gif','fierywings.gif','littlebatwings.gif','smallerredwings.gif','fallenangel.gif'],
+                pets: ['blackcat.gif','sleepingkitty.gif','rottweiler.gif','panther.gif','bats.gif','dragon2.gif','sleepydragon.gif','spider.gif'],
+                props: ['fire.gif','fire2.gif','greenfire.gif','pinkfire.gif','blueflame.gif','blueflame2.gif','blackflames.gif','redflames.gif','blueswirl.gif','blackcloud.gif','moon.gif','snowflake.gif','spiderweb.gif','spiderwithweb.gif','candles.gif','gravestone2.gif','gravestone3.gif','deadgrass.gif','grass.gif','wine.gif','prop.gif','prop2.gif','prop3.gif','prop4.gif','prop5.gif','prop6.gif','prop7.gif','prop8.gif','prop9.gif','prop10.gif','prop11.gif','prop12.gif','prop13.gif','prop14.gif','prop15.gif','prop16.gif','prop17.gif','prop18.gif','goodpsycho.gif','preppy.gif','stupidpeople.gif','nsyncgrave.gif']
+            },
+            'divaz': {
+                body: ['diva.gif'],
+                hair: ['dh1.gif','dh2.gif','dh3.gif','dh4.gif','dh5.gif','dh6.gif','dh7.gif','dh8.gif','dh9.gif','dh10.gif','dh11.gif','dh12.gif','dh13.gif','dh14.gif','dh15.gif','dh16.gif','dh17.gif','dh18.gif','dh19.gif','dh20.gif'],
+                tops: ['dt1.gif','dt2.gif','dt3.gif','dt4.gif','dt5.gif','dt6.gif','dt7.gif','dt8.gif','dt9.gif','dt10.gif','dt11.gif','dt12.gif','dt13.gif','dt14.gif','dt15.gif','dt16.gif','dt17.gif','dt18.gif','dt19.gif','dt20.gif'],
+                bottoms: ['dp1.gif','dp2.gif','dp3.gif','dp4.gif','dp5.gif','dp6.gif','dp7.gif','dp8.gif','dp9.gif','dp10.gif','dp11.gif','dp12.gif','dp13.gif','dp14.gif','dp15.gif','dp16.gif','dp17.gif','dp18.gif'],
+                dresses: [],
+                shoes: [],
+                accessories: ['da1.gif','da2.gif'],
+                wings: [],
+                pets: [],
+                props: []
+            },
+            'girlz/uniquez': {
+                body: ['blank.gif','ltarm.gif','rtarm0.gif','rtarm1.gif','rtarm2.gif','rtarm3.gif','rtarm4.gif','rtarm5.gif','rtarm6.gif','sleeve.gif','sleeve0.gif','sleeve1.gif','sleeve2.gif','sleeve3.gif','sleeve4.gif'],
+                hair: ['blonde.gif','blonde0.gif','blonde1.gif','blonde2.gif','blonde3.gif','blonde4.gif','blonde5.gif','blonde6.gif','blonde7.gif','blonde8.gif','blonde9.gif','blonde10.gif','blonde11.gif','blonde12.gif','blonde13.gif','blonde14.gif','blonde15.gif','blonde16.gif','blonde17.gif','blonde18.gif','blonde19.gif','blonde20.gif','blonde21.gif','blonde22.gif','blonde23.gif','blonde24.gif','blonde25.gif','blonde26.gif','blonde27.gif','blonde28.gif','blonde29.gif','blonde30.gif','blonde31.gif','blonde32.gif','blonde33.gif','blonde34.gif','blonde35.gif','blonde36.gif','blonde37.gif','blonde38.gif','blonde40.gif','blonde41.gif','blonde42.gif','blonde43.gif','blonde44.gif','blonde45.gif','blonde46.gif','blonde47.gif','blonde48.gif','blonde49.gif','blonde50.gif','blonde51.gif','blonde52.gif','blonde53.gif','blonde54.gif','blonde55.gif','blonde56.gif','blonde57.gif','blonde58.gif','blonde59.gif','blonde60.gif','blonde61.gif','blonde62.gif','blonde63.gif','blonde64.gif','blonde65.gif','blonde66.gif','blonde67.gif','blonde68.gif','blonde69.gif','br0.gif','br1.gif','br2.gif','br3.gif','br4.gif','br5.gif','br6.gif','br7.gif','br8.gif','br9.gif','br10.gif','br11.gif','br12.gif','br13.gif','br14.gif','br15.gif','br16.gif','br17.gif','br18.gif','br19.gif','br20.gif','br21.gif','br22.gif','br23.gif','br24.gif','br25.gif','br26.gif','br27.gif','br28.gif','br29.gif','br30.gif','br31.gif','br32.gif','br33.gif','br34.gif','br35.gif','br36.gif','br37.gif','br38.gif','br39.gif','br40.gif','br41.gif','br42.gif','br43.gif','br44.gif','br45.gif','br46.gif','br47.gif','br48.gif','br49.gif','br50.gif','br51.gif','br52.gif','br53.gif','da0.gif','da1.gif','da2.gif','da3.gif','da4.gif','da5.gif','da6.gif','da7.gif','da8.gif','da9.gif','da10.gif','da11.gif','da12.gif','da13.gif','da14.gif','da15.gif','da16.gif','da17.gif','da18.gif','da19.gif','da20.gif','da21.gif','da22.gif','da23.gif','da24.gif','da25.gif','da26.gif','da27.gif','da28.gif','da29.gif','da30.gif','da31.gif','da32.gif','da33.gif','da34.gif','da35.gif','da36.gif','da37.gif','da38.gif','da39.gif','da40.gif','da41.gif','da42.gif','da43.gif','da44.gif','da45.gif','da46.gif','da47.gif','da48.gif','da49.gif','da50.gif'],
+                tops: ['a.gif','a0.gif','a1.gif','a2.gif','a3.gif','a4.gif','a5.gif','a6.gif','a7.gif','a8.gif','a9.gif','b.gif','b0.gif','b1.gif','b2.gif','b3.gif','c.gif','c0.gif','c1.gif','c2.gif','c3.gif','c4.gif','c5.gif','d.gif','d0.gif','d1.gif','d2.gif','d3.gif','d4.gif','d5.gif','d6.gif','e.gif','e0.gif','e1.gif','f.gif','g.gif','ust0.gif','ust1.gif','ust2.gif','ust3.gif','ust4.gif','ust10.gif','ust11.gif','ust12.gif','ust13.gif','ust14.gif','ust16.gif','ust17.gif','ust18.gif','ust19.gif','ust20.gif','ust21.gif','ust22.gif','ust23.gif','ust24.gif','ust25.gif','ust26.gif','ust27.gif','ust28.gif','ust29.gif','ust30.gif','ust31.gif','ust32.gif','ust33.gif','ust34.gif','ust35.gif','ust36.gif','ust37.gif','ust38.gif','ust39.gif','ust40.gif','ust41.gif','ust42.gif','ust43.gif','ust44.gif','ust45.gif','ust46.gif','ust47.gif','ust48.gif','ust49.gif','ust50.gif','ust51.gif','ust52.gif','ust53.gif','ust54.gif','ust55.gif','ust56.gif','ust57.gif','ust58.gif','ust59.gif','ust400.gif','ustb.gif','ustb0.gif','ustb1.gif','ustb2.gif','ustb3.gif','ustb4.gif','ustb5.gif','ustb6.gif','ustb7.gif','ustb8.gif','ustb9.gif','ustb10.gif','ustb11.gif','ustb12.gif','ustb13.gif','ustb14.gif','ustb15.gif','ustb16.gif','ustb17.gif','ustb18.gif','ustb19.gif','ustb20.gif','ustb21.gif','ustb22.gif','ustb23.gif','ustb24.gif','ustb25.gif','ustb26.gif','ustb27.gif','ustb28.gif','ustb29.gif','ustb30.gif','ustb31.gif','ustb32.gif','ustb33.gif','ustb34.gif','ustb35.gif','ustb36.gif','ustb37.gif','ustb38.gif','ustb39.gif','ustb40.gif','ustb41.gif','ustb42.gif','ustb43.gif','ustb44.gif','ustb45.gif','ustb46.gif','ustb47.gif','ustb48.gif','ustb49.gif','ustb50.gif','ustb51.gif'],
+                bottoms: ['sk1.gif','sk2.gif','sk3.gif','sk4.gif','sk5.gif','sk6.gif','sk7.gif','sk10.gif','sk11.gif','sk12.gif','sk13.gif','sk14.gif','sk15.gif','sk16.gif','sk17.gif','sk18.gif','sk19.gif','sk20.gif','sk21.gif','sk22.gif','sk23.gif','sk24.gif','sk25.gif','sk26.gif','sk27.gif','sk28.gif','sk29.gif','sk30.gif','sk31.gif','sk32.gif','sk33.gif','sk34.gif','sk35.gif','sk36.gif','sk37.gif','sk38.gif','sk39.gif','sk40.gif','sk41.gif','sk42.gif','sk43.gif','sk44.gif','sk45.gif','sk46.gif','sk47.gif','sk48.gif','skirt1.gif','capri.gif','capri0.gif','short1.gif','short2.gif','short3.gif','short4.gif','short5.gif','p1.gif','p2.gif','p3.gif','p4.gif','p5.gif','p6.gif','p7.gif','p8.gif','p9.gif','p10.gif','p11.gif','p12.gif','p13.gif','p14.gif','p15.gif','p16.gif','p17.gif','p18.gif','p19.gif','p20.gif','p21.gif','p22.gif','p23.gif','p24.gif','p25.gif','p26.gif','p27.gif','p28.gif','p29.gif','p30.gif','p31.gif','p32.gif','p33.gif','p34.gif','p35.gif','p36.gif','p37.gif','p38.gif','p39.gif','p40.gif','p41.gif','p42.gif','p43.gif','p44.gif','p45.gif','p46.gif','p47.gif','p48.gif','p49.gif','p50.gif','p51.gif','p52.gif','p53.gif','p54.gif','p55.gif','p56.gif','p57.gif','p58.gif','p59.gif','p60.gif','p61.gif','p62.gif','p63.gif','p64.gif','p65.gif','p66.gif','p67.gif','usl0.gif','usl1.gif','usl2.gif','usl3.gif','usl4.gif','usl5.gif','usl6.gif','usl7.gif','usl8.gif','usl9.gif','usl10.gif','usl11.gif','usl12.gif','usl13.gif','usl14.gif','usl15.gif','usl16.gif','usl17.gif','usl18.gif','usl19.gif','usl20.gif','usl21.gif','usl22.gif','usl23.gif','usl24.gif','usl25.gif','usl26.gif','usl27.gif','usl28.gif','usl29.gif','usl30.gif','usl31.gif','usl32.gif','usl33.gif','usl34.gif','usl35.gif','usl36.gif','usl37.gif','usl38.gif','usl39.gif','usl40.gif','usl41.gif','usl42.gif','usl43.gif','usl44.gif','usl45.gif','usl46.gif','usl47.gif','usl48.gif','usl49.gif','usl50.gif','usl51.gif','usl52.gif','usl53.gif','usl54.gif'],
+                dresses: ['udress.gif','udress1.gif','udress2.gif','udress3.gif','udress4.gif','udress5.gif','i.gif','i0.gif','i1.gif','j.gif','k.gif','m.gif','m1.gif','m2.gif','m3.gif','n.gif','n0.gif','n1.gif','n3.gif','n4.gif','n5.gif','o.gif','q.gif','q0.gif','q1.gif'],
+                shoes: ['us0.gif','us1.gif','us2.gif','us3.gif','us4.gif','us5.gif','us6.gif','us7.gif','us8.gif','us9.gif','us10.gif','us11.gif','us12.gif','us13.gif','us14.gif','us15.gif','us16.gif','us17.gif','us18.gif','us19.gif','us20.gif','us21.gif','us22.gif','us23.gif','us24.gif','us25.gif','us26.gif','us27.gif','us28.gif','us29.gif','us30.gif','us40.gif','us41.gif','us42.gif','us50.gif','us51.gif','us60.gif','us70.gif','pltg.gif','pltg0.gif','pltg1.gif','snowboots0.gif','snowboots1.gif','snowboots2.gif','snowboots3.gif','snowboots4.gif','snowboots5.gif','usj.gif','usj0.gif','usj1.gif','usj2.gif','usj3.gif','usj4.gif','usj5.gif','uss0.gif','uss1.gif','usm.gif','usm0.gif','usm1.gif','usm2.gif','usm3.gif','usm4.gif','usm5.gif','usm6.gif','usm7.gif','usm8.gif','usm9.gif','usm10.gif','usm11.gif','usm12.gif','usm13.gif','usm14.gif','usm15.gif','usm16.gif','usm17.gif','usm18.gif','usm19.gif','usm20.gif','usm21.gif','usm22.gif','usm23.gif','usm24.gif','usm25.gif','usm26.gif','usm27.gif'],
+                accessories: ['belt.gif','belt0.gif','belt1.gif','belt2.gif','belt3.gif','belt4.gif','belt5.gif','belt6.gif','belt7.gif','belt8.gif','belt9.gif','belt10.gif','belt11.gif','belt12.gif','belt13.gif','glasses.gif','glasses0.gif','glasses1.gif','glasses2.gif','glasses3.gif','glasses4.gif','glasses10.gif','glasses11.gif','glasses12.gif','glasses13.gif','glasses14.gif','glasses15.gif','glasses16.gif','glasses17.gif','glasses18.gif','glasses19.gif','hat.gif','hat0.gif','hat1.gif','hat2.gif','hat3.gif','hat4.gif','hat5.gif','hat6.gif','hat7.gif','hat8.gif','hat9.gif','hat10.gif','hat11.gif','hat12.gif','hat13.gif','hat14.gif','hat15.gif','hat16.gif','hat17.gif','hat18.gif','hat19.gif','hat20.gif','necklace.gif','necklace0.gif','necklace1.gif','necklace2.gif','necklace3.gif','necklace4.gif','earrings.gif','earrings0.gif','earrings1.gif','earrings2.gif','bracelet.gif','headband.gif','headband0.gif','headband1.gif','headband2.gif','purse.gif','purse0.gif','purse1.gif','purse2.gif','purse3.gif','purse4.gif','purse5.gif','purse6.gif','purse7.gif','purse8.gif','purse9.gif','purse10.gif','purse11.gif','purse12.gif','purse13.gif','purse14.gif','purse15.gif','purse16.gif','purse17.gif','purse18.gif','purse19.gif','purse20.gif','purse21.gif','purse22.gif','purse23.gif','purse24.gif','purse25.gif','purse26.gif','purse27.gif','purse28.gif','purse29.gif','purse30.gif','purse31.gif','purse32.gif','purse33.gif','purse34.gif','purse35.gif','purse36.gif','purse37.gif','purse38.gif','purse39.gif','purse40.gif','purse41.gif','purse42.gif','purse43.gif','purse44.gif','purse45.gif','purse46.gif','purse47.gif','purse48.gif','purse49.gif','purse50.gif','purse51.gif','purse52.gif','purse53.gif','purse54.gif','purse55.gif','cig.gif'],
+                wings: ['w.gif','w1.gif','w2.gif','w3.gif','w4.gif','w5.gif','w6.gif'],
+                pets: ['pet.gif','flower.gif','flower0.gif','flower1.gif','fflower.gif'],
+                props: ['electronic.gif','electronic3.gif','electronic4.gif','food4.gif','food5.gif','fbsk.gif','hair.gif','uh.gif','usx.gif','usx0.gif','r0.gif','r1.gif','r2.gif','r3.gif','r4.gif','r5.gif','r6.gif','r7.gif','r8.gif','r9.gif','r10.gif','r11.gif','r12.gif','r13.gif','r14.gif','r15.gif','r16.gif','r17.gif','r18.gif','r19.gif','r20.gif','r21.gif','r22.gif','r23.gif','r24.gif','r25.gif','r26.gif','r27.gif','r28.gif','r29.gif','r30.gif','r31.gif','pcr.gif','pcr0.gif','pcr1.gif','pcr2.gif','pcr3.gif','pcr4.gif','pcr5.gif','pcr6.gif','pcr7.gif','pcr8.gif','pcr9.gif','pcr10.gif','pcr11.gif','pcr12.gif','pcr13.gif','pcr14.gif','pcr15.gif','pcr16.gif','pcr17.gif','pcr18.gif','pcr19.gif','pcr20.gif','pcr21.gif','pcr22.gif','pcr23.gif','pcr24.gif','pcr25.gif','pcr26.gif','pcr27.gif','s.gif','s0.gif','s1.gif','s2.gif','s3.gif','s4.gif','s5.gif','t.gif','t0.gif','t1.gif','t2.gif','t3.gif','t4.gif','t5.gif','t6.gif','t7.gif','u.gif','u0.gif','u1.gif','u2.gif','u3.gif','v.gif','v0.gif','v1.gif','v2.gif','v3.gif','v4.gif','v5.gif','v6.gif','v7.gif','v10.gif','v11.gif','v12.gif','x.gif','x0.gif','x1.gif','x2.gif','x3.gif','x4.gif','x5.gif','x6.gif','x7.gif','y.gif','y0.gif','y1.gif','z.gif','z0.gif','z1.gif','z2.gif','z3.gif']
+            },
+            'girlz/silentz': {
+                body: ['arm.gif','blank.gif','sit.gif','sit0.gif','sit1.gif','sit2.gif','sit3.gif','sit4.gif','sit5.gif','sit6.gif','sit7.gif','sit8.gif','sit9.gif','sit10.gif','sit11.gif','sit12.gif','sit13.gif','sit14.gif','sit15.gif','sit16.gif','sit17.gif','sit18.gif','sit19.gif','sit20.gif','sit21.gif','sit22.gif','sit23.gif','sit24.gif','sit25.gif','sit26.gif','sit27.gif','sit28.gif','sit29.gif','sit30.gif','sit31.gif','sit32.gif','sit33.gif','sit34.gif','sit35.gif','sit36.gif','sit37.gif'],
+                hair: ['a.gif','a0.gif','a1.gif','a2.gif','a3.gif','a4.gif','a5.gif','a6.gif','a7.gif','a8.gif','a9.gif','a10.gif','a11.gif','a12.gif','a13.gif','a14.gif','a15.gif','a16.gif','a17.gif','a18.gif','a19.gif','a20.gif','a21.gif','a22.gif','a23.gif','a24.gif','a25.gif','blacka.gif','blondef1.gif','blued.gif','blued0.gif','bluee.gif','bluef.gif','green.gif','rainbowd.gif','rainbowf.gif','redb.gif','redg.gif','redh.gif','redi.gif','whitee.gif','whitef.gif','whitei.gif'],
+                tops: ['t.gif','t0.gif','t1.gif','t2.gif','t3.gif','t4.gif','t5.gif','t6.gif','t7.gif','t8.gif','t9.gif','t10.gif','t11.gif','t12.gif','t13.gif','t14.gif','t15.gif','t16.gif','t17.gif','t18.gif','t19.gif','t20.gif','t21.gif','t22.gif','t23.gif','t24.gif','t25.gif','t26.gif','t27.gif','t28.gif','t29.gif','t30.gif','t31.gif','t32.gif','t33.gif','t34.gif','t35.gif','t36.gif','t37.gif','t38.gif','t39.gif','t40.gif','t41.gif','t42.gif','t43.gif','t44.gif','t45.gif','t46.gif','t47.gif','t48.gif','t49.gif','t50.gif','t51.gif','t52.gif','t53.gif','t54.gif','t55.gif','t56.gif','t57.gif','t58.gif','t59.gif','t60.gif','t61.gif','t62.gif','t63.gif','t64.gif','t65.gif','t66.gif','t67.gif','t68.gif','t69.gif','t70.gif','t71.gif','t72.gif','t73.gif','t74.gif','t75.gif','t76.gif','t77.gif','t78.gif','t79.gif','t80.gif','t81.gif','t82.gif','t83.gif','t84.gif','t85.gif','t86.gif','t87.gif','t88.gif','t89.gif','t90.gif','t91.gif','t92.gif','t93.gif','t94.gif','t95.gif','t96.gif','t97.gif','t98.gif','t99.gif','t100.gif','t101.gif','t102.gif','t103.gif','t104.gif','t105.gif','t106.gif','t107.gif','t108.gif','t109.gif','t110.gif','t111.gif','t112.gif','t113.gif','t114.gif','t115.gif','t116.gif','t117.gif','t118.gif','t119.gif','t120.gif','t121.gif','t122.gif','t123.gif','t124.gif','t125.gif','t126.gif','t127.gif','t128.gif','t129.gif','t130.gif','t131.gif','t200.gif'],
+                bottoms: ['b.gif','b0.gif','b1.gif','b2.gif','b3.gif','b4.gif','b5.gif','b6.gif','b7.gif','b8.gif','b9.gif','b10.gif','b11.gif','b12.gif','b13.gif','b14.gif','b15.gif','b16.gif','b17.gif','b18.gif','b19.gif','b20.gif','b21.gif','b22.gif','b23.gif','b24.gif','b25.gif','b26.gif','b28.gif','b29.gif','b30.gif','b31.gif','b32.gif','b33.gif','b34.gif','b35.gif','b36.gif','b37.gif','b38.gif','b39.gif','b40.gif','b41.gif','b42.gif','b43.gif','b44.gif','b45.gif','b46.gif','b47.gif','b48.gif','b49.gif','b50.gif','b51.gif','b52.gif','b53.gif','b54.gif','b55.gif','b56.gif','b57.gif','b58.gif','b59.gif','b60.gif','b62.gif','b63.gif','b64.gif','b65.gif','b66.gif','b67.gif','b68.gif','b69.gif','b70.gif','b71.gif','b72.gif','b73.gif','b74.gif','b75.gif','b76.gif','b77.gif','b78.gif','b79.gif','b80.gif','b81.gif','b82.gif','b83.gif','b84.gif','b85.gif','b86.gif','b87.gif','b88.gif','b89.gif','b90.gif','b91.gif','b92.gif'],
+                dresses: ['c.gif','c0.gif','c1.gif','c2.gif','c3.gif','c4.gif','c5.gif','c6.gif','c7.gif','c9.gif','c10.gif','c11.gif','c12.gif','c13.gif','c15.gif','c16.gif','c17.gif','c18.gif','c19.gif','c20.gif','c21.gif','c22.gif','c23.gif','c24.gif','c25.gif'],
+                shoes: [],
+                accessories: ['belt.gif','belt0.gif','belt1.gif','glasses.gif','hat.gif','hat0.gif','hat1.gif','hat2.gif','hat3.gif','hat10.gif','hat11.gif','hat12.gif','hat13.gif','hat14.gif','hat15.gif','bag.gif','bag0.gif','ears.gif','ears0.gif','ears1.gif','ears2.gif','ears3.gif','hand.gif','hand0.gif','hand1.gif','hand2.gif','words.gif','words0.gif','words1.gif','words2.gif','words3.gif','words4.gif','wand.gif'],
+                wings: ['wings.gif','wings0.gif','wings1.gif','wings2.gif','wings3.gif','wings4.gif','wings5.gif','wings6.gif'],
+                pets: ['animal.gif','animal0.gif','animal1.gif','animal2.gif','animal3.gif','animal4.gif','animal5.gif','animal6.gif','flower.gif','flower0.gif','flower1.gif','food.gif'],
+                props: ['balloon.gif','balloon0.gif','balloon1.gif','balloon2.gif','balloon3.gif','balloon4.gif','basketball.gif','guitar.gif','guitar0.gif','skateboard.gif','skateboard0.gif','skateboard1.gif']
+            },
+            'boyz/uniquez_boi': {
+                body: ['bod.gif','bod0.gif','bod1.gif','bod2.gif','bod50.gif','blank.gif','sit.gif','sit0.gif','pale.gif','pale0.gif','pale1.gif','pale2.gif','pale3.gif','pale4.gif','pale5.gif','pale6.gif','pale7.gif','pale8.gif','pale9.gif','pale10.gif','pale11.gif','pale12.gif','pale13.gif','pale14.gif','pale15.gif','pale16.gif','pale50.gif'],
+                hair: ['hd.gif','hd0.gif','hd1.gif','hd2.gif','hd3.gif','hd4.gif','hd5.gif','hd6.gif','hd7.gif','hd8.gif','hd9.gif','hd10.gif','long.gif','md7.gif'],
+                tops: ['a.gif','23.gif'],
+                bottoms: ['mp0.gif','mp1.gif','mp2.gif','mp3.gif','mp4.gif','mp5.gif','mp6.gif','mp7.gif','mp8.gif','mp9.gif','mp10.gif','mp11.gif','mp12.gif','mp13.gif','mp14.gif','mp15.gif','mp16.gif','mp17.gif','mp18.gif','mp19.gif','mp20.gif','mp21.gif','mp22.gif','mp23.gif','mp24.gif','mp25.gif','mp26.gif','mp27.gif','mp28.gif','mp29.gif','mp30.gif','mp31.gif','mp32.gif','mp33.gif','mp34.gif','mp35.gif','mp36.gif','mp37.gif','mp38.gif','mp39.gif','mp40.gif','mp41.gif','mp42.gif','mp43.gif','mp44.gif','mp45.gif','mp46.gif','mp47.gif','mp48.gif','mp49.gif','mp50.gif','mp51.gif','mp52.gif','mp53.gif','mp54.gif','mp55.gif','mp56.gif','mp57.gif','mp58.gif','mp59.gif','mp60.gif','mp61.gif','mp62.gif','mp63.gif','mp64.gif','mp65.gif','mp66.gif','mp67.gif','mp68.gif','mp69.gif','mp70.gif','mp71.gif','mp72.gif','mp73.gif','mp74.gif','mp75.gif','mp76.gif','mp77.gif','mp78.gif','mp79.gif','mp80.gif','mp81.gif','mp82.gif','mp83.gif','mp84.gif','mp85.gif','mp86.gif','mp87.gif','mp88.gif','mp89.gif','mp90.gif','mp91.gif','mp92.gif','mp93.gif','mp94.gif','mp95.gif','mp100.gif','mp101.gif','mp102.gif','mp103.gif','mps0.gif','mps1.gif','mps2.gif','mps3.gif','mps4.gif','mps5.gif','mps6.gif','mps7.gif','mps8.gif','mps9.gif','mps10.gif','mps11.gif','mps12.gif','mps13.gif','mps14.gif','mps15.gif','mps16.gif','mps17.gif','mps18.gif','mps19.gif','mps20.gif','mps21.gif','mps22.gif','mps23.gif','mps24.gif','mps25.gif','mps26.gif','mps27.gif','mps28.gif','mps29.gif','mps30.gif','mps31.gif','mps32.gif','mps33.gif','mps34.gif','mps35.gif','mps36.gif','mps37.gif','mps38.gif','mps39.gif','mps40.gif','mps41.gif','mps42.gif','mps43.gif','mps44.gif','mps45.gif','mps46.gif','mps47.gif','mps48.gif','mps49.gif','mps50.gif','mps51.gif','mps52.gif','mps53.gif','mps54.gif','mps55.gif','mps56.gif','mps57.gif','mps58.gif','mps59.gif','mps60.gif','mps61.gif','mps62.gif','mps63.gif','mps64.gif','mps65.gif','mps66.gif','mps67.gif','mps68.gif','mps69.gif','mps70.gif','mps71.gif','mps72.gif','mps73.gif','mps74.gif','mps75.gif','mps76.gif','mps77.gif','mps78.gif','mps79.gif','mps80.gif','mps81.gif','mps82.gif','mps83.gif','mps84.gif','mps85.gif','mps86.gif','mps87.gif','mps88.gif','mps89.gif','mps90.gif','mps91.gif','mps92.gif','mps93.gif','mps94.gif','mps95.gif','mps96.gif','mps97.gif','mps98.gif','mps99.gif','mpsz0.gif','mpsz1.gif','mpsz2.gif','mpsz3.gif','ovmp1.gif','ovmp2.gif','short.gif','Su1.gif'],
+                dresses: [],
+                shoes: ['z0.gif'],
+                accessories: ['belt1.gif','belt2.gif','belt6.gif','belt7.gif','belt8.gif','belt9.gif','belt10.gif','belt12.gif','glasses1.gif','glasses2.gif','glasses4.gif','glasses12.gif','glasses15.gif','glasses16.gif','glasses18.gif','ac122.gif','ac4.gif','ac7.gif','acc42.gif','acc52.gif','acc53.gif','acc54.gif','acc55.gif','acc56.gif','acc57.gif','acc58.gif','acc59.gif','cig.gif','pbsymbol.gif','sharm2.gif','sharm8.gif','sharm9.gif','sharm12.gif','sharm18.gif','sharm20.gif','sharm23.gif','sharm26.gif','sharm27.gif'],
+                wings: [],
+                pets: [],
+                props: []
+            }
+        };
+
+        const backgrounds = [
+            { name: 'White', color: '#ffffff' },
+            { name: 'Pink', color: '#ffccff' },
+            { name: 'Blue', color: '#ccffff' },
+            { name: 'Lavender', color: '#e6ccff' },
+            { name: 'Mint', color: '#ccffcc' },
+            { name: 'Peach', color: '#ffe6cc' },
+            { name: 'Yellow', color: '#ffffcc' },
+            { name: 'Black', color: '#1a1a1a' }
+        ];
+
+        let currentCollection = 'chubbiez';
+        let currentCategory = 'body';
+        let canvasItems = [];
+        let selectedItem = null;
+        let zIndexCounter = 1;
+
+        const assetGrid = document.getElementById('assetGrid');
+        const dollCanvas = document.getElementById('dollCanvas');
+        const layersList = document.getElementById('layersList');
+        const bgGrid = document.getElementById('bgGrid');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupCollectionButtons();
+            setupCategoryTabs();
+            setupCanvasControls();
+            setupBackgrounds();
+            loadAssets();
+        });
+
+        function setupCollectionButtons() {
+            document.querySelectorAll('.collection-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.collection-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCollection = btn.dataset.collection;
+                    loadAssets();
+                });
+            });
+        }
+
+        function setupCategoryTabs() {
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.dataset.category;
+                    loadAssets();
+                });
+            });
+        }
+
+        function loadAssets() {
+            const collection = assetDB[currentCollection];
+            if (!collection) {
+                assetGrid.innerHTML = '<p style="color:#999;padding:20px;text-align:center;">Collection not found</p>';
+                return;
+            }
+
+            const assets = collection[currentCategory] || [];
+            if (assets.length === 0) {
+                assetGrid.innerHTML = '<p style="color:#999;padding:20px;text-align:center;font-size:11px;">No items here</p>';
+                return;
+            }
+
+            assetGrid.innerHTML = '';
+
+            assets.forEach(asset => {
+                const assetPath = `assets/dollz/${currentCollection}/${asset}`;
+                const item = document.createElement('div');
+                item.className = 'asset-item';
+                item.draggable = true;
+
+                const img = document.createElement('img');
+                img.src = assetPath;
+                img.alt = asset;
+                img.onerror = () => item.remove();
+
+                item.appendChild(img);
+
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', assetPath);
+                });
+
+                item.addEventListener('dblclick', () => addItemToCanvas(assetPath));
+
+                assetGrid.appendChild(item);
+            });
+        }
+
+        dollCanvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dollCanvas.classList.add('drag-over');
+        });
+
+        dollCanvas.addEventListener('dragleave', () => dollCanvas.classList.remove('drag-over'));
+
+        dollCanvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dollCanvas.classList.remove('drag-over');
+            const src = e.dataTransfer.getData('text/plain');
+            if (src) {
+                const rect = dollCanvas.getBoundingClientRect();
+                addItemToCanvas(src, e.clientX - rect.left - 50, e.clientY - rect.top - 50);
+            }
+        });
+
+        function addItemToCanvas(src, x = null, y = null) {
+            const img = document.createElement('img');
+            img.src = src;
+            img.className = 'canvas-item';
+            img.dataset.id = Date.now();
+            img.style.zIndex = zIndexCounter++;
+
+            if (x === null) {
+                img.style.left = '50%';
+                img.style.top = '50%';
+                img.style.transform = 'translate(-50%, -50%)';
+            } else {
+                img.style.left = Math.max(0, x) + 'px';
+                img.style.top = Math.max(0, y) + 'px';
+            }
+
+            makeItemDraggable(img);
+            img.addEventListener('click', (e) => { e.stopPropagation(); selectItem(img); });
+
+            dollCanvas.appendChild(img);
+            canvasItems.push({ id: img.dataset.id, element: img, src });
+            updateLayersList();
+            selectItem(img);
+        }
+
+        function makeItemDraggable(el) {
+            let dragging = false, startX, startY, initX, initY;
+
+            el.addEventListener('mousedown', (e) => {
+                if (e.button !== 0) return;
+                dragging = true;
+                el.style.transform = '';
+                startX = e.clientX; startY = e.clientY;
+                initX = el.offsetLeft; initY = el.offsetTop;
+                selectItem(el);
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!dragging) return;
+                el.style.left = (initX + e.clientX - startX) + 'px';
+                el.style.top = (initY + e.clientY - startY) + 'px';
+            });
+
+            document.addEventListener('mouseup', () => dragging = false);
+        }
+
+        function selectItem(item) {
+            document.querySelectorAll('.canvas-item.selected, .layer-item.selected').forEach(el => el.classList.remove('selected'));
+            if (item) {
+                item.classList.add('selected');
+                selectedItem = item;
+                const layerEl = document.querySelector(`.layer-item[data-id="${item.dataset.id}"]`);
+                if (layerEl) layerEl.classList.add('selected');
+            } else {
+                selectedItem = null;
+            }
+        }
+
+        dollCanvas.addEventListener('click', (e) => { if (e.target === dollCanvas) selectItem(null); });
+
+        function updateLayersList() {
+            if (canvasItems.length === 0) {
+                layersList.innerHTML = '<p style="color:#999;font-size:11px;text-align:center;padding:20px;">Drop items to see layers</p>';
+                return;
+            }
+
+            const sorted = [...canvasItems].sort((a, b) => parseInt(b.element.style.zIndex) - parseInt(a.element.style.zIndex));
+            layersList.innerHTML = '';
+
+            sorted.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'layer-item' + (selectedItem?.dataset.id === item.id ? ' selected' : '');
+                div.dataset.id = item.id;
+
+                const thumb = document.createElement('img');
+                thumb.src = item.src;
+                thumb.className = 'layer-thumb';
+
+                const name = document.createElement('span');
+                name.textContent = item.src.split('/').pop().replace('.gif', '');
+                name.style.flex = '1';
+                name.style.overflow = 'hidden';
+                name.style.textOverflow = 'ellipsis';
+
+                const del = document.createElement('button');
+                del.className = 'layer-btn';
+                del.innerHTML = 'X';
+                del.onclick = (e) => { e.stopPropagation(); deleteItem(item.id); };
+
+                div.append(thumb, name, del);
+                div.addEventListener('click', () => selectItem(item.element));
+                layersList.appendChild(div);
+            });
+        }
+
+        function deleteItem(id) {
+            const idx = canvasItems.findIndex(i => i.id === id);
+            if (idx > -1) {
+                canvasItems[idx].element.remove();
+                canvasItems.splice(idx, 1);
+                if (selectedItem?.dataset.id === id) selectedItem = null;
+                updateLayersList();
+            }
+        }
+
+        function setupCanvasControls() {
+            document.getElementById('bringForward').onclick = () => {
+                if (selectedItem) { selectedItem.style.zIndex = zIndexCounter++; updateLayersList(); }
+            };
+            document.getElementById('sendBackward').onclick = () => {
+                if (selectedItem) { selectedItem.style.zIndex = Math.max(0, parseInt(selectedItem.style.zIndex) - 2); updateLayersList(); }
+            };
+            document.getElementById('flipH').onclick = () => {
+                if (selectedItem) {
+                    selectedItem.style.transform = selectedItem.style.transform.includes('scaleX(-1)')
+                        ? selectedItem.style.transform.replace('scaleX(-1)', '')
+                        : selectedItem.style.transform + ' scaleX(-1)';
+                }
+            };
+            document.getElementById('scaleUp').onclick = () => {
+                if (selectedItem) selectedItem.style.width = (selectedItem.offsetWidth * 1.2) + 'px';
+            };
+            document.getElementById('scaleDown').onclick = () => {
+                if (selectedItem) selectedItem.style.width = Math.max(20, selectedItem.offsetWidth * 0.8) + 'px';
+            };
+            document.getElementById('deleteItem').onclick = () => {
+                if (selectedItem) deleteItem(selectedItem.dataset.id);
+            };
+            document.getElementById('clearCanvas').onclick = () => {
+                if (confirm('Clear all?')) {
+                    canvasItems.forEach(i => i.element.remove());
+                    canvasItems = [];
+                    selectedItem = null;
+                    zIndexCounter = 1;
+                    updateLayersList();
+                }
+            };
+            document.getElementById('saveImage').onclick = async () => {
+                if (typeof html2canvas !== 'undefined') {
+                    const canvas = await html2canvas(dollCanvas);
+                    const link = document.createElement('a');
+                    link.download = 'my-doll.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                } else {
+                    alert('Use screenshot tool to save!');
+                }
+            };
+        }
+
+        function setupBackgrounds() {
+            backgrounds.forEach(bg => {
+                const item = document.createElement('div');
+                item.className = 'bg-item';
+                item.style.background = bg.color;
+                item.title = bg.name;
+                item.onclick = () => {
+                    document.querySelectorAll('.bg-item').forEach(b => b.classList.remove('active'));
+                    item.classList.add('active');
+                    dollCanvas.style.background = bg.color;
+                };
+                bgGrid.appendChild(item);
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!selectedItem) return;
+            if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); deleteItem(selectedItem.dataset.id); }
+            if (e.key === 'ArrowUp') { e.preventDefault(); selectedItem.style.top = (parseInt(selectedItem.style.top) - 5) + 'px'; }
+            if (e.key === 'ArrowDown') { e.preventDefault(); selectedItem.style.top = (parseInt(selectedItem.style.top) + 5) + 'px'; }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); selectedItem.style.left = (parseInt(selectedItem.style.left) - 5) + 'px'; }
+            if (e.key === 'ArrowRight') { e.preventDefault(); selectedItem.style.left = (parseInt(selectedItem.style.left) + 5) + 'px'; }
+        });
+    </script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</body>
+</html>
