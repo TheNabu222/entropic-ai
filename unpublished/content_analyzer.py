@@ -163,7 +163,7 @@ class ContentAnalyzer:
     def analyze_html_file(self, filepath):
         """Analyze a single HTML file"""
         try:
-            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read()
                 
             title = self.extract_title(content)
