@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyena Diva Desktop 98 - Digital Savannah Edition</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦁</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'MS Sans Serif', Arial, sans-serif;
+            font-size: 11px;
+            overflow: hidden;
+            /* Y2K McBling Safari Rhinestone Cursor */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%23FF69B4" stroke="%2300CED1" stroke-width="2"/><circle cx="12" cy="12" r="6" fill="%23FFD700" opacity="0.7"/><circle cx="12" cy="12" r="3" fill="%23FFFFFF" opacity="0.9"/></svg>') 12 12, auto;
+        }
+
+        #boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #000000 0%, #1a0033 50%, #330066 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: #00FFFF;
+            font-family: 'Courier New', monospace;
+        }
+
+        .boot-line {
+            margin: 8px 0;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        #desktop {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            /* DIGITAL SAVANNAH - Y2K McBling Safari Gradient */
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 105, 180, 0.25) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 206, 209, 0.25) 0%, transparent 50%),
+                linear-gradient(180deg, #00CED1 0%, #00FFFF 25%, #CCFF00 60%, #00FF00 100%);
+            background-size: 400% 400%;
+            animation: savannahShift 25s ease infinite;
+            overflow: hidden;
+        }
+
+        /* Hyena Spot Pattern Overlay */
+        #desktop::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle, rgba(0, 0, 0, 0.08) 25%, transparent 25%),
+                radial-gradient(circle, rgba(0, 0, 0, 0.08) 25%, transparent 25%);
+            background-size: 100px 100px;
+            background-position: 0 0, 50px 50px;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes savannahShift {
+            0%, 100% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+        }
+
+        /* Floating Iridescent Bubbles */
+        .savannah-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 2;
+            filter: blur(1px);
+        }
+
+        @keyframes floatParticle {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.5;
+            }
+            25% {
+                transform: translate(40px, -50px) scale(1.3);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translate(-30px, -100px) scale(0.8);
+                opacity: 0.3;
+            }
+            75% {
+                transform: translate(50px, -75px) scale(1.1);
+                opacity: 0.6;
+            }
+        }
+
+        .desktop-icon {
+            position: absolute;
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            padding: 8px;
+            user-select: none;
+            z-index: 10;
+            /* Rhinestone Glow */
+            background: radial-gradient(circle, rgba(255, 105, 180, 0.2), transparent);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .desktop-icon:hover {
+            /* Y2K Bling Hover */
+            background: radial-gradient(circle, rgba(255, 105, 180, 0.5), rgba(0, 206, 209, 0.3));
+            border: 2px solid #00CED1;
+            box-shadow: 
+                0 0 15px rgba(255, 215, 0, 0.7),
+                0 0 25px rgba(0, 206, 209, 0.5);
+            transform: scale(1.08);
+        }
+
+        .icon-image {
+            font-size: 48px;
+            margin-bottom: 4px;
+            filter: drop-shadow(0 0 6px rgba(0, 206, 209, 0.8));
+        }
+
+        .icon-label {
+            color: white;
+            font-size: 11px;
+            text-shadow: 
+                1px 1px 2px rgba(0, 0, 0, 0.9),
+                0 0 8px rgba(0, 206, 209, 0.6),
+                0 0 12px rgba(255, 215, 0, 0.4);
+            font-weight: bold;
+        }
+
+        .window {
+            position: absolute;
+            /* Matte Bubble Vinyl */
+            background: rgba(255, 255, 255, 0.96);
+            border: 3px solid #00CED1;
+            box-shadow: 
+                0 0 25px rgba(255, 105, 180, 0.5),
+                0 10px 30px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            min-width: 300px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+        }
+
+        .window-title {
+            /* Hot Pink Gradient Title Bar */
+            background: linear-gradient(180deg, #FF69B4 0%, #FF1493 100%);
+            color: white;
+            padding: 4px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            user-select: none;
+            border-bottom: 2px solid #00CED1;
+            box-shadow: 
+                0 0 15px rgba(0, 206, 209, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            text-shadow: 
+                0 0 8px rgba(0, 206, 209, 0.9),
+                1px 1px 2px rgba(0, 0, 0, 0.7);
+            font-weight: bold;
+            /* Rhinestone Shimmer */
+            animation: rhinestoneGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes rhinestoneGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 15px rgba(0, 206, 209, 0.6),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            }
+            50% {
+                box-shadow: 
+                    0 0 25px rgba(255, 215, 0, 0.8),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            }
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .window-controls button {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #00CED1;
+            background: linear-gradient(180deg, #F5F5DC 0%, #FFD700 100%);
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 8px rgba(0, 206, 209, 0.5);
+        }
+
+        .window-controls button:hover {
+            background: linear-gradient(180deg, #FFD700 0%, #FF69B4 100%);
+            box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+        }
+
+        .window-content {
+            flex: 1;
+            padding: 12px;
+            overflow: auto;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        #taskbar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 32px;
+            /* Metallic Bronze with Aqua Glow */
+            background: linear-gradient(180deg, #CD7F32 0%, #8B4513 100%);
+            border-top: 2px solid #00CED1;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            z-index: 1000;
+            box-shadow: 
+                0 -3px 15px rgba(0, 206, 209, 0.6),
+                inset 0 1px 0 rgba(255, 215, 0, 0.4);
+        }
+
+        #start-button {
+            /* Hot Pink Start Button */
+            background: linear-gradient(180deg, #FF69B4 0%, #FF1493 100%);
+            border: 2px solid #00CED1;
+            color: white;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 8px;
+            box-shadow: 
+                0 0 12px rgba(0, 206, 209, 0.7),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+        }
+
+        #start-button:hover {
+            box-shadow: 
+                0 0 18px rgba(255, 215, 0, 0.9),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        #start-menu {
+            position: fixed;
+            bottom: 32px;
+            left: 0;
+            width: 220px;
+            /* Digital Champagne */
+            background: linear-gradient(135deg, rgba(245, 245, 220, 0.97) 0%, rgba(255, 215, 0, 0.95) 100%);
+            border: 3px solid #00CED1;
+            display: none;
+            z-index: 1001;
+            box-shadow: 
+                0 0 25px rgba(255, 105, 180, 0.6),
+                0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(0, 206, 209, 0.3);
+            color: #000;
+            font-weight: bold;
+        }
+
+        .menu-item:hover {
+            background: linear-gradient(90deg, #FF69B4 0%, #00CED1 100%);
+            color: #FFFFFF;
+            text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+        }
+
+        .submenu {
+            display: none;
+            background: rgba(245, 245, 220, 0.98);
+            border-left: 3px solid #FF69B4;
+            margin-left: 12px;
+        }
+
+        #clock {
+            margin-left: auto;
+            color: #FFD700;
+            font-weight: bold;
+            padding: 0 12px;
+            text-shadow: 0 0 8px rgba(0, 206, 209, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div id="boot-screen">
+        <div class="boot-line" style="animation-delay: 0s;">Initializing Digital Savannah...</div>
+        <div class="boot-line" style="animation-delay: 0.5s;">Loading Rhinestone Hyena Spots...</div>
+        <div class="boot-line" style="animation-delay: 1s;">Connecting to Frutiger Aero Matrix...</div>
+        <div class="boot-line" style="animation-delay: 1.5s;">Activating Matte Bubble Systems...</div>
+        <div class="boot-line" style="animation-delay: 2s;">Syncing with GFW (Galactic Fashion Worlds)...</div>
+        <div class="boot-line" style="animation-delay: 2.5s;">Booting Hyena Diva 98...</div>
+    </div>
+
+    <div id="desktop">
+        <!-- YOUR ORIGINAL 10 DESKTOP ICONS PRESERVED -->
+        <div class="desktop-icon" style="top: 20px; left: 20px;" ondblclick="alert('My Computer - Coming Soon!')">
+            <div class="icon-image">💻</div>
+            <div class="icon-label">My Computer</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 120px; left: 20px;" ondblclick="alert('Rizzlord has been permanently deleted! 🚮')">
+            <div class="icon-image">🗑️</div>
+            <div class="icon-label">Recycle Bin<br>(Rizzlord's Grave)</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 220px; left: 20px;" ondblclick="openHyenaDiva()">
+            <div class="icon-image">🦁</div>
+            <div class="icon-label">Hyena Diva.exe</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 320px; left: 20px;" ondblclick="openSearchScript()">
+            <div class="icon-image">🔍</div>
+            <div class="icon-label">Search Script</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 420px; left: 20px;" ondblclick="openVaudeville()">
+            <div class="icon-image">🎭</div>
+            <div class="icon-label">Vaudeville Theater</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 20px; left: 120px;" ondblclick="openThemeMusic()">
+            <div class="icon-image">🎵</div>
+            <div class="icon-label">Theme Music.mp3</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 120px; left: 120px;" ondblclick="openBarbieWorld()">
+            <div class="icon-image">💖</div>
+            <div class="icon-label">Barbie World.doc</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 220px; left: 120px;" ondblclick="openGFWPortal()">
+            <div class="icon-image">🌌</div>
+            <div class="icon-label">GFW Portal</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 320px; left: 120px;" ondblclick="openKenergyInstall()">
+            <div class="icon-image">💪</div>
+            <div class="icon-label">Install Kenergy</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 420px; left: 120px;" ondblclick="openRizzlordWarning()">
+            <div class="icon-image">⚠️</div>
+            <div class="icon-label">Rizzlord Warning</div>
+        </div>
+
+        <!-- NEW: THREE RETRO PORTAL ICONS -->
+        <div class="desktop-icon" style="top: 20px; left: 220px;" ondblclick="openRetroHub()">
+            <div class="icon-image">🦁</div>
+            <div class="icon-label">HD Hub<br>(Retro)</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 120px; left: 220px;" ondblclick="openRetroEpisodes()">
+            <div class="icon-image">📺</div>
+            <div class="icon-label">Episodes<br>(GeoCities)</div>
+        </div>
+
+        <div class="desktop-icon" style="top: 220px; left: 220px;" ondblclick="openRetroCharacters()">
+            <div class="icon-image">👥</div>
+            <div class="icon-label">Characters<br>(Web 1.0)</div>
+        </div>
+    </div>
+
+    <div id="taskbar">
+        <div id="start-button" onclick="toggleStartMenu()">⭐ Start</div>
+        <div id="clock"></div>
+    </div>
+
+    <div id="start-menu">
+        <div class="menu-item" onclick="toggleSubmenu(event, 'episodesMenu')">
+            📁 Episodes ▶
+            <div class="submenu" id="episodesMenu">
+                <div class="menu-item" onclick="openEpisode(1); hideStartMenu()">Episode 1: Origins</div>
+                <div class="menu-item" onclick="openEpisode(2); hideStartMenu()">Episode 2: Takes The Stage</div>
+                <div class="menu-item" onclick="openEpisode(3); hideStartMenu()">Episode 3: The Great Rizz Battle</div>
+                <div class="menu-item" onclick="openEpisode(4); hideStartMenu()">Episode 4: The Campaign</div>
+                <div class="menu-item" onclick="openEpisode(5); hideStartMenu()">Episode 5: Holy Grail of Dolls</div>
+                <div class="menu-item" onclick="openEpisode(6); hideStartMenu()">Episode 6: Kenough</div>
+                <div class="menu-item" onclick="openEpisode(7); hideStartMenu()">Episode 7: Kenergy</div>
+            </div>
+        </div>
+        <div class="menu-item" onclick="alert('Characters Browser - Coming Soon!'); hideStartMenu()">👥 Characters</div>
+        <div class="menu-item" onclick="alert('Scene Browser - Coming Soon!'); hideStartMenu()">🎬 Scene Browser</div>
+        <div class="menu-item" onclick="toggleSubmenu(event, 'retroPortalMenu')">
+            📁 Retro Portal ▶
+            <div class="submenu" id="retroPortalMenu">
+                <div class="menu-item" onclick="openRetroHub(); hideStartMenu()">🦁 HD Hub (Retro)</div>
+                <div class="menu-item" onclick="openRetroEpisodes(); hideStartMenu()">📺 Episodes (GeoCities)</div>
+                <div class="menu-item" onclick="openRetroCharacters(); hideStartMenu()">👥 Characters (Web 1.0)</div>
+            </div>
+        </div>
+        <div class="menu-item" onclick="alert('🦴 Hyena Help loading...'); hideStartMenu()">🦴 Hyena Help</div>
+        <div class="menu-item" onclick="alert('⚠️ CURSED POPUPS ACTIVATED! 👻'); hideStartMenu()">⚠️ Cursed Popups</div>
+        <div class="menu-item" onclick="alert('✨ All That Jazz! 🎺'); hideStartMenu()">✨ All That Jazz</div>
+        <div class="menu-item" onclick="alert('🎭 Vaudeville Mode Enabled!'); hideStartMenu()">🎭 Vaudeville Mode</div>
+        <div class="menu-item" onclick="alert('🔨 *CRASH* Safe dropped on Rizzlord!'); hideStartMenu()">🔨 Looney Tunes Safe Drop</div>
+        <div class="menu-item" onclick="alert('🍌 *SLIP* Rizzlord stepped on a banana peel!'); hideStartMenu()">🍌 Banana Peel Slip</div>
+        <div class="menu-item" onclick="alert('💥 *PFFFT* Whoopee cushion activated!'); hideStartMenu()">💥 Whoopee Cushion</div>
+        <div class="menu-item" onclick="alert('💃 Diva Screensaver - WHOOP WHOOP WHOOP!'); hideStartMenu()">💃 Diva Screensaver</div>
+        <div class="menu-item" onclick="if(confirm('Shut down Hyena Diva 98?')) location.reload(); hideStartMenu()">🔌 Shut Down...</div>
+    </div>
+
+    <script>
+        // Global state
+        const state = {
+            windows: [],
+            nextZIndex: 100,
+            draggedWindow: null,
+            dragOffset: { x: 0, y: 0 }
+        };
+
+        // Boot sequence
+        window.addEventListener('DOMContentLoaded', () => {
+            bootSequence();
+        });
+
+        function bootSequence() {
+            const bootScreen = document.getElementById('boot-screen');
+            const lines = document.querySelectorAll('.boot-line');
+            
+            lines.forEach((line, index) => {
+                line.style.animationDelay = `${index * 0.5}s`;
+            });
+
+            setTimeout(() => {
+                bootScreen.style.opacity = '0';
+                bootScreen.style.transition = 'opacity 1s';
+                setTimeout(() => {
+                    bootScreen.style.display = 'none';
+                    createSavannahParticles();
+                    updateClock();
+                    setInterval(updateClock, 1000);
+                }, 1000);
+            }, 3500);
+        }
+
+        // Create floating savannah particles
+        function createSavannahParticles() {
+            const desktop = document.getElementById('desktop');
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'savannah-particle';
+                particle.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    width: ${25 + Math.random() * 50}px;
+                    height: ${25 + Math.random() * 50}px;
+                    background: radial-gradient(circle, 
+                        rgba(255, 255, 255, 0.6) 0%, 
+                        rgba(0, 206, 209, 0.4) 40%,
+                        transparent 70%);
+                    animation: floatParticle ${6 + Math.random() * 12}s ease-in-out infinite;
+                    animation-delay: ${Math.random() * 5}s;
+                `;
+                desktop.appendChild(particle);
+            }
+        }
+
+        // Window management
+        function createWindow(title, content, width = 500, height = 400) {
+            const windowEl = document.createElement('div');
+            windowEl.className = 'window';
+            windowEl.style.width = `${width}px`;
+            windowEl.style.height = `${height}px`;
+            windowEl.style.left = `${50 + Math.random() * 100}px`;
+            windowEl.style.top = `${50 + Math.random() * 100}px`;
+            windowEl.style.zIndex = state.nextZIndex++;
+
+            windowEl.innerHTML = `
+                <div class="window-title">
+                    <span>${title}</span>
+                    <div class="window-controls">
+                        <button onclick="minimizeWindow(this)">_</button>
+                        <button onclick="maximizeWindow(this)">□</button>
+                        <button onclick="closeWindow(this)">×</button>
+                    </div>
+                </div>
+                <div class="window-content">${content}</div>
+            `;
+
+            document.getElementById('desktop').appendChild(windowEl);
+            state.windows.push(windowEl);
+
+            // Drag functionality
+            const titleBar = windowEl.querySelector('.window-title');
+            titleBar.addEventListener('mousedown', startDrag);
+
+            return windowEl;
+        }
+
+        function startDrag(e) {
+            if (e.target.tagName === 'BUTTON') return;
+            
+            state.draggedWindow = e.target.closest('.window');
+            state.draggedWindow.style.zIndex = state.nextZIndex++;
+            
+            const rect = state.draggedWindow.getBoundingClientRect();
+            state.dragOffset = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function doDrag(e) {
+            if (!state.draggedWindow) return;
+            
+            state.draggedWindow.style.left = `${e.clientX - state.dragOffset.x}px`;
+            state.draggedWindow.style.top = `${e.clientY - state.dragOffset.y}px`;
+        }
+
+        function stopDrag() {
+            state.draggedWindow = null;
+            document.removeEventListener('mousemove', doDrag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        function minimizeWindow(btn) {
+            btn.closest('.window').style.display = 'none';
+        }
+
+        function maximizeWindow(btn) {
+            const win = btn.closest('.window');
+            if (win.style.width === '100vw') {
+                win.style.width = '500px';
+                win.style.height = '400px';
+                win.style.left = '100px';
+                win.style.top = '100px';
+            } else {
+                win.style.width = '100vw';
+                win.style.height = 'calc(100vh - 32px)';
+                win.style.left = '0';
+                win.style.top = '0';
+            }
+        }
+
+        function closeWindow(btn) {
+            btn.closest('.window').remove();
+        }
+
+        // Start menu
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function hideStartMenu() {
+            document.getElementById('start-menu').style.display = 'none';
+        }
+
+        function toggleSubmenu(e, id) {
+            e.stopPropagation();
+            const submenu = document.getElementById(id);
+            submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString();
+        }
+
+        // Episode windows
+        const episodes = [
+            { num: 1, title: 'Origins in the Mara', desc: 'Baby HD finds a mystical Barbie doll in the African savannah.' },
+            { num: 2, title: 'The Glenwood Awakening', desc: 'HD discovers the open mic and meets Nabu, her cosmic mother.' },
+            { num: 3, title: 'Enter the Rizzlord', desc: 'A debate-bro from Ohio challenges HD for alderman.' },
+            { num: 4, title: 'Voice of the Diva', desc: 'Barbie grants HD her powerful voice!' },
+            { num: 5, title: 'The Kenergy Lesson', desc: 'Ken teaches the difference between strength and toxic masculinity.' },
+            { num: 6, title: 'Cosmic Showdown', desc: 'HD, Barbie, and Ken confront Rizzlord.' },
+            { num: 7, title: 'Election Day Chaos', desc: 'Despite being yeeted into a portal, Rizzlord wins... Ohio strikes again!' }
+        ];
+
+        function openEpisode(num) {
+            const ep = episodes[num - 1];
+            createWindow(`📺 Episode ${ep.num}: ${ep.title}`, `
+                <h2>Episode ${ep.num}</h2>
+                <h3>${ep.title}</h3>
+                <p>${ep.desc}</p>
+                <hr>
+                <p><i>Full episode content coming soon...</i></p>
+            `, 600, 400);
+        }
+
+        // Desktop icon functions
+        function openHyenaDiva() {
+            createWindow('🦁 Hyena Diva - About', `
+                <h2>HYENA DIVA</h2>
+                <p><strong>Species:</strong> Spotted Hyena</p>
+                <p><strong>Status:</strong> Aspiring Alderman</p>
+                <p><strong>Voice:</strong> Silent → POWERFUL (Episode 4+)</p>
+                <p><strong>Signature:</strong> The Whoop</p>
+                <hr>
+                <p>Baby HD found a Barbie doll in the Masai Mara and her life changed FOREVER!</p>
+            `, 500, 400);
+        }
+
+        function openSearchScript() {
+            createWindow('🔍 Search Script', '<p>Script search functionality coming soon!</p>', 400, 300);
+        }
+
+        function openVaudeville() {
+            createWindow('🎭 Vaudeville Theater', '<h2>🎪 Welcome to The Glenwood!</h2><p>Open mic night every night!</p>', 500, 400);
+        }
+
+        function openThemeMusic() {
+            createWindow('🎵 Theme Music', '<p>♪ Hyena Diva Theme ♪<br>🎺 Jazz meets cosmic chaos 🎺</p>', 400, 300);
+        }
+
+        function openBarbieWorld() {
+            createWindow('💖 Barbie World', '<h2>Welcome to Barbie World!</h2><p>Life in plastic, it\'s fantastic! ✨</p>', 500, 350);
+        }
+
+        function openGFWPortal() {
+            createWindow('🌌 GFW Portal', '<h2>Galactic Federation of Worlds</h2><p>Cosmic connection established...</p>', 500, 400);
+        }
+
+        function openKenergyInstall() {
+            createWindow('💪 Install Kenergy', '<h2>Kenergy Installation Wizard</h2><p>Installing true masculine confidence...</p>', 500, 400);
+        }
+
+        function openRizzlordWarning() {
+            alert('⚠️ WARNING: Rizzlord detected! Ohio rizz levels: CRINGE ⚠️');
+        }
+
+        // NEW: RETRO PORTAL FUNCTIONS
+        function openRetroHub() {
+            createWindow('🦁 HD Hub (Retro Portal)', `
+                <iframe src="hd-hub-retro.html" style="width:100%;height:100%;border:none;background:#000;" frameborder="0"></iframe>
+            `, 900, 700);
+        }
+
+        function openRetroEpisodes() {
+            createWindow('📺 Episodes (GeoCities Classic)', `
+                <iframe src="hd-episodes-retro.html" style="width:100%;height:100%;border:none;background:#000;" frameborder="0"></iframe>
+            `, 900, 700);
+        }
+
+        function openRetroCharacters() {
+            createWindow('👥 Characters (Web 1.0 Database)', `
+                <iframe src="hd-characters-retro.html" style="width:100%;height:100%;border:none;background:#000;" frameborder="0"></iframe>
+            `, 900, 700);
+        }
+    </script>
+</body>
+</html>

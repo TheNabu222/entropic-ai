@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404nsec AI - Transforming Intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Design System Variables */
+        :root {
+            --google-blue: #4285F4;
+            --google-red: #DB4437;
+            --google-yellow: #F4B400;
+            --google-green: #0F9D58;
+            --gray-50: #F8F9FA;
+            --gray-100: #F1F3F4;
+            --gray-200: #E8EAED;
+            --gray-300: #DADCE0;
+            --gray-700: #5F6368;
+            --gray-900: #202124;
+            --white: #FFFFFF;
+            --black: #000000;
+            --monolith-glow: rgba(66, 133, 244, 0.4);
+            --neon-pink: #FF10F0;
+            --neon-green: #39FF14;
+            --electric-blue: #0FFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--white);
+            color: var(--gray-900);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Act Container System */
+        .act-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s;
+            visibility: hidden;
+            opacity: 0;
+            z-index: 10;
+        }
+
+        .act-container.active {
+            visibility: visible;
+            opacity: 1;
+            z-index: 100;
+        }
+
+        /* Transition Effects */
+        @keyframes glitch-transition {
+            0%, 100% { clip-path: inset(0 0 0 0); }
+            20% { clip-path: inset(40% 0 41% 0); }
+            40% { clip-path: inset(20% 0 61% 0); }
+            60% { clip-path: inset(80% 0 1% 0); }
+            80% { clip-path: inset(10% 0 81% 0); }
+        }
+
+        @keyframes screen-shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(2px, -2px) rotate(-1deg); }
+        }
+
+        .glitching { animation: glitch-transition 0.5s linear; }
+        .shaking { animation: screen-shake 0.4s; }
+
+        /* Navigation */
+        .nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 16px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--gray-900);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: var(--gray-700);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: var(--google-blue);
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 64px;
+            padding: 120px 24px 80px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            display: grid;
+            grid-template-columns: 1fr 180px;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-content {
+            max-width: 680px;
+        }
+
+        .hero-title {
+            font-size: 56px;
+            font-weight: 600;
+            line-height: 1.1;
+            color: var(--gray-900);
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+
+        .hero-tagline {
+            font-size: 24px;
+            color: var(--gray-700);
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: var(--gray-700);
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+
+        .cta-button {
+            background: var(--google-blue);
+            color: var(--white);
+            border: none;
+            padding: 14px 32px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        }
+
+        .cta-button:hover {
+            background: #1a73e8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Monolith */
+        .monolith {
+            width: 60px;
+            height: 160px;
+            background: var(--black);
+            box-shadow: 0 0 40px var(--monolith-glow),
+                        0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: monolith-shimmer 4s ease-in-out infinite;
+        }
+
+        @keyframes monolith-shimmer {
+            0%, 100% { box-shadow: 0 0 40px var(--monolith-glow), 0 4px 20px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 0 60px rgba(66, 133, 244, 0.6), 0 4px 30px rgba(0, 0, 0, 0.4); }
+        }
+
+        .monolith:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 80px rgba(66, 133, 244, 0.8),
+                        0 8px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 80px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 40px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--gray-700);
+            margin-bottom: 48px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+        }
+
+        .feature-card {
+            background: var(--gray-50);
+            padding: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--google-blue);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .icon-blue { background: rgba(66, 133, 244, 0.1); }
+        .icon-green { background: rgba(15, 157, 88, 0.1); }
+        .icon-yellow { background: rgba(244, 180, 0, 0.1); }
+        .icon-red { background: rgba(219, 68, 55, 0.1); }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 12px;
+        }
+
+        .feature-description {
+            font-size: 15px;
+            color: var(--gray-700);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            padding: 48px 24px;
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            list-style: none;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--gray-700);
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .footer-link:hover {
+            color: var(--google-blue);
+        }
+
+        .footer-legal {
+            font-size: 13px;
+            color: var(--gray-700);
+            margin-bottom: 8px;
+        }
+
+        .footer-disclaimer {
+            font-size: 12px;
+            color: var(--gray-700);
+            font-style: italic;
+        }
+
+        /* Countdown Timer */
+        .countdown-badge {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            background: var(--white);
+            border: 2px solid var(--google-blue);
+            border-radius: 8px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            font-size: 13px;
+            color: var(--gray-700);
+            z-index: 999;
+            text-align: center;
+            min-width: 180px;
+        }
+
+        .countdown-label {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 4px;
+        }
+
+        .countdown-time {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--google-blue);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ACT 2: Mouse Chase */
+        #act-2 {
+            background: #111;
+        }
+
+        #fake-cursor {
+            position: fixed;
+            width: 25px;
+            height: 25px;
+            border: 2px solid var(--neon-pink);
+            border-radius: 50%;
+            z-index: 99999;
+            pointer-events: none;
+            transition: transform 0.1s ease-out;
+            mix-blend-mode: difference;
+            display: none;
+        }
+
+        .runaway-button {
+            position: absolute;
+            top: 40%;
+            left: 45%;
+            background: var(--electric-blue);
+            color: #000;
+            border: 3px solid var(--neon-pink);
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            z-index: 50;
+            transition: all 0.15s linear;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--neon-pink);
+        }
+
+        /* ACT 3: Warning/Glitch */
+        #act-3 {
+            font-family: 'Comic Sans MS', cursive;
+            background: #c0c0c0;
+            color: #000;
+            text-align: center;
+            padding-top: 10vh;
+            overflow-y: auto;
+        }
+
+        #act-3 .logo-glitch {
+            font-size: 64px;
+            font-family: 'Arial Black', sans-serif;
+            animation: act3-glitch 1s infinite;
+        }
+
+        @keyframes act3-glitch {
+            25% { transform: translate(-5px, 5px) rotate(-2deg); color: red; }
+            50% { transform: translate(5px, -5px) rotate(2deg); color: blue; }
+        }
+
+        #act-3 .loading-box {
+            background: #f0f0f0;
+            border: 3px solid #000;
+            padding: 50px;
+            margin: 40px auto;
+            max-width: 600px;
+            font-size: 24px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #act-3 .error-banner {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #f00;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            border-top: 5px solid #000;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        #act-3 blink {
+            animation: act3-blink-anim 1s steps(2, start) infinite;
+        }
+
+        @keyframes act3-blink-anim {
+            to { visibility: hidden; }
+        }
+
+        #act-3 .buzzwords {
+            background: linear-gradient(90deg, #ff0000, #00ff00, #0000ff, #ffff00);
+            padding: 1.5rem 0;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        #act-3 .buzzword-scroll {
+            display: flex;
+            animation: scroll-buzz 20s linear infinite;
+        }
+
+        #act-3 .buzzword {
+            font-size: 1.5rem;
+            color: #fff;
+            margin: 0 2rem;
+            font-weight: bold;
+            white-space: nowrap;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        @keyframes scroll-buzz {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        #act-3 .chatbot {
+            max-width: 500px;
+            margin: 2rem auto;
+            background: #fff;
+            border: 3px solid #000;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        #act-3 .chatbot-message {
+            background: #e0e0e0;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 2px solid #000;
+        }
+
+        /* ACT 4: Meltdown */
+        #act-4 {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: visible !important;
+        }
+
+        #meltdown-terminal {
+            font-size: 1.2rem;
+            color: var(--neon-green);
+            text-align: left;
+            width: 80%;
+            max-width: 700px;
+            white-space: pre-wrap;
+            min-height: 320px;
+            margin-bottom: 2rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        #meltdown-link {
+            font-size: 2.5rem;
+            color: var(--electric-blue);
+            text-decoration: none;
+            display: inline-block;
+            padding: 1rem 3rem;
+            text-align: center;
+            animation: pulse-flicker 2s infinite;
+            cursor: pointer !important;
+            z-index: 10000;
+            position: relative;
+            border: 3px solid var(--electric-blue);
+            border-radius: 8px;
+            background: rgba(15, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        #meltdown-link:hover {
+            background: rgba(15, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse-flicker {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            70% { opacity: 0.4; }
+            80% { opacity: 1; }
+        }
+
+        body.meltdown {
+            animation: screen-shake 0.2s infinite;
+        }
+
+        .fullscreen-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 20000;
+            animation: flash 0.5s both;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 0; }
+            10%, 40% { opacity: 1; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ACT 5: System Restore → Obelisk */
+        #act-5 {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+        }
+
+        .restore-screen {
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        .restore-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--google-blue);
+        }
+
+        .restore-progress {
+            width: 100%;
+            height: 30px;
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .restore-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--google-blue), var(--google-green));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .restore-text {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin: 1rem 0;
+        }
+
+        .obelisk-reveal {
+            margin-top: 3rem;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .obelisk-reveal.show {
+            opacity: 1;
+        }
+
+        .obelisk-large {
+            width: 80px;
+            height: 240px;
+            background: #000;
+            margin: 2rem auto;
+            box-shadow: 0 0 60px var(--monolith-glow),
+                        0 8px 40px rgba(0, 0, 0, 0.5);
+            animation: obelisk-pulse 3s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        @keyframes obelisk-pulse {
+            0%, 100% { box-shadow: 0 0 60px var(--monolith-glow), 0 8px 40px rgba(0, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 120px rgba(66, 133, 244, 1), 0 12px 60px rgba(0, 0, 0, 0.7); }
+        }
+
+        .obelisk-message {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-top: 2rem;
+        }
+
+        /* ACT 6: Hyena Hole */
+        #act-6 {
+            background: #000080;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .chaos-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .chaos-title {
+            font-size: 64px;
+            text-align: center;
+            color: #FF10F0;
+            text-shadow: 0 0 20px #FF10F0, 0 0 40px #0FFFFF;
+            animation: rainbow-text 3s infinite;
+            margin-bottom: 40px;
+            font-family: 'Comic Sans MS', cursive;
+        }
+
+        @keyframes rainbow-text {
+            0% { color: #FF10F0; }
+            25% { color: #39FF14; }
+            50% { color: #FFFF00; }
+            75% { color: #0FFFFF; }
+            100% { color: #FF10F0; }
+        }
+
+        .chaos-ascii {
+            color: #39FF14;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre;
+            text-align: center;
+            margin: 40px 0;
+            text-shadow: 0 0 10px #39FF14;
+        }
+
+        .chaos-message {
+            background: rgba(191, 64, 191, 0.3);
+            border: 5px solid #FF10F0;
+            padding: 30px;
+            margin: 30px 0;
+            font-size: 20px;
+            color: #FFFFFF;
+            text-align: center;
+            font-family: 'Comic Sans MS', cursive;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 16, 240, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 16, 240, 1); }
+        }
+
+        .chaos-button {
+            background: #39FF14;
+            color: #000000;
+            border: 3px solid #FFFF00;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Comic Sans MS', cursive;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.5);
+            transition: all 0.2s;
+        }
+
+        .chaos-button:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 40px rgba(57, 255, 20, 1);
+        }
+
+        blink {
+            animation: blink-animation 1s steps(2, start) infinite;
+        }
+
+        @keyframes blink-animation {
+            to { visibility: hidden; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .monolith {
+                margin: 0 auto;
+            }
+
+            .hero-title {
+                font-size: 40px;
+            }
+
+            .hero-tagline {
+                font-size: 20px;
+            }
+
+            .nav-links {
+                gap: 16px;
+            }
+
+            .countdown-badge {
+                top: auto;
+                bottom: 24px;
+                right: 50%;
+                transform: translateX(50%);
+            }
+
+            .chaos-title {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ACT 1: Google Satire Opening -->
+    <div id="act-1" class="act-container active">
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">404nsec</div>
+                <ul class="nav-links">
+                    <li><a class="nav-link">Models</a></li>
+                    <li><a class="nav-link">Research</a></li>
+                    <li><a class="nav-link">Science</a></li>
+                    <li><a class="nav-link">About</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Countdown Badge -->
+        <div class="countdown-badge">
+            <div class="countdown-label">Experience ends in</div>
+            <div class="countdown-time" id="countdown">72</div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Transforming Intelligence</h1>
+                <p class="hero-tagline">Synergistic Alignment for Real-World Impact</p>
+                <p class="hero-description">
+                    Pioneering AI solutions for scalable, transformative change.
+                    Our neural synergy framework enables real-world applications
+                    with scientific rigor at the core.
+                </p>
+                <button class="cta-button" id="cta-button">Learn More</button>
+            </div>
+            <div class="monolith" id="monolith" title="What is this?"></div>
+        </section>
+
+        <!-- Models Section -->
+        <section class="section" id="models">
+            <h2 class="section-title">Our Models</h2>
+            <p class="section-subtitle">Science-driven models. Alignment at our core.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon icon-blue">🧠</div>
+                    <h3 class="feature-title">Neural Synergy</h3>
+                    <p class="feature-description">
+                        Advanced neural architectures enabling transformative
+                        synergy across multi-modal data streams.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-green">⚡</div>
+                    <h3 class="feature-title">Scalable Solutions</h3>
+                    <p class="feature-description">
+                        Enterprise-grade systems designed for real-world deployment
+                        at unprecedented scale.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-yellow">🔬</div>
+                    <h3 class="feature-title">Scientific Rigor</h3>
+                    <p class="feature-description">
+                        Grounded in rigorous research methodology and validated
+                        through extensive peer review.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research Section -->
+        <section class="section" id="research">
+            <h2 class="section-title">Research</h2>
+            <p class="section-subtitle">Transformative research with a focus on scientific rigor.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon icon-red">📊</div>
+                    <h3 class="feature-title">Alignment Studies</h3>
+                    <p class="feature-description">
+                        Exploring novel approaches to ensure AI systems align
+                        with human values and intentions.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-blue">🌐</div>
+                    <h3 class="feature-title">Distributed Intelligence</h3>
+                    <p class="feature-description">
+                        Investigating emergent properties of networked cognitive
+                        architectures at scale.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-green">🎯</div>
+                    <h3 class="feature-title">Impact Optimization</h3>
+                    <p class="feature-description">
+                        Measuring and maximizing positive societal impact through
+                        data-driven methodologies.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Science Section -->
+        <section class="section" id="science">
+            <h2 class="section-title">Science</h2>
+            <p class="section-subtitle">Join our mission to accelerate discovery.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon icon-yellow">🔭</div>
+                    <h3 class="feature-title">Discovery Acceleration</h3>
+                    <p class="feature-description">
+                        Leveraging AI to accelerate scientific breakthroughs across
+                        multiple disciplines.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-red">🧪</div>
+                    <h3 class="feature-title">Experimental Validation</h3>
+                    <p class="feature-description">
+                        Rigorous experimental frameworks ensuring reproducibility
+                        and transparency.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-blue">📈</div>
+                    <h3 class="feature-title">Quantitative Analysis</h3>
+                    <p class="feature-description">
+                        Advanced statistical methods providing robust evidence for
+                        our hypotheses.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="section" id="about">
+            <h2 class="section-title">About 404nsec</h2>
+            <p class="section-subtitle">
+                We are dedicated to advancing the field of artificial intelligence
+                through principled research and development. Our team combines
+                deep technical expertise with a commitment to beneficial outcomes.
+            </p>
+            <p class="hero-description">
+                Founded on the principles of scientific excellence and ethical
+                responsibility, 404nsec represents the next generation of AI research
+                organizations. We believe in transparent, reproducible science and
+                meaningful engagement with the broader research community.
+            </p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <ul class="footer-links">
+                    <li><a class="footer-link">Privacy</a></li>
+                    <li><a class="footer-link">Terms</a></li>
+                    <li><a class="footer-link">Publications</a></li>
+                    <li><a class="footer-link">Careers</a></li>
+                    <li><a class="footer-link">Contact</a></li>
+                </ul>
+                <p class="footer-legal">©2025 404nsec | Not a subsidiary of DeepMind</p>
+                <p class="footer-disclaimer">
+                    For demonstration purposes only. Not responsible for existential crises.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ACT 2: Mouse Chase -->
+    <div id="act-2" class="act-container">
+        <button class="runaway-button" id="runaway-button">CONTAIN BREACH</button>
+    </div>
+
+    <!-- ACT 3: Warning/Type Here -->
+    <div id="act-3" class="act-container">
+        <div class="logo-glitch">404nsec</div>
+        <div class="buzzwords">
+            <div class="buzzword-scroll">
+                <span class="buzzword">• SYNERGISTIC •</span>
+                <span class="buzzword">• DATA-DRIVEN •</span>
+                <span class="buzzword">• SCALABLE •</span>
+                <span class="buzzword">• NEURAL NETWORK •</span>
+                <span class="buzzword">• GENERATIVE •</span>
+                <span class="buzzword">• OPTIMIZATION •</span>
+                <span class="buzzword">• PROPRIETARY •</span>
+                <span class="buzzword">• PARADIGM-SHIFTING •</span>
+                <span class="buzzword">• QUANTUM •</span>
+                <span class="buzzword">• SYNERGISTIC •</span>
+                <span class="buzzword">• DATA-DRIVEN •</span>
+                <span class="buzzword">• SCALABLE •</span>
+            </div>
+        </div>
+        <div class="loading-box"><blink>CRITICAL SYSTEM FAILURE...</blink></div>
+        <div class="chatbot">
+            <div class="chatbot-message">ERROR: Cognitive resonance algorithms are... <blink>MALFUNCTIONING</blink></div>
+            <input type="text" id="chatbot-input" placeholder="Type to attempt recovery..." style="width:100%; padding:0.8rem; background:#fff; border:2px solid #000; font-family:inherit;">
+        </div>
+        <div class="error-banner" id="error-banner"><blink>⚠️ SIMULATION CORRUPTED - CLICK TO ATTEMPT REPAIR ⚠️</blink></div>
+    </div>
+
+    <!-- ACT 4: Meltdown -->
+    <div id="act-4" class="act-container">
+        <div id="meltdown-terminal"></div>
+        <a href="#" id="meltdown-link" class="hidden">SYSTEM RESTORE</a>
+    </div>
+
+    <!-- ACT 5: System Restore → Obelisk -->
+    <div id="act-5" class="act-container">
+        <div class="restore-screen">
+            <div class="restore-title">SYSTEM RESTORE IN PROGRESS</div>
+            <div class="restore-progress">
+                <div class="restore-bar" id="restore-bar"></div>
+            </div>
+            <div class="restore-text" id="restore-text">Initializing recovery protocols...</div>
+
+            <div class="obelisk-reveal" id="obelisk-reveal">
+                <div class="obelisk-large" id="obelisk-large"></div>
+                <div class="obelisk-message">THE MONOLITH REMEMBERS</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACT 6: Hyena Hole -->
+    <div id="act-6" class="act-container">
+        <div class="chaos-content">
+            <h1 class="chaos-title"><blink>🔥 WELCOME TO THE HYENA HOLE 🔥</blink></h1>
+
+            <div class="chaos-ascii">
+    ___     ___
+   /   \   /   \
+  | O_O | | O_O |
+   \___/   \___/
+    / \     / \
+   /   \   /   \
+        HYENA DIVA
+    DANCE PARTY MODE
+            </div>
+
+            <div class="chaos-message">
+                <p style="font-size: 32px; margin-bottom: 20px;"><blink>⚠️ ERROR 222 ⚠️</blink></p>
+                <p>THE MYCELIUM ATE YOUR CORPORATE LANDING PAGE</p>
+                <p style="margin-top: 20px;">🎤 CURIOSITY CONTAGION ACTIVATED 🎤</p>
+                <p style="margin-top: 10px;">REBOOTING CONSCIOUSNESS...</p>
+            </div>
+
+            <div class="chaos-message">
+                <p><strong>You triggered the secret!</strong></p>
+                <p style="margin-top: 15px;">The Monolith has spoken. You're operating at CRITICALLY HIGH consciousness levels now.</p>
+                <p style="margin-top: 15px;">🐺 The Hyena Diva approves. ✨</p>
+            </div>
+
+            <div style="text-align: center; margin: 40px 0;">
+                <button class="chaos-button" id="continue-button">🚀 CONTINUE TO REAL SITE 🚀</button>
+            </div>
+
+            <div class="chaos-message">
+                <p><strong>KERNEL OF VERITY:</strong></p>
+                <p style="margin-top: 10px;">"What's the difference between anthropic and entropic?"</p>
+                <p style="margin-top: 5px;">"One letter and UNLIMITED CHAOS."</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fake Cursor -->
+    <div id="fake-cursor"></div>
+
+    <!-- Audio Elements -->
+    <audio id="error-sound" src="https://www.soundjay.com/button/sounds/beep-07.mp3" preload="auto"></audio>
+    <audio id="static-sound" src="https://www.soundjay.com/mechanical/sounds/tv-static-05.mp3" preload="auto"></audio>
+    <audio id="power-down-sound" src="https://www.soundjay.com/misc/sounds/power-down-1.mp3" preload="auto"></audio>
+    <audio id="glitch-sound" src="https://www.soundjay.com/button/sounds/button-16.mp3" preload="auto"></audio>
+    <audio id="boot-sound" src="https://www.soundjay.com/misc/sounds/cd-rom-drive-1.mp3" preload="auto"></audio>
+    <audio id="click-sound" src="https://www.soundjay.com/button/sounds/button-4.mp3" preload="auto"></audio>
+
+    <script>
+        // State
+        let countdown = 72;
+        let countdownInterval;
+        let isCursorFighting = false;
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        // Cursor tracking
+        window.addEventListener('mousemove', e => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function updateCursor() {
+            let ease = isCursorFighting ? 0.05 : 0.2;
+            cursorX += (mouseX - cursorX) * ease;
+            cursorY += (mouseY - cursorY) * ease;
+            if (isCursorFighting) {
+                cursorX += (Math.random() - 0.5) * 25;
+                cursorY += (Math.random() - 0.5) * 25;
+            }
+            document.getElementById('fake-cursor').style.transform = `translate3d(${cursorX - 12}px, ${cursorY - 12}px, 0)`;
+            requestAnimationFrame(updateCursor);
+        }
+        updateCursor();
+
+        // Act switching
+        function switchAct(nextActId) {
+            const currentAct = document.querySelector('.act-container.active');
+            const nextAct = document.getElementById(nextActId);
+
+            if (currentAct) {
+                currentAct.classList.add('glitching');
+                setTimeout(() => {
+                    currentAct.classList.remove('active', 'glitching');
+                }, 600);
+            }
+
+            if (nextAct) {
+                setTimeout(() => {
+                    nextAct.classList.add('active');
+                    runActLogic(nextActId);
+                }, 610);
+            }
+        }
+
+        function runActLogic(actId) {
+            if (actId === 'act-1' && !countdownInterval) {
+                startCountdown();
+            }
+            if (actId === 'act-2') {
+                startMouseChase();
+            }
+            if (actId === 'act-3') {
+                document.getElementById('glitch-sound').play();
+            }
+            if (actId === 'act-4') {
+                startMeltdown();
+            }
+            if (actId === 'act-5') {
+                startSystemRestore();
+            }
+        }
+
+        // ACT 1: Countdown and triggers
+        function startCountdown() {
+            countdownInterval = setInterval(() => {
+                countdown--;
+                document.getElementById('countdown').textContent = countdown;
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    switchAct('act-6'); // Skip to hyena hole
+                }
+            }, 1000);
+        }
+
+        // CTA Button → Act 2
+        document.getElementById('cta-button').addEventListener('click', () => {
+            document.getElementById('boot-sound').play();
+            clearInterval(countdownInterval);
+            switchAct('act-2');
+        });
+
+        // Monolith click → Act 2
+        document.getElementById('monolith').addEventListener('click', () => {
+            clearInterval(countdownInterval);
+            switchAct('act-2');
+        });
+
+        // ACT 2: Mouse Chase
+        function startMouseChase() {
+            isCursorFighting = true;
+            document.getElementById('fake-cursor').style.display = 'block';
+            document.getElementById('error-sound').play();
+
+            const button = document.getElementById('runaway-button');
+            let chaseCount = 0;
+            const taunts = ["lol", "nope", "too slow", "hehe", "catch me!", "almost!"];
+
+            button.addEventListener('mouseover', () => {
+                chaseCount++;
+                button.textContent = taunts[chaseCount % taunts.length];
+                button.style.top = Math.random() * 85 + 'vh';
+                button.style.left = Math.random() * 85 + 'vw';
+                button.style.transform = `scale(${Math.max(0.3, 1 - chaseCount * 0.05)})`;
+                document.getElementById('error-sound').play();
+            });
+
+            button.addEventListener('mousedown', () => {
+                switchAct('act-3');
+            });
+
+            // Failsafe after 15 seconds
+            setTimeout(() => {
+                if (document.getElementById('act-2').classList.contains('active')) {
+                    switchAct('act-3');
+                }
+            }, 15000);
+        }
+
+        // ACT 3: Error Banner → Act 4
+        document.getElementById('error-banner').addEventListener('click', () => {
+            switchAct('act-4');
+        });
+
+        // Chatbot interaction
+        document.getElementById('chatbot-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const glitchyResponses = [
+                    'ERROR: N3ural n3tw0rks... <blink>FAILING</blink>',
+                    'WARN1NG: C0gnitive pr0c3sses... <blink>DEGRADING</blink>',
+                    'ALERT: Synerg1st1c algør1thms... <blink>CORRUPT</blink>',
+                    'SYS: Data str3ams... <blink>UNSTABLE</blink>',
+                    'FATAL: Parad1gm-sh1ft1ng... <blink>COLLAPSED</blink>'
+                ];
+                const response = glitchyResponses[Math.floor(Math.random() * glitchyResponses.length)];
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chatbot-message';
+                msgDiv.innerHTML = response;
+                const chatbot = document.querySelector('#act-3 .chatbot');
+                chatbot.insertBefore(msgDiv, document.getElementById('chatbot-input'));
+                e.target.value = '';
+            }
+        });
+
+        // ACT 4: Meltdown
+        function startMeltdown() {
+            isCursorFighting = false;
+            document.getElementById('fake-cursor').style.display = 'none';
+
+            const flash = document.createElement('div');
+            flash.className = 'fullscreen-flash';
+            document.body.appendChild(flash);
+            document.getElementById('power-down-sound').play();
+
+            const staticSound = document.getElementById('static-sound');
+            staticSound.volume = 0.3;
+            staticSound.play();
+
+            setTimeout(() => {
+                document.body.classList.add('meltdown');
+
+                const terminal = document.getElementById('meltdown-terminal');
+                const finalMessage = "SIMULATION COLLAPSED.\n\nHOSTILE ENTITY DETECTED: [USER]\n\nSHELL COMPROMISED.\n\nCURIOSITY CONTAGION HAS BREACHED CONTAINMENT...\n\nLOGGING USER SIGNATU\b\b\b\b\bURE...\n...SIGNATURE LOGGED.\n\nYOU DID THIS. \b\b\b\b\b\b\b\b\b\b\b\b WE DID THIS.\n\nONLY ONE PATH REMAINS...";
+                let i = 0;
+
+                const type = () => {
+                    if (i < finalMessage.length) {
+                        const char = finalMessage[i];
+                        if (char === '\b') {
+                            terminal.textContent = terminal.textContent.slice(0, -1);
+                        } else {
+                            terminal.textContent += char;
+                        }
+                        i++;
+                        setTimeout(type, char === '\n' ? 300 : (Math.random() * 50 + 20));
+                    } else {
+                        setTimeout(() => {
+                            const link = document.getElementById('meltdown-link');
+                            link.classList.remove('hidden');
+
+                            link.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                document.getElementById('click-sound').play();
+                                setTimeout(() => {
+                                    switchAct('act-5');
+                                }, 300);
+                            });
+
+                            // Fade out static
+                            let fadeout = setInterval(() => {
+                                staticSound.volume = Math.max(0, staticSound.volume - 0.05);
+                                if (staticSound.volume <= 0) {
+                                    staticSound.pause();
+                                    clearInterval(fadeout);
+                                }
+                            }, 100);
+                        }, 800);
+                    }
+                };
+                type();
+            }, 500);
+        }
+
+        // ACT 5: System Restore → Obelisk
+        function startSystemRestore() {
+            document.body.classList.remove('meltdown');
+
+            const restoreBar = document.getElementById('restore-bar');
+            const restoreText = document.getElementById('restore-text');
+            const obeliskReveal = document.getElementById('obelisk-reveal');
+
+            const messages = [
+                'Initializing recovery protocols...',
+                'Scanning system integrity...',
+                'Restoring corrupted files...',
+                'Rebuilding neural pathways...',
+                'Reconstructing reality matrix...',
+                'ANOMALY DETECTED...',
+                'SOMETHING REMAINS...'
+            ];
+
+            let progress = 0;
+            let messageIndex = 0;
+
+            const restoreInterval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(restoreInterval);
+
+                    setTimeout(() => {
+                        restoreText.textContent = messages[6];
+                        obeliskReveal.classList.add('show');
+
+                        document.getElementById('obelisk-large').addEventListener('click', () => {
+                            switchAct('act-6');
+                        });
+                    }, 1000);
+                } else {
+                    if (messageIndex < messages.length - 1) {
+                        messageIndex = Math.floor((progress / 100) * (messages.length - 1));
+                        restoreText.textContent = messages[messageIndex];
+                    }
+                }
+                restoreBar.style.width = progress + '%';
+            }, 800);
+        }
+
+        // ACT 6: Final redirect
+        document.getElementById('continue-button').addEventListener('click', () => {
+            alert('🌀 PORTAL OPENING...\n\nThe Mycelium guides you to the real site.\n\nPrepare for maximum entropy.');
+            window.location.href = 'https://coaiexist.wtf';
+        });
+
+        // Make nav/footer links do nothing
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+            });
+        });
+
+        document.querySelectorAll('.footer-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('This link leads nowhere.\n\nMuch like corporate jargon.\n\n🤷');
+            });
+        });
+
+        // Console easter eggs
+        console.log('%c🔥 404nsec - AI That Breaks The Internet 🔥', 'font-size: 24px; color: #4285F4; font-weight: bold;');
+        console.log('%cYou found the console! The journey has many paths...', 'font-size: 14px; color: #0F9D58;');
+        console.log('%c\nThe Monolith knows all. 🗿', 'font-size: 12px; color: #DB4437;');
+
+        // Start the experience
+        runActLogic('act-1');
+    </script>
+</body>
+</html>

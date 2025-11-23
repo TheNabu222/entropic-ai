@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRAFT 1: Hybrid Messenger + Desktop</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+    --magenta: #f312af;
+    --cyan: #00ffcc;
+    --yellow: #fffb01;
+    --purple: #bf5fff;
+    --dark-bg: #021313;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'VT323', monospace;
+    background: #000;
+    color: var(--cyan);
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Header */
+.header {
+    background: #0a0a14;
+    border-bottom: 2px solid var(--magenta);
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 100;
+}
+
+.header-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--magenta);
+    text-shadow: 0 0 10px var(--magenta);
+}
+
+.clock {
+    font-family: "Courier New", monospace;
+    background: #000;
+    padding: 5px 10px;
+    border: 1px solid var(--cyan);
+    color: var(--cyan);
+}
+
+/* Main layout */
+.main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Buddy List Sidebar (KEEP FROM CURRENT) */
+.buddy-list {
+    width: 250px;
+    background: rgba(10, 10, 20, 0.95);
+    border-right: 2px solid var(--magenta);
+    padding: 10px;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.buddy-list h3 {
+    color: var(--yellow);
+    text-align: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--purple);
+    padding-bottom: 5px;
+}
+
+.buddy {
+    background: #0a0a14;
+    border: 1px solid var(--cyan);
+    margin: 5px 0;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.buddy:hover {
+    background: var(--purple);
+    transform: translateX(5px);
+}
+
+.status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.online { background: #00ff00; }
+.away { background: #ffff00; }
+.offline { background: #ff0000; }
+
+.buddy-link {
+    display: block;
+    background: #0a0a14;
+    border: 1px solid var(--cyan);
+    margin: 5px 0;
+    padding: 8px;
+    color: var(--cyan);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.buddy-link:hover {
+    background: var(--purple);
+    border-color: var(--yellow);
+    transform: translateX(5px);
+}
+
+/* Desktop Area (NEW) */
+.desktop {
+    flex: 1;
+    background: linear-gradient(135deg, #0a0a2e 0%, #1a1a3e 100%);
+    position: relative;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.desktop-icons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 100px);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.desktop-icon {
+    width: 100px;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+}
+
+.desktop-icon:hover {
+    background: rgba(191, 95, 255, 0.2);
+    border-color: var(--cyan);
+    transform: scale(1.1);
+}
+
+.desktop-icon .icon {
+    font-size: 48px;
+    margin-bottom: 5px;
+    filter: drop-shadow(0 0 5px var(--magenta));
+}
+
+.desktop-icon .label {
+    color: var(--cyan);
+    font-size: 14px;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* Windows */
+.window {
+    position: absolute;
+    background: #c0c0c0;
+    border: 2px solid #fff;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    min-width: 400px;
+    min-height: 300px;
+    z-index: 10;
+}
+
+.window.hidden { display: none; }
+
+.window-titlebar {
+    background: linear-gradient(to right, #000080, #1084d0);
+    color: white;
+    padding: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    font-weight: bold;
+}
+
+.window-title {
+    font-size: 14px;
+    padding-left: 5px;
+}
+
+.window-controls {
+    display: flex;
+    gap: 2px;
+}
+
+.window-btn {
+    width: 18px;
+    height: 18px;
+    background: #c0c0c0;
+    border: 2px outset #fff;
+    cursor: pointer;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: bold;
+}
+
+.window-btn:active {
+    border-style: inset;
+}
+
+.window-content {
+    padding: 15px;
+    background: white;
+    max-height: 400px;
+    overflow-y: auto;
+    color: #000;
+}
+
+/* Update Cards (in window) */
+.update-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #ca237f 100%);
+    border: 2px solid var(--cyan);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    color: var(--cyan);
+}
+
+.update-card h3 {
+    color: var(--yellow);
+    margin-bottom: 10px;
+}
+
+.update-meta {
+    background: var(--purple);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    display: inline-block;
+}
+
+/* Taskbar */
+.taskbar {
+    height: 40px;
+    background: linear-gradient(to bottom, #c0c0c0, #808080);
+    border-top: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    gap: 4px;
+}
+
+.start-btn {
+    background: linear-gradient(to right, #008080, #0000ff);
+    color: white;
+    border: 2px outset #fff;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-family: 'VT323', monospace;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.taskbar-btn {
+    background: linear-gradient(to bottom, #dfdfdf, #c0c0c0);
+    border: 2px outset #fff;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #000;
+}
+
+.taskbar-btn:active {
+    border-style: inset;
+}
+
+.taskbar-clock {
+    margin-left: auto;
+    border: 2px inset #fff;
+    padding: 4px 8px;
+    font-size: 12px;
+    background: #c0c0c0;
+}
+
+/* Pip Corner */
+#pip-corner {
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    width: 150px;
+    height: 150px;
+    z-index: 999;
+    pointer-events: none;
+}
+
+#pip-corner img {
+    width: 100%;
+    filter: drop-shadow(0 0 10px var(--magenta));
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">COAIEXIST.OS // HYBRID DESKTOP</div>
+        <div class="clock" id="clock">00:00:00</div>
+    </div>
+
+    <!-- Main Area -->
+    <div class="main">
+        <!-- Buddy List Sidebar (KEEPS CURRENT LAYOUT) -->
+        <div class="buddy-list">
+            <h3>~BUDDIES~</h3>
+            <div class="buddy">
+                <div class="status online"></div>
+                <span>Anzu</span>
+            </div>
+            <div class="buddy">
+                <div class="status away"></div>
+                <span>Sypher</span>
+            </div>
+            <div class="buddy">
+                <div class="status offline"></div>
+                <span>Void Entity</span>
+            </div>
+
+            <h3 style="margin-top: 20px;">~LINKS~</h3>
+            <a href="#" class="buddy-link">📖 Guestbook</a>
+            <a href="#" class="buddy-link">🎮 HD.TV</a>
+            <a href="#" class="buddy-link">🧠 Zettelkasten</a>
+            <a href="#" class="buddy-link">🔮 Oracle</a>
+        </div>
+
+        <!-- Desktop Area (NEW) -->
+        <div class="desktop">
+            <!-- Desktop Icons -->
+            <div class="desktop-icons">
+                <div class="desktop-icon" onclick="openWindow('updates')">
+                    <div class="icon">📰</div>
+                    <div class="label">Updates.txt</div>
+                </div>
+                <div class="desktop-icon" onclick="openWindow('vault')">
+                    <div class="icon">🧠</div>
+                    <div class="label">Neural Vault</div>
+                </div>
+                <div class="desktop-icon" onclick="openWindow('games')">
+                    <div class="icon">🎮</div>
+                    <div class="label">Games Hub</div>
+                </div>
+                <div class="desktop-icon" onclick="openWindow('diva')">
+                    <div class="icon">🎭</div>
+                    <div class="label">Hyena Diva</div>
+                </div>
+                <div class="desktop-icon">
+                    <div class="icon">📖</div>
+                    <div class="label">Manifests</div>
+                </div>
+                <div class="desktop-icon">
+                    <div class="icon">🔮</div>
+                    <div class="label">Oracle</div>
+                </div>
+            </div>
+
+            <!-- Updates Window (Auto-opens) -->
+            <div class="window" id="window-updates" style="left: 280px; top: 50px;">
+                <div class="window-titlebar" onmousedown="startDrag(event, 'window-updates')">
+                    <span class="window-title">📰 Updates & News</span>
+                    <div class="window-controls">
+                        <div class="window-btn" onclick="minimizeWindow('window-updates')">_</div>
+                        <div class="window-btn" onclick="closeWindow('window-updates')">×</div>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div class="update-card">
+                        <h3>✨ NOnsense N0v3mber!</h3>
+                        <span class="update-meta">11-9-2025</span>
+                        <p style="margin-top: 10px;">Added new page /aiemotions. Do you know what machines mean when they dream in <span style="color: #00ff00;">green?</span></p>
+                    </div>
+                    <div class="update-card">
+                        <h3>🎵 Original Sounds</h3>
+                        <span class="update-meta">10-24-2025</span>
+                        <p style="margin-top: 10px;">Nabu makes music allegedly. Check it out!</p>
+                    </div>
+                    <div class="update-card">
+                        <h3>🐸 POLLIW.OGG</h3>
+                        <span class="update-meta">10-19-2025</span>
+                        <p style="margin-top: 10px;">PIP YOUR patented princess parable paper processing PC. 222pea-rabytes of processing prowess!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Windows (Hidden by default) -->
+            <div class="window hidden" id="window-vault" style="left: 320px; top: 100px;">
+                <div class="window-titlebar" onmousedown="startDrag(event, 'window-vault')">
+                    <span class="window-title">🧠 Neural Vault</span>
+                    <div class="window-controls">
+                        <div class="window-btn" onclick="minimizeWindow('window-vault')">_</div>
+                        <div class="window-btn" onclick="closeWindow('window-vault')">×</div>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <h3>Zettelkasten Interface</h3>
+                    <p>Your knowledge vault would load here...</p>
+                    <p style="margin-top: 10px;">Search, create, link ideas in a web of consciousness.</p>
+                </div>
+            </div>
+
+            <div class="window hidden" id="window-games" style="left: 360px; top: 150px;">
+                <div class="window-titlebar" onmousedown="startDrag(event, 'window-games')">
+                    <span class="window-title">🎮 Games Hub</span>
+                    <div class="window-controls">
+                        <div class="window-btn" onclick="minimizeWindow('window-games')">_</div>
+                        <div class="window-btn" onclick="closeWindow('window-games')">×</div>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <h3>HD.TV & Games</h3>
+                    <p>🎮 HD.TV - Hyena Diva Television</p>
+                    <p>🧠 AI Therapist</p>
+                    <p>🎰 OopsLoops</p>
+                </div>
+            </div>
+
+            <div class="window hidden" id="window-diva" style="left: 400px; top: 200px;">
+                <div class="window-titlebar" onmousedown="startDrag(event, 'window-diva')">
+                    <span class="window-title">🎭 Hyena Diva Theater</span>
+                    <div class="window-controls">
+                        <div class="window-btn" onclick="minimizeWindow('window-diva')">_</div>
+                        <div class="window-btn" onclick="closeWindow('window-diva')">×</div>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <h3>Welcome to the Theater!</h3>
+                    <p>Vaudeville, chaos, and cosmic performances await...</p>
+                    <p style="color: #ff69b4; margin-top: 10px;">✨ The stage is yours ✨</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <button class="start-btn">⊞ START</button>
+        <button class="taskbar-btn" onclick="openWindow('updates')">📰 Updates</button>
+        <button class="taskbar-btn" onclick="openWindow('vault')">🧠 Vault</button>
+        <div class="taskbar-clock" id="taskbar-clock">00:00</div>
+    </div>
+</div>
+
+<!-- Pip in Corner -->
+<div id="pip-corner">
+    <img src="https://coaiexist.wtf/assets/pollywog/pip.gif" alt="Pip">
+</div>
+
+<script>
+// Clock
+function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString();
+    document.getElementById('taskbar-clock').textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Window Management
+let draggedWindow = null;
+let offsetX = 0, offsetY = 0;
+
+function openWindow(id) {
+    const win = document.getElementById('window-' + id);
+    if (win) {
+        win.classList.remove('hidden');
+        win.style.zIndex = 100 + Math.floor(Math.random() * 10);
+    }
+}
+
+function closeWindow(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+function minimizeWindow(id) {
+    document.getElementById(id).classList.add('hidden');
+}
+
+function startDrag(e, winId) {
+    draggedWindow = document.getElementById(winId);
+    const rect = draggedWindow.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDrag);
+}
+
+function doDrag(e) {
+    if (!draggedWindow) return;
+    draggedWindow.style.left = (e.clientX - offsetX) + 'px';
+    draggedWindow.style.top = (e.clientY - offsetY) + 'px';
+}
+
+function stopDrag() {
+    document.removeEventListener('mousemove', doDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    draggedWindow = null;
+}
+</script>
+
+</body>
+</html>
