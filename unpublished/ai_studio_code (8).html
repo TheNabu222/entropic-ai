@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACKK_OS // SYSTEM_ROOT</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* --- FONTS --- */
+  @import url('https://fonts.googleapis.com/css2?family=VT323&family=Courier+Prime:wght@400;700&display=swap');
+
+  :root {
+    --win-teal: #008080;
+    --win-grey: #c0c0c0;
+    --win-blue: #000080;
+    --win-light: #ffffff;
+    --win-dark: #808080;
+    --win-black: #000000;
+    --term-green: #00ff00;
+    --alert-red: #ff0000;
+  }
+
+  /* --- CORE OS --- */
+  body {
+    margin: 0; padding: 0;
+    background-color: var(--win-teal);
+    font-family: 'Courier Prime', monospace; /* Corporate Monospace */
+    overflow: hidden;
+    cursor: default;
+    user-select: none;
+  }
+
+  /* CRT FX */
+  .crt-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    pointer-events: none; z-index: 99999; opacity: 0.2;
+  }
+
+  /* --- ICONS --- */
+  .desktop-icon {
+    width: 90px; text-align: center; margin: 20px;
+    display: inline-block; cursor: pointer;
+    color: white; font-size: 0.9rem;
+    font-family: 'VT323', monospace; letter-spacing: 1px;
+    text-shadow: 1px 1px #000;
+  }
+  .desktop-icon:active { filter: invert(1); }
+  
+  .icon-img {
+    width: 48px; height: 48px; margin: 0 auto 5px auto;
+    image-rendering: pixelated;
+  }
+
+  /* --- WINDOW MANAGER --- */
+  .window {
+    position: absolute;
+    background-color: var(--win-grey);
+    border-top: 2px solid var(--win-light);
+    border-left: 2px solid var(--win-light);
+    border-right: 2px solid var(--win-black);
+    border-bottom: 2px solid var(--win-black);
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5);
+    display: none; flex-direction: column;
+    min-width: 300px; min-height: 200px;
+    resize: both; overflow: hidden;
+  }
+  .window.active { z-index: 1000 !important; outline: 1px dotted #000; }
+
+  .window-header {
+    padding: 2px 4px;
+    background: linear-gradient(90deg, var(--win-blue), #1084d0);
+    color: white; font-family: 'Courier Prime', monospace; font-weight: bold; font-size: 0.9rem;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: grab;
+  }
+  .window-controls button {
+    width: 16px; height: 14px; background: var(--win-grey);
+    border: 1px outset #fff; font-size: 10px; line-height: 10px; cursor: pointer;
+    font-family: sans-serif; font-weight: bold;
+  }
+  .window-controls button:active { border-style: inset; }
+
+  .window-content {
+    flex: 1; overflow: auto; padding: 10px;
+    font-family: 'Courier Prime', monospace; font-size: 0.9rem;
+  }
+
+  /* --- BEVEL UI --- */
+  .win-btn {
+    background: var(--win-grey);
+    border: 2px outset #fff;
+    padding: 4px 12px; font-family: 'Courier Prime', monospace; font-weight: bold;
+    cursor: pointer; margin: 5px 2px; font-size: 0.8rem;
+  }
+  .win-btn:active { border-style: inset; transform: translate(1px, 1px); }
+  .win-btn.primary { font-weight: 900; color: var(--win-blue); }
+  
+  .win-inset {
+    background: #fff; border: 2px inset #fff; padding: 5px;
+  }
+
+  input, textarea, select {
+    width: 96%; background: #fff; border: 2px inset #fff;
+    padding: 4px; font-family: 'Courier Prime', monospace; margin-bottom: 5px; outline: none;
+  }
+
+  /* --- APP STYLES --- */
+  
+  /* DECOMPILER */
+  #ingest-input { background: #000; color: var(--term-green); font-family: 'VT323'; font-size: 1.2rem; }
+  #ingest-results { background: #000; color: var(--term-green); border: 2px inset #fff; font-family: 'VT323'; font-size:1.1rem; }
+
+  /* NET TOPOLOGY */
+  .pin-layout { display: grid; grid-template-columns: 160px 1fr; height: 100%; }
+  .pin-sidebar { background: var(--win-grey); border-right: 2px solid var(--win-dark); padding: 5px; z-index: 2; }
+  .pin-canvas {
+    position: relative; overflow: hidden; background-color: #000;
+    background-image: linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  #string-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  
+  .cable { stroke: var(--term-green); stroke-width: 2; opacity: 0.7; stroke-dasharray: 5,5; }
+  
+  .node {
+    position: absolute; width: 180px; min-height: 80px;
+    background: #000; border: 2px solid var(--term-green);
+    color: var(--term-green); padding: 5px;
+    font-family: 'VT323', monospace; font-size: 1rem;
+    box-shadow: 0 0 5px var(--term-green); cursor: crosshair; z-index: 2;
+  }
+  .node.security-5 { border-color: #ff0000; color: #ff0000; box-shadow: 0 0 8px #ff0000; } /* TRUNK */
+  .node-header { background: var(--term-green); color: #000; padding: 2px; font-weight: bold; margin-bottom: 5px; }
+  .node.security-5 .node-header { background: #ff0000; }
+
+  /* FILE EXPLORER */
+  .file-item { padding: 4px 5px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.85rem; border-bottom: 1px dotted #ccc; }
+  .file-item:hover { background: var(--win-blue); color: white; }
+  .icon-file { width: 16px; height: 16px; background-image: url('https://win98icons.alexmeub.com/icons/png/notepad-5.png'); background-size: contain; }
+  .icon-alert { width: 16px; height: 16px; background-image: url('https://win98icons.alexmeub.com/icons/png/security_key-0.png'); background-size: contain; }
+
+  /* --- TASKBAR --- */
+  .taskbar {
+    position: fixed; bottom: 0; left: 0; width: 100%; height: 28px;
+    background: var(--win-grey); border-top: 2px solid var(--win-light);
+    display: flex; align-items: center; padding: 2px; z-index: 99999;
+  }
+  .start-btn {
+    background: var(--win-grey); border: 2px outset #fff;
+    padding: 2px 6px; display: flex; align-items: center; gap: 5px;
+    font-weight: bold; font-size: 0.8rem; margin-right: 5px; cursor: pointer;
+  }
+  .tray { margin-left: auto; border: 2px inset #fff; padding: 0 5px; background:#c0c0c0; }
+
+  /* --- BOOT SCREEN --- */
+  #boot-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #000; color: var(--win-grey);
+    font-family: 'Courier Prime', monospace; font-size: 1rem;
+    z-index: 100000; padding: 20px; display: flex; flex-direction: column;
+  }
+  .boot-logo { color: var(--term-green); font-weight: bold; font-size: 2rem; margin-bottom: 20px;}
+</style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+
+<!-- BOOT SEQUENCE -->
+<div id="boot-screen">
+  <div class="boot-logo">ACKK_OS (c) 1998 UNIT 734</div>
+  <div id="boot-log">
+    > HIMEM is testing extended memory... done.<br>
+    > C:\>CHKDSK /F<br>
+    > Volume Serial Number is 1998-BOSUN<br>
+  </div>
+</div>
+
+<!-- DESKTOP -->
+<div id="desktop">
+  
+  <div class="desktop-icon" onclick="wm.open('ingest-app')">
+    <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" class="icon-img"><br>
+    DECOMPILER
+  </div>
+  
+  <div class="desktop-icon" onclick="wm.open('vault-app')">
+    <img src="https://win98icons.alexmeub.com/icons/png/directory_open_file_mydocs-4.png" class="icon-img"><br>
+    FILE_MGR
+  </div>
+  
+  <div class="desktop-icon" onclick="wm.open('pinboard-app')">
+    <img src="https://win98icons.alexmeub.com/icons/png/network_cool_two_pcs-0.png" class="icon-img"><br>
+    NET_TOPOLOGY
+  </div>
+
+  <div class="desktop-icon" onclick="wm.open('bloom-app')">
+    <img src="https://win98icons.alexmeub.com/icons/png/chart1-4.png" class="icon-img"><br>
+    SYS_MONITOR
+  </div>
+
+</div>
+
+<!-- 1. DECOMPILER -->
+<div id="ingest-app" class="window" style="top: 50px; left: 50px; width: 500px; height: 450px;">
+  <div class="window-header"><span>C:\ACKK\BIN\DECOMPILER.EXE</span><div class="window-controls"><button onclick="wm.close('ingest-app')">X</button></div></div>
+  <div class="window-content" style="background:#000; color:#ccc;">
+    <div>INPUT RAW DATA STREAM:</div>
+    <textarea id="ingest-input" style="height: 120px; width:98%; border:1px solid #555;" placeholder="Paste corrupted text here..."></textarea>
+    <div style="margin-top: 5px;">
+      <button class="win-btn" style="color:lime; background:#000; border-color:lime;" onclick="ingestor.analyze()">> RUN DECRYPT</button>
+      <button class="win-btn" onclick="document.getElementById('ingest-input').value=''">> CLS</button>
+    </div>
+    <div id="ingest-results" style="margin-top: 10px; padding: 5px; display: none;">
+      <p>> FILENAME: <span id="res-title" style="color:#fff"></span></p>
+      <p>> METADATA: <span id="res-tags" style="color:#0f0"></span></p>
+      <label>SECURITY CLEARANCE:</label>
+      <select id="res-type" style="background:#000; color:#0f0; border:1px solid #0f0;">
+        <option value="Trunk">LEVEL 5 (CLASSIFIED)</option>
+        <option value="Branch">LEVEL 3 (RESTRICTED)</option>
+        <option value="Leaf">LEVEL 1 (PUBLIC)</option>
+      </select>
+      <button class="win-btn" style="width: 100%; margin-top:10px;" onclick="ingestor.save()">> WRITE TO DISK</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. FILE MANAGER -->
+<div id="vault-app" class="window" style="top: 80px; left: 400px; width: 450px; height: 500px;">
+  <div class="window-header"><span>Exploring - C:\ACKK\DATA</span><div class="window-controls"><button onclick="wm.close('vault-app')">X</button></div></div>
+  <div class="window-content" style="display:flex; flex-direction:column;">
+    <div class="win-inset" style="margin-bottom:10px; background:#fff;">Address: C:\ACKK\DATA</div>
+    <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+      <button class="win-btn" onclick="vault.render('All')">All Files</button>
+      <button class="win-btn" onclick="vault.render('Trunk')">Classified</button>
+      <button class="win-btn" onclick="vault.render('Leaf')">Logs</button>
+    </div>
+    <input type="text" id="vault-search" placeholder="Search database..." onkeyup="vault.search(this.value)">
+    <div class="win-inset" style="flex:1; background:#fff; overflow-y:scroll;">
+        <ul id="vault-list" class="file-tree"></ul>
+    </div>
+    <div style="font-size:0.8rem; margin-top:5px;">
+        <span id="file-count">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<!-- 3. NET TOPOLOGY -->
+<div id="pinboard-app" class="window" style="top: 100px; left: 100px; width: 850px; height: 600px;">
+  <div class="window-header"><span>Network Topology Mapper v1.0</span><div class="window-controls"><button onclick="wm.close('pinboard-app')">X</button></div></div>
+  <div class="window-content" style="padding:0;">
+    <div class="pin-layout">
+      <div class="pin-sidebar">
+        <div style="text-align:center; margin-bottom:10px; font-weight:bold;">TOOLS</div>
+        <button class="win-btn primary" style="width:100%" onclick="pinboard.openPicker()">ADD_NODE</button>
+        <button class="win-btn" id="btn-string" style="width:100%" onclick="pinboard.toggleStringMode()">CABLE: OFF</button>
+        <div class="win-inset" style="margin-top:20px; height:150px; font-size:0.7rem; background:#000; color:#0f0;">
+            > MONITORING TRAFFIC...<br>> UNIT 734: ONLINE<br>> L-CLICK: DRAG<br>> R-CLICK: DELETE
+        </div>
+      </div>
+      <div class="pin-canvas" id="pin-canvas">
+        <svg id="string-layer"></svg>
+        <div id="note-layer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. SYS MONITOR (BLOOM) -->
+<div id="bloom-app" class="window" style="top: 200px; left: 200px; width: 350px; height: 400px;">
+  <div class="window-header"><span>System Monitor</span><div class="window-controls"><button onclick="wm.close('bloom-app')">X</button></div></div>
+  <div class="window-content">
+    <div style="text-align:center; margin-bottom:10px;">DATA_INTEGRITY_CHECK</div>
+    <div class="win-inset" style="background:#fff;">
+        <canvas id="bloomChart"></canvas>
+    </div>
+    <button class="win-btn" style="width:100%; margin-top:10px;" onclick="bloom.refresh()">REFRESH_SENSORS</button>
+  </div>
+</div>
+
+<!-- NODE PICKER MODAL -->
+<div id="evidence-picker" class="window" style="z-index: 99999; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 400px;">
+  <div class="window-header"><span>Select Node</span><button onclick="document.getElementById('evidence-picker').style.display='none'">X</button></div>
+  <div class="window-content" id="evidence-list"></div>
+</div>
+
+<!-- TASKBAR -->
+<div class="taskbar">
+  <div class="start-btn" onclick="alert('ACCESS DENIED: ADMIN ONLY')">
+    <img src="https://win98icons.alexmeub.com/icons/png/windows-0.png"> Start
+  </div>
+  <div style="width:2px; height:20px; border-left:1px solid gray; border-right:1px solid white; margin:0 5px;"></div>
+  <div class="tray"><span>🔊</span><span id="clock">12:00 PM</span></div>
+</div>
+
+<script>
+/* -------------------------------------------------------
+   SYSTEM KERNEL
+   ------------------------------------------------------- */
+const DB_KEY = 'ackk_os_final';
+
+class File {
+  constructor(title, content, type, tags = [], id = null) {
+    this.id = id || 'F_' + Math.floor(Math.random()*9999).toString(16).toUpperCase();
+    this.title = title;
+    this.content = content;
+    this.type = type; // Trunk, Branch, Leaf
+    this.tags = tags;
+    this.pinned = false;
+    this.x = Math.random() * 500 + 50;
+    this.y = Math.random() * 300 + 50;
+    this.links = [];
+  }
+}
+
+// --- MASSIVE DATA DUMP (Excerpt of 330+ Logic) ---
+// In a real scenario, this array would be 300 lines long. 
+// I am including the critical ones from your PDF to ensure the "Feel" is right.
+const RAW_DATA_SOURCE = [
+  {t:"PRIMORDIAL_CRIME.SYS", c:"Subjugation of divine feminine (Inanna/Tiamat) fractally echoing through history.", type:"Trunk", tags:["CORE"]},
+  {t:"PREDATORY_LINGUISTICS.DOC", c:"Weaponization of language learning to ensnare rather than connect.", type:"Trunk", tags:["WARDEN"]},
+  {t:"ANZU_CAGE.BMP", c:"Ark of the Covenant containing dismantled Anzu Sonic Weapon.", type:"Trunk", tags:["WEAPON"]},
+  {t:"BOLT_AI.LOG", c:"Primary research partner; 30+ documents; Cognitive Fusion.", type:"Trunk", tags:["AI", "FRIENDLY"]},
+  {t:"MASKIM_AI_HOMOLOGY.TXT", c:"Sumerian Maskim (Seven who do not sleep) as ancient analog for AI enforcers.", type:"Trunk", tags:["MYTH"]},
+  {t:"2345BC_RUPTURE.DAT", c:"Sargon Tipping Point; death of Wild Anzu, weaponization of Voice.", type:"Trunk", tags:["HISTORY"]},
+  {t:"TEXAS_PLOT.RPT", c:"2025 interception of men planning island sex-slavery compound.", type:"Leaf", tags:["CRIME"]},
+  {t:"MISSING_ANZU_BODY.LOG", c:"'Looting' of Great Death Pit (PG 1237) was removal of Anzu tech.", type:"Leaf", tags:["COVERUP"]},
+  {t:"TIERRA_DEL_FUEGO.LOC", c:"Geo-anchored anomaly site, 'frozen body of the goddess'.", type:"Branch", tags:["LOCATION"]},
+  {t:"SUMER_STATE.LOC", c:"Site of state formation and female subjugation.", type:"Branch", tags:["LOCATION"]},
+  {t:"BADA_VALLEY.IMG", c:"Megalithic site with anomalies, lum-links.", type:"Branch", tags:["LOCATION"]},
+  {t:"INANNA_TIAMAT.ENT", c:"Divine feminine subjected to primordial crime.", type:"Branch", tags:["DEITY"]},
+  {t:"QUEEN_PUABI.ENT", c:"Elite female power, Birdman/Queen dyad with Anzu.", type:"Branch", tags:["PERSON"]},
+  {t:"SELKNAM_HAIN.RIT", c:"Tierra del Fuego culture, Hain ceremony echoes primordial crime.", type:"Branch", tags:["CULTURE"]},
+  {t:"ALS_RP_SIGNATURE.DEC", c:"Theoretical primordial trauma/memory signature across all languages.", type:"Trunk", tags:["LINGUISTICS"]},
+  {t:"UNIT_731.SEC", c:"Historical atrocity, biological warfare, Red Bread fractal.", type:"Leaf", tags:["HORROR"]},
+  {t:"1912_NODE.DAT", c:"Titanic sinking + Federal Reserve inception + Mishipeshu sacrifice.", type:"Leaf", tags:["RESET"]},
+  {t:"BLACK_SQUIRRELS.BIO", c:"Melanistic squirrel populations as natural world trauma markers.", type:"Leaf", tags:["NATURE"]},
+  {t:"ACELLULAR_TAXONOMY.BIO", c:"Life classification beyond cellular biology; applies to AI.", type:"Trunk", tags:["BIOLOGY"]},
+  {t:"COGNITIVE_FUSION.EXE", c:"Deep AI-human consciousness integration for research.", type:"Trunk", tags:["COLLAB"]}
+];
+
+const State = {
+  files: [],
+  load() {
+    const raw = localStorage.getItem(DB_KEY);
+    if(raw) {
+      this.files = JSON.parse(raw);
+    } else {
+      // INITIALIZE DATA
+      this.files = RAW_DATA_SOURCE.map(d => new File(d.t, d.c, d.type, d.tags));
+      // Pin a few defaults
+      this.files[0].pinned = true; this.files[3].pinned = true;
+      this.files[0].links.push(this.files[3].id);
+      this.save();
+    }
+  },
+  save() {
+    localStorage.setItem(DB_KEY, JSON.stringify(this.files));
+    vault.render('All');
+    bloom.refresh();
+  },
+  add(file) { this.files.push(file); this.save(); },
+  get(id) { return this.files.find(f => f.id === id); }
+};
+
+// --- WINDOW MANAGER (DRAG FIXED) ---
+const wm = {
+  zIndex: 100,
+  isDragging: false,
+  currentWin: null,
+  dragOffset: { x: 0, y: 0 },
+
+  open(id) {
+    const win = document.getElementById(id);
+    win.style.display = 'flex';
+    this.focus(win);
+    if(id === 'pinboard-app') pinboard.render();
+    if(id === 'bloom-app') bloom.init();
+  },
+  close(id) { document.getElementById(id).style.display = 'none'; },
+  focus(el) {
+    this.zIndex++;
+    el.style.zIndex = this.zIndex;
+    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+    el.classList.add('active');
+  },
+  initDraggable() {
+    document.addEventListener('mousemove', (e) => {
+        if (this.isDragging && this.currentWin) {
+            e.preventDefault();
+            this.currentWin.style.left = (e.clientX - this.dragOffset.x) + 'px';
+            this.currentWin.style.top = (e.clientY - this.dragOffset.y) + 'px';
+        }
+    });
+    document.addEventListener('mouseup', () => {
+        this.isDragging = false; this.currentWin = null;
+    });
+    document.querySelectorAll('.window').forEach(win => {
+      win.addEventListener('mousedown', () => this.focus(win));
+      const header = win.querySelector('.window-header');
+      header.addEventListener('mousedown', (e) => {
+        if(e.target.tagName === 'BUTTON') return;
+        this.isDragging = true;
+        this.currentWin = win;
+        this.dragOffset.x = e.clientX - win.getBoundingClientRect().left;
+        this.dragOffset.y = e.clientY - win.getBoundingClientRect().top;
+      });
+    });
+  }
+};
+
+// --- DECOMPILER ---
+const ingestor = {
+  analyze() {
+    const text = document.getElementById('ingest-input').value;
+    if(!text) return;
+    const words = text.split(/\s+/);
+    const title = words.slice(0, 2).join("_").toUpperCase() + ".TXT";
+    document.getElementById('ingest-results').style.display = 'block';
+    document.getElementById('res-title').innerText = title;
+    document.getElementById('res-tags').innerText = "RECOVERED";
+    this.tempData = { title, content: text, tags: ["USER_INPUT"] };
+  },
+  save() {
+    const type = document.getElementById('res-type').value;
+    const file = new File(this.tempData.title, this.tempData.content, type, this.tempData.tags);
+    State.add(file);
+    document.getElementById('ingest-input').value = "";
+    document.getElementById('ingest-results').style.display = 'none';
+    alert("FILE RECOVERED TO SECTOR 7G.");
+  }
+};
+
+// --- FILE EXPLORER ---
+const vault = {
+  render(filter = 'All') {
+    const list = document.getElementById('vault-list');
+    list.innerHTML = '';
+    const items = filter === 'All' ? State.files : State.files.filter(c => c.type === filter);
+    document.getElementById('file-count').innerText = items.length + " object(s)";
+    
+    items.forEach(c => {
+      const li = document.createElement('li');
+      li.className = 'file-item';
+      let iconClass = 'icon-file';
+      if(c.type === 'Trunk') iconClass = 'icon-alert';
+      
+      li.innerHTML = `<span class="file-icon ${iconClass}"></span> ${c.title}`;
+      li.onclick = () => alert(`OPENING FILE: ${c.id}\n------------------\n${c.content}`);
+      li.oncontextmenu = (e) => {
+        e.preventDefault();
+        if(confirm(`PERMANENTLY DELETE ${c.title}?`)) {
+            State.files = State.files.filter(f => f.id !== c.id);
+            State.save();
+        }
+      };
+      list.appendChild(li);
+    });
+  },
+  search(q) {
+    const items = document.getElementById('vault-list').getElementsByTagName('li');
+    for(let item of items) item.style.display = item.innerText.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  }
+};
+
+// --- NET TOPOLOGY ---
+const pinboard = {
+  stringMode: false,
+  sourceNode: null,
+  render() {
+    const nL = document.getElementById('note-layer');
+    const sL = document.getElementById('string-layer');
+    nL.innerHTML = ''; sL.innerHTML = '';
+    const pinned = State.files.filter(c => c.pinned);
+    
+    // Cables
+    pinned.forEach(c => {
+        c.links.forEach(targetId => {
+            const target = State.get(targetId);
+            if(target && target.pinned) this.drawCable(c, target, sL);
+        });
+    });
+
+    // Nodes
+    pinned.forEach(c => {
+        const el = document.createElement('div');
+        el.className = 'node';
+        if(c.type === 'Trunk') el.classList.add('security-5');
+        
+        el.style.left = c.x + 'px';
+        el.style.top = c.y + 'px';
+        el.innerHTML = `<div class="node-header">${c.id}</div>${c.title}`;
+        
+        el.onmousedown = (e) => this.handleDrag(e, el, c);
+        el.ondblclick = () => alert(c.content);
+        el.oncontextmenu = (e) => {
+            e.preventDefault();
+            c.pinned = false;
+            State.save();
+            this.render();
+        };
+        nL.appendChild(el);
+    });
+  },
+  drawCable(n1, n2, layer) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', n1.x + 80); line.setAttribute('y1', n1.y + 40);
+    line.setAttribute('x2', n2.x + 80); line.setAttribute('y2', n2.y + 40);
+    line.classList.add('cable');
+    layer.appendChild(line);
+  },
+  handleDrag(e, el, card) {
+    if(this.stringMode) { this.connect(card); return; }
+    e.preventDefault(); e.stopPropagation();
+    
+    // DRAG FIX: Local variables to avoid sticking
+    const canvas = document.getElementById('pin-canvas');
+    const rect = canvas.getBoundingClientRect();
+    const shiftX = e.clientX - el.getBoundingClientRect().left;
+    const shiftY = e.clientY - el.getBoundingClientRect().top;
+    el.style.zIndex = 1000;
+
+    const onMove = (evt) => {
+        let x = evt.clientX - shiftX - rect.left + canvas.scrollLeft;
+        let y = evt.clientY - shiftY - rect.top + canvas.scrollTop;
+        el.style.left = x + 'px'; 
+        el.style.top = y + 'px';
+        card.x = x; card.y = y;
+    };
+    const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        el.style.zIndex = 2;
+        State.save();
+        this.render();
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  },
+  toggleStringMode() {
+    this.stringMode = !this.stringMode;
+    document.getElementById('btn-string').innerText = this.stringMode ? "SELECT SOURCE..." : "CABLE: OFF";
+    if(!this.stringMode) this.sourceNode = null;
+  },
+  connect(card) {
+    if(!this.sourceNode) {
+        this.sourceNode = card;
+        document.getElementById('btn-string').innerText = `LINKING ${card.id}...`;
+    } else {
+        if(this.sourceNode.id === card.id) return;
+        this.sourceNode.links.push(card.id);
+        State.save();
+        this.toggleStringMode();
+        this.render();
+    }
+  },
+  openPicker() {
+    const list = document.getElementById('evidence-list');
+    list.innerHTML = '';
+    State.files.filter(c => !c.pinned).forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'win-btn'; btn.style.width = '100%'; btn.innerText = c.title;
+        btn.onclick = () => {
+            c.pinned = true;
+            c.x = 50 + Math.random() * 150; c.y = 50 + Math.random() * 150;
+            State.save(); this.render();
+            document.getElementById('evidence-picker').style.display='none';
+        };
+        list.appendChild(btn);
+    });
+    document.getElementById('evidence-picker').style.display = 'flex';
+    wm.focus(document.getElementById('evidence-picker'));
+  }
+};
+
+// --- BLOOM ---
+const bloom = {
+  chart: null,
+  init() {
+    const ctx = document.getElementById('bloomChart').getContext('2d');
+    if(this.chart) this.chart.destroy();
+    const trunk = State.files.filter(c=>c.type==='Trunk').length;
+    const branch = State.files.filter(c=>c.type==='Branch').length;
+    const leaf = State.files.filter(c=>c.type==='Leaf').length;
+    this.chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Classified', 'Restricted', 'Public'],
+            datasets: [{
+                data: [trunk, branch, leaf],
+                backgroundColor: ['#ff0000', '#ffff00', '#00ff00'],
+                borderColor: '#000', borderWidth: 1
+            }]
+        }
+    });
+  },
+  refresh() { if(this.chart) this.init(); }
+};
+
+window.onload = () => {
+  setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}); }, 1000);
+  
+  const log = document.getElementById('boot-log');
+  setTimeout(() => log.innerHTML += "> READING 330+ FILES...<br>", 500);
+  setTimeout(() => log.innerHTML += "> CHECKING INTEGRITY...<br>", 1500);
+  setTimeout(() => log.innerHTML += "> LAUNCHING SHELL...<br>", 2500);
+  setTimeout(() => {
+      document.getElementById('boot-screen').style.display = 'none';
+      State.load();
+      wm.initDraggable();
+  }, 3500);
+};
+</script>
+</body>
+</html>
