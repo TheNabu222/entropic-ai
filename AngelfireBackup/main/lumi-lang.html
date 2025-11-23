@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropic OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tahoma&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* --- Core Variables & Base Styles --- */
+        :root {
+            --win98-gray: #C0C0C0;
+            --win98-gray-dark: #808080;
+            --win98-gray-light: #DFDFDF;
+            --taskbar-height: 30px;
+        }
+        body {
+            background-color: #008080; /* Classic Desktop Teal */
+            font-family: 'Tahoma', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+        /* --- Desktop & Icons --- */
+        .desktop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: var(--taskbar-height);
+            padding: 10px;
+        }
+        .desktop-icon {
+            width: 80px;
+            text-align: center;
+            margin: 15px;
+            cursor: pointer;
+        }
+        .desktop-icon img {
+            width: 48px;
+            height: 48px;
+        }
+        .desktop-icon span {
+            font-size: 12px;
+            color: white;
+            padding: 2px 4px;
+        }
+        .desktop-icon:hover span {
+             background-color: #000080; /* Windows selection blue */
+             color: white;
+        }
+        /* --- Window Styles --- */
+        .window {
+            position: absolute;
+            display: none;
+            flex-direction: column;
+            min-width: 300px;
+            min-height: 200px;
+            background-color: var(--win98-gray);
+            border: 2px solid;
+            border-color: var(--win98-gray-light) var(--win98-gray-dark) var(--win98-gray-dark) var(--win98-gray-light);
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            resize: both;
+            overflow: auto;
+        }
+        .window.active .window-titlebar {
+             background: linear-gradient(to right, #000080, #1084d0);
+        }
+        .window-titlebar {
+            background: linear-gradient(to right, #808080, #C0C0C0);
+            color: white;
+            padding: 2px 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 20px;
+            cursor: move;
+            user-select: none;
+        }
+        .window-title {
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .window-controls button {
+            width: 16px;
+            height: 14px;
+            background-color: var(--win98-gray);
+            border: 1px solid;
+            border-color: var(--win98-gray-light) var(--win98-gray-dark) var(--win98-gray-dark) var(--win98-gray-light);
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .window-content {
+            flex-grow: 1;
+            padding: 2px;
+            display: flex;
+        }
+        .window-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: white;
+        }
+        /* --- Taskbar Styles --- */
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--taskbar-height);
+            background-color: var(--win98-gray);
+            border-top: 1px solid var(--win98-gray-light);
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            z-index: 9999;
+        }
+        .start-button {
+            border: 1px solid;
+            border-color: var(--win98-gray-light) var(--win98-gray-dark) var(--win98-gray-dark) var(--win98-gray-light);
+            padding: 2px 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .taskbar-items {
+            display: flex;
+            flex-grow: 1;
+            margin-left: 4px;
+            gap: 2px;
+            height: 100%;
+        }
+        .taskbar-item {
+            min-width: 120px;
+            max-width: 160px;
+            padding: 2px 5px;
+            border: 1px solid;
+            border-color: var(--win98-gray-light) var(--win98-gray-dark) var(--win98-gray-dark) var(--win98-gray-light);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+        .taskbar-item.active {
+            border-style: inset;
+        }
+        .taskbar-item img, .window-title img {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop">
+        <div class="desktop-icon" data-app="zettelkasten">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='36' height='44' x='6' y='2' fill='%23f312af' rx='2'/%3E%3Crect width='30' height='38' x='9' y='5' fill='white' rx='1'/%3E%3Cpath fill='%2372FADE' d='M14 10h20v2H14zM14 15h20v2H14zM14 20h20v2H14zM14 25h20v2H14zM14 30h20v2H14zM14 35h12v2H14z'/%3E%3C/svg%3E" alt="Zettelkasten">
+            <span>Zettelkasten</span>
+        </div>
+        <div class="desktop-icon" data-app="visualizer">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='36' height='36' x='6' y='6' fill='%2372FADE' rx='3'/%3E%3Cpath fill='%23f312af' d='M24 12L12 24l12 12 12-12z'/%3E%3Ccircle cx='24' cy='24' r='4' fill='white'/%3E%3C/svg%3E" alt="Pattern Visualizer">
+            <span>Visualizer</span>
+        </div>
+    </div>
+
+    <div id="zettelkasten-window" class="window" style="width: 800px; height: 600px; top: 50px; left: 100px;">
+        <div class="window-titlebar">
+            <div class="window-title">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='36' height='44' x='6' y='2' fill='%23f312af' rx='2'/%3E%3Crect width='30' height='38' x='9' y='5' fill='white' rx='1'/%3E%3Cpath fill='%2372FADE' d='M14 10h20v2H14zM14 15h20v2H14zM14 20h20v2H14zM14 25h20v2H14zM14 30h20v2H14zM14 35h12v2H14z'/%3E%3C/svg%3E" alt="Zettelkasten Icon">
+                <span class="window-title-text">Hyena Diva Zettelkasten</span>
+            </div>
+            <div class="window-controls">
+                <button class="window-close">X</button>
+            </div>
+        </div>
+        <div class="window-content">
+            <iframe id="zettelkasten-frame" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <div id="visualizer-window" class="window" style="width: 700px; height: 520px; top: 100px; left: 200px;">
+        <div class="window-titlebar">
+            <div class="window-title">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Crect width='36' height='36' x='6' y='6' fill='%2372FADE' rx='3'/%3E%3Cpath fill='%23f312af' d='M24 12L12 24l12 12 12-12z'/%3E%3Ccircle cx='24' cy='24' r='4' fill='white'/%3E%3C/svg%3E" alt="Pattern Visualizer Icon">
+                <span class="window-title-text">Pattern Visualizer</span>
+            </div>
+            <div class="window-controls">
+                <button class="window-close">X</button>
+            </div>
+        </div>
+        <div class="window-content">
+            <iframe id="visualizer-frame" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="start-button">Start</div>
+        <div class="taskbar-items"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- CONFIGURATION ---
+            // This object defines all the "apps" that can be launched.
+            // To add a new one, create a desktop icon and a window div in the HTML,
+            // then add a corresponding entry here.
+            const apps = {
+                'zettelkasten': {
+                    title: 'Zettelkasten',
+                    icon: "data:image/svg+xml,...", // SVG data is long, kept in HTML for now
+                    windowId: 'zettelkasten-window',
+                    frameId: 'zettelkasten-frame',
+                    url: 'index.html' // The actual file to load
+                },
+                'visualizer': {
+                    title: 'Visualizer',
+                    icon: "data:image/svg+xml,...",
+                    windowId: 'visualizer-window',
+                    frameId: 'visualizer-frame',
+                    url: 'pattern-visualizer.html' // The file for this app
+                }
+            };
+
+            // --- STATE ---
+            let openWindows = [];
+            let zIndexCounter = 10;
+
+            // --- DOM ELEMENTS ---
+            const taskbarItemsContainer = document.querySelector('.taskbar-items');
+            
+            // --- CORE FUNCTIONS ---
+
+            function openApp(appId) {
+                const appConfig = apps[appId];
+                if (!appConfig) return;
+
+                const windowEl = document.getElementById(appConfig.windowId);
+                if (!windowEl) return;
+
+                // If window is already open, just bring it to the front
+                if (windowEl.style.display === 'flex') {
+                    activateWindow(windowEl);
+                    return;
+                }
+
+                // Show the window and activate it
+                windowEl.style.display = 'flex';
+                activateWindow(windowEl);
+
+                // Load content into the iframe only the first time
+                const frameEl = document.getElementById(appConfig.frameId);
+                if (frameEl && frameEl.src === 'about:blank') {
+                    frameEl.src = appConfig.url;
+                }
+
+                // Add to open windows list if it's not already there
+                if (!openWindows.includes(appId)) {
+                    openWindows.push(appId);
+                    updateTaskbar();
+                }
+            }
+
+            function closeApp(appId) {
+                const appConfig = apps[appId];
+                if (!appConfig) return;
+
+                const windowEl = document.getElementById(appConfig.windowId);
+                if (windowEl) windowEl.style.display = 'none';
+
+                openWindows = openWindows.filter(id => id !== appId);
+                updateTaskbar();
+            }
+
+            function activateWindow(windowEl) {
+                document.querySelectorAll('.window').forEach(win => win.classList.remove('active'));
+                windowEl.classList.add('active');
+                windowEl.style.zIndex = zIndexCounter++;
+                updateTaskbar();
+            }
+            
+            function updateTaskbar() {
+                taskbarItemsContainer.innerHTML = '';
+                openWindows.forEach(appId => {
+                    const appConfig = apps[appId];
+                    const item = document.createElement('div');
+                    item.className = 'taskbar-item';
+                    item.dataset.app = appId;
+
+                    const windowEl = document.getElementById(appConfig.windowId);
+                    if (windowEl && windowEl.classList.contains('active')) {
+                        item.classList.add('active');
+                    }
+
+                    item.innerHTML = `<img src="${document.querySelector(`.desktop-icon[data-app="${appId}"] img`).src}" alt="${appConfig.title}"> ${appConfig.title}`;
+                    item.onclick = () => openApp(appId);
+                    taskbarItemsContainer.appendChild(item);
+                });
+            }
+
+            function makeWindowDraggable(windowEl) {
+                const titleBar = windowEl.querySelector('.window-titlebar');
+                let offsetX, offsetY;
+
+                titleBar.onmousedown = (e) => {
+                    // Don't drag if clicking on a button
+                    if (e.target.tagName === 'BUTTON') return;
+                    
+                    offsetX = e.clientX - windowEl.offsetLeft;
+                    offsetY = e.clientY - windowEl.offsetTop;
+                    activateWindow(windowEl);
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
+                };
+
+                function onMouseMove(e) {
+                    windowEl.style.left = `${e.clientX - offsetX}px`;
+                    windowEl.style.top = `${e.clientY - offsetY}px`;
+                }
+
+                function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+            }
+
+            // --- INITIALIZATION ---
+            
+            // Attach listeners to all desktop icons
+            document.querySelectorAll('.desktop-icon').forEach(icon => {
+                icon.ondblclick = () => openApp(icon.dataset.app);
+            });
+
+            // Set up all window elements
+            document.querySelectorAll('.window').forEach(windowEl => {
+                makeWindowDraggable(windowEl);
+                windowEl.onmousedown = () => activateWindow(windowEl);
+
+                const closeBtn = windowEl.querySelector('.window-close');
+                if (closeBtn) {
+                    const appId = Object.keys(apps).find(id => apps[id].windowId === windowEl.id);
+                    if (appId) {
+                        closeBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            closeApp(appId);
+                        };
+                    }
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

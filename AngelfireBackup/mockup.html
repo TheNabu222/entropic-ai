@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Veridan Neon Desk — Unified Skin Mockup</title>
+  <style>
+    /* =========================
+       THEME TOKENS (unified)
+       ========================= */
+    :root {
+      --bg: #000;               /* canvas */
+      --panel: #0b0b0f;         /* window */
+      --text: #e6fffa;          /* body text */
+      --veridan: #00E18E;       /* brand green */
+      --cyan: #72FADE;          /* accent */
+      --magenta: #F312AF;       /* accent */
+      --yellow: #FFFB01;        /* accent */
+      --line: #1f2937;          /* borders */
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 12px;
+      --glow: 0 0 12px rgba(114,250,222,.35);
+      --font-ui: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-term: "VT323", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    /* Retro skin (soft gray) */
+    :root[data-theme="retro"] {
+      --bg: #0a0a0a;
+      --panel: #e5e7eb;
+      --text: #111827;
+      --line: #9ca3af;
+      --glow: 0 0 0 transparent;
+    }
+
+    /* =========================
+       BASE LAYOUT
+       ========================= */
+    html, body { height: 100%; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-ui);
+    }
+    .scanlines::before { /* optional CRT shimmer */
+      content: ""; position: fixed; inset: 0; pointer-events: none; mix-blend-mode: overlay;
+      background: linear-gradient(rgba(255,255,255,.05) 50%, transparent 50%) 0 0 / 100% 2px;
+      opacity: .15;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scanlines::before { display:none; }
+      * { animation: none !important; transition: none !important; }
+    }
+
+    .top-nav {
+      position: sticky; top: 0; z-index: 40;
+      display: flex; align-items: center; gap: .5rem;
+      padding: .6rem .75rem; background: rgba(0,0,0,.6);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(6px);
+    }
+    .brand { font-family: var(--font-term); letter-spacing: .5px; }
+    .brand strong { color: var(--veridan); }
+    .nav-item {
+      appearance: none; border: 1px solid var(--line); background: #0000; color: var(--text);
+      padding: .45rem .7rem; border-radius: 10px; cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s;
+    }
+    .nav-item:hover { transform: translateY(-1px); box-shadow: var(--glow); background: rgba(255,255,255,.06); }
+
+    /* Desktop canvas */
+    #desktop {
+      position: relative; height: calc(100vh - 56px);
+      background:
+        radial-gradient(1000px 500px at 20% 20%, rgba(243,18,175,.05), transparent 60%),
+        radial-gradient(1000px 500px at 80% 70%, rgba(114,250,222,.06), transparent 60%),
+        linear-gradient(transparent 95%, rgba(255,255,255,.06) 96%);
+      overflow: hidden;
+    }
+
+    /* Icons grid */
+    #icons { position: absolute; inset: 0; padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 14px; align-content: start; }
+    .icon {
+      display: grid; justify-items: center; gap: 8px; padding: 12px; border: 1px dashed var(--line); border-radius: 14px; cursor: pointer; text-align: center;
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+      background: rgba(255,255,255,.02);
+    }
+    .icon:hover { transform: translateY(-2px); box-shadow: var(--glow); background: rgba(255,255,255,.06); }
+    .ico-emoji { font-size: 28px; }
+    .icon span { font-size: 12px; opacity: .9; }
+
+    /* Windows */
+    .window {
+      position: absolute; inset: auto auto 80px auto; width: min(760px, 92vw); max-height: 70vh;
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden; display: none; z-index: 30;
+    }
+    .window.active { display: block; }
+    .window-titlebar {
+      display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+      padding: 8px 12px; border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, var(--magenta), var(--cyan)); color: #000;
+      font-family: var(--font-term);
+      cursor: move;
+    }
+    .window-title { font-weight: 700; letter-spacing: .5px; }
+    .window-actions { display: flex; gap: 6px; }
+    .btn-close {
+      width: 28px; height: 28px; border: 1px solid rgba(0,0,0,.2); border-radius: 8px; cursor: pointer; background: rgba(255,255,255,.85);
+    }
+    .window-body { background: var(--panel); padding: 0; }
+    .window-body iframe { display: block; width: 100%; height: 52vh; border: 0; background: #000; }
+
+    /* Taskbar + Start */
+    #taskbar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-top: 1px solid var(--line);
+      background: rgba(0,0,0,.7); backdrop-filter: blur(6px);
+    }
+    #start-btn { font-family: var(--font-term); }
+    .start-menu {
+      position: fixed; left: 10px; bottom: 56px; z-index: 46; width: 240px; display: none;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+      padding: 8px;
+    }
+    .start-menu.open { display: block; }
+    .start-item { width: 100%; text-align: left; margin: 4px 0; }
+
+    /* Mobile adaptation */
+    @media (max-width: 720px) {
+      #icons { grid-template-columns: repeat(3, 1fr); }
+      .window { left: 4vw !important; top: 12vh !important; width: 92vw; max-height: 70vh; }
+      .window-titlebar { cursor: default; }
+    }
+  </style>
+  <!-- Optional: Google Fonts for VT323 terminal face -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+</head>
+<body class="scanlines">
+  <nav class="top-nav">
+    <div class="brand">Veridan <strong>Neon Desk</strong></div>
+    <button class="nav-item" data-action="theme">Toggle Theme</button>
+    <button class="nav-item" data-action="crt">Toggle CRT</button>
+    <div style="flex:1"></div>
+    <!-- Nav items will be generated here -->
+    <div id="nav-apps" class="nav"></div>
+  </nav>
+
+  <main id="desktop">
+    <section id="icons"></section>
+
+    <!-- Windows (generated) -->
+  </main>
+
+  <footer id="taskbar">
+    <button id="start-btn" class="nav-item">Start</button>
+    <div id="tasks" style="display:flex; gap:6px;"></div>
+    <div class="start-menu" id="start-menu"></div>
+  </footer>
+
+  <script>
+    // =========================
+    // 1) App Registry (one source of truth)
+    // =========================
+    const APPS = [
+      { id:'terminalTemple', title:'Terminal Temple', emoji:'&#9961;&#65039;', path:'/main/terminal_temple.html', mode:'window' },
+      { id:'pinboard',       title:'Conspiracy Pinboard', emoji:'&#129527;', path:'/main/bl00m/pinboard.html', mode:'window' },
+      { id:'settings',       title:'System Settings', emoji:'&#9881;&#65039;', path:'/main/bl00m/settings.html', mode:'window' },
+      { id:'ackk',           title:'ACKK Desk', emoji:'&#128450;&#65039;', path:'/main/ackk.html', mode:'tab' }
+    ];
+
+    // =========================
+    // 2) Build UI from registry
+    // =========================
+    const icons = document.getElementById('icons');
+    const startMenu = document.getElementById('start-menu');
+    const navApps = document.getElementById('nav-apps');
+
+    APPS.forEach(app => {
+      // Desktop icon
+      const ico = document.createElement('button');
+      ico.className = 'icon';
+      ico.dataset.app = app.id;
+      ico.innerHTML = `<div class="ico-emoji">${app.emoji||'&#128499;&#65039;'}</div><span>${app.title}</span>`;
+      icons.appendChild(ico);
+
+      // Start menu entry
+      const si = document.createElement('button');
+      si.className = 'nav-item start-item';
+      si.dataset.app = app.id;
+      si.textContent = app.title;
+      startMenu.appendChild(si);
+
+      // Top nav link (as button)
+      const nb = document.createElement('button');
+      nb.className = 'nav-item';
+      nb.dataset.app = app.id;
+      nb.textContent = app.title;
+      navApps.appendChild(nb);
+
+      // Window (only for mode 'window')
+      if (app.mode === 'window') {
+        const w = document.createElement('div');
+        w.className = 'window';
+        w.id = `${app.id}-window`;
+        w.innerHTML = `
+          <div class="window-titlebar" data-drag-handle>
+            <div class="window-title">${app.title}</div>
+            <div class="window-actions">
+              <button class="btn-close" aria-label="Close" data-close-for="${app.id}">&#10005;</button>
+            </div>
+          </div>
+          <div class="window-body">
+            <iframe title="${app.title}" loading="lazy" data-src="${app.path}"></iframe>
+          </div>`;
+        document.getElementById('desktop').appendChild(w);
+      }
+    });
+
+    // =========================
+    // 3) Interactions
+    // =========================
+    function openApp(id) {
+      const app = APPS.find(a => a.id === id);
+      if (!app) return;
+      if (app.mode === 'tab') {
+        window.open(app.path, '_blank');
+        return;
+      }
+      const win = document.getElementById(`${id}-window`);
+      if (!win) return;
+      // lazy-load iframe
+      const ifr = win.querySelector('iframe');
+      if (ifr && !ifr.src) ifr.src = ifr.dataset.src;
+      // place + show
+      win.style.left = Math.round(window.innerWidth * .04) + 'px';
+      win.style.top  = Math.round(window.innerHeight * .12) + 'px';
+      win.classList.add('active');
+      bringToFront(win);
+      activeWin = win;
+    }
+
+    function closeApp(id) {
+      const win = document.getElementById(`${id}-window`);
+      if (win) win.classList.remove('active');
+    }
+
+    function bringToFront(el) {
+      // simple z-index bump
+      document.querySelectorAll('.window').forEach(w => w.style.zIndex = 30);
+      el.style.zIndex = 50;
+    }
+
+    // Click open/close
+    document.addEventListener('click', (e) => {
+      const appBtn = e.target.closest('[data-app]');
+      if (appBtn) return openApp(appBtn.dataset.app);
+      const closer = e.target.closest('[data-close-for]');
+      if (closer) return closeApp(closer.dataset.closeFor);
+    });
+
+    // ESC closes topmost window
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const top = [...document.querySelectorAll('.window.active')].pop();
+        if (top) top.classList.remove('active');
+        const sm = document.getElementById('start-menu');
+        sm.classList.remove('open');
+      }
+    });
+
+    // Start menu toggle
+    document.getElementById('start-btn').addEventListener('click', () => {
+      startMenu.classList.toggle('open');
+    });
+
+    // Theme + CRT toggles
+    document.querySelector('[data-action="theme"]').addEventListener('click', () => {
+      const r = document.documentElement;
+      r.dataset.theme = r.dataset.theme === 'retro' ? '' : 'retro';
+    });
+    document.querySelector('[data-action="crt"]').addEventListener('click', () => {
+      document.body.classList.toggle('scanlines');
+    });
+
+    // Dragging (desktop only)
+    let drag = null, offsetX = 0, offsetY = 0, activeWin = null;
+    document.addEventListener('mousedown', (e) => {
+      const bar = e.target.closest('[data-drag-handle]');
+      const win = bar?.closest('.window');
+      if (!win) return;
+      bringToFront(win);
+      drag = win;
+      const rect = win.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!drag) return;
+      const x = Math.max(8, Math.min(window.innerWidth - drag.offsetWidth - 8, e.clientX - offsetX));
+      const y = Math.max(56, Math.min(window.innerHeight - drag.offsetHeight - 80, e.clientY - offsetY));
+      drag.style.left = x + 'px';
+      drag.style.top  = y + 'px';
+    });
+    document.addEventListener('mouseup', () => drag = null);
+  </script>
+</body>
+</html>
