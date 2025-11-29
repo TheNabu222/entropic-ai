@@ -47,6 +47,25 @@
         .label { color: #cbd5e1; font-weight: 700; letter-spacing: 0.02em; }
         .help { color: var(--panel-muted); }
 
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .chip-button {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e5e7eb;
+            border-radius: 10px;
+            padding: 8px 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .chip-button:hover { border-color: var(--accent); color: var(--accent); }
+
         .preview-wrapper {
             border: 1px solid var(--panel-border);
             background: #0b1220;
@@ -94,6 +113,89 @@
         }
 
         .stat strong { color: #fbbf24; }
+
+        .rich-editor {
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(15, 23, 42, 0.65);
+        }
+
+        .rich-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .rich-toolbar button {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e5e7eb;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .rich-toolbar button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .rich-area {
+            min-height: 220px;
+            padding: 14px;
+            color: #e5e7eb;
+            background: rgba(7, 11, 22, 0.9);
+        }
+
+        .rich-area:focus {
+            outline: 2px solid var(--accent);
+        }
+
+        .rich-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            border-top: 1px solid var(--panel-border);
+            color: var(--panel-muted);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .rich-meta strong { color: #e5e7eb; }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: #e5e7eb;
+            font-size: 13px;
+        }
+
+        .is-checklist {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .is-checklist li {
+            position: relative;
+            padding-left: 26px;
+            margin-bottom: 6px;
+        }
+
+        .is-checklist li::before {
+            content: '\2713';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
     </style>
 </head>
 <body>
@@ -127,6 +229,8 @@
                     <div class="control">
                         <input id="accent" class="input" type="color" value="#00d1b2">
                     </div>
+                    <p class="help">Tap a preset from other WYSIWYG builds to sync the palette.</p>
+                    <div class="mini-grid" style="margin-top:10px;" id="accentPresets"></div>
                 </div>
                 <div class="field">
                     <label class="label">Layout style</label>
@@ -146,6 +250,65 @@
                     <label class="label" for="notes">Highlight note</label>
                     <div class="control">
                         <input class="input" id="notes" type="text" value="Updated weekly with fresh interactive prototypes.">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">README rich text</label>
+                    <p class="help">Borrowed from the richtexteditor demo: formatting, templates, and HTML view.</p>
+                    <div class="rich-editor">
+                        <div class="rich-toolbar">
+                            <button type="button" onclick="applyCommand('bold')">Bold</button>
+                            <button type="button" onclick="applyCommand('italic')">Italic</button>
+                            <button type="button" onclick="applyCommand('underline')">Underline</button>
+                            <button type="button" onclick="applyCommand('formatBlock', 'h3')">H3</button>
+                            <button type="button" onclick="applyCommand('insertUnorderedList')">Bullets</button>
+                            <button type="button" onclick="applyCommand('insertOrderedList')">Numbered</button>
+                            <button type="button" onclick="applyCommand('formatBlock', 'blockquote')">Quote</button>
+                            <button type="button" onclick="insertLink()">Link</button>
+                            <button type="button" onclick="wrapSelection('<mark>', '</mark>')">Highlight</button>
+                            <button type="button" onclick="insertTemplate('callout')">Callout</button>
+                            <button type="button" onclick="insertTemplate('code')">Code</button>
+                            <button type="button" onclick="insertTemplate('checklist')">Checklist</button>
+                            <button type="button" onclick="toggleSourceView()" id="sourceToggle">Show HTML</button>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center; padding:10px; border-bottom:1px solid var(--panel-border); background:rgba(7,11,22,0.8);">
+                            <div class="select is-small" style="flex:1;">
+                                <select id="snippetSelect">
+                                    <option value="hero">Hero intro</option>
+                                    <option value="release">Release bulletin</option>
+                                    <option value="badges">Badge shelf</option>
+                                    <option value="stack">Stack + links</option>
+                                    <option value="faq">FAQ block</option>
+                                </select>
+                            </div>
+                            <button class="button is-small" type="button" onclick="insertSnippet()">Insert snippet</button>
+                            <button class="button is-small is-light" type="button" onclick="resetEditorContent()">Reset content</button>
+                        </div>
+                        <div id="richArea" class="rich-area" contenteditable="true"></div>
+                        <textarea id="richSource" class="textarea is-small" style="display:none; border:0; border-top:1px solid var(--panel-border); border-radius:0; background:rgba(7,11,22,0.9); color:#e5e7eb;" rows="6"></textarea>
+                        <div class="rich-meta">
+                            <span class="pill">Words: <strong id="wordCount">0</strong></span>
+                            <span class="pill">Reading time: <strong id="readTime">0</strong> min</span>
+                            <span class="pill">HTML length: <strong id="htmlLength">0</strong> chars</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Session snapshots</label>
+                    <p class="help">Save and reload repo presets like the admin WYSIWYG editors.</p>
+                    <div style="display:flex; gap:10px; margin-bottom:8px;">
+                        <input class="input is-small" id="presetName" type="text" placeholder="Preset name e.g. Neon release">
+                        <button class="button is-small" type="button" onclick="savePreset()">Save</button>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-bottom:8px;">
+                        <div class="select is-small" style="flex:1;">
+                            <select id="presetList"></select>
+                        </div>
+                        <button class="button is-small" type="button" onclick="loadPreset()">Load</button>
+                    </div>
+                    <div class="buttons are-small">
+                        <button class="button is-light" type="button" onclick="exportPreset()">Copy JSON preset</button>
+                        <button class="button is-light" type="button" onclick="importPreset()">Import preset</button>
                     </div>
                 </div>
                 <div class="field is-grouped is-grouped-right" style="margin-top:18px;">
@@ -180,6 +343,258 @@
         const preview = document.getElementById('preview');
         const markupOutput = document.getElementById('markup');
         const themeTag = document.getElementById('themeTag');
+        const richArea = document.getElementById('richArea');
+        const richSource = document.getElementById('richSource');
+        const wordCountEl = document.getElementById('wordCount');
+        const readTimeEl = document.getElementById('readTime');
+        const htmlLengthEl = document.getElementById('htmlLength');
+        const sourceToggle = document.getElementById('sourceToggle');
+        const storageKey = 'repo-bulma-richtext-state';
+        const presetKey = 'repo-bulma-presets';
+        const presetList = document.getElementById('presetList');
+        const accentPresetsEl = document.getElementById('accentPresets');
+
+        const accentPresets = [
+            { name: 'Neon', color: '#00ffcc' },
+            { name: 'Plasma', color: '#f312af' },
+            { name: 'Cobalt', color: '#3273dc' },
+            { name: 'Sunrise', color: '#ff9f43' },
+            { name: 'Emerald', color: '#48c774' },
+            { name: 'Slate', color: '#94a3b8' }
+        ];
+
+        const templates = {
+            callout: `<article class="message is-link"><div class="message-header">Release focus</div><div class="message-body">Use this slot for your latest tagged release, preview build, or nightly artifact.</div></article>`,
+            code: `<pre><code class="language-bash">npm install && npm run dev</code></pre>`,
+            checklist: `<ul class="is-checklist"><li>Ship new landing</li><li>Record demo</li><li>Publish changelog</li></ul>`
+        };
+
+        const snippets = {
+            hero: `<p><strong>Why this repo</strong> — refreshed layouts for the Entropic AI surface area with lighter copy and more obvious calls to action.</p>`,
+            release: `<article class="message is-primary"><div class="message-header">Latest release</div><div class="message-body">v0.9.2 ships starter presets, linted typography, and in-browser previews for repo pages.</div></article>`,
+            badges: `<div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="tag is-info">Bulma</span><span class="tag is-warning">WYSIWYG</span><span class="tag is-success">Landing kits</span><span class="tag is-link">Neocities</span></div>`,
+            stack: `<ul><li><strong>Stack:</strong> Bulma 1.0, vanilla JS, Inter typeface</li><li><strong>Workflow:</strong> LocalStorage persistence, snippet library, JSON presets</li><li><strong>Use it for:</strong> Repo landing previews, README callouts, component dumps.</li></ul>`,
+            faq: `<div class="box"><h4 class="title is-5">FAQs</h4><p><strong>Does it keep state?</strong> Yes—local snapshots plus import/export. <strong>Can I remix colors?</strong> Use the palette chips or the color picker.</p></div>`
+        };
+
+        function sanitizeHtml(html) {
+            const template = document.createElement('template');
+            template.innerHTML = html;
+            template.content.querySelectorAll('script, style').forEach(el => el.remove());
+            template.content.querySelectorAll('*').forEach(el => {
+                [...el.attributes].forEach(attr => {
+                    if (attr.name.startsWith('on')) el.removeAttribute(attr.name);
+                });
+            });
+            return template.innerHTML;
+        }
+
+        function buildAccentPresetButtons() {
+            accentPresetsEl.innerHTML = '';
+            accentPresets.forEach(preset => {
+                const btn = document.createElement('button');
+                btn.className = 'chip-button';
+                btn.textContent = preset.name;
+                btn.style.borderColor = `${preset.color}55`;
+                btn.style.color = preset.color;
+                btn.onclick = () => {
+                    document.getElementById('accent').value = preset.color;
+                    updatePreview();
+                };
+                accentPresetsEl.appendChild(btn);
+            });
+        }
+
+        function insertSnippet() {
+            const key = document.getElementById('snippetSelect').value;
+            const html = snippets[key];
+            if (!html) return;
+            richArea.focus();
+            document.execCommand('insertHTML', false, html);
+            syncSourceFromArea();
+        }
+
+        function resetEditorContent() {
+            richArea.innerHTML = defaultContent;
+            syncSourceFromArea();
+            updatePreview();
+        }
+
+        function applyCommand(cmd, value = null) {
+            richArea.focus();
+            document.execCommand(cmd, false, value);
+            syncSourceFromArea();
+        }
+
+        function wrapSelection(before, after) {
+            const selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0) return;
+            const range = selection.getRangeAt(0);
+            const content = range.toString();
+            if (!content) return;
+            range.deleteContents();
+            const frag = range.createContextualFragment(`${before}${content}${after}`);
+            range.insertNode(frag);
+            syncSourceFromArea();
+        }
+
+        function insertTemplate(type) {
+            const snippet = templates[type];
+            if (!snippet) return;
+            richArea.focus();
+            document.execCommand('insertHTML', false, snippet);
+            syncSourceFromArea();
+        }
+
+        function insertLink() {
+            const url = prompt('Enter URL');
+            if (!url) return;
+            richArea.focus();
+            document.execCommand('createLink', false, url);
+            syncSourceFromArea();
+        }
+
+        function toggleSourceView() {
+            const showingSource = richSource.style.display === 'block';
+            if (showingSource) {
+                richArea.innerHTML = richSource.value;
+                richArea.style.display = 'block';
+                richSource.style.display = 'none';
+                sourceToggle.textContent = 'Show HTML';
+            } else {
+                richSource.value = richArea.innerHTML;
+                richSource.style.display = 'block';
+                richArea.style.display = 'none';
+                sourceToggle.textContent = 'Hide HTML';
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            const text = richArea.innerText || '';
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            wordCountEl.textContent = words;
+            readTimeEl.textContent = Math.max(1, Math.round(words / 200));
+            htmlLengthEl.textContent = (richArea.innerHTML || '').length;
+        }
+
+        function syncSourceFromArea() {
+            richSource.value = richArea.innerHTML;
+            updateStats();
+        }
+
+        function getCurrentState() {
+            return {
+                repoName: document.getElementById('repoName').value || 'Untitled repo',
+                tagline: document.getElementById('tagline').value || 'Add a tagline that sells your repo.',
+                repoUrl: document.getElementById('repoUrl').value || '#',
+                accent: document.getElementById('accent').value || '#00d1b2',
+                layout: document.querySelector('input[name="layout"]:checked').value,
+                topics: document.getElementById('topics').value,
+                notes: document.getElementById('notes').value || 'Add a quick note about cadence or roadmap.',
+                readmeHtml: sanitizeHtml(richArea.innerHTML || defaultContent)
+            };
+        }
+
+        function applyState(state) {
+            document.getElementById('repoName').value = state.repoName || '';
+            document.getElementById('tagline').value = state.tagline || '';
+            document.getElementById('repoUrl').value = state.repoUrl || '';
+            document.getElementById('accent').value = state.accent || '#00d1b2';
+            document.querySelector(`input[name="layout"][value="${state.layout || 'dark'}"]`).checked = true;
+            document.getElementById('topics').value = state.topics || '';
+            document.getElementById('notes').value = state.notes || '';
+            richArea.innerHTML = state.readmeHtml || defaultContent;
+            syncSourceFromArea();
+        }
+
+        function restoreState() {
+            try {
+                const saved = localStorage.getItem(storageKey);
+                if (!saved) return;
+                const parsed = JSON.parse(saved);
+                applyState(parsed);
+            } catch (e) {
+                console.warn('Could not restore saved state', e);
+            }
+        }
+
+        function getPresets() {
+            try {
+                return JSON.parse(localStorage.getItem(presetKey) || '[]');
+            } catch (e) {
+                console.warn('Could not load presets', e);
+                return [];
+            }
+        }
+
+        function savePresets(list) {
+            try {
+                localStorage.setItem(presetKey, JSON.stringify(list));
+            } catch (e) {
+                console.warn('Could not persist presets', e);
+            }
+        }
+
+        function renderPresetOptions() {
+            const presets = getPresets();
+            presetList.innerHTML = '';
+            if (!presets.length) {
+                const opt = document.createElement('option');
+                opt.textContent = 'No presets yet';
+                opt.value = '';
+                presetList.appendChild(opt);
+                return;
+            }
+
+            presets.forEach((preset, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = preset.name;
+                presetList.appendChild(opt);
+            });
+        }
+
+        function savePreset() {
+            const nameInput = document.getElementById('presetName');
+            const name = nameInput.value.trim() || `Preset ${new Date().toLocaleTimeString()}`;
+            const presets = getPresets();
+            presets.unshift({ name, state: getCurrentState() });
+            savePresets(presets.slice(0, 15));
+            renderPresetOptions();
+            nameInput.value = '';
+        }
+
+        function loadPreset() {
+            const idx = presetList.value;
+            const presets = getPresets();
+            const target = presets[idx];
+            if (!target) return;
+            applyState(target.state);
+            updatePreview();
+        }
+
+        async function exportPreset() {
+            const state = getCurrentState();
+            const payload = JSON.stringify(state, null, 2);
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(payload);
+            } else {
+                alert(payload);
+            }
+        }
+
+        function importPreset() {
+            const raw = prompt('Paste a preset JSON blob');
+            if (!raw) return;
+            try {
+                const parsed = JSON.parse(raw);
+                applyState(parsed);
+                updatePreview();
+            } catch (e) {
+                alert('Could not parse preset');
+            }
+        }
 
         function buildMarkup(state) {
             const tone = state.layout === 'dark'
@@ -213,6 +628,7 @@
           <p class="title is-4" style="color:${tone.text};">README snapshot</p>
           <p class="subtitle is-6" style="color:${tone.muted};">Curated paragraphs you want on the repo landing page.</p>
           <div class="content" style="color:${tone.text};">
+            ${state.readmeHtml}
             <p><strong>${state.repoName}</strong> bundles creative tooling, web experiments, and assets. Use this template to surface the highlights without touching the raw markdown.</p>
             <p>Drop in sections for install steps, stack badges, callouts, or changelog summaries. Everything stays Bulma-native for quick publishing.</p>
           </div>
@@ -257,6 +673,7 @@
         }
 
         function updatePreview() {
+            const state = getCurrentState();
             const state = {
                 repoName: document.getElementById('repoName').value || 'Untitled repo',
                 tagline: document.getElementById('tagline').value || 'Add a tagline that sells your repo.',
@@ -274,6 +691,13 @@
             themeTag.style.borderColor = `${state.accent}55`;
             themeTag.style.backgroundColor = `${state.accent}15`;
             themeTag.style.color = state.accent;
+            document.documentElement.style.setProperty('--accent', state.accent);
+
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(state));
+            } catch (e) {
+                console.warn('Local storage not available', e);
+            }
         }
 
         async function copyMarkup() {
@@ -285,6 +709,28 @@
             await navigator.clipboard.writeText(markupOutput.value);
         }
 
+        const defaultContent = `<p><strong>entropic-ai</strong> bundles creative tooling, web experiments, and assets. Use this template to surface the highlights without touching the raw markdown.</p>
+        <p>Drop in sections for install steps, stack badges, callouts, or changelog summaries. Everything stays Bulma-native for quick publishing.</p>`;
+
+        richArea.innerHTML = defaultContent;
+        syncSourceFromArea();
+        richArea.addEventListener('input', () => {
+            syncSourceFromArea();
+        });
+        richSource.addEventListener('input', () => {
+            richArea.innerHTML = richSource.value;
+            updateStats();
+        });
+
+        ['repoName','tagline','repoUrl','accent','topics','notes'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', updatePreview);
+        });
+        document.querySelectorAll('input[name="layout"]').forEach(radio => radio.addEventListener('change', updatePreview));
+
+        buildAccentPresetButtons();
+        renderPresetOptions();
+        restoreState();
         updatePreview();
     </script>
 </body>
