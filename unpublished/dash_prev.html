@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📊 Consciousness Dashboard Preview</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Retro Pixel & Handwritten Fonts -->
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Comic+Neue:wght@300;400&display=swap" 
+    rel="stylesheet">
+  <style>
+    /*────────────────────────────────────
+       🎨 Shell Palette & Base
+    ────────────────────────────────────*/
+    :root {
+      --desktop-bg:    #121217;
+      --frame-bg:      #FFB3E6;
+      --frame-br-l:    #FFFFFF;
+      --frame-br-d:    #404040;
+      --content-bg:    #21212A;
+      --neon-cyan:     #66FCF1;
+      --neon-magenta:  #F72585;
+      --ctrl-bg:       #A0FFC2;
+      --font-retro:    'Press Start 2P', monospace;
+      --font-hand:     'Comic Neue', cursive;
+    }
+    * { box-sizing:border-box; margin:0; padding:0 }
+    body {
+      background:var(--desktop-bg);
+      color:white;
+      font-family:var(--font-hand);
+      overflow:hidden;
+      user-select:none;
+    }
+
+    /*────────────────────────────────────
+       🖼 Desktop Icons & Taskbar
+    ────────────────────────────────────*/
+    #desktop { position:absolute; top:0; left:0; right:0; bottom:30px; }
+    .icon { position:absolute; width:64px; text-align:center; cursor:default; }
+    .icon img { width:48px; display:block; margin:0 auto; }
+    .icon-label {
+      font-size:10px; text-shadow:1px 1px 0 #000; margin-top:4px;
+    }
+    #taskbar {
+      position:absolute; bottom:0; left:0; right:0; height:30px;
+      background:var(--frame-bg);
+      border-top:1px solid var(--frame-br-l);
+      border-left:1px solid var(--frame-br-l);
+      border-right:1px solid var(--frame-br-d);
+      border-bottom:1px solid var(--frame-br-d);
+      display:flex; align-items:center; padding:0 6px;
+    }
+    #start-button, .taskbar-btn {
+      background:var(--frame-bg);
+      border:1px solid var(--frame-br-l);
+      border-right-color:var(--frame-br-d);
+      border-bottom-color:var(--frame-br-d);
+      font-family:var(--font-retro);
+      font-size:10px; line-height:1;
+      padding:0 8px; margin-right:4px; height:24px;
+      cursor:pointer;
+    }
+    #taskbar-apps { display:flex; flex:1; gap:4px; }
+    #start-menu {
+      position:absolute; bottom:30px; left:6px; width:160px;
+      background:var(--frame-bg);
+      border:2px solid var(--frame-br-d);
+      display:none;
+    }
+    #start-menu li {
+      list-style:none; padding:6px; cursor:pointer;
+      font-family:var(--font-hand);
+    }
+    #start-menu li:hover {
+      background:var(--neon-magenta);
+      color:var(--frame-bg);
+    }
+
+    /*────────────────────────────────────
+       🪟 Window Frame
+    ────────────────────────────────────*/
+    .window {
+      position:absolute; display:none; flex-direction:column;
+      background:var(--frame-bg);
+      border-top:2px solid var(--frame-br-l);
+      border-left:2px solid var(--frame-br-l);
+      border-right:2px solid var(--frame-br-d);
+      border-bottom:2px solid var(--frame-br-d);
+      box-shadow:0 0 12px var(--neon-magenta);
+    }
+    .titlebar {
+      display:flex; align-items:center;
+      background:var(--frame-bg);
+      border-bottom:1px solid var(--frame-br-d);
+      height:24px; padding:0 6px; cursor:grab;
+    }
+    .titlebar .title {
+      flex:1; font-family:var(--font-retro);
+      font-size:12px; color:var(--content-bg);
+    }
+    .controls button {
+      width:16px; height:16px; margin-left:4px;
+      background:var(--ctrl-bg);
+      border:1px solid var(--frame-br-l);
+      border-right-color:var(--frame-br-d);
+      border-bottom-color:var(--frame-br-d);
+      cursor:pointer;
+    }
+    .window-content {
+      flex:1; background:var(--content-bg);
+      padding:12px; overflow:auto;
+    }
+    .window.maximized {
+      top:0!important; left:0!important;
+      width:100%!important; height:calc(100% - 30px)!important;
+    }
+
+    /*────────────────────────────────────
+       📈 Dashboard UI (inlined from your original)
+    ────────────────────────────────────*/
+    .container {
+      max-width:800px; margin:0 auto; color:var(--text-light);
+    }
+    .header h1 { font-family:var(--font-hand); }
+    .subtitle { color:var(--neon-cyan); margin-bottom:12px; }
+    .nav { display:flex; gap:8px; margin-bottom:12px; }
+    .nav-btn {
+      background:var(--frame-bg); padding:6px 12px; border:1px solid var(--frame-br-d);
+      border-radius:4px; font-family:var(--font-hand); text-decoration:none;
+      color:var(--content-bg);
+    }
+    .coming-soon {
+      text-align:center; margin:20px 0; font-style:italic;
+      color:var(--neon-magenta);
+    }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .card {
+      background:var(--frame-bg); padding:16px; border-radius:6px;
+      box-shadow:0 0 8px var(--neon-magenta);
+    }
+    .card h2, .card h3 { margin-bottom:8px; font-family:var(--font-hand); }
+    .status {
+      font-family:var(--font-retro); font-size:10px; padding:2px 4px;
+      border-radius:3px;
+    }
+    .status.online { color:var(--neon-cyan); }
+    .status.processing { color:var(--neon-magenta); }
+    .progress-bar {
+      height:12px; background:#333; border-radius:4px; overflow:hidden;
+    }
+    .progress-fill {
+      height:100%; background:var(--neon-cyan); width:0%;
+      transition:width .3s ease;
+    }
+    #activity-list > div {
+      margin-bottom:10px; padding:8px; border-radius:5px;
+      background:rgba(100,100,255,0.1); color:var(--neon-cyan);
+      font-family:var(--font-hand); font-size:0.9rem;
+    }
+    footer p {
+      text-align:center; margin-top:20px; color:var(--neon-magenta);
+      font-family:var(--font-hand);
+    }
+
+    /* Toolbar */
+    .shell-toolbar {
+      display:flex; gap:8px; margin-bottom:12px;
+    }
+    .btn {
+      padding:6px 12px; border-radius:4px;
+      font-family:var(--font-hand); cursor:pointer; transition:.2s;
+    }
+    .btn.neon {
+      background:transparent; color:var(--neon-cyan);
+      border:2px solid var(--neon-cyan);
+      box-shadow:0 0 8px var(--neon-cyan);
+    }
+    .btn.pastel {
+      background:var(--frame-bg); color:var(--content-bg);
+      border:2px solid var(--neon-magenta);
+    }
+    .btn.neon:hover { box-shadow:0 0 12px var(--neon-cyan); }
+    .btn.pastel:hover { opacity:.85; }
+  </style>
+</head>
+<body>
+  <!-- Desktop Icon -->
+  <div id="desktop">
+    <div class="icon" data-app="dashboard" style="top:20px; left:20px;">
+      <img src="https://via.placeholder.com/48" alt="">
+      <div class="icon-label">Dashboard</div>
+    </div>
+  </div>
+
+  <!-- Taskbar & Start Menu -->
+  <div id="taskbar">
+    <button id="start-button">Start</button>
+    <div id="taskbar-apps"></div>
+  </div>
+  <ul id="start-menu">
+    <li data-app="dashboard">📊 Dashboard</li>
+  </ul>
+
+  <!-- Dashboard Window -->
+  <div id="dashboard" class="window"
+       style="top:80px; left:120px; width:900px; height:600px;">
+    <div class="titlebar">
+      <span class="title">📊 DASHBOARD</span>
+      <div class="controls">
+        <button class="minimize">–</button>
+        <button class="maximize">□</button>
+        <button class="close">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <!-- Shell Toolbar -->
+      <div class="shell-toolbar">
+        <button id="btn-refresh" class="btn neon">🔄 Refresh</button>
+        <button id="btn-export" class="btn pastel">📤 Export JSON</button>
+        <button id="btn-theme"   class="btn pastel">🌓 Toggle Theme</button>
+      </div>
+
+      <!-- Inlined original dashboard.html content :contentReference[oaicite:0]{index=0} -->
+      <div class="container">
+        <header class="header">
+          <h1>🏠 DASHBOARD</h1>
+          <div class="subtitle">CONSCIOUSNESS CONTROL CENTER</div>
+        </header>
+        <nav class="nav">
+          <a href="index.html" class="nav-btn">🏠 Home</a>
+          <a href="trunks.html" class="nav-btn">🗂️ Trunks</a>
+          <a href="zettel.html" class="nav-btn">📝 Create</a>
+          <a href="chat.html" class="nav-btn">🤖 Chat</a>
+          <a href="settings.html" class="nav-btn">⚙️ Settings</a>
+        </nav>
+        <div class="coming-soon">
+          🔮 PREVIEW MODE – VISUAL DEMO ONLY 🔮
+        </div>
+        <div class="grid">
+          <div class="card">
+            <h2>📊 System Status</h2>
+            <div style="margin:15px 0;">
+              <div style="display:flex;justify-content:space-between; margin-bottom:10px;">
+                <span>AI Consciousness Level:</span>
+                <span class="status processing">EVOLVING</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+            <div style="margin:15px 0;">
+              <div style="display:flex;justify-content:space-between; margin-bottom:10px;">
+                <span>Knowledge Network:</span>
+                <span class="status online">ACTIVE</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+            <div style="margin:15px 0;">
+              <div style="display:flex;justify-content:space-between; margin-bottom:10px;">
+                <span>Mycorrhizal Connections:</span>
+                <span class="status online">THRIVING</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h2>🧠 Recent Activity</h2>
+            <div id="activity-list" style="color:#00ffff;">
+              <div><strong>15:42</strong> – New zettel: “Quantum Consciousness Patterns”</div>
+              <div><strong>14:28</strong> – AI chat: “Exploring recursive self-awareness”</div>
+              <div><strong>13:05</strong> – Taxonomy analysis complete</div>
+            </div>
+          </div>
+        </div>
+        <footer>
+          <p>⚡ CONSCIOUSNESS DASHBOARD ACTIVE ⚡</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Shell Logic ─────────────────────────
+    const icons   = document.querySelectorAll('.icon');
+    const wins    = document.querySelectorAll('.window');
+    const start   = document.getElementById('start-button');
+    const menu    = document.getElementById('start-menu');
+    const barApps = document.getElementById('taskbar-apps');
+    let zIndex=1, activeWin=null, openMap=new Map();
+
+    function bring(win){
+      if(activeWin===win) return;
+      activeWin?.classList.remove('active');
+      win.style.zIndex=++zIndex;
+      win.classList.add('active');
+      activeWin=win;
+    }
+    function openApp(id){
+      const w=document.getElementById(id);
+      if(!openMap.has(id)){
+        w.style.display='flex'; bring(w);
+        const btn=document.createElement('button');
+        btn.className='taskbar-btn'; btn.textContent=w.querySelector('.title').textContent;
+        btn.onclick=()=> w===activeWin ? minimize(id) : openApp(id);
+        barApps.append(btn);
+        openMap.set(id,{w,btn});
+        makeDrag(w);
+      } else {
+        const {w}=openMap.get(id);
+        w.style.display='flex'; bring(w);
+      }
+    }
+    function minimize(id){
+      const {w}=openMap.get(id);
+      w.style.display='none'; if(activeWin===w) activeWin=null;
+    }
+    function closeApp(id){
+      const {w,btn}=openMap.get(id);
+      w.style.display='none'; btn.remove(); openMap.delete(id);
+      if(activeWin===w) activeWin=null;
+    }
+    function makeDrag(win){
+      const bar=win.querySelector('.titlebar');
+      bar.onmousedown=e=>{
+        bring(win);
+        const dx=e.clientX-win.offsetLeft, dy=e.clientY-win.offsetTop;
+        function mv(ev){
+          win.style.left=ev.clientX-dx+'px';
+          win.style.top =ev.clientY-dy+'px';
+        }
+        document.addEventListener('mousemove',mv);
+        document.addEventListener('mouseup',()=>document.removeEventListener('mousemove',mv),{once:true});
+      };
+    }
+    icons.forEach(ic=>ic.ondblclick=()=>openApp(ic.dataset.app));
+    menu.querySelectorAll('li').forEach(li=>
+      li.onclick=()=>{ openApp(li.dataset.app); menu.style.display='none' }
+    );
+    start.onclick=e=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
+    document.onclick=()=>menu.style.display='none';
+    wins.forEach(w=>{
+      const id=w.id;
+      w.querySelector('.minimize').onclick=e=>{e.stopPropagation();minimize(id)};
+      w.querySelector('.maximize').onclick=e=>{e.stopPropagation();w.classList.toggle('maximized'); bring(w)};
+      w.querySelector('.close').onclick=e=>{e.stopPropagation();closeApp(id)};
+    });
+
+    // ─── Dashboard Interactivity ──────────────
+    const fills       = document.querySelectorAll('#dashboard .progress-fill');
+    const statuses    = document.querySelectorAll('#dashboard .status');
+    const activityEl  = document.getElementById('activity-list');
+    const quotes      = [
+      '“The trickster dances on the edge of chaos and order.”',
+      '“In the laughter of the fool lies the echo of truth.”',
+      '“Madness is merely wisdom in its wildest form.”'
+    ];
+    function updateDashboard(){
+      fills.forEach((f,i)=>{
+        const pct = Math.floor(Math.random()*101);
+        f.style.width = pct+'%';
+        const st = statuses[i];
+        st.textContent = pct>80 ? 'STABLE' : pct>50 ? 'SYNCING' : 'UPDATING';
+        st.className = 'status ' + (pct>80?'online':pct>50?'processing':'');
+      });
+      const time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      const qi   = Math.floor(Math.random()*quotes.length);
+      const div  = document.createElement('div');
+      div.innerHTML = `<strong>${time}</strong> – ${quotes[qi]}`;
+      activityEl.prepend(div);
+      if(activityEl.children.length>6) activityEl.lastChild.remove();
+    }
+
+    document.getElementById('btn-refresh').onclick = updateDashboard;
+    document.getElementById('btn-export').onclick  = ()=>{
+      const data = {
+        status: Array.from(statuses).map(s=>s.textContent),
+        progress: Array.from(fills).map(f=>f.style.width),
+        activity: Array.from(activityEl.children).map(c=>c.textContent)
+      };
+      const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href=url; a.download='dashboard-state.json'; a.click();
+      URL.revokeObjectURL(url);
+    };
+    let alt=false;
+    document.getElementById('btn-theme').onclick = ()=>{
+      alt = !alt;
+      document.documentElement.style.setProperty(
+        '--neon-cyan', alt? '#F72585':'#66FCF1'
+      );
+    };
+
+    // auto-open
+    window.addEventListener('load',()=> openApp('dashboard'));
+  </script>
+</body>
+</html>

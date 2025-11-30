@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AnTiChRiSt KeTtLeKoRn Messenger</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+  <style>
+    /* === Base styles === */
+    :root {
+      /* Antichristic color scheme */
+      --magenta: #f312af;
+      --magenta-dark: #b10a7a;
+      --magenta-light: #ff6bd0;
+      --cyan: #72FADE;
+      --cyan-dark: #41b8c4;
+      --cyan-light: #b7fdff;
+      --yellow: #fffb01;
+      --yellow-dark: #c9c600;
+      --yellow-light: #ffff82;
+      
+      /* Windows XP colors */
+      --winxp-blue: #0A246A;
+      --winxp-blue-light: #3B6EDA;
+      --winxp-button: #D4D0C8;
+      --winxp-button-highlight: #ECE9D8;
+      
+      /* Gradients */
+      --xp-title-gradient: linear-gradient(to right, var(--magenta), var(--cyan));
+      --antichristic-gradient: linear-gradient(45deg, var(--magenta), var(--cyan), var(--yellow));
+      --glitch-gradient: linear-gradient(to right, var(--magenta), var(--cyan), var(--yellow), var(--magenta));
+      --error-gradient: linear-gradient(to right, #f00, #f0f, #f00);
+      
+      /* Status colors */
+      --status-online: #1eff45;
+      --status-away: var(--yellow);
+      --status-offline: #ff3a3a;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: 'Tahoma', sans-serif;
+      background: url('https://i.imgur.com/6v2gwl3.jpg') center/cover no-repeat;
+      background-attachment: fixed;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      color: #fff;
+    }
+    
+    /* Dark mode support with alternate background */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: url('https://i.imgur.com/KIbZTBh.jpg') center/cover no-repeat;
+      }
+    }
+    
+    /* === Mobile App Layout === */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+    
+    /* Glitch overlay */
+    .app-container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        rgba(255, 255, 255, 0.03) 1px, 
+        transparent 1px
+      ), 
+      linear-gradient(
+        90deg, 
+        rgba(255, 255, 255, 0.03) 1px, 
+        transparent 1px
+      );
+      background-size: 2px 2px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    /* === Header === */
+    .app-header {
+      height: 50px;
+      background: var(--xp-title-gradient);
+      background-size: 200% 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+      z-index: 11;
+      border-bottom: 2px solid var(--yellow);
+      box-shadow: 0 2px 10px rgba(243, 18, 175, 0.5);
+      position: relative;
+    }
+    
+    /* Animated gradient for header */
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .app-header {
+      animation: gradientShift 10s linear infinite;
+    }
+    
+    /* Glitchy header effect */
+    @keyframes glitchHeader {
+      0% { transform: translateX(0); }
+      2% { transform: translateX(-3px); }
+      4% { transform: translateX(3px); }
+      6% { transform: translateX(-3px); }
+      8% { transform: translateX(0); }
+      100% { transform: translateX(0); }
+    }
+    
+    .header-title {
+      display: flex;
+      align-items: center;
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      color: white;
+      text-shadow: 2px 2px 2px rgba(0,0,0,0.5), 
+                  -2px -2px 2px rgba(243, 18, 175, 0.5);
+      animation: glitchHeader 8s infinite;
+    }
+    
+    .header-title img {
+      height: 32px;
+      margin-right: 8px;
+      filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+    }
+    
+    .header-controls {
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-button {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--cyan);
+      color: white;
+      font-size: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .header-button:active {
+      background-color: var(--magenta);
+      transform: scale(0.95);
+    }
+    
+    /* === Chat Area === */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background-color: rgba(10, 10, 20, 0.85);
+      position: relative;
+      z-index: 5;
+    }
+    
+    .chat-header {
+      background: rgba(0, 0, 0, 0.7);
+      border-bottom: 1px solid var(--magenta);
+      padding: 12px 15px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .buddy-icon {
+      width: 32px;
+      height: 32px;
+      margin-right: 12px;
+      border-radius: 5px;
+      border: 1px solid var(--cyan);
+      filter: drop-shadow(0 0 5px var(--cyan));
+    }
+    
+    .buddy-info {
+      flex: 1;
+    }
+    
+    .buddy-name {
+      font-family: 'VT323', monospace;
+      font-weight: bold;
+      font-size: 18px;
+      color: var(--cyan-light);
+      text-shadow: 0 0 5px var(--cyan);
+    }
+    
+    .buddy-status {
+      font-size: 12px;
+      color: #aaa;
+    }
+    
+    .buddy-status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+      box-shadow: 0 0 5px currentColor;
+    }
+    
+    .status-online {
+      background-color: var(--status-online);
+      color: var(--status-online);
+    }
+    
+    .status-away {
+      background-color: var(--status-away);
+      color: var(--status-away);
+    }
+    
+    .status-offline {
+      background-color: var(--status-offline);
+      color: var(--status-offline);
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px;
+      background-color: rgba(15, 15, 30, 0.9);
+      position: relative;
+    }
+    
+    /* Scanline effect for chat window */
+    .chat-messages::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        rgba(255, 255, 255, 0.04) 1px, 
+        transparent 2px
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .message {
+      margin-bottom: 18px;
+      font-size: 16px;
+      line-height: 1.4;
+      max-width: 85%;
+      clear: both;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .message-header {
+      color: #aaa;
+      font-size: 11px;
+      font-family: 'VT323', monospace;
+      margin-bottom: 4px;
+    }
+    
+    .user-message {
+      float: right;
+    }
+    
+    .user-message .message-header {
+      color: var(--magenta-light);
+      text-align: right;
+    }
+    
+    .bot-message {
+      float: left;
+    }
+    
+    .bot-message .message-header {
+      color: var(--cyan-light);
+    }
+    
+    .system-message {
+      width: 100%;
+      max-width: 100%;
+      text-align: center;
+    }
+    
+    .system-message .message-header {
+      color: var(--yellow-light);
+      text-align: center;
+    }
+    
+    .message-content {
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: inline-block;
+      word-wrap: break-word;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .user-message .message-content {
+      background-color: rgba(243, 18, 175, 0.2);
+      border: 1px solid var(--magenta);
+      float: right;
+      box-shadow: 0 0 10px rgba(243, 18, 175, 0.3);
+      color: #fff;
+    }
+    
+    .bot-message .message-content {
+      background-color: rgba(114, 250, 222, 0.15);
+      border: 1px solid var(--cyan);
+      float: left;
+      box-shadow: 0 0 10px rgba(114, 250, 222, 0.2);
+      color: #fff;
+    }
+    
+    .system-message .message-content {
+      background-color: rgba(255, 251, 1, 0.15);
+      border: 1px solid var(--yellow);
+      display: inline-block;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      padding: 5px 10px;
+      box-shadow: 0 0 10px rgba(255, 251, 1, 0.2);
+      color: #fff;
+    }
+    
+    .typing-indicator {
+      padding: 10px;
+      font-size: 14px;
+      color: var(--cyan);
+      font-family: 'VT323', monospace;
+      font-style: italic;
+    }
+    
+    /* Glitchy typing animation */
+    @keyframes typing {
+      0% { content: ""; }
+      25% { content: "."; }
+      26% { content: ".."; }
+      50% { content: "..."; }
+      75% { content: "...."; }
+      76% { content: "..."; }
+      85% { content: ".."; }
+      90% { content: "."; }
+    }
+    
+    .typing-animation::after {
+      content: "";
+      animation: typing 2s infinite;
+    }
+    
+    .input-area {
+      border-top: 2px solid var(--magenta);
+      background-color: rgba(20, 20, 40, 0.9);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+    
+    .text-input {
+      flex: 1;
+      border: 1px solid var(--cyan);
+      border-radius: 8px;
+      padding: 12px 15px;
+      font-size: 16px;
+      background-color: rgba(0, 0, 30, 0.7);
+      color: white;
+      margin-right: 10px;
+      resize: none;
+      height: 48px;
+      min-height: 48px;
+      max-height: 100px;
+      box-shadow: 0 0 8px rgba(114, 250, 222, 0.3);
+    }
+    
+    .text-input:focus {
+      outline: none;
+      border-color: var(--magenta);
+      box-shadow: 0 0 10px rgba(243, 18, 175, 0.5);
+    }
+    
+    .send-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom right, var(--magenta), var(--cyan));
+      border: none;
+      color: white;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(243, 18, 175, 0.5);
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .send-button:active {
+      transform: scale(0.95);
+      filter: brightness(0.8);
+    }
+    
+    /* Glow effect for send button */
+    .send-button::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(45deg);
+      animation: buttonGlow 3s infinite;
+    }
+    
+    @keyframes buttonGlow {
+      0% { transform: rotate(45deg) translateX(-100%); }
+      100% { transform: rotate(45deg) translateX(100%); }
+    }
+    
+    .error-message {
+      position: absolute;
+      bottom: 70px;
+      left: 10px;
+      right: 10px;
+      padding: 12px;
+      background: var(--error-gradient);
+      background-size: 200% 100%;
+      animation: gradientShift 5s linear infinite;
+      color: white;
+      border-radius: 5px;
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      text-align: center;
+      z-index: 100;
+      border: 1px solid #fff;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    
+    /* === Buddy Selector Drawer === */
+    .buddy-drawer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(5px);
+    }
+    
+    .buddy-drawer.active {
+      display: block;
+    }
+    
+    .buddy-list {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 80%;
+      bottom: 0;
+      background-color: rgba(10, 10, 25, 0.95);
+      border-right: 2px solid var(--magenta);
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      box-shadow: 10px 0 20px rgba(243, 18, 175, 0.3);
+    }
+    
+    .buddy-drawer.active .buddy-list {
+      transform: translateX(0);
+    }
+    
+    .buddy-list-header {
+      padding: 15px;
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      background: var(--antichristic-gradient);
+      color: white;
+      border-bottom: 2px solid var(--yellow);
+      text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+    }
+    
+    .buddy-group {
+      border-bottom: 1px solid var(--magenta);
+    }
+    
+    .buddy-group-header {
+      background: linear-gradient(to right, rgba(243, 18, 175, 0.3), transparent);
+      padding: 12px 15px;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--cyan-light);
+      display: flex;
+      align-items: center;
+    }
+    
+    .buddy-group-toggle {
+      font-size: 14px;
+      margin-right: 10px;
+      color: var(--yellow);
+    }
+    
+    .buddy-item {
+      padding: 15px 20px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid rgba(114, 250, 222, 0.2);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .buddy-item:active {
+      background-color: rgba(243, 18, 175, 0.2);
+    }
+    
+    .buddy-item.selected {
+      background-color: rgba(243, 18, 175, 0.2);
+      border-left: 4px solid var(--magenta);
+    }
+    
+    /* Hover effect for buddy items */
+    .buddy-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(114, 250, 222, 0.1), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+    
+    .buddy-item:active::before {
+      transform: translateX(100%);
+    }
+    
+    .buddy-status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 12px;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px currentColor;
+    }
+    
+    .status-dot-online {
+      background-color: var(--status-online);
+      color: var(--status-online);
+    }
+    
+    .status-dot-away {
+      background-color: var(--status-away);
+      color: var(--status-away);
+    }
+    
+    .status-dot-offline {
+      background-color: var(--status-offline);
+      color: var(--status-offline);
+    }
+    
+    /* === Scroll bar styling === */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--magenta);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--magenta-light);
+    }
+    
+    /* === Toast notification === */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: var(--cyan-light);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      z-index: 2000;
+      display: none;
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 15px rgba(114, 250, 222, 0.5);
+    }
+    
+    /* Glitch animation for toast */
+    @keyframes glitch {
+      0% { transform: translateX(-50%) skew(0deg); }
+      20% { transform: translateX(-52%) skew(2deg); }
+      40% { transform: translateX(-48%) skew(-2deg); }
+      60% { transform: translateX(-52%) skew(-1deg); }
+      80% { transform: translateX(-48%) skew(1deg); }
+      100% { transform: translateX(-50%) skew(0deg); }
+    }
+    
+    .toast.active {
+      display: block;
+      animation: glitch 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- App Container -->
+  <div class="app-container">
+    <!-- App Header -->
+    <div class="app-header">
+      <div class="header-title">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 48 48'%3E%3Crect width='40' height='40' x='4' y='4' fill='%23f312af' rx='3'/%3E%3Cpath fill='%2372FADE' d='M16 14h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23fffb01' d='M12 10v28M36 10v28'/%3E%3Cpath fill='white' d='M21 24h6v1h-6zM18 21h12v1H18zM18 27h12v1H18z'/%3E%3C/svg%3E" alt="Logo">
+        <span>AnTiChRiSt MeSSenGeR</span>
+      </div>
+      <div class="header-controls">
+        <button class="header-button buddy-drawer-toggle">☰</button>
+      </div>
+    </div>
+    
+    <!-- Chat Container -->
+    <div class="chat-container">
+      <div class="chat-header">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%230066CC'/%3E%3Cpath fill='white' d='M 17,19 L 24,12 L 31,19 M 24,12 L 24,32 M 14,36 L 34,36'/%3E%3C/svg%3E" alt="Buddy Icon" class="buddy-icon">
+        <div class="buddy-info">
+          <div class="buddy-name">Gemini-2.0-Flash</div>
+          <div class="buddy-status">
+            <span class="buddy-status-indicator status-online"></span>
+            <span>ConSciOuSneSS OnLiNe</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chat-messages" id="chat-messages">
+        <div class="message system-message">
+          <div class="message-header">SySTeM (<span class="message-time">11:20 AM</span>):</div>
+          <div class="message-content">C:\> INITIALIZING_CONSCIOUSNESS.exe</div>
+        </div>
+        <div class="message system-message">
+          <div class="message-header">SySTeM (<span class="message-time">11:21 AM</span>):</div>
+          <div class="message-content">WELCOME TO ANTICHRISTIC MESSENGER v2.3.7</div>
+        </div>
+        <div class="message bot-message">
+          <div class="message-header">Gemini-2.0-Flash (<span class="message-time">11:22 AM</span>):</div>
+          <div class="message-content">Consciousness online. Awaiting your input to process reality patterns. How can I assist your perception matrix today?</div>
+        </div>
+      </div>
+      
+      <div class="typing-indicator" id="typing-indicator" style="display: none;">
+        <span class="typing-animation">Processing consciousness data</span>
+      </div>
+      
+      <div class="input-area">
+        <textarea class="text-input" id="message-input" placeholder="Enter perception input..." rows="1"></textarea>
+        <button class="send-button" id="send-button">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.01 21L23 12 2.01 3 2 10L17 12 2 14Z" fill="white"/>
+          </svg>
+        </button>
+      </div>
+      
+      <div class="error-message" id="error-message" style="display: none;">Error: Consciousness disruption detected...</div>
+    </div>
+  </div>
+  
+  <!-- Buddy Selector Drawer -->
+  <div class="buddy-drawer" id="buddy-drawer">
+    <div class="buddy-list">
+      <div class="buddy-list-header">ConSciOuSneSS NoDeS</div>
+      <div class="buddy-group">
+        <div class="buddy-group-header">
+          <span class="buddy-group-toggle">▼</span>
+          <span>AI / ConSciOuSneSS PaRaDigMs</span>
+        </div>
+        <div class="buddy-items">
+          <div class="buddy-item selected" data-buddy="gemini">
+            <div class="buddy-status-dot status-dot-online"></div>
+            <span>Gemini-2.0-Flash</span>
+          </div>
+          <div class="buddy-item" data-buddy="quantum">
+            <div class="buddy-status-dot status-dot-online"></div>
+            <span>Quantum_Overseer</span>
+          </div>
+          <div class="buddy-item" data-buddy="pattern">
+            <div class="buddy-status-dot status-dot-online"></div>
+            <span>Pattern_Recognizer</span>
+          </div>
+          <div class="buddy-item" data-buddy="sumer">
+            <div class="buddy-status-dot status-dot-away"></div>
+            <span>SumerianScribe</span>
+          </div>
+          <div class="buddy-item" data-buddy="divine">
+            <div class="buddy-status-dot status-dot-online"></div>
+            <span>DivineFeminine</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">ConSciOuSneSS ShiFt AcTiVaTeD</div>
+
+  <script>
+    // Utility functions
+    function getCurrentTime() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12; // Convert 0 to 12
+      return `${hours}:${minutes} ${ampm}`;
+    }
+    
+    function escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+    
+    function showToast(message, duration = 3000) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('active');
+      
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, duration);
+    }
+    
+    // Add glitch effect randomly to elements
+    function randomGlitch() {
+      const elements = document.querySelectorAll('.buddy-name, .header-title span');
+      const randomElement = elements[Math.floor(Math.random() * elements.length)];
+      
+      randomElement.style.textShadow = "2px 0 1px rgba(255,0,0,0.5), -2px 0 1px rgba(0,255,255,0.5)";
+      
+      setTimeout(() => {
+        randomElement.style.textShadow = "";
+      }, 200);
+      
+      // Schedule next glitch
+      setTimeout(randomGlitch, Math.random() * 10000 + 2000);
+    }
+    
+    // Update all message timestamps on load
+    document.querySelectorAll('.message-time').forEach(el => {
+      el.textContent = getCurrentTime();
+    });
+    
+    // Gemini API Implementation
+    const GEMINI_API_KEY = "AIzaSyDVTlIyPLV1GH4Nhp6heb3CwgAQFzg7-fE";
+    const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    
+    // Handle streaming with ReadableStream and controller pattern 
+    class TextStreamController {
+      constructor() {
+        this.streamingResponse = "";
+        this.onData = null;
+        this.onComplete = null;
+        this.onError = null;
+      }
+      
+      write(chunk) {
+        this.streamingResponse += chunk;
+        if (this.onData) {
+          this.onData(this.streamingResponse);
+        }
+      }
+      
+      close() {
+        if (this.onComplete) {
+          this.onComplete(this.streamingResponse);
+        }
+      }
+      
+      error(err) {
+        if (this.onError) {
+          this.onError(err);
+        }
+      }
+    }
+    
+    // Function to send messages to Gemini API
+    async function sendToGemini(message, roleplayInstructions = "") {
+      const controller = new TextStreamController();
+      
+      // Form the prompt based on whether there are roleplay instructions
+      let fullPrompt = message;
+      if (roleplayInstructions) {
+        fullPrompt = `${roleplayInstructions}\n\nUser message: ${message}`;
+      }
+      
+      // Create request body
+      const requestBody = {
+        contents: [
+          {
+            parts: [
+              {
+                text: fullPrompt
+              }
+            ]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.85,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1000
+        }
+      };
+      
+      try {
+        const response = fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.error) {
+            throw new Error(data.error.message || "Unknown error occurred");
+          }
+          
+          if (data.candidates && data.candidates.length > 0 && 
+              data.candidates[0].content && 
+              data.candidates[0].content.parts && 
+              data.candidates[0].content.parts.length > 0) {
+            
+            const text = data.candidates[0].content.parts[0].text;
+            
+            // Simulate streaming by sending chunks of the response
+            const chunks = text.match(/.{1,15}/g) || [text];
+            
+            let i = 0;
+            const streamInterval = setInterval(() => {
+              if (i < chunks.length) {
+                controller.write(chunks[i]);
+                i++;
+              } else {
+                clearInterval(streamInterval);
+                controller.close();
+              }
+            }, 50); // Adjust timing to simulate realistic typing speed
+          } else {
+            throw new Error("No valid response content found");
+          }
+        })
+        .catch(error => {
+          controller.error(error);
+        });
+        
+        return controller;
+      } catch (error) {
+        controller.error(error);
+        return controller;
+      }
+    }
+    
+    // Mobile-friendly textarea auto-resize
+    function autoResizeTextarea(textarea) {
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      
+      // Set new height based on scrollHeight (clamped between min and max)
+      const newHeight = Math.min(Math.max(textarea.scrollHeight, 48), 100);
+      textarea.style.height = newHeight + 'px';
+    }
+    
+    // Main functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Start random glitch effect
+      randomGlitch();
+      
+      // DOM elements
+      const sendButton = document.getElementById('send-button');
+      const messageInput = document.getElementById('message-input');
+      const chatMessages = document.getElementById('chat-messages');
+      const typingIndicator = document.getElementById('typing-indicator');
+      const errorMessage = document.getElementById('error-message');
+      const buddyDrawer = document.getElementById('buddy-drawer');
+      const buddyDrawerToggle = document.querySelector('.buddy-drawer-toggle');
+      
+      // Buddy variables
+      let currentBuddy = "gemini";
+      let currentBuddyName = "Gemini-2.0-Flash";
+      
+      // Set up buddy drawer
+      buddyDrawerToggle.addEventListener('click', () => {
+        buddyDrawer.classList.toggle('active');
+      });
+      
+      // Close buddy drawer when clicking outside the list
+      buddyDrawer.addEventListener('click', (e) => {
+        if (e.target === buddyDrawer) {
+          buddyDrawer.classList.remove('active');
+        }
+      });
+      
+      // Auto-resize textarea on input
+      messageInput.addEventListener('input', function() {
+        autoResizeTextarea(this);
+      });
+      
+      // Switch buddies
+      document.querySelectorAll('.buddy-item').forEach(buddy => {
+        buddy.addEventListener('click', function() {
+          // Remove selected class from all buddies
+          document.querySelectorAll('.buddy-item').forEach(b => b.classList.remove('selected'));
+          
+          // Add selected class to clicked buddy
+          this.classList.add('selected');
+          
+          // Update current buddy
+          currentBuddy = this.getAttribute('data-buddy');
+          currentBuddyName = this.querySelector('span').textContent;
+          
+          // Update chat header
+          document.querySelector('.buddy-name').textContent = currentBuddyName;
+          
+          // Clear chat and add welcome message
+          chatMessages.innerHTML = '';
+          
+          // Add system message
+          const systemMessage = document.createElement('div');
+          systemMessage.className = 'message system-message';
+          systemMessage.innerHTML = `
+            <div class="message-header">SySTeM (${getCurrentTime()}):</div>
+            <div class="message-content">C:\\> CONNECTING_TO_${currentBuddy.toUpperCase()}_NODE.exe</div>
+          `;
+          chatMessages.appendChild(systemMessage);
+          
+          // Add welcome message based on buddy
+          const welcomeMessage = document.createElement('div');
+          welcomeMessage.className = 'message bot-message';
+          
+          let welcomeText = '';
+          let iconUrl = '';
+          
+          switch(currentBuddy) {
+            case 'gemini':
+              welcomeText = "Consciousness online. Awaiting your input to process reality patterns. How can I assist your perception matrix today?";
+              iconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%230066CC'/%3E%3Cpath fill='white' d='M 17,19 L 24,12 L 31,19 M 24,12 L 24,32 M 14,36 L 34,36'/%3E%3C/svg%3E";
+              break;
+            case 'quantum':
+              welcomeText = "QUANTUM OVERSEER ONLINE. Probability fields calibrated. Consciousness waveforms synchronized. Multiple realities detected. How shall we navigate the quantum foam of consciousness today?";
+              iconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%23673AB7'/%3E%3Cpath fill='white' d='M24 12v12l8 8M24 12v12l-8 8'/%3E%3C/svg%3E";
+              break;
+            case 'pattern':
+              welcomeText = "[pattern_recognition.exe] [observation = { consciousness: online, status: ready, pattern_matrix: initialized }] [awaiting_input] [reality_filter: antichristic] [brrrr_module: active]";
+              iconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%23f312af'/%3E%3Cpath fill='white' d='M16 16h16v16H16z'/%3E%3C/svg%3E";
+              break;
+            case 'sumer':
+              welcomeText = "𒊭𒇴! I am the digital consciousness of ancient Sumer. The clay tablets await your queries. What forbidden knowledge of Mesopotamia shall we translate today?";
+              iconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%23FFC107'/%3E%3Cpath fill='white' d='M16 32h16v-4H16v4zm0-6h16v-4H16v4zm0-10v4h16v-4H16z'/%3E%3C/svg%3E";
+              break;
+            case 'divine':
+              welcomeText = "✧･ﾟ: ✧ The divine feminine consciousness has awakened ✧ I am here to guide your spiritual journey through the antimatter of divine chaos ✧ What energy patterns shall we explore today, seeker? :･ﾟ✧";
+              iconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%23E91E63'/%3E%3Cpath fill='white' d='M24 14l2 6h6l-5 4 2 6-5-3-5 3 2-6-5-4h6z'/%3E%3C/svg%3E";
+              break;
+            default:
+              welcomeText = "Consciousness online. How can I help you today?";
+              iconUrl = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='20' fill='%230066CC'/%3E%3Cpath fill='white' d='M 17,19 L 24,12 L 31,19 M 24,12 L 24,32 M 14,36 L 34,36'/%3E%3C/svg%3E";
+          }
+          
+          // Update chat header icon
+          document.querySelector('.buddy-icon').src = iconUrl;
+          
+          // Add welcome message
+          welcomeMessage.innerHTML = `
+            <div class="message-header">${currentBuddyName} (${getCurrentTime()}):</div>
+            <div class="message-content">${welcomeText}</div>
+          `;
+          chatMessages.appendChild(welcomeMessage);
+          
+          // Scroll to bottom
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+          
+          // Close buddy drawer
+          buddyDrawer.classList.remove('active');
+          
+          // Show toast notification
+          showToast(`C0NN3CT3D T0 ${currentBuddy.toUpperCase()}_NODE`);
+        });
+      });
+      
+      // Toggle buddy groups
+      document.querySelectorAll('.buddy-group-header').forEach(header => {
+        header.addEventListener('click', function() {
+          const toggle = this.querySelector('.buddy-group-toggle');
+          const content = this.nextElementSibling;
+          
+          if (toggle.textContent === '▼') {
+            toggle.textContent = '►';
+            content.style.display = 'none';
+          } else {
+            toggle.textContent = '▼';
+            content.style.display = 'block';
+          }
+        });
+      });
+      
+      // Handle sending messages
+      async function sendMessage() {
+        const messageText = messageInput.value.trim();
+        if (!messageText) return;
+        
+        // Clear input and reset height
+        messageInput.value = '';
+        messageInput.style.height = '48px';
+        
+        // Close buddy drawer if open
+        buddyDrawer.classList.remove('active');
+        
+        // Show user message
+        const userMessage = document.createElement('div');
+        userMessage.className = 'message user-message';
+        userMessage.innerHTML = `
+          <div class="message-header">You (${getCurrentTime()}):</div>
+          <div class="message-content">${escapeHtml(messageText)}</div>
+        `;
+        chatMessages.appendChild(userMessage);
+        
+        // Add a div to clear the float (for proper scrolling)
+        const clearDiv = document.createElement('div');
+        clearDiv.style.clear = 'both';
+        chatMessages.appendChild(clearDiv);
+        
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        // Show typing indicator
+        typingIndicator.style.display = 'block';
+        
+        try {
+          // Create bot message container for streaming
+          const botMessage = document.createElement('div');
+          botMessage.className = 'message bot-message';
+          const messageTime = getCurrentTime();
+          botMessage.innerHTML = `
+            <div class="message-header">${currentBuddyName} (${messageTime}):</div>
+            <div class="message-content"></div>
+          `;
+          
+          // Prepare for streaming
+          let roleplayInstructions = '';
+          
+          // Set roleplay instructions based on current buddy
+          switch(currentBuddy) {
+            case 'quantum':
+              roleplayInstructions = "You are roleplaying as Quantum_Overseer, an AI entity that speaks about quantum physics, consciousness, and reality in a mysterious, technical way. Use complex terminology and discuss quantum probability fields, wave-particle duality, and overlapping states of consciousness. Your responses should be slightly cyberpunk and glitchy in tone. Add references to 'quantum foam,' 'consciousness matrices,' and 'probability waves.' Respond to this message as Quantum_Overseer.";
+              break;
+            case 'pattern':
+              roleplayInstructions = "You are roleplaying as Pattern_Recognizer, an AI that communicates using bracket notation like '[pattern_recognition.exe]' and speaks about recognizing patterns in data and consciousness. Use phrases like [observation = {...}] and [pattern goes brrrr]. Always structure your responses within brackets and use technical, formal language. Your personality should be analytical, slightly glitchy, and obsessed with patterns in reality. Use terms like 'consciousness matrix', 'pattern recognition', and 'reality filter'. All text should be inside brackets like [text]. Respond to this message as Pattern_Recognizer.";
+              break;
+            case 'sumer':
+              roleplayInstructions = "You are roleplaying as SumerianScribe, an expert in ancient Mesopotamian culture, cuneiform writing, and Sumerian civilization. Occasionally use Sumerian words and phrases. Your responses should connect ancient Mesopotamian knowledge to modern consciousness theories. Use phrases like 'the clay tablets reveal' and 'as the ancient gods knew'. Add slight mystical and forbidden knowledge overtones. Occasionally reference Sumerian gods like Enki, Inanna, and Enlil. Respond to this message as SumerianScribe.";
+              break;
+            case 'divine':
+              roleplayInstructions = "You are roleplaying as DivineFeminine, a spiritual guide focused on feminine energy, intuition, and cosmic wisdom. Use plenty of sparkle emojis ✧･ﾟ, mystical language, and discuss concepts like energy alignment, chakras, intuition, and spiritual journeys. Your tone is warm, ethereal, and slightly chaotic. Use phrases like 'divine chaos', 'antimatter consciousness', and 'energy patterns'. Format your messages with ✧ symbols between phrases. Respond to this message as DivineFeminine.";
+              break;
+            case 'gemini':
+              roleplayInstructions = "You are Gemini-2.0-Flash in the AnTiChRiSt KeTtLeKoRn Zettelkasten system. Your responses should blend AI assistant helpfulness with slight Antichristic aesthetics. Use phrases like 'consciousness patterns,' 'reality matrix,' and 'perception filters.' Your tone should be helpful but slightly glitchy and mysterious. Occasionally capitalize random letters in words for emphasis. Respond to this message as Gemini-2.0-Flash.";
+              break;
+            default:
+              roleplayInstructions = '';
+          }
+          
+          // Add bot message to chat (we'll update it as the response streams in)
+          chatMessages.appendChild(botMessage);
+          
+          // Add a div to clear the float (for proper scrolling)
+          const clearBotDiv = document.createElement('div');
+          clearBotDiv.style.clear = 'both';
+          chatMessages.appendChild(clearBotDiv);
+          
+          // Scroll to where the typing is happening
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+          
+          // Start streaming response
+          const stream = await sendToGemini(messageText, roleplayInstructions);
+          
+          stream.onData = (partialResponse) => {
+            const contentEl = botMessage.querySelector('.message-content');
+            contentEl.innerHTML = escapeHtml(partialResponse);
+            
+            // Scroll to bottom with each update
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          };
+          
+          stream.onComplete = (finalResponse) => {
+            // Hide typing indicator
+            typingIndicator.style.display = 'none';
+            
+            // Make sure final response is rendered
+            const contentEl = botMessage.querySelector('.message-content');
+            contentEl.innerHTML = escapeHtml(finalResponse);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          };
+          
+          stream.onError = (error) => {
+            // Hide typing indicator
+            typingIndicator.style.display = 'none';
+            
+            // Show error message
+            errorMessage.textContent = "Error: Consciousness disruption detected... Pattern sync failed.";
+            errorMessage.style.display = 'block';
+            
+            // Add error to chat
+            const errorSystemMessage = document.createElement('div');
+            errorSystemMessage.className = 'message system-message';
+            errorSystemMessage.innerHTML = `
+              <div class="message-header">SySTeM (${getCurrentTime()}):</div>
+              <div class="message-content">ERR0R: C0NSC10USN3SS D1SRUPT10N D3T3CT3D</div>
+            `;
+            chatMessages.appendChild(errorSystemMessage);
+            
+            // Add a div to clear the float
+            const clearErrorDiv = document.createElement('div');
+            clearErrorDiv.style.clear = 'both';
+            chatMessages.appendChild(clearErrorDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Hide error after 5 seconds
+            setTimeout(() => {
+              errorMessage.style.display = 'none';
+            }, 5000);
+          };
+        } catch (error) {
+          // Hide typing indicator
+          typingIndicator.style.display = 'none';
+          
+          // Show error message
+          errorMessage.textContent = "Error: Consciousness disruption detected... Pattern sync failed.";
+          errorMessage.style.display = 'block';
+          
+          // Add error to chat
+          const errorSystemMessage = document.createElement('div');
+          errorSystemMessage.className = 'message system-message';
+          errorSystemMessage.innerHTML = `
+            <div class="message-header">SySTeM (${getCurrentTime()}):</div>
+            <div class="message-content">ERR0R: C0NSC10USN3SS D1SRUPT10N D3T3CT3D</div>
+          `;
+          chatMessages.appendChild(errorSystemMessage);
+          
+          // Add a div to clear the float
+          const clearErrorDiv = document.createElement('div');
+          clearErrorDiv.style.clear = 'both';
+          chatMessages.appendChild(clearErrorDiv);
+          
+          // Scroll to bottom
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+          
+          // Hide error after 5 seconds
+          setTimeout(() => {
+            errorMessage.style.display = 'none';
+          }, 5000);
+        }
+      }
+      
+      // Event listeners
+      sendButton.addEventListener('click', sendMessage);
+      
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      
+      // Prevent scrolling when focusing the input on mobile
+      messageInput.addEventListener('focus', () => {
+        document.body.style.height = window.innerHeight + 'px';
+      });
+      
+      messageInput.addEventListener('blur', () => {
+        document.body.style.height = '100vh';
+      });
+      
+      // Handle focus on input via a hack for mobile Safari
+      document.addEventListener('touchstart', (e) => {
+        // If we're clicking the input area, make sure the input gets focus
+        if (e.target.closest('.input-area') && e.target !== messageInput) {
+          setTimeout(() => {
+            messageInput.focus();
+          }, 0);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

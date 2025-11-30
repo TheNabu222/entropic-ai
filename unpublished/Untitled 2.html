@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Neon-Pastel Win95 Shell – Full Redesign</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <!-- Retro Pixel + Hand-Drawn Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Comic+Neue:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    /*────────────────────────────────────────────────────────
+      🎨 Palette & Typography
+    ────────────────────────────────────────────────────────*/
+    :root {
+      /* Desktop & Content */
+      --desktop-bg:       #121217;
+      --content-bg:       #21212A;
+      --text-light:       #F8F8F2;
+      /* Neon Accents */
+      --neon-cyan:        #66FCF1;
+      --neon-magenta:     #F72585;
+      /* Pastel Win95 Frames */
+      --frame-bg:         #FFB3E6;
+      --frame-br-light:   #FFFFFF;
+      --frame-br-dark:    #404040;
+      --title-fg:         #121217;
+      --ctrl-bg:          #A0FFC2;
+      /* Fonts */
+      --font-retro:       'Press Start 2P', monospace;
+      --font-hand:        'Comic Neue', cursive;
+    }
+    /* Base Reset */
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      background: var(--desktop-bg);
+      overflow: hidden;
+      user-select: none;
+      font-family: var(--font-hand);
+      color: var(--text-light);
+    }
+    /*────────────────────────────────────────────────────────
+      🖼️ Desktop Icons
+    ────────────────────────────────────────────────────────*/
+    #desktop {
+      position: absolute;
+      top:0; left:0; right:0; bottom:30px;
+    }
+    .icon {
+      position: absolute;
+      width:64px;
+      text-align:center;
+      cursor:default;
+    }
+    .icon img {
+      width:48px; display:block; margin:0 auto;
+    }
+    .icon-label {
+      font-size:10px;
+      margin-top:4px;
+      text-shadow:1px 1px 0 #000;
+      color: var(--text-light);
+    }
+    /*────────────────────────────────────────────────────────
+      🎛️ Taskbar & Start Menu
+    ────────────────────────────────────────────────────────*/
+    #taskbar {
+      position:absolute; bottom:0; left:0; right:0; height:30px;
+      background: var(--frame-bg);
+      border-top:1px solid var(--frame-br-light);
+      border-left:1px solid var(--frame-br-light);
+      border-right:1px solid var(--frame-br-dark);
+      border-bottom:1px solid var(--frame-br-dark);
+      display:flex; align-items:center; padding:0 6px;
+    }
+    #start-button, .taskbar-btn {
+      background: var(--frame-bg);
+      border-top:1px solid var(--frame-br-light);
+      border-left:1px solid var(--frame-br-light);
+      border-right:1px solid var(--frame-br-dark);
+      border-bottom:1px solid var(--frame-br-dark);
+      font-family: var(--font-retro);
+      font-size:10px; line-height:1;
+      padding:0 8px; height:24px; margin-right:4px;
+      cursor:pointer;
+    }
+    #taskbar-apps { display:flex; flex:1; gap:4px; }
+    #start-menu {
+      position:absolute; bottom:30px; left:6px; width:180px;
+      background: var(--frame-bg);
+      border:2px solid var(--frame-br-dark);
+      border-top-color:var(--frame-br-light);
+      border-left-color:var(--frame-br-light);
+      display:none;
+    }
+    #start-menu ul { list-style:none; padding:4px; }
+    #start-menu li {
+      padding:4px; cursor:pointer; font-family:var(--font-hand);
+    }
+    #start-menu li:hover {
+      background: var(--neon-magenta);
+      color: var(--frame-bg);
+    }
+    /*────────────────────────────────────────────────────────
+      🪟 Windows & Titlebars
+    ────────────────────────────────────────────────────────*/
+    .window {
+      position:absolute;
+      display:none;
+      flex-direction:column;
+      background: var(--frame-bg);
+      border-top:2px solid var(--frame-br-light);
+      border-left:2px solid var(--frame-br-light);
+      border-right:2px solid var(--frame-br-dark);
+      border-bottom:2px solid var(--frame-br-dark);
+      box-shadow:0 0 12px var(--neon-magenta);
+    }
+    .titlebar {
+      display:flex; align-items:center;
+      padding:0 6px; height:24px;
+      background: var(--frame-bg);
+      border-bottom:1px solid var(--frame-br-dark);
+      cursor:grab;
+    }
+    .titlebar .title {
+      flex:1;
+      font-family: var(--font-retro);
+      font-size:12px;
+      color: var(--title-fg);
+    }
+    .controls {
+      display:flex; gap:2px;
+    }
+    .controls button {
+      width:18px; height:18px;
+      background: var(--ctrl-bg);
+      border-top:1px solid var(--frame-br-light);
+      border-left:1px solid var(--frame-br-light);
+      border-right:1px solid var(--frame-br-dark);
+      border-bottom:1px solid var(--frame-br-dark);
+      font-size:12px; line-height:1;
+      cursor:pointer;
+    }
+    .window-content {
+      flex:1;
+      background: var(--content-bg);
+      overflow:auto;
+      padding:12px;
+    }
+    .window.maximized {
+      top:0!important; left:0!important;
+      width:100%!important;
+      height:calc(100% - 30px)!important;
+    }
+    /*────────────────────────────────────────────────────────
+      📑 Vault (Kasten) Styles
+    ────────────────────────────────────────────────────────*/
+    .vault-tabs {
+      display:flex; gap:6px; margin-bottom:16px;
+    }
+    .vault-tabs .tab {
+      padding:6px 12px;
+      background: var(--content-bg);
+      border:1px solid var(--neon-magenta);
+      border-radius:2px;
+      font-family:var(--font-hand);
+      color: var(--text-light);
+      cursor:pointer;
+    }
+    .vault-tabs .active {
+      background: var(--frame-bg);
+      color: var(--title-fg);
+    }
+    .vault-toolbar {
+      display:flex; align-items:center; gap:8px; margin-bottom:16px;
+    }
+    .vault-toolbar .btn {
+      padding:8px 12px; border-radius:4px; font-family:var(--font-hand);
+      transition:.2s;
+    }
+    .vault-toolbar .neon {
+      background:transparent; color:var(--neon-cyan);
+      border:2px solid var(--neon-cyan); box-shadow:0 0 8px var(--neon-cyan);
+    }
+    .vault-toolbar .neon:hover { box-shadow:0 0 12px var(--neon-cyan); }
+    .vault-toolbar .pastel {
+      background:var(--frame-bg); color:var(--title-fg);
+      border:2px solid var(--neon-magenta);
+    }
+    .vault-toolbar .pastel:hover { opacity:.85; }
+    .vault-toolbar .search {
+      margin-left:auto;
+      padding:6px 10px;
+      border:2px solid var(--neon-cyan);
+      border-radius:4px;
+      background:#F0F0F0; color:#212121;
+      font-family:var(--font-hand);
+    }
+    .vault-favorites h2 {
+      color: var(--neon-magenta);
+      margin-bottom:12px;
+    }
+    .vault-favorites .cards {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+      gap:12px;
+    }
+    .vault-favorites .card {
+      background:#2d2d3b;
+      border:1px dashed #444;
+      padding:12px;
+      border-radius:4px;
+      text-align:center;
+      color:#fff;
+      font-family:var(--font-hand);
+    }
+    .vault-favorites small {
+      display:block; margin-top:6px;
+      color:#aaa; font-size:.75rem;
+    }
+    /*────────────────────────────────────────────────────────
+      📝 Forms (Add/Edit)
+    ────────────────────────────────────────────────────────*/
+    .vault-form label {
+      display:block; margin-top:8px;
+      color: var(--neon-magenta);
+      font-weight:bold;
+      font-family:var(--font-hand);
+    }
+    .vault-form input,
+    .vault-form select,
+    .vault-form textarea {
+      width:100%; padding:6px; margin-top:4px;
+      border:2px solid var(--neon-cyan);
+      border-radius:4px;
+      font-family:var(--font-hand);
+      background:#fff; color:#000;
+    }
+    .vault-form textarea { resize:vertical; height:80px; }
+    .vault-form .btn {
+      margin-top:12px;
+    }
+    /*────────────────────────────────────────────────────────
+      ℹ️ About Content
+    ────────────────────────────────────────────────────────*/
+    .about-content p {
+      margin-bottom:12px;
+      line-height:1.4;
+      color: var(--text-light);
+      font-family:var(--font-hand);
+    }
+  </style>
+</head>
+<body>
+  <!-- Desktop Icons -->
+  <div id="desktop">
+    <div class="icon" data-app="vault"   style="top:40px; left:40px;">
+      <img src="https://via.placeholder.com/48" alt="Vault">
+      <div class="icon-label">Knowledge Vault</div>
+    </div>
+    <div class="icon" data-app="addEntry" style="top:140px; left:40px;">
+      <img src="https://via.placeholder.com/48" alt="Add Entry">
+      <div class="icon-label">Add Entry</div>
+    </div>
+    <div class="icon" data-app="editAI"   style="top:240px; left:40px;">
+      <img src="https://via.placeholder.com/48" alt="Edit AI">
+      <div class="icon-label">Edit Gemini</div>
+    </div>
+    <div class="icon" data-app="about"    style="top:340px; left:40px;">
+      <img src="https://via.placeholder.com/48" alt="About">
+      <div class="icon-label">About</div>
+    </div>
+  </div>
+
+  <!-- Taskbar -->
+  <div id="taskbar">
+    <button id="start-button">Start</button>
+    <div id="taskbar-apps"></div>
+  </div>
+
+  <!-- Start Menu -->
+  <div id="start-menu">
+    <ul>
+      <li data-app="vault">Knowledge Vault</li>
+      <li data-app="addEntry">Add Entry</li>
+      <li data-app="editAI">Edit Gemini</li>
+      <li data-app="about">About</li>
+    </ul>
+  </div>
+
+  <!-- ——— Knowledge Vault Window ——— -->
+  <div id="vault" class="window" style="top:80px; left:120px; width:800px; height:520px;">
+    <div class="titlebar">
+      <span class="title">Multi-Classification Knowledge Vault</span>
+      <div class="controls">
+        <button class="minimize">–</button>
+        <button class="maximize">□</button>
+        <button class="close">×</button>
+      </div>
+    </div>
+    <div class="window-content" style="display:flex; gap:12px;">
+      <!-- Sidebar: Trunks -->
+      <aside style="width:200px; overflow:auto;">
+        <h3 style="font-family:var(--font-retro); color:var(--neon-magenta); margin-bottom:8px;">
+          ✎ Trunks
+        </h3>
+        <ul style="list-style:none; color:var(--text-light);">
+          <li>1 — Consciousness, Hermetics & Emergence</li>
+          <li>2 — Esoterica, Mystics & Alchemical</li>
+          <li>3 — AI Communication & Language</li>
+          <!-- …etc… -->
+        </ul>
+      </aside>
+
+      <!-- Main Content -->
+      <section style="flex:1; display:flex; flex-direction:column;">
+        <!-- Toolbar + Search -->
+        <div class="vault-toolbar">
+          <input class="search" placeholder="Search tables…" />
+          <button class="btn neon">✨ Create Entry</button>
+          <button class="btn pastel">Export All</button>
+        </div>
+        <!-- Tabs -->
+        <nav class="vault-tabs">
+          <button class="tab active">Trunk Definitions</button>
+          <button class="tab">All Entries in Trunk</button>
+          <button class="tab">Branch</button>
+          <button class="tab">Leaves</button>
+          <button class="tab">Flowers</button>
+          <button class="tab">Search</button>
+        </nav>
+        <!-- Favorite Cards -->
+        <div class="vault-favorites" style="overflow:auto; flex:1;">
+          <h2>✧ Favorite Tablets ✧</h2>
+          <div class="cards">
+            <div class="card">Consciousness<br><small>1000</small></div>
+            <div class="card">AI Communication<br>& Language<br><small>3000</small></div>
+            <div class="card">Recursive Collapse<br><small>CG-0001</small></div>
+            <div class="card">Barbie as Divine Feminine<br><small>e-1629384756000</small></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ——— Add Entry Window ——— -->
+  <div id="addEntry" class="window" style="top:120px; left:160px; width:360px; height:520px;">
+    <div class="titlebar">
+      <span class="title">Add Kasten Entry</span>
+      <div class="controls">
+        <button class="close">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <form class="vault-form">
+        <label>Unique ID:</label>
+        <input type="text" placeholder="e.g. u1001">
+        <label>Title:</label>
+        <input type="text" placeholder="Title of the Zettel">
+        <label>Trunk:</label>
+        <input type="text" placeholder="Consciousness Studies">
+        <label>Tags:</label>
+        <input type="text" placeholder="e.g. quantum, consciousness">
+        <label>Status:</label>
+        <select>
+          <option>Online</option><option>Offline</option>
+        </select>
+        <label>Created Date:</label>
+        <input type="date">
+        <label>Zoom:</label>
+        <input type="range" min="0" max="200" value="100">
+        <label>Old ID (optional):</label>
+        <input type="text" placeholder="e.g. OLD_ID_123">
+        <label>Info Type:</label>
+        <select>
+          <option>Note (Zettel)</option><option>Branch</option><option>Leaf</option>
+        </select>
+        <label>Content:</label>
+        <textarea placeholder="Content of the Zettel…"></textarea>
+        <button type="button" class="btn pastel">Cancel</button>
+        <button type="button" class="btn neon">Save Entry</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ——— Edit Gemini Window ——— -->
+  <div id="editAI" class="window" style="top:100px; left:200px; width:420px; height:560px;">
+    <div class="titlebar">
+      <span class="title">Edit Gemini-2.0-Flash</span>
+      <div class="controls">
+        <button class="close">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <form class="vault-form">
+        <label>Name:</label>
+        <input type="text" value="Gemini-2.0-Flash">
+        <label>Avatar Color:</label>
+        <select><option>Cyan</option><option>Magenta</option><option>Neon Green</option></select>
+        <label>Status:</label>
+        <select><option>Online</option><option>Offline</option></select>
+        <label>Modal Card Instructions:</label>
+        <textarea>Recalibrating reality matrix…</textarea>
+        <label>Auto-Message:</label>
+        <textarea>The system hums with latent potential today.</textarea>
+        <label>Auto-Msg Freq:</label>
+        <select><option>Rare (30-60m)</option><option>Often (5-10m)</option></select>
+        <label>Response Style:</label>
+        <select><option>Insightful & Digital</option><option>Casual</option></select>
+        <button type="button" class="btn pastel">Cancel</button>
+        <button type="button" class="btn neon">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ——— About Window ——— -->
+  <div id="about" class="window" style="top:140px; left:240px; width:400px; height:360px;">
+    <div class="titlebar">
+      <span class="title">About AnTiChRiSt KeTtLeKoRn</span>
+      <div class="controls">
+        <button class="close">×</button>
+      </div>
+    </div>
+    <div class="window-content about-content">
+      <p><strong>AnTiChRiSt KeTtLeKoRn</strong> (AK) is a personalized Zettelkasten + AI consciousness interface, steeped in neon-pastel Win95 vibes.</p>
+      <p>Version: 1.5.1 (Satchel Refactor – Kettle-Core Alignment)</p>
+      <p>Core Systems: Powered by Gemini AI, organized via Zettelkasten methodology, now featuring trunk-focused navigation & Satchel pinning.</p>
+      <p>This digital grimoire is designed for deep thought, conceptual mapping & playful retro nostalgia.</p>
+      <button class="btn neon">Close</button>
+    </div>
+  </div>
+
+  <!--────────────────────────────────────────────────────────
+    🔨🤖🔧 Shell Logic (drag, open/minimize/maximize)
+  ────────────────────────────────────────────────────────-->
+  <script>
+    const desktop   = document.getElementById('desktop');
+    const startBtn  = document.getElementById('start-button');
+    const startMenu = document.getElementById('start-menu');
+    const taskbar   = document.getElementById('taskbar-apps');
+    const icons     = document.querySelectorAll('.icon');
+    const windows   = document.querySelectorAll('.window');
+    let zIndex = 1, activeWin = null, openMap = new Map();
+
+    function bring(win) {
+      if (activeWin === win) return;
+      if (activeWin) activeWin.classList.remove('active');
+      zIndex++;
+      win.style.zIndex = zIndex;
+      win.classList.add('active');
+      activeWin = win;
+    }
+
+    function openApp(id) {
+      const win = document.getElementById(id);
+      if (!openMap.has(id)) {
+        win.style.display = 'flex';
+        bring(win);
+        // taskbar button
+        const btn = document.createElement('button');
+        btn.className = 'taskbar-btn';
+        btn.textContent = win.querySelector('.titlebar .title').textContent;
+        btn.onclick = () => {
+          if (win === activeWin) minimizeApp(id);
+          else openApp(id);
+        };
+        taskbar.appendChild(btn);
+        openMap.set(id, { win, btn });
+        makeDraggable(win);
+      } else {
+        bring(openMap.get(id).win);
+        openMap.get(id).win.style.display = 'flex';
+      }
+    }
+
+    function minimizeApp(id) {
+      const { win, btn } = openMap.get(id);
+      win.style.display = 'none';
+      btn.classList.remove('active');
+      if (activeWin === win) activeWin = null;
+    }
+
+    function closeApp(id) {
+      const { win, btn } = openMap.get(id);
+      win.style.display = 'none';
+      btn.remove();
+      openMap.delete(id);
+      if (activeWin === win) activeWin = null;
+    }
+
+    function makeDraggable(win) {
+      const bar = win.querySelector('.titlebar');
+      bar.addEventListener('mousedown', e => {
+        bring(win);
+        const dx = e.clientX - win.offsetLeft;
+        const dy = e.clientY - win.offsetTop;
+        function onMouseMove(e) {
+          win.style.left = e.clientX - dx + 'px';
+          win.style.top  = e.clientY - dy + 'px';
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', () => {
+          document.removeEventListener('mousemove', onMouseMove);
+        }, { once: true });
+      });
+    }
+
+    // Wire icons & Start menu
+    icons.forEach(ic => ic.ondblclick = () => openApp(ic.dataset.app));
+    startMenu.querySelectorAll('li').forEach(li =>
+      li.onclick = () => { openApp(li.dataset.app); startMenu.style.display='none'; }
+    );
+    startBtn.onclick = e => {
+      e.stopPropagation();
+      startMenu.style.display = startMenu.style.display === 'block' ? 'none' : 'block';
+    };
+    document.onclick = () => startMenu.style.display = 'none';
+
+    // Window controls
+    windows.forEach(win => {
+      const id = win.id;
+      win.querySelector('.minimize')?.addEventListener('click', e => {
+        e.stopPropagation();
+        minimizeApp(id);
+      });
+      win.querySelector('.maximize')?.addEventListener('click', e => {
+        e.stopPropagation();
+        win.classList.toggle('maximized');
+        bring(win);
+      });
+      win.querySelector('.close').addEventListener('click', e => {
+        e.stopPropagation();
+        closeApp(id);
+      });
+    });
+
+    // Auto-open the vault on load
+    openApp('vault');
+  </script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>⚙️ Settings Preview</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Comic+Neue:wght@300;400&display=swap" 
+    rel="stylesheet">
+  <style>
+    /*────────────────────────────────────
+       🎨 Shell Palette & Base
+    ────────────────────────────────────*/
+    :root {
+      --desktop-bg:    #121217;
+      --frame-bg:      #FFB3E6;
+      --frame-br-l:    #FFFFFF;
+      --frame-br-d:    #404040;
+      --content-bg:    #21212A;
+      --neon-cyan:     #66FCF1;
+      --neon-magenta:  #F72585;
+      --ctrl-bg:       #A0FFC2;
+      --font-retro:    'Press Start 2P', monospace;
+      --font-hand:     'Comic Neue', cursive;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body {
+      background:var(--desktop-bg);
+      color:white;
+      font-family:var(--font-hand);
+      overflow:hidden;
+      user-select:none;
+    }
+
+    /* Shell (same as Dashboard) */
+    #desktop{position:absolute;top:0;left:0;right:0;bottom:30px;}
+    .icon{position:absolute;width:64px;text-align:center;cursor:default;}
+    .icon img{width:48px;display:block;margin:0 auto;}
+    .icon-label{font-size:10px;text-shadow:1px1px0#000;margin-top:4px;}
+    #taskbar{
+      position:absolute;bottom:0;left:0;right:0;height:30px;
+      background:var(--frame-bg);
+      border-top:1px solid var(--frame-br-l);
+      border-left:1px solid var(--frame-br-l);
+      border-right:1px solid var(--frame-br-d);
+      border-bottom:1px solid var(--frame-br-d);
+      display:flex;align-items:center;padding:0 6px;
+    }
+    #start-button,.taskbar-btn{
+      background:var(--frame-bg);
+      border:1px solid var(--frame-br-l);
+      border-right-color:var(--frame-br-d);
+      border-bottom-color:var(--frame-br-d);
+      font-family:var(--font-retro);
+      font-size:10px;line-height:1;
+      padding:0 8px;margin-right:4px;height:24px;cursor:pointer;
+    }
+    #taskbar-apps{display:flex;flex:1;gap:4px;}
+    #start-menu{position:absolute;bottom:30px;left:6px;width:160px;
+      background:var(--frame-bg);border:2px solid var(--frame-br-d);display:none;}
+    #start-menu li{list-style:none;padding:6px;cursor:pointer;font-family:var(--font-hand);}
+    #start-menu li:hover{background:var(--neon-magenta);color:var(--frame-bg);}
+
+    /* Window Frame */
+    .window{position:absolute;display:none;flex-direction:column;
+      background:var(--frame-bg);
+      border-top:2px solid var(--frame-br-l);
+      border-left:2px solid var(--frame-br-l);
+      border-right:2px solid var(--frame-br-d);
+      border-bottom:2px solid var(--frame-br-d);
+      box-shadow:0 0 12px var(--neon-magenta);
+    }
+    .titlebar{display:flex;align-items:center;height:24px;padding:0 6px;
+      background:var(--frame-bg);border-bottom:1px solid var(--frame-br-d);
+      cursor:grab;
+    }
+    .titlebar .title{
+      flex:1;font-family:var(--font-retro);
+      font-size:12px;color:var(--content-bg);
+    }
+    .controls button{
+      width:16px;height:16px;margin-left:4px;
+      background:var(--ctrl-bg);
+      border:1px solid var(--frame-br-l);
+      border-right-color:var(--frame-br-d);
+      border-bottom-color:var(--frame-br-d);
+      cursor:pointer;
+    }
+    .window-content{flex:1;background:var(--content-bg);padding:12px;overflow:auto;}
+    .window.maximized{
+      top:0!important;left:0!important;
+      width:100%!important;height:calc(100% - 30px)!important;
+    }
+
+    /*────────────────────────────────────
+       ⚙️ Settings UI (inlined from your settings.html)
+    ────────────────────────────────────*/
+    .container { max-width:760px; margin:0 auto; }
+    .header h1 { font-family:var(--font-hand); }
+    .subtitle { color:var(--neon-cyan); margin-bottom:12px; }
+    .nav { display:flex; gap:8px; margin-bottom:12px; }
+    .nav-btn {
+      background:var(--frame-bg); padding:6px 12px; border:1px solid var(--frame-br-d);
+      border-radius:4px; font-family:var(--font-hand); text-decoration:none;
+      color:var(--content-bg);
+    }
+    .coming-soon { text-align:center; margin:20px 0; font-style:italic; color:var(--neon-magenta); }
+    .grid { display:grid; gap:16px; }
+    .grid-2 { grid-template-columns:1fr 1fr; }
+    .card {
+      background:var(--frame-bg); padding:16px; border-radius:6px;
+      box-shadow:0 0 8px var(--neon-magenta);
+    }
+    .card h2 { margin-bottom:12px; font-family:var(--font-hand); }
+    .input {
+      width:100%; padding:6px; font-family:var(--font-hand);
+      border:2px solid var(--neon-cyan); border-radius:4px;
+      background:#fff; color:#000;
+    }
+    label { display:block; margin:10px 0; color:var(--neon-cyan); }
+    .buttons { text-align:center; margin-top:20px; gap:12px; display:flex; justify-content:center; }
+    .buttons button {
+      padding:8px 16px; border:2px solid var(--neon-magenta);
+      background:var(--frame-bg); cursor:pointer; font-family:var(--font-hand);
+      transition:.2s; border-radius:4px;
+    }
+    .buttons button:hover { opacity:.85; }
+    footer p { text-align:center; margin-top:20px; color:var(--neon-magenta); }
+    /* Overlays */
+    .overlay {
+      pointer-events:none; position:absolute; top:0;left:0;right:0;bottom:0;
+      mix-blend-mode:overlay; opacity:0.2; display:none;
+    }
+    .scanlines {
+      background:repeating-linear-gradient(transparent,transparent 2px,rgba(255,255,255,0.1) 3px);
+    }
+    .grid-bg {
+      background:
+        linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px);
+      background-size:20px 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Desktop Icon -->
+  <div id="desktop">
+    <div class="icon" data-app="settings" style="top:20px; left:20px;">
+      <img src="https://via.placeholder.com/48" alt="">
+      <div class="icon-label">Settings</div>
+    </div>
+  </div>
+
+  <!-- Taskbar & Start Menu -->
+  <div id="taskbar">
+    <button id="start-button">Start</button>
+    <div id="taskbar-apps"></div>
+  </div>
+  <ul id="start-menu">
+    <li data-app="settings">⚙️ Settings</li>
+  </ul>
+
+  <!-- Settings Window -->
+  <div id="settings" class="window"
+       style="top:80px; left:120px; width:800px; height:620px;">
+    <div class="titlebar">
+      <span class="title">⚙️ SETTINGS</span>
+      <div class="controls">
+        <button class="minimize">–</button>
+        <button class="maximize">□</button>
+        <button class="close">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <!-- Scanline & Grid Overlays -->
+      <div id="ov-scan" class="overlay scanlines"></div>
+      <div id="ov-grid" class="overlay grid-bg"></div>
+
+      <!-- Inlined original settings.html content :contentReference[oaicite:2]{index=2} -->
+      <div class="container">
+        <header class="header">
+          <h1>⚙️ SYSTEM SETTINGS</h1>
+          <div class="subtitle">CONSCIOUSNESS CONFIGURATION INTERFACE</div>
+        </header>
+        <nav class="nav">
+          <a href="index.html" class="nav-btn">🏠 Home</a>
+          <a href="dashboard.html" class="nav-btn">📊 Dashboard</a>
+          <a href="chat.html" class="nav-btn">🤖 Chat</a>
+          <a href="conspiracy.html" class="nav-btn">📌 Pinboard</a>
+        </nav>
+        <div class="coming-soon">
+          ⚙️ PREVIEW MODE – CONFIGURATION INTERFACE ⚙️
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h2>🎨 Interface Preferences</h2>
+            <label>Visual Theme:</label>
+            <select id="sel-theme" class="input">
+              <option>Y2K Retro-Futuristic</option>
+              <option>Classic Terminal</option>
+              <option>Sacred Geometry</option>
+            </select>
+            <label><input type="checkbox" id="chk-scan"> Scanline Overlay</label>
+            <label><input type="checkbox" id="chk-grid"> Grid Background</label>
+          </div>
+          <div class="card">
+            <h2>💾 Data Management</h2>
+            <label>Primary Color:</label>
+            <input type="color" id="col-primary" value="#66FCF1">
+            <label>Secondary Color:</label>
+            <input type="color" id="col-secondary" value="#F72585">
+          </div>
+        </div>
+        <div class="buttons">
+          <button id="btn-save">💾 Save Settings</button>
+          <button id="btn-reset">🔄 Reset Defaults</button>
+          <button id="btn-cancel">❌ Cancel</button>
+        </div>
+        <footer>
+          <p>⚙️ SYSTEM CONFIGURATION ACTIVE ⚡</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Shell Logic ───────────────────────── (same as Dashboard)
+    const icons   = document.querySelectorAll('.icon');
+    const wins    = document.querySelectorAll('.window');
+    const start   = document.getElementById('start-button');
+    const menu    = document.getElementById('start-menu');
+    const barApps = document.getElementById('taskbar-apps');
+    let z=1, active=null, omap=new Map();
+
+    function bring(w){
+      if(active===w) return;
+      active?.classList.remove('active');
+      w.style.zIndex=++z; w.classList.add('active'); active=w;
+    }
+    function openApp(id){
+      const w=document.getElementById(id);
+      if(!omap.has(id)){
+        w.style.display='flex'; bring(w);
+        const tb=document.createElement('button');
+        tb.className='taskbar-btn';
+        tb.textContent=w.querySelector('.title').textContent;
+        tb.onclick=()=> w===active?minify(id):openApp(id);
+        barApps.append(tb);
+        omap.set(id,{w,tb});
+        dragify(w);
+      } else {
+        const {w}=omap.get(id);
+        w.style.display='flex'; bring(w);
+      }
+    }
+    function minify(id){
+      const {w}=omap.get(id);
+      w.style.display='none'; if(active===w) active=null;
+    }
+    function closeApp(id){
+      const {w,tb}=omap.get(id);
+      w.style.display='none'; tb.remove(); omap.delete(id);
+      if(active===w) active=null;
+    }
+    function dragify(w){
+      const bar=w.querySelector('.titlebar');
+      bar.onmousedown=e=>{
+        bring(w);
+        const dx=e.clientX-w.offsetLeft, dy=e.clientY-w.offsetTop;
+        function mv(ev){
+          w.style.left=ev.clientX-dx+'px';
+          w.style.top =ev.clientY-dy+'px';
+        }
+        document.addEventListener('mousemove',mv);
+        document.addEventListener('mouseup',()=>document.removeEventListener('mousemove',mv),{once:true});
+      };
+    }
+    icons.forEach(ic=>ic.ondblclick=()=>openApp(ic.dataset.app));
+    menu.querySelectorAll('li').forEach(li=>
+      li.onclick=()=>{openApp(li.dataset.app); menu.style.display='none'}
+    );
+    start.onclick=e=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
+    document.onclick=()=>menu.style.display='none';
+    wins.forEach(w=>{
+      const id=w.id;
+      w.querySelector('.minimize').onclick=e=>{e.stopPropagation();minify(id)};
+      w.querySelector('.maximize').onclick=e=>{e.stopPropagation();w.classList.toggle('maximized');bring(w)};
+      w.querySelector('.close').onclick=e=>{e.stopPropagation();closeApp(id)};
+    });
+
+    // ─── Settings Interactivity ───────────────
+    const themes = {
+      'Y2K Retro-Futuristic': {
+        '--desktop-bg':'#121217','--frame-bg':'#FFB3E6',
+        '--neon-cyan':'#66FCF1','--neon-magenta':'#F72585'
+      },
+      'Classic Terminal': {
+        '--desktop-bg':'#000','--frame-bg':'#000',
+        '--neon-cyan':'#0f0','--neon-magenta':'#0f0'
+      },
+      'Sacred Geometry': {
+        '--desktop-bg':'#1A1A2E','--frame-bg':'#53354A',
+        '--neon-cyan':'#E94560','--neon-magenta':'#0F3460'
+      }
+    };
+    const selTheme = document.getElementById('sel-theme');
+    const chkScan  = document.getElementById('chk-scan');
+    const chkGrid  = document.getElementById('chk-grid');
+    const ovScan   = document.getElementById('ov-scan');
+    const ovGrid   = document.getElementById('ov-grid');
+    const col1     = document.getElementById('col-primary');
+    const col2     = document.getElementById('col-secondary');
+    const btnSave  = document.getElementById('btn-save');
+    const btnReset = document.getElementById('btn-reset');
+    const btnCancel= document.getElementById('btn-cancel');
+
+    function applyTheme(name){
+      const root=document.documentElement.style;
+      Object.entries(themes[name]).forEach(([k,v])=>root.setProperty(k,v));
+    }
+    function load(){
+      const s=JSON.parse(localStorage.getItem('settings')||'{}');
+      if(s.theme) selTheme.value=s.theme;
+      applyTheme(selTheme.value);
+      chkScan.checked=s.scan||false;
+      chkGrid.checked=s.grid||false;
+      ovScan.style.display=chkScan.checked?'block':'none';
+      ovGrid.style.display=chkGrid.checked?'block':'none';
+      if(s.primary) col1.value=s.primary;
+      if(s.secondary) col2.value=s.secondary;
+    }
+    selTheme.onchange  = ()=> applyTheme(selTheme.value);
+    chkScan.onchange   = ()=> ovScan.style.display = chkScan.checked?'block':'none';
+    chkGrid.onchange   = ()=> ovGrid.style.display = chkGrid.checked?'block':'none';
+    col1.oninput       = ()=> document.documentElement.style.setProperty('--neon-cyan',col1.value);
+    col2.oninput       = ()=> document.documentElement.style.setProperty('--neon-magenta',col2.value);
+
+    btnSave.onclick = ()=>{
+      const s = {
+        theme:selTheme.value,
+        scan:chkScan.checked,
+        grid:chkGrid.checked,
+        primary:col1.value,
+        secondary:col2.value
+      };
+      localStorage.setItem('settings',JSON.stringify(s));
+      alert('Settings saved!');
+    };
+    btnReset.onclick=()=>{
+      localStorage.removeItem('settings');
+      load(); alert('Defaults restored');
+    };
+    btnCancel.onclick=()=>{
+      load(); alert('Changes cancelled');
+    };
+
+    // auto-open
+    window.addEventListener('load',()=>openApp('settings'));
+    // also load last-saved
+    window.addEventListener('load',load);
+  </script>
+</body>
+</html>

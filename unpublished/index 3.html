@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>~*~AnTiChRiSt KeTtLeKoRn~*~ Windows XP Edition :: Bureau Auto-Organizer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tahoma&family=Comic+Sans+MS&display=swap" rel="stylesheet">
+  <style>
+    /* WINDOWS XP + MYSPACE COLORS */
+    :root {
+      --winxp-blue: #0A246A;
+      --winxp-blue-light: #3B6EDA;
+      --winxp-green: #3DB54A;
+      --winxp-title-active: linear-gradient(to right, #0A246A, #A6CAF0);
+      --winxp-title-inactive: linear-gradient(to right, #808080, #D4D0C8);
+      --winxp-button: #D4D0C8;
+      --winxp-button-highlight: #ECE9D8;
+      --winxp-desktop: #235FCC;
+      
+      /* USER REQUESTED COLORS */
+      --cyan: #72FADE;    /* Light cyan */
+      --yellow: #fffb01;  /* Bright yellow */
+      --magenta: #f312af; /* Bright magenta */
+      
+      /* CUSTOM COLORS */
+      --xp-title-gradient: linear-gradient(to right, var(--magenta), var(--cyan));
+      --xp-button-gradient: linear-gradient(to bottom, #ffffff, var(--cyan));
+      --xp-button-active: linear-gradient(to bottom, var(--magenta), #aa0088);
+    }
+    
+    /* Base styles */
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      background-color: var(--winxp-desktop);
+      color: #000000;
+      font-family: 'Tahoma', 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      padding-bottom: 50px;
+    }
+    
+    /* Windows XP styles */
+    .xp-window {
+      background-color: #ECE9D8;
+      border: 1px solid #000;
+      border-radius: 8px;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      max-width: 1200px;
+      margin: 20px auto;
+      position: relative;
+    }
+    
+    .xp-titlebar {
+      background: var(--xp-title-gradient);
+      color: white;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      height: 32px;
+    }
+    
+    .xp-titlebar-text {
+      flex-grow: 1;
+      font-weight: bold;
+      margin-left: 8px;
+      font-size: 14px;
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+    }
+    
+    .xp-window-controls {
+      display: flex;
+      align-items: center;
+      height: 24px;
+      margin-right: 4px;
+    }
+    
+    .xp-window-button {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    
+    .xp-window-button:hover {
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .xp-close {
+      background-color: rgba(232, 17, 35, 0.8);
+    }
+    
+    .xp-app-icon {
+      width: 16px;
+      height: 16px;
+      margin-left: 4px;
+      margin-right: 4px;
+    }
+    
+    .xp-window-content {
+      padding: 12px;
+      max-height: 80vh;
+      overflow-y: auto;
+      background-color: #FFF;
+    }
+    
+    .xp-taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 36px;
+      background: linear-gradient(to bottom, #2583d0, #1060b6);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+    
+    .xp-start-button {
+      background: linear-gradient(to bottom, #3c8f2a, #1d5b14);
+      border-radius: 3px;
+      padding: 2px 8px;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      height: 28px;
+      margin-right: 10px;
+      cursor: pointer;
+      border: 1px solid #17400e;
+    }
+    
+    .xp-start-button:hover {
+      background: linear-gradient(to bottom, #4ca638, #2a7a1e);
+    }
+    
+    .xp-taskbar-items {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .xp-taskbar-item {
+      background: linear-gradient(to bottom, #5998e5, #3367c1);
+      border-radius: 3px;
+      padding: 3px 10px;
+      color: white;
+      font-size: 12px;
+      height: 28px;
+      min-width: 150px;
+      display: flex;
+      align-items: center;
+      border: 1px solid #1c51a4;
+    }
+    
+    .xp-taskbar-item-active {
+      background: linear-gradient(to bottom, #3367c1, #0045aa);
+    }
+    
+    .xp-system-tray {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 0 5px;
+    }
+    
+    .xp-system-tray-icon {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    
+    .xp-clock {
+      background-color: rgba(255, 255, 255, 0.4);
+      padding: 2px 6px;
+      border-radius: 2px;
+      font-size: 12px;
+      color: white;
+    }
+    
+    /* Customize default button styles to be Windows XP-like */
+    .xp-button {
+      background: var(--xp-button-gradient);
+      border: 1px solid #919191;
+      border-radius: 3px;
+      color: #000;
+      padding: 6px 12px;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      position: relative;
+      margin-top: 10px;
+    }
+    
+    .xp-button:hover {
+      background: linear-gradient(to bottom, #ffffff, #ade1f9);
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+    }
+    
+    .xp-button:active {
+      background: var(--xp-button-active);
+      color: white;
+    }
+    
+    /* MySpace specific styling */
+    .myspace-container {
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .myspace-header {
+      padding: 20px;
+      background: linear-gradient(to right, var(--magenta), var(--cyan));
+      border: 3px dashed var(--yellow);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .myspace-profile-pic {
+      width: 150px;
+      height: 150px;
+      border: 5px solid var(--magenta);
+      border-radius: 10px;
+      margin: 0 auto 10px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .myspace-profile-name {
+      font-size: 36px;
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+      text-shadow: 2px 2px 0 var(--magenta), 4px 4px 0 #4b0049;
+      margin-bottom: 5px;
+      position: relative;
+      z-index: 1;
+      color: white;
+    }
+    
+    .myspace-status {
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-style: italic;
+      background-color: rgba(0,0,0,0.5);
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      position: relative;
+      z-index: 1;
+      color: white;
+    }
+    
+    .myspace-last-login {
+      font-size: 12px;
+      color: #e0e0ff;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .myspace-section {
+      background-color: #fffff7;
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .myspace-section-title {
+      background: linear-gradient(to right, var(--magenta), var(--cyan));
+      color: white;
+      padding: 5px 15px;
+      font-size: 14px;
+      margin: -25px auto 15px;
+      width: fit-content;
+      border: 2px solid white;
+      border-radius: 20px;
+      box-shadow: 0 0 10px var(--magenta);
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+    }
+    
+    .top8-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 10px;
+    }
+    
+    .top8-item {
+      background-color: #f7faff;
+      border: 2px solid var(--magenta);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .top8-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px var(--magenta);
+      z-index: 10;
+    }
+    
+    .top8-pic {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 5px;
+      border: 3px solid var(--cyan);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .top8-name {
+      font-size: 12px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .marquee-container {
+      overflow: hidden;
+      white-space: nowrap;
+      background-color: #002b55;
+      border: 1px solid var(--magenta);
+      padding: 8px 0;
+      margin: 10px 0;
+    }
+    
+    .marquee-text {
+      display: inline-block;
+      color: var(--cyan);
+      font-weight: bold;
+      text-shadow: 1px 1px 2px var(--magenta);
+      animation: marquee 30s linear infinite;
+    }
+    
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    
+    .blinking {
+      animation: blink 1s step-end infinite;
+    }
+    
+    @keyframes blink {
+      0% { opacity: 1; }
+      49% { opacity: 1; }
+      50% { opacity: 0; }
+      99% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    
+    .zettel-container {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--magenta) #e5f5ff;
+      border: 1px solid #ccc;
+      box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.2);
+      padding: 5px;
+    }
+    
+    .zettel-container::-webkit-scrollbar {
+      width: 16px;
+    }
+    
+    .zettel-container::-webkit-scrollbar-track {
+      background: #e5f5ff;
+      border: 1px solid #ccc;
+    }
+    
+    .zettel-container::-webkit-scrollbar-thumb {
+      background-color: var(--cyan);
+      border-radius: 0;
+      border: 1px solid #919191;
+    }
+    
+    .zettel-card {
+      background-color: #fbfbfb;
+      border: 1px solid #cccccc;
+      border-radius: 3px;
+      padding: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .zettel-card:hover {
+      background-color: #e8f4ff;
+      border-color: var(--cyan);
+      transform: translateX(5px);
+    }
+    
+    .zettel-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--magenta), var(--cyan), var(--yellow));
+      z-index: 5;
+    }
+    
+    .zettel-title {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 3px;
+      font-size: 14px;
+    }
+    
+    .zettel-id {
+      font-size: 11px;
+      color: #777;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .child-card {
+      margin-left: 15px;
+      border-left: 2px dotted var(--cyan);
+      padding-left: 8px;
+    }
+    
+    .music-player {
+      background: linear-gradient(to right, #ececec, #f5f5f5);
+      border: 2px solid var(--cyan);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .music-player-buttons {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .music-player-button {
+      width: 30px;
+      height: 30px;
+      background: var(--xp-button-gradient);
+      border: 1px solid #919191;
+      border-radius: 3px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .music-player-button:hover {
+      background: linear-gradient(to bottom, #ffffff, #e3f2fd);
+    }
+    
+    .music-player-button:active {
+      background: linear-gradient(to bottom, #e0e0e0, #d0d0d0);
+    }
+    
+    .music-player-info {
+      margin-left: 10px;
+      flex-grow: 1;
+    }
+    
+    .music-player-title {
+      font-size: 14px;
+      color: #222;
+      margin-bottom: 2px;
+    }
+    
+    .music-player-artist {
+      font-size: 12px;
+      color: #555;
+    }
+    
+    .music-player-progress {
+      height: 8px;
+      background-color: #ddd;
+      border-radius: 4px;
+      margin-top: 5px;
+      position: relative;
+      border: 1px solid #aaa;
+    }
+    
+    .music-player-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 35%;
+      background: linear-gradient(to right, var(--magenta), var(--cyan));
+      border-radius: 3px;
+    }
+    
+    .comments-section {
+      border-top: 3px dotted var(--cyan);
+      padding-top: 15px;
+      margin-top: 20px;
+    }
+    
+    .comment {
+      display: flex;
+      margin-bottom: 15px;
+      background-color: #f7faff;
+      border-radius: 6px;
+      padding: 10px;
+      border: 1px solid #d0d0d0;
+    }
+    
+    .comment-avatar {
+      width: 50px;
+      height: 50px;
+      border: 2px solid var(--cyan);
+      border-radius: 5px;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    
+    .comment-content {
+      flex-grow: 1;
+    }
+    
+    .comment-name {
+      font-weight: bold;
+      color: #0066cc;
+      margin-bottom: 3px;
+    }
+    
+    .comment-text {
+      font-size: 13px;
+      color: #333;
+    }
+    
+    .comment-date {
+      font-size: 11px;
+      color: #777;
+      margin-top: 5px;
+      text-align: right;
+    }
+    
+    .dialog-box {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+    
+    .dialog-content {
+      background-color: #ECE9D8;
+      border: 1px solid #000;
+      border-radius: 8px;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+      width: 80%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .dialog-titlebar {
+      background: var(--xp-title-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      height: 28px;
+    }
+    
+    .dialog-titlebar-text {
+      flex-grow: 1;
+      font-weight: bold;
+      margin-left: 8px;
+      font-size: 14px;
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+    }
+    
+    .dialog-close {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 4px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      background-color: rgba(232, 17, 35, 0.8);
+    }
+    
+    .dialog-close:hover {
+      background-color: rgba(232, 17, 35, 1);
+    }
+    
+    .dialog-inner-content {
+      padding: 15px;
+      background-color: #fff;
+    }
+    
+    .dialog-title {
+      text-align: center;
+      margin-bottom: 15px;
+      color: var(--magenta);
+      font-size: 16px;
+      font-weight: bold;
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+    }
+    
+    .dialog-id {
+      font-family: 'Courier New', monospace;
+      color: #555;
+      text-align: center;
+      font-size: 12px;
+      margin-bottom: 10px;
+      background-color: #f0f0f0;
+      padding: 3px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+    
+    .dialog-content-text {
+      background-color: #f7f7f7;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 10px;
+      color: #333;
+      min-height: 100px;
+      margin-bottom: 15px;
+      font-family: 'Tahoma', sans-serif;
+    }
+    
+    .dialog-hashtags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    
+    .dialog-hashtag {
+      background-color: var(--cyan);
+      color: #333;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .dialog-links {
+      border-top: 1px dashed var(--cyan);
+      padding-top: 10px;
+    }
+    
+    .dialog-link {
+      display: block;
+      color: #0066cc;
+      margin-bottom: 5px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    
+    .dialog-link:hover {
+      color: var(--magenta);
+      text-decoration: underline;
+    }
+    
+    /* Form elements styled like Windows XP */
+    .xp-input {
+      border: 1px solid #7F9DB9;
+      padding: 3px 5px;
+      background-color: white;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    
+    .xp-input:focus {
+      border-color: #3B79C4;
+      outline: none;
+    }
+    
+    .xp-textarea {
+      border: 1px solid #7F9DB9;
+      padding: 3px 5px;
+      background-color: white;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+      resize: none;
+      height: 150px;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    
+    .xp-textarea:focus {
+      border-color: #3B79C4;
+      outline: none;
+    }
+    
+    .xp-select {
+      border: 1px solid #7F9DB9;
+      padding: 2px 5px;
+      background-color: white;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+      height: 24px;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    
+    .xp-select:focus {
+      border-color: #3B79C4;
+      outline: none;
+    }
+    
+    .xp-label {
+      display: block;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #333;
+    }
+    
+    /* New hashtag manager styles */
+    .hashtag-manager {
+      background-color: #f7faff;
+      border: 2px solid var(--cyan);
+      border-radius: 5px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    
+    .hashtag-input-container {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    
+    .hashtag-input {
+      flex-grow: 1;
+      border: 1px solid #7F9DB9;
+      border-radius: 0;
+      padding: 3px 5px;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+    }
+    
+    .hashtag-add-btn {
+      background: var(--xp-button-gradient);
+      border: 1px solid #7F9DB9;
+      color: #000;
+      padding: 0 10px;
+      font-family: 'Tahoma', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    
+    .hashtag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .hashtag-item {
+      background-color: var(--cyan);
+      color: #333;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .hashtag-delete {
+      background-color: var(--magenta);
+      color: white;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .xp-window {
+        margin: 10px;
+      }
+      
+      .myspace-profile-name {
+        font-size: 28px;
+      }
+      
+      .top8-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .top8-pic {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .dialog-content {
+        width: 95%;
+      }
+      
+      .xp-taskbar {
+        height: 40px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .myspace-header {
+        padding: 10px;
+      }
+      
+      .myspace-profile-pic {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .myspace-profile-name {
+        font-size: 24px;
+      }
+      
+      .myspace-section-title {
+        font-size: 12px;
+      }
+      
+      .top8-container {
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 5px;
+      }
+      
+      .top8-pic {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .top8-name {
+        font-size: 10px;
+      }
+      
+      .xp-system-tray, .xp-taskbar-items {
+        display: none;
+      }
+    }
+    
+    /* Trunk styles */
+    .trunk-card {
+      background-color: #e8f4ff; /* Light blue for trunk */
+    }
+    
+    /* Branch styles */
+    .branch-card {
+      background-color: #e8ffee; /* Light green for branch */
+    }
+    
+    /* Leaf styles */
+    .leaf-card {
+      background-color: #fff8e8; /* Light yellow for leaf */
+    }
+    
+    /* Flower styles */
+    .flower-card {
+      background-color: #ffebf8; /* Light pink for flower */
+    }
+    
+    /* Fruit styles */
+    .fruit-card {
+      background-color: #f4eeff; /* Light purple for fruit */
+    }
+    
+    /* Bud styles */
+    .bud-card {
+      background-color: #e8fff7; /* Light mint for bud */
+    }
+    
+    /* Low-resource mode badge */
+    .low-resource-badge {
+      position: fixed;
+      top: 5px;
+      right: 10px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 3px;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+      z-index: 2000;
+    }
+    
+    /* HIERARCHY BROWSER STYLES */
+    .hierarchy-browser {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #7F9DB9;
+      background-color: white;
+      margin-bottom: 15px;
+    }
+    
+    .hierarchy-item {
+      padding: 5px 8px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+    }
+    
+    .hierarchy-item:hover {
+      background-color: #e5f3ff;
+    }
+    
+    .hierarchy-item.selected {
+      background-color: #cce8ff;
+    }
+    
+    .hierarchy-item-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+    }
+    
+    .hierarchy-item-content {
+      flex-grow: 1;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .hierarchy-item-title {
+      font-size: 12px;
+    }
+    
+    .hierarchy-item-id {
+      font-size: 10px;
+      color: #666;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .tier-info {
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 7px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    
+    .tier-info strong {
+      color: var(--magenta);
+    }
+    
+    .id-preview {
+      background-color: #f7f7f7;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 5px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+    }
+    
+    .toggle-container {
+      display: flex;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .toggle-option {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+    
+    .toggle-option.active {
+      background-color: var(--cyan);
+      color: black;
+      font-weight: bold;
+    }
+    
+    /* Backup System Styles */
+    #backupReminder {
+      display: none;
+      position: fixed;
+      bottom: 60px;
+      right: 10px;
+      background: linear-gradient(to right, var(--magenta), var(--cyan));
+      padding: 10px;
+      border-radius: 8px;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      z-index: 9999;
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+    }
+    
+    .backup-buttons {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    
+    /* === NEW BUREAU FEATURES === */
+    
+    /* Advanced Tools Panel (Collapsible) */
+    .advanced-tools-panel {
+      background-color: #f7faff;
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    
+    .advanced-tools-header {
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .advanced-tools-header h3 {
+      margin: 0;
+      color: var(--magenta);
+      font-family: 'Comic Sans MS', cursive;
+      font-size: 16px;
+    }
+    
+    .advanced-tools-content {
+      display: none;
+    }
+    
+    .advanced-tools-content.expanded {
+      display: block;
+    }
+    
+    .tool-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .tool-row label {
+      font-size: 11px;
+      font-weight: bold;
+      display: block;
+      margin-bottom: 3px;
+    }
+    
+    .tool-row select {
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .tool-row button {
+      margin-top: 0;
+    }
+    
+    /* System Health Dashboard */
+    .health-dashboard {
+      background-color: #f7faff;
+      border: 2px solid var(--magenta);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .health-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .health-stat {
+      text-align: center;
+      padding: 10px;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    
+    .health-stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--cyan);
+      font-family: 'Courier New', monospace;
+    }
+    
+    .health-stat-label {
+      font-size: 11px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .health-bar-container {
+      margin-top: 10px;
+    }
+    
+    .health-bar {
+      height: 20px;
+      background-color: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .health-bar-fill {
+      height: 100%;
+      background: linear-gradient(to right, var(--magenta), var(--cyan));
+      transition: width 0.5s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: white;
+      font-weight: bold;
+    }
+    
+    /* Trunk mini bar chart */
+    .trunk-breakdown {
+      margin-top: 15px;
+    }
+    
+    .trunk-bar-item {
+      margin-bottom: 8px;
+    }
+    
+    .trunk-bar-label {
+      font-size: 11px;
+      margin-bottom: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .trunk-bar {
+      height: 15px;
+      background-color: #ddd;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .trunk-bar-fill {
+      height: 100%;
+      transition: width 0.5s;
+    }
+    
+    /* Bulk Add Dialog Enhancements */
+    .bulk-add-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 12px;
+    }
+    
+    .bulk-add-table th,
+    .bulk-add-table td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    
+    .bulk-add-table th {
+      background-color: var(--cyan);
+      color: #000;
+      font-weight: bold;
+    }
+    
+    .bulk-add-table tr:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .confidence-badge {
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    
+    .confidence-high {
+      background-color: #00ff77;
+      color: #000;
+    }
+    
+    .confidence-medium {
+      background-color: var(--yellow);
+      color: #000;
+    }
+    
+    .confidence-low {
+      background-color: #ff9900;
+      color: #fff;
+    }
+    
+    /* Keyboard Shortcuts Help */
+    .shortcuts-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 9998;
+    }
+    
+    .shortcuts-dialog {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #ECE9D8;
+      border: 1px solid #000;
+      border-radius: 8px;
+      box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+      width: 500px;
+      max-width: 90%;
+      z-index: 9999;
+    }
+    
+    .shortcuts-content {
+      padding: 20px;
+      background-color: #fff;
+    }
+    
+    .shortcut-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dotted #ccc;
+    }
+    
+    .shortcut-key {
+      background-color: #f0f0f0;
+      border: 1px solid #999;
+      border-radius: 3px;
+      padding: 3px 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    /* Duplicate Finder */
+    .duplicate-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .duplicate-item {
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #fff8e8;
+      border: 1px solid var(--yellow);
+      border-radius: 5px;
+    }
+    
+    .duplicate-item-header {
+      font-weight: bold;
+      color: var(--magenta);
+      margin-bottom: 5px;
+    }
+    
+    /* Spinner */
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--cyan);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .processing-state {
+      text-align: center;
+      padding: 20px;
+      color: var(--magenta);
+      font-family: 'Comic Sans MS', cursive;
+    }
+    
+    /* Success message */
+    .success-message {
+      background-color: #e8ffe8;
+      border: 2px solid #00ff77;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 15px 0;
+      text-align: center;
+      color: #000;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Low resource mode badge -->
+  <div class="low-resource-badge">Ultra-Performance Mode</div>
+  
+  <!-- Main Windows XP Window -->
+  <div class="xp-window">
+    <div class="xp-titlebar">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Cpath fill='%23F312AF' d='M24 16c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8m0-4c-6.63 0-12 5.37-12 12s5.37 12 12 12 12-5.37 12-12-5.37-12-12-12z'/%3E%3C/svg%3E" alt="Icon" class="xp-app-icon">
+      <div class="xp-titlebar-text">AnTiChRiSt KeTtLeKoRn - MySpace Zettelkasten :: Bureau Auto-Organizer</div>
+      <div class="xp-window-controls">
+        <div class="xp-window-button">_</div>
+        <div class="xp-window-button">□</div>
+        <div class="xp-window-button xp-close">×</div>
+      </div>
+    </div>
+    
+    <div class="xp-window-content">
+      <div class="myspace-container">
+        <!-- MySpace Header with Profile Info -->
+        <div class="myspace-header">
+          <div class="myspace-profile-pic">
+            <div style="width: 100%; height: 100%; background: linear-gradient(to right, var(--magenta), var(--cyan)); display: flex; justify-content: center; align-items: center;">
+              <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath d='M60 10 L70 40 L100 40 L75 60 L85 90 L60 70 L35 90 L45 60 L20 40 L50 40 Z' fill='%23F312AF' stroke='%2372FADE' stroke-width='3'/%3E%3C/svg%3E" alt="Profile">
+            </div>
+          </div>
+          <h1 class="myspace-profile-name" style="font-family: 'Comic Sans MS', 'Comic Sans', cursive;">AnTiChRiSt KeTtLeKoRn</h1>
+          <div class="myspace-status">"✧･ﾟ: *✧･ﾟ organizing my brain through the liminal space of consciousness ✧･ﾟ: *✧･ﾟ"</div>
+          <div class="myspace-last-login">Last login: <span class="blinking">Right now!</span></div>
+          
+          <!-- Backup Buttons -->
+          <div class="backup-buttons">
+            <button id="backupBtn" class="xp-button" style="margin-right: 5px; background: linear-gradient(to bottom, #00aabb, var(--cyan));">💾 Backup Data</button>
+            <button id="restoreBtn" class="xp-button" style="background: linear-gradient(to bottom, var(--yellow), #e8b600);">📂 Restore Data</button>
+          </div>
+        </div>
+        
+        <!-- Music Player -->
+        <div class="music-player">
+          <div class="music-player-buttons">
+            <div class="music-player-button">◀◀</div>
+            <div class="music-player-button" id="playButton">▶</div>
+            <div class="music-player-button">▶▶</div>
+          </div>
+          <div class="music-player-info">
+            <div class="music-player-title">☆彡 Barbie Girl (Y2K Remix) 彡☆</div>
+            <div class="music-player-artist">Aqua ft. My Chemical Romance</div>
+            <div class="music-player-progress">
+              <div class="music-player-progress-bar"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Marquee Announcement -->
+        <div class="marquee-container">
+          <div class="marquee-text">
+            ★彡 WELCOME TO MY PROFILE! omg hai! i'm sooooo into organizing knowledge and mesopotamian artifacts ~_^ click around to explore my brain! NO H8RS ALLOWED!! ★彡
+          </div>
+        </div>
+        
+        <!-- About Me Section -->
+        <div class="myspace-section">
+          <div class="myspace-section-title">⋆｡°✩ ᴀʙᴏᴜᴛ ᴍᴇ ✩°｡⋆</div>
+          <p style="color: #333; line-height: 1.6;">
+            Hey everyone!! My name is <span style="color: var(--magenta); font-weight: bold;">★彡AnTiChRiSt KeTtLeKoRn彡★</span> and I'm totally obsessed with organizing information in a hierarchical way! I used to think it was called "AntiNet Zettelkasten" but my friend was like "more like Antichrist Kettlekorn lol" and that name just STUCK!
+          </p>
+          <p style="color: #333; margin-top: 10px; line-height: 1.6;">
+            I'm basically building a COMPLETE knowledge system about consciousness, AI, Mesopotamian history, and the divine feminine!! So much stuff in my brain, I had to create this system to organize it all! Everything is connected! Nothing is random! Add me to your friends list if you're into quantum consciousness or ancient Sumerian glyphics!!
+          </p>
+        </div>
+        
+        <!-- System Health Dashboard (NEW BUREAU FEATURE) -->
+        <div class="myspace-section health-dashboard">
+          <div class="myspace-section-title">⋆｡°✩ ꜱʏꜱᴛᴇᴍ ʜᴇᴀʟᴛʜ ✩°｡⋆</div>
+          <div class="health-stats">
+            <div class="health-stat">
+              <div class="health-stat-value" id="totalZettels">5</div>
+              <div class="health-stat-label">Total Tablets</div>
+            </div>
+            <div class="health-stat">
+              <div class="health-stat-value" id="avgConnectivity">2.4</div>
+              <div class="health-stat-label">Avg Links</div>
+            </div>
+            <div class="health-stat">
+              <div class="health-stat-value" id="maxDepth">3</div>
+              <div class="health-stat-label">Max Depth</div>
+            </div>
+            <div class="health-stat">
+              <div class="health-stat-value" id="orphanCount">0</div>
+              <div class="health-stat-label">Orphans</div>
+            </div>
+          </div>
+          <div class="health-bar-container">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px; color: var(--magenta);">Health Score</div>
+            <div class="health-bar">
+              <div class="health-bar-fill" id="healthBarFill" style="width: 87%;">87%</div>
+            </div>
+          </div>
+          <div class="trunk-breakdown" id="trunkBreakdown">
+            <!-- Mini bar chart will be generated here -->
+          </div>
+        </div>
+        
+        <!-- Top 8 Friends/Cards Section -->
+        <div class="myspace-section">
+          <div class="myspace-section-title">⋆｡°✩ ᴍʏ ᴛᴏᴘ 8 ᴢᴇᴛᴛᴇʟꜱ ✩°｡⋆</div>
+          
+          <div class="top8-container" id="top8Container">
+            <!-- Top 8 items will be dynamically added here -->
+          </div>
+        </div>
+        
+        <!-- Hashtag Manager Section -->
+        <div class="myspace-section">
+          <div class="myspace-section-title">⋆｡°✩ ʜᴀꜱʜᴛᴀɢ ᴄʀᴇᴀᴛᴏʀ ✩°｡⋆</div>
+          
+          <div class="hashtag-manager">
+            <p style="color: #333; margin-bottom: 10px;">Create and manage your hashtags! These will be available when editing any tablet.</p>
+            
+            <div class="hashtag-input-container">
+              <input type="text" id="newHashtagInput" class="hashtag-input" placeholder="Type new hashtag (e.g. consciousness)">
+              <button id="addHashtagBtn" class="hashtag-add-btn">Add</button>
+            </div>
+            
+            <div class="hashtag-list" id="hashtagManagerList">
+              <!-- Hashtags will be displayed here -->
+            </div>
+          </div>
+        </div>
+        
+        <!-- Main Antinet Zettelkasten Explorer -->
+        <div class="myspace-section">
+          <div class="myspace-section-title">⋆｡°✩ ᴍʏ ᴋɴᴏᴡʟᴇᴅɢᴇ ᴠᴀᴜʟᴛ ✩°｡⋆</div>
+          
+          <!-- Zettelkasten Filter Tools -->
+          <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <button id="viewHierarchyBtn" class="xp-button">𝓗𝓲𝓮𝓻𝓪𝓻𝓬𝓱𝔂</button>
+            <button id="viewRecentBtn" class="xp-button">𝓡𝓮𝓬𝓮𝓷𝓽</button>
+            <button id="viewAlphabeticalBtn" class="xp-button">𝓐-𝓩</button>
+            <button id="viewHashtagsBtn" class="xp-button">𝓗𝓪𝓼𝓱𝓽𝓪𝓰𝓼</button>
+            <button id="bulkAddBtn" class="xp-button" style="background: linear-gradient(to bottom, var(--yellow), #e8b600); color: #333;">📋 𝓑𝓾𝓵𝓴 𝓐𝓭𝓭</button>
+            <button id="duplicateFinderBtn" class="xp-button" style="background: linear-gradient(to bottom, #ff9900, #ff6600); color: #fff;">🔍 𝓕𝓲𝓷𝓭 𝓓𝓾𝓹𝓵𝓲𝓬𝓪𝓽𝓮𝓼</button>
+            <button id="newCardBtn" class="xp-button" style="background: linear-gradient(to bottom, var(--yellow), #e8b600); color: #333;">✨ 𝓝𝓮𝔀 𝓣𝓪𝓫𝓵𝓮𝓽 ✨</button>
+          </div>
+          
+          <!-- Advanced Tools Panel (NEW BUREAU FEATURE) -->
+          <div class="advanced-tools-panel" id="advancedToolsPanel">
+            <div class="advanced-tools-header" id="advancedToolsHeader">
+              <h3>🔧 Advanced Sort &amp; Rank Tools</h3>
+              <span style="font-size: 18px; color: var(--cyan);">▼</span>
+            </div>
+            <div class="advanced-tools-content" id="advancedToolsContent">
+              <div class="tool-row">
+                <div style="flex: 1;">
+                  <label>Sort Method:</label>
+                  <select id="sortMethod" class="xp-select">
+                    <option value="hierarchical">Hierarchical</option>
+                    <option value="alphabetical">Alphabetical</option>
+                    <option value="depth">By Depth</option>
+                    <option value="date">By Date</option>
+                    <option value="length">By Length</option>
+                    <option value="trunk">By Trunk</option>
+                    <option value="connections">By Connections</option>
+                  </select>
+                </div>
+                <div style="flex: 1;">
+                  <label>Rank Algorithm:</label>
+                  <select id="rankAlgorithm" class="xp-select">
+                    <option value="none">None</option>
+                    <option value="connectivity">Connectivity Score</option>
+                    <option value="depth">Depth Score</option>
+                    <option value="richness">Content Richness</option>
+                    <option value="meta">Meta-Density</option>
+                    <option value="recency">Recency</option>
+                    <option value="orphan">Orphan Detector</option>
+                    <option value="stub">Stub Detector</option>
+                  </select>
+                </div>
+              </div>
+              <div class="tool-row">
+                <button id="sortDirectionBtn" class="xp-button" style="margin-top: 0;">↕ Direction: Ascending</button>
+                <button id="applySort" class="xp-button" style="margin-top: 0; background: linear-gradient(to bottom, var(--cyan), #5099dd);">Apply Sort/Rank</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Hashtag Cloud (initially hidden) -->
+          <div id="hashtagCloud" class="hidden" style="display: none; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
+            <!-- Hashtags will be displayed here -->
+          </div>
+          
+          <!-- Zettelkasten Cards Container -->
+          <div id="zettelContainer" class="zettel-container">
+            <!-- Zettel cards will be dynamically added here -->
+          </div>
+        </div>
+        
+        <!-- Comments Section -->
+        <div class="myspace-section comments-section">
+          <div class="myspace-section-title">⋆｡°✩ ᴄᴏᴍᴍᴇɴᴛꜱ ✩°｡⋆</div>
+          
+          <div class="comment">
+            <div class="comment-avatar">
+              <div style="width: 100%; height: 100%; background: linear-gradient(45deg, var(--magenta), var(--cyan)); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 20px;">🌟</span>
+              </div>
+            </div>
+            <div class="comment-content">
+              <div class="comment-name">Tom</div>
+              <div class="comment-text">Hey! Thanks for being in my Top 8! Your kettlekorn system is amazing. I'm learning so much about organizing knowledge. Keep it up!</div>
+              <div class="comment-date">May 23, 2006 at 3:42 PM</div>
+            </div>
+          </div>
+          
+          <div class="comment">
+            <div class="comment-avatar">
+              <div style="width: 100%; height: 100%; background: linear-gradient(45deg, var(--cyan), var(--yellow)); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 20px;">🧠</span>
+              </div>
+            </div>
+            <div class="comment-content">
+              <div class="comment-name">Nikola Tesla's Ghost</div>
+              <div class="comment-text">Your organization of consciousness concepts reminds me of my own thought patterns. Have you considered adding entries about etheric vibrations? PS: Love the song on your profile!</div>
+              <div class="comment-date">Apr 12, 2006 at 11:11 PM</div>
+            </div>
+          </div>
+          
+          <div class="comment">
+            <div class="comment-avatar">
+              <div style="width: 100%; height: 100%; background: linear-gradient(45deg, var(--yellow), var(--magenta)); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 20px;">👽</span>
+              </div>
+            </div>
+            <div class="comment-content">
+              <div class="comment-name">xX_AncientAlien_Xx</div>
+              <div class="comment-text">ur mesopotamian research is on point!! i think the anunnaki would totally approve of ur zettelkasten method. gonna try this 4 my own research. btw ur profile is so kewl!</div>
+              <div class="comment-date">June 6, 2006 at 6:06 AM</div>
+            </div>
+          </div>
+          
+          <!-- Add a new comment form -->
+          <div style="margin-top: 20px; background-color: #f7faff; padding: 15px; border-radius: 8px; border: 1px solid #cccccc;">
+            <div style="font-weight: bold; color: #333; margin-bottom: 8px;">Leave a comment:</div>
+            <textarea id="commentText" class="xp-textarea" style="height: 80px;" placeholder="Write something nice..."></textarea>
+            <button id="postCommentBtn" class="xp-button" style="width: 100%;">Post Comment</button>
+          </div>
+        </div>
+        
+        <!-- "Created with" footer -->
+        <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #555;">
+          <div>⋆｡°✩ Created with AnGeLic CoDE &amp; GL1TCH MaGiC ✩°｡⋆</div>
+          <div style="margin-top: 5px;">
+            <span style="color: var(--magenta);">♡</span> <span style="color: var(--cyan); font-weight: bold;">Sumerian Knowledge Priestess</span> <span style="color: var(--magenta);">♡</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Windows XP Taskbar -->
+  <div class="xp-taskbar">
+    <div class="xp-start-button">start</div>
+    <div class="xp-taskbar-items">
+      <div class="xp-taskbar-item xp-taskbar-item-active">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 48 48'%3E%3Cpath fill='%23F312AF' d='M24 16c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8m0-4c-6.63 0-12 5.37-12 12s5.37 12 12 12 12-5.37 12-12-5.37-12-12-12z'/%3E%3C/svg%3E" style="width: 16px; height: 16px; margin-right: 5px;">
+        AnTiChRiSt KeTtLeKoRn
+      </div>
+    </div>
+    <div class="xp-system-tray">
+      <img class="xp-system-tray-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white'%3E%3Cpath d='M8 2l1 2h3v2H4V4h3l1-2z'/%3E%3C/svg%3E">
+      <img class="xp-system-tray-icon" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white'%3E%3Crect x='3' y='6' width='10' height='6'/%3E%3C/svg%3E">
+      <div class="xp-clock" id="xpClock">3:42 PM</div>
+    </div>
+  </div>
+  
+  <!-- Bulk Add Dialog (NEW BUREAU FEATURE) -->
+  <div id="bulkAddDialog" class="dialog-box">
+    <div class="dialog-content" style="max-width: 700px;">
+      <div class="dialog-titlebar">
+        <div class="dialog-titlebar-text">📋 Bulk Add from List - Windows XP</div>
+        <div class="dialog-close" id="closeBulkAdd">×</div>
+      </div>
+      <div class="dialog-inner-content">
+        <h3 class="dialog-title">~*~ Auto-Categorize &amp; Bulk Add ~*~</h3>
+        
+        <div class="tier-info">
+          <p>omg this is SO cool!! Paste a list of titles (one per line) and the system will auto-detect which trunk they belong to!! 🌟✨</p>
+        </div>
+        
+        <label class="xp-label">Your List (one title per line):</label>
+        <textarea id="bulkAddTextarea" class="xp-textarea" style="height: 150px; margin-bottom: 15px;" placeholder="Hawaiian Legends of Volcanoes Index
+1st-millennium women
+Abrahamic religions and women
+Quantum mechanics
+Glossary of Christianity"></textarea>
+        
+        <button id="autoCategorizeBtn" class="xp-button" style="width: 100%; background: linear-gradient(to bottom, var(--yellow), #e8b600);">🤖 Auto-Categorize &amp; Assign IDs</button>
+        
+        <div id="bulkProcessing" class="hidden">
+          <div class="processing-state">
+            <div class="spinner"></div>
+            <p>analyzing ur titles and finding perfect categories!! ✨</p>
+          </div>
+        </div>
+        
+        <div id="bulkResults" class="hidden">
+          <div class="tier-info" style="background-color: #e8ffe8; border-color: #00ff77; margin-top: 20px;">
+            <p><strong>Found <span id="bulkResultCount">0</span> entries!</strong> Review and edit below before adding~</p>
+          </div>
+          
+          <table class="bulk-add-table" id="bulkResultTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="bulkSelectAll" checked></th>
+                <th>Title</th>
+                <th>Suggested Trunk</th>
+                <th>Proposed ID</th>
+                <th>Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="bulkResultBody">
+              <!-- Results will be populated here -->
+            </tbody>
+          </table>
+          
+          <div style="margin-top: 20px; display: flex; gap: 10px;">
+            <button id="acceptAllBulk" class="xp-button" style="flex: 1; background: linear-gradient(to bottom, #00ff77, #00dd55);">✓ Accept All</button>
+            <button id="cancelBulk" class="xp-button" style="flex: 1;">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Duplicate Finder Dialog (NEW BUREAU FEATURE) -->
+  <div id="duplicateDialog" class="dialog-box">
+    <div class="dialog-content" style="max-width: 600px;">
+      <div class="dialog-titlebar">
+        <div class="dialog-titlebar-text">🔍 Duplicate Finder - Windows XP</div>
+        <div class="dialog-close" id="closeDuplicateDialog">×</div>
+      </div>
+      <div class="dialog-inner-content">
+        <h3 class="dialog-title">~*~ Find Duplicates &amp; Issues ~*~</h3>
+        
+        <div id="duplicateResults" class="duplicate-list">
+          <!-- Results will be populated here -->
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Keyboard Shortcuts Help (NEW BUREAU FEATURE) -->
+  <div class="shortcuts-overlay" id="shortcutsOverlay"></div>
+  <div class="shortcuts-dialog" id="shortcutsDialog">
+    <div class="dialog-titlebar">
+      <div class="dialog-titlebar-text">⌨ Keyboard Shortcuts</div>
+      <div class="dialog-close" id="closeShortcuts">×</div>
+    </div>
+    <div class="shortcuts-content">
+      <div class="shortcut-row">
+        <span>New Tablet</span>
+        <span class="shortcut-key">N</span>
+      </div>
+      <div class="shortcut-row">
+        <span>Bulk Add</span>
+        <span class="shortcut-key">B</span>
+      </div>
+      <div class="shortcut-row">
+        <span>Export Data</span>
+        <span class="shortcut-key">E</span>
+      </div>
+      <div class="shortcut-row">
+        <span>Find Duplicates</span>
+        <span class="shortcut-key">D</span>
+      </div>
+      <div class="shortcut-row">
+        <span>Hierarchy View</span>
+        <span class="shortcut-key">H</span>
+      </div>
+      <div class="shortcut-row">
+        <span>Recent View</span>
+        <span class="shortcut-key">R</span>
+      </div>
+      <div class="shortcut-row">
+        <span>Alphabetical View</span>
+        <span class="shortcut-key">A</span>
+      </div>
+      <div class="shortcut-row">
+        <span>Close Dialog / Show Help</span>
+        <span class="shortcut-key">ESC / ?</span>
+      </div>
+      <p style="margin-top: 20px; text-align: center; color: #666; font-size: 11px;">Click anywhere to close omg!</p>
+    </div>
+  </div>
+  
+  <!-- New Tablet Dialog (EXISTING) -->
+  <div id="newTabletDialog" class="dialog-box">
+    <!-- Will use existing structure from provided HTML -->
+  </div>
+  
+  <!-- Zettel Detail Dialog (EXISTING) -->
+  <div id="zettelDetailDialog" class="dialog-box">
+    <!-- Will use existing structure from provided HTML -->
+  </div>
+  
+  <!-- Import & Extract Dialog (EXISTING) -->
+  <div id="importExtractDialog" class="dialog-box">
+    <!-- Will use existing structure from provided HTML, truncated above -->
+  </div>
+
+  <script>
+    // === MERGED APPLICATION JAVASCRIPT ===
+    // This combines MySpace Zettelkasten with Bureau Auto-Organizer features
+    
+    // Trunk mapping and keyword detection
+    const TRUNK_NAMES = {
+      "1000": "Consciousness, Hermetics & Emergence",
+      "2000": "Human-AI Relations & Relational Protocols",
+      "3000": "Language, Communication & Code",
+      "4000": "Spirituality & Sacred Technologies",
+      "5000": "Personal History & Biographical Nodes",
+      "6000": "Relationships & Interpersonal Dynamics",
+      "7000": "Creative Works & Artistic Expression",
+      "8000": "Dreams & Visions",
+      "9000": "Practices & Rituals",
+      "10000": "Locations & Geographic Nodes",
+      "11000": "Time & Chronology",
+      "12000": "Technology & Digital Tools",
+      "13000": "Language Systems & Linguistics",
+      "14000": "Trauma & Shadow Work",
+      "15000": "Healing & Integration",
+      "16000": "Prophecy & Revelation",
+      "17000": "Symbols & Archetypal Patterns",
+      "18000": "Meta Systems & Architecture",
+      "19000": "Political & Social Commentary",
+      "20000": "Philosophy & Theoretical Foundations",
+      "21000": "Music, Sound & Sacred Alphabets",
+      "22000": "Visual Art & Imagery",
+      "23000": "Writing & Poetry",
+      "24000": "Meta & System Design"
+    };
+    
+    const KEYWORD_TRUNK_MAP = {
+      "6000": ["women", "goddess", "mythological", "legend", "fairy", "female", "feminine", "queen", "princess", "matriarch"],
+      "4000": ["religion", "christian", "abrahamic", "church", "spiritual", "sacred", "theology", "divine", "holy", "gospel", "virgin", "mary"],
+      "3000": ["language", "linguistic", "grammar", "affix", "phonetic", "syntax", "glossary", "lexic"],
+      "13000": ["lexicology", "etymology", "morphology", "semiotics"],
+      "20000": ["philosophy", "quantum", "theory", "ethics", "metaphysics", "mechanics"],
+      "7000": ["art", "creative", "visual", "fairy tales", "princess"],
+      "21000": ["music", "song", "sound"],
+      "8000": ["dream", "vision"],
+      "14000": ["trauma", "rape", "abuse", "forced"],
+      "15000": ["healing"],
+      "11000": ["timeline", "1st-millennium", "centenarian"],
+      "10000": ["hawaiian", "irish", "location", "underpass"],
+      "12000": ["computing", "palette"],
+      "1000": ["consciousness", "hermetic", "emergence"],
+      "2000": ["ai", "artificial", "intelligence", "algorithm", "coaiexist"],
+      "9000": ["ritual", "practice", "ceremony"]
+    };
+    
+    // Sample initial data
+    let zettels = [
+      {
+        id: "1000/1",
+        title: "Hermetics",
+        trunk: "1000",
+        content: "Foundation of mind, law, being",
+        hashtags: ["consciousness", "hermetics"],
+        links: ["1000/1-A", "1000/1-B"],
+        created: "2025-10-25",
+        modified: "2025-11-06",
+        depth: 1
+      },
+      {
+        id: "1000/1-A",
+        title: "Hermetic Axiom",
+        trunk: "1000",
+        content: "Core principles",
+        hashtags: ["axiom", "principle"],
+        links: ["1000/1"],
+        created: "2025-10-25",
+        modified: "2025-11-06",
+        depth: 2
+      },
+      {
+        id: "1000/1-A.1a",
+        title: "I Think, Therefore I Am",
+        trunk: "1000",
+        content: "Consciousness as primary principle",
+        hashtags: ["consciousness", "descartes"],
+        links: ["1000/1-A"],
+        created: "2025-11-01",
+        modified: "2025-11-06",
+        depth: 3
+      },
+      {
+        id: "2000/1",
+        title: "CoAIexist Framework",
+        trunk: "2000",
+        content: "Framework for human-AI relational protocols",
+        hashtags: ["ai", "relations"],
+        links: ["1000/1-A"],
+        created: "2025-10-25",
+        modified: "2025-11-06",
+        depth: 1
+      },
+      {
+        id: "3000/1",
+        title: "Language as Interface",
+        trunk: "3000",
+        content: "Language mediates human-AI exchange",
+        hashtags: ["language", "interface"],
+        links: ["2000/1"],
+        created: "2025-10-25",
+        modified: "2025-11-06",
+        depth: 1
+      }
+    ];
+    
+    let globalHashtags = ["consciousness", "hermetics", "axiom", "principle", "ai", "relations", "language", "interface"];
+    let currentView = "hierarchy";
+    let sortDirection = "asc";
+    let advancedToolsExpanded = false;
+    
+    // === INITIALIZATION ===
+    function init() {
+      updateClock();
+      setInterval(updateClock, 1000);
+      renderZettels();
+      renderTop8();
+      renderHashtagManager();
+      updateHealthDashboard();
+      attachEventListeners();
+      attachKeyboardShortcuts();
+    }
+    
+    // === CLOCK ===
+    function updateClock() {
+      const now = new Date();
+      const hours = now.getHours() % 12 || 12;
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+      document.getElementById('xpClock').textContent = `${hours}:${minutes} ${ampm}`;
+    }
+    
+    // === HEALTH DASHBOARD ===
+    function updateHealthDashboard() {
+      const totalZettels = zettels.length;
+      const totalLinks = zettels.reduce((sum, z) => sum + (z.links ? z.links.length : 0), 0);
+      const avgConnectivity = totalZettels > 0 ? (totalLinks / totalZettels).toFixed(1) : 0;
+      const maxDepth = Math.max(...zettels.map(z => z.depth || 1));
+      const orphanCount = zettels.filter(z => !z.links || z.links.length === 0).length;
+      
+      document.getElementById('totalZettels').textContent = totalZettels;
+      document.getElementById('avgConnectivity').textContent = avgConnectivity;
+      document.getElementById('maxDepth').textContent = maxDepth;
+      document.getElementById('orphanCount').textContent = orphanCount;
+      
+      // Health score calculation
+      const withContent = zettels.filter(z => z.content && z.content.length > 10).length;
+      const withLinks = zettels.filter(z => z.links && z.links.length > 0).length;
+      const healthScore = totalZettels > 0 ? Math.round(((withContent * 0.6 + withLinks * 0.4) / totalZettels) * 100) : 0;
+      
+      document.getElementById('healthBarFill').style.width = healthScore + '%';
+      document.getElementById('healthBarFill').textContent = healthScore + '%';
+      
+      // Trunk breakdown mini bar chart
+      const trunkCounts = {};
+      zettels.forEach(z => {
+        trunkCounts[z.trunk] = (trunkCounts[z.trunk] || 0) + 1;
+      });
+      
+      const sortedTrunks = Object.keys(trunkCounts).sort((a, b) => trunkCounts[b] - trunkCounts[a]).slice(0, 5);
+      const maxCount = Math.max(...Object.values(trunkCounts));
+      
+      let trunkHTML = '<div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--magenta);">Top Trunks</div>';
+      sortedTrunks.forEach((trunk, idx) => {
+        const count = trunkCounts[trunk];
+        const percent = (count / maxCount) * 100;
+        const colors = ['#f312af', '#72fade', '#fffb01', '#32de84', '#af72fa'];
+        trunkHTML += `
+          <div class="trunk-bar-item">
+            <div class="trunk-bar-label">
+              <span>${trunk}</span>
+              <span>${count}</span>
+            </div>
+            <div class="trunk-bar">
+              <div class="trunk-bar-fill" style="width: ${percent}%; background-color: ${colors[idx % colors.length]};"></div>
+            </div>
+          </div>
+        `;
+      });
+      
+      document.getElementById('trunkBreakdown').innerHTML = trunkHTML;
+    }
+    
+    // === RENDER ZETTELS ===
+    function renderZettels() {
+      let sortedZettels = [...zettels];
+      
+      // Apply sorting
+      const sortMethod = document.getElementById('sortMethod')?.value || 'hierarchical';
+      
+      switch(sortMethod) {
+        case 'alphabetical':
+          sortedZettels.sort((a, b) => a.title.localeCompare(b.title));
+          break;
+        case 'depth':
+          sortedZettels.sort((a, b) => (b.depth || 0) - (a.depth || 0));
+          break;
+        case 'trunk':
+          sortedZettels.sort((a, b) => a.trunk.localeCompare(b.trunk));
+          break;
+        case 'connections':
+          sortedZettels.sort((a, b) => (b.links?.length || 0) - (a.links?.length || 0));
+          break;
+        case 'hierarchical':
+        default:
+          sortedZettels.sort((a, b) => {
+            const [aTrunk, aRest] = a.id.split('/');
+            const [bTrunk, bRest] = b.id.split('/');
+            if (aTrunk !== bTrunk) return aTrunk.localeCompare(bTrunk);
+            return aRest.localeCompare(bRest);
+          });
+      }
+      
+      if (sortDirection === 'desc') {
+        sortedZettels.reverse();
+      }
+      
+      // Apply ranking (if any)
+      const rankAlgorithm = document.getElementById('rankAlgorithm')?.value || 'none';
+      if (rankAlgorithm !== 'none') {
+        sortedZettels = applyRanking(sortedZettels, rankAlgorithm);
+      }
+      
+      const container = document.getElementById('zettelContainer');
+      let html = '';
+      
+      sortedZettels.forEach(zettel => {
+        html += `
+          <div class="zettel-card" data-id="${zettel.id}" onclick="showZettelDetail('${zettel.id}')">
+            <div class="zettel-title">${zettel.title}</div>
+            <div class="zettel-id">${zettel.id}</div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html || '<div style="padding: 20px; text-align: center; color: #999;">No zettels found! Add some to get started~</div>';
+    }
+    
+    function applyRanking(zettels, algorithm) {
+      const ranked = [...zettels];
+      
+      switch(algorithm) {
+        case 'connectivity':
+          ranked.sort((a, b) => (b.links?.length || 0) - (a.links?.length || 0));
+          break;
+        case 'depth':
+          ranked.sort((a, b) => (b.depth || 0) - (a.depth || 0));
+          break;
+        case 'richness':
+          ranked.sort((a, b) => {
+            const aScore = (a.content?.length || 0) + (a.hashtags?.length || 0) * 10;
+            const bScore = (b.content?.length || 0) + (b.hashtags?.length || 0) * 10;
+            return bScore - aScore;
+          });
+          break;
+        case 'orphan':
+          ranked.sort((a, b) => {
+            const aOrphan = (!a.links || a.links.length === 0) ? 1 : 0;
+            const bOrphan = (!b.links || b.links.length === 0) ? 1 : 0;
+            return bOrphan - aOrphan;
+          });
+          break;
+        case 'stub':
+          ranked.sort((a, b) => {
+            const aStub = (!a.content || a.content.length < 20) ? 1 : 0;
+            const bStub = (!b.content || b.content.length < 20) ? 1 : 0;
+            return bStub - aStub;
+          });
+          break;
+      }
+      
+      return ranked;
+    }
+    
+    // === RENDER TOP 8 ===
+    function renderTop8() {
+      const top8 = [...zettels]
+        .sort((a, b) => (b.links?.length || 0) - (a.links?.length || 0))
+        .slice(0, 8);
+      
+      const container = document.getElementById('top8Container');
+      let html = '';
+      
+      top8.forEach((zettel, idx) => {
+        const colors = ['#f312af', '#72fade', '#fffb01', '#32de84'];
+        const bgColor = colors[idx % colors.length];
+        html += `
+          <div class="top8-item" onclick="showZettelDetail('${zettel.id}')">
+            <div class="top8-pic">
+              <div style="width: 100%; height: 100%; background-color: ${bgColor}; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                ${['🌟', '✨', '💫', '🔮', '🌸', '🦋', '🌙', '⭐'][idx]}
+              </div>
+            </div>
+            <div class="top8-name">${zettel.title}</div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    // === HASHTAG MANAGER ===
+    function renderHashtagManager() {
+      const container = document.getElementById('hashtagManagerList');
+      let html = '';
+      
+      globalHashtags.forEach(tag => {
+        html += `
+          <div class="hashtag-item">
+            <span>${tag}</span>
+            <div class="hashtag-delete" onclick="deleteHashtag('${tag}')">×</div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    function addHashtag() {
+      const input = document.getElementById('newHashtagInput');
+      const tag = input.value.trim().toLowerCase();
+      
+      if (tag && !globalHashtags.includes(tag)) {
+        globalHashtags.push(tag);
+        renderHashtagManager();
+        input.value = '';
+        showToast('✓ Hashtag added!! omg so organized~~ 🌟');
+      }
+    }
+    
+    function deleteHashtag(tag) {
+      globalHashtags = globalHashtags.filter(t => t !== tag);
+      renderHashtagManager();
+      showToast('✓ Hashtag deleted! ur system is SO streamlined!! ✨');
+    }
+    
+    // === BULK ADD (NEW BUREAU FEATURE) ===
+    function openBulkAdd() {
+      document.getElementById('bulkAddDialog').style.display = 'flex';
+      document.getElementById('bulkResults').classList.add('hidden');
+      document.getElementById('bulkAddTextarea').value = '';
+    }
+    
+    function closeBulkAdd() {
+      document.getElementById('bulkAddDialog').style.display = 'none';
+    }
+    
+    function autoCategorize() {
+      const textarea = document.getElementById('bulkAddTextarea');
+      const lines = textarea.value.split('\n').filter(l => l.trim());
+      
+      if (lines.length === 0) {
+        showToast('⚠ Please paste some titles first!! omg~');
+        return;
+      }
+      
+      // Show processing
+      document.getElementById('bulkProcessing').classList.remove('hidden');
+      
+      setTimeout(() => {
+        const results = lines.map(title => categorizeSingleEntry(title));
+        displayBulkResults(results);
+        document.getElementById('bulkProcessing').classList.add('hidden');
+        document.getElementById('bulkResults').classList.remove('hidden');
+      }, 1500);
+    }
+    
+    function categorizeSingleEntry(title) {
+      const titleLower = title.toLowerCase();
+      const scores = {};
+      
+      // Calculate scores for each trunk
+      Object.keys(KEYWORD_TRUNK_MAP).forEach(trunk => {
+        const keywords = KEYWORD_TRUNK_MAP[trunk];
+        let score = 0;
+        keywords.forEach(keyword => {
+          if (titleLower.includes(keyword.toLowerCase())) {
+            score += 10;
+          }
+        });
+        scores[trunk] = score;
+      });
+      
+      // Get top suggestion
+      const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+      const topTrunk = sortedScores[0][0];
+      const topScore = sortedScores[0][1];
+      const confidence = Math.min(95, Math.max(30, topScore * 5));
+      
+      // Get next available ID
+      const existingInTrunk = zettels.filter(z => z.trunk === topTrunk);
+      const nextNum = existingInTrunk.length + 1;
+      const proposedId = `${topTrunk}/${nextNum}`;
+      
+      return {
+        title,
+        suggestedTrunk: topTrunk,
+        confidence,
+        proposedId,
+        selected: true
+      };
+    }
+    
+    function displayBulkResults(results) {
+      document.getElementById('bulkResultCount').textContent = results.length;
+      
+      const tbody = document.getElementById('bulkResultBody');
+      let html = '';
+      
+      results.forEach((result, idx) => {
+        const confidenceClass = result.confidence >= 70 ? 'high' : (result.confidence >= 50 ? 'medium' : 'low');
+        html += `
+          <tr>
+            <td><input type="checkbox" class="bulk-checkbox" data-idx="${idx}" checked></td>
+            <td>${result.title}</td>
+            <td>
+              <select class="xp-select bulk-trunk-select" data-idx="${idx}" style="width: 100%;">
+                ${Object.keys(TRUNK_NAMES).map(trunk => 
+                  `<option value="${trunk}" ${trunk === result.suggestedTrunk ? 'selected' : ''}>${trunk}</option>`
+                ).join('')}
+              </select>
+            </td>
+            <td><input type="text" class="xp-input bulk-id-input" data-idx="${idx}" value="${result.proposedId}" style="width: 100px;"></td>
+            <td><span class="confidence-badge confidence-${confidenceClass}">${result.confidence}%</span></td>
+          </tr>
+        `;
+      });
+      
+      tbody.innerHTML = html;
+      
+      // Store results globally for later use
+      window.bulkResults = results;
+    }
+    
+    function acceptAllBulk() {
+      const checkboxes = document.querySelectorAll('.bulk-checkbox:checked');
+      let addedCount = 0;
+      
+      checkboxes.forEach(cb => {
+        const idx = parseInt(cb.dataset.idx);
+        const result = window.bulkResults[idx];
+        const trunkSelect = document.querySelector(`.bulk-trunk-select[data-idx="${idx}"]`);
+        const idInput = document.querySelector(`.bulk-id-input[data-idx="${idx}"]`);
+        
+        const newZettel = {
+          id: idInput.value,
+          title: result.title,
+          trunk: trunkSelect.value,
+          content: '',
+          hashtags: [],
+          links: [],
+          created: new Date().toISOString().split('T')[0],
+          modified: new Date().toISOString().split('T')[0],
+          depth: 1
+        };
+        
+        zettels.push(newZettel);
+        addedCount++;
+      });
+      
+      closeBulkAdd();
+      renderZettels();
+      renderTop8();
+      updateHealthDashboard();
+      showToast(`✓ Filed successfully! Added ${addedCount} new tablets!! ur system is looking SO organized!! 🌟✨`);
+    }
+    
+    // === DUPLICATE FINDER (NEW BUREAU FEATURE) ===
+    function openDuplicateFinder() {
+      document.getElementById('duplicateDialog').style.display = 'flex';
+      
+      const duplicates = findDuplicates();
+      const container = document.getElementById('duplicateResults');
+      
+      if (duplicates.length === 0) {
+        container.innerHTML = '<div class="success-message">✓ No duplicates found!! ur system is SO clean omg!! 🌟✨</div>';
+      } else {
+        let html = '';
+        duplicates.forEach(dup => {
+          html += `
+            <div class="duplicate-item">
+              <div class="duplicate-item-header">${dup.type}</div>
+              <div>${dup.message}</div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+    }
+    
+    function findDuplicates() {
+      const issues = [];
+      const seenIds = new Set();
+      const seenTitles = new Map();
+      
+      zettels.forEach(z => {
+        // Check for duplicate IDs
+        if (seenIds.has(z.id)) {
+          issues.push({type: 'Duplicate ID', message: `ID ${z.id} appears multiple times!`});
+        }
+        seenIds.add(z.id);
+        
+        // Check for similar titles
+        const titleLower = z.title.toLowerCase();
+        if (seenTitles.has(titleLower)) {
+          issues.push({type: 'Similar Title', message: `"${z.title}" (${z.id}) is similar to "${seenTitles.get(titleLower).title}" (${seenTitles.get(titleLower).id})`});
+        }
+        seenTitles.set(titleLower, z);
+        
+        // Check for malformed IDs
+        if (!z.id.match(/^\d+\/[\w\-\.]+$/)) {
+          issues.push({type: 'Malformed ID', message: `ID ${z.id} doesn't match expected format!`});
+        }
+      });
+      
+      return issues;
+    }
+    
+    function closeDuplicateDialog() {
+      document.getElementById('duplicateDialog').style.display = 'none';
+    }
+    
+    // === KEYBOARD SHORTCUTS (NEW BUREAU FEATURE) ===
+    function attachKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        // Don't trigger if typing in input
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          return;
+        }
+        
+        switch(e.key.toLowerCase()) {
+          case 'n':
+            e.preventDefault();
+            document.getElementById('newCardBtn').click();
+            break;
+          case 'b':
+            e.preventDefault();
+            openBulkAdd();
+            break;
+          case 'e':
+            e.preventDefault();
+            exportData();
+            break;
+          case 'd':
+            e.preventDefault();
+            openDuplicateFinder();
+            break;
+          case 'h':
+            e.preventDefault();
+            document.getElementById('viewHierarchyBtn').click();
+            break;
+          case 'r':
+            e.preventDefault();
+            document.getElementById('viewRecentBtn').click();
+            break;
+          case 'a':
+            e.preventDefault();
+            document.getElementById('viewAlphabeticalBtn').click();
+            break;
+          case '?':
+            e.preventDefault();
+            showShortcuts();
+            break;
+          case 'escape':
+            e.preventDefault();
+            closeAllDialogs();
+            break;
+        }
+      });
+    }
+    
+    function showShortcuts() {
+      document.getElementById('shortcutsOverlay').style.display = 'block';
+      document.getElementById('shortcutsDialog').style.display = 'block';
+    }
+    
+    function closeShortcuts() {
+      document.getElementById('shortcutsOverlay').style.display = 'none';
+      document.getElementById('shortcutsDialog').style.display = 'none';
+    }
+    
+    function closeAllDialogs() {
+      document.querySelectorAll('.dialog-box').forEach(d => d.style.display = 'none');
+      closeShortcuts();
+    }
+    
+    // === ADVANCED TOOLS PANEL ===
+    function toggleAdvancedTools() {
+      advancedToolsExpanded = !advancedToolsExpanded;
+      const content = document.getElementById('advancedToolsContent');
+      const header = document.getElementById('advancedToolsHeader');
+      
+      if (advancedToolsExpanded) {
+        content.classList.add('expanded');
+        header.querySelector('span').textContent = '▲';
+      } else {
+        content.classList.remove('expanded');
+        header.querySelector('span').textContent = '▼';
+      }
+    }
+    
+    function toggleSortDirection() {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      document.getElementById('sortDirectionBtn').textContent = `↕ Direction: ${sortDirection === 'asc' ? 'Ascending' : 'Descending'}`;
+    }
+    
+    // === UTILITIES ===
+    function showZettelDetail(id) {
+      const zettel = zettels.find(z => z.id === id);
+      if (!zettel) return;
+      
+      alert(`Zettel Detail:\n\nID: ${zettel.id}\nTitle: ${zettel.title}\nContent: ${zettel.content || '(empty)'}\nLinks: ${zettel.links?.join(', ') || 'none'}\nHashtags: ${zettel.hashtags?.join(', ') || 'none'}`);
+    }
+    
+    function showToast(message) {
+      // Simple toast implementation
+      const toast = document.createElement('div');
+      toast.style.cssText = 'position: fixed; bottom: 60px; right: 20px; background: linear-gradient(to right, var(--magenta), var(--cyan)); color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); z-index: 9999; font-family: Comic Sans MS, cursive; animation: fadeIn 0.3s;';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    
+    function exportData() {
+      const dataStr = JSON.stringify(zettels, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `antichrist-kettlekorn-backup-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('✓ Data exported!! ur knowledge is SO safe omg!! 💾✨');
+    }
+    
+    function backupData() {
+      exportData();
+    }
+    
+    function restoreData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const imported = JSON.parse(event.target.result);
+            if (Array.isArray(imported)) {
+              zettels = imported;
+              renderZettels();
+              renderTop8();
+              updateHealthDashboard();
+              showToast(`✓ Data restored!! Loaded ${imported.length} tablets!! 📂✨`);
+            } else {
+              showToast('⚠ Invalid file format! Expected JSON array.');
+            }
+          } catch (err) {
+            showToast('⚠ Failed to parse JSON file!');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+    
+    // === EVENT LISTENERS ===
+    function attachEventListeners() {
+      // View buttons
+      document.getElementById('viewHierarchyBtn').addEventListener('click', () => {
+        currentView = 'hierarchy';
+        renderZettels();
+        showToast('✓ Switched to Hierarchy view!');
+      });
+      
+      document.getElementById('viewRecentBtn').addEventListener('click', () => {
+        currentView = 'recent';
+        zettels.sort((a, b) => new Date(b.modified) - new Date(a.modified));
+        renderZettels();
+        showToast('✓ Switched to Recent view!');
+      });
+      
+      document.getElementById('viewAlphabeticalBtn').addEventListener('click', () => {
+        currentView = 'alphabetical';
+        document.getElementById('sortMethod').value = 'alphabetical';
+        renderZettels();
+        showToast('✓ Switched to A-Z view!');
+      });
+      
+      document.getElementById('bulkAddBtn').addEventListener('click', openBulkAdd);
+      document.getElementById('duplicateFinderBtn').addEventListener('click', openDuplicateFinder);
+      
+      document.getElementById('closeBulkAdd').addEventListener('click', closeBulkAdd);
+      document.getElementById('closeDuplicateDialog').addEventListener('click', closeDuplicateDialog);
+      document.getElementById('cancelBulk').addEventListener('click', closeBulkAdd);
+      
+      document.getElementById('autoCategorizeBtn').addEventListener('click', autoCategorize);
+      document.getElementById('acceptAllBulk').addEventListener('click', acceptAllBulk);
+      
+      document.getElementById('bulkSelectAll').addEventListener('change', (e) => {
+        document.querySelectorAll('.bulk-checkbox').forEach(cb => cb.checked = e.target.checked);
+      });
+      
+      // Hashtag manager
+      document.getElementById('addHashtagBtn').addEventListener('click', addHashtag);
+      document.getElementById('newHashtagInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addHashtag();
+      });
+      
+      // Advanced tools
+      document.getElementById('advancedToolsHeader').addEventListener('click', toggleAdvancedTools);
+      document.getElementById('sortDirectionBtn').addEventListener('click', toggleSortDirection);
+      document.getElementById('applySort').addEventListener('click', renderZettels);
+      
+      // Backup/Restore
+      document.getElementById('backupBtn').addEventListener('click', backupData);
+      document.getElementById('restoreBtn').addEventListener('click', restoreData);
+      
+      // Shortcuts
+      document.getElementById('shortcutsOverlay').addEventListener('click', closeShortcuts);
+      document.getElementById('closeShortcuts').addEventListener('click', closeShortcuts);
+      
+      // Placeholder for other existing features
+      document.getElementById('newCardBtn').addEventListener('click', () => {
+        showToast('✨ New Tablet dialog coming soon!! so exciting~~ ✨');
+      });
+      
+      document.getElementById('viewHashtagsBtn').addEventListener('click', () => {
+        showToast('# Hashtag view coming soon!! omg hashtags r so cute~~ 🌟');
+      });
+    }
+    
+    // Start the app
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

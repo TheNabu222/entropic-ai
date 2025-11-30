@@ -1,0 +1,411 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎭 Sacred Clown Generator Preview</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <!-- Retro Pixel + Handwritten Fonts -->
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Comic+Neue:wght@300;400&display=swap" 
+    rel="stylesheet">
+  <style>
+    /* Palette & Base */
+    :root {
+      --desktop-bg:   #121217;
+      --content-bg:   #21212A;
+      --text-light:   #F8F8F2;
+      --neon-cyan:    #66FCF1;
+      --neon-magenta: #F72585;
+      --frame-bg:     #FFB3E6;
+      --frame-br-l:   #FFFFFF;
+      --frame-br-d:   #404040;
+      --title-fg:     #121217;
+      --ctrl-bg:      #A0FFC2;
+      --font-retro:   'Press Start 2P', monospace;
+      --font-hand:    'Comic Neue', cursive;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      background: var(--desktop-bg);
+      color: var(--text-light);
+      font-family: var(--font-hand);
+      overflow: hidden; user-select: none;
+    }
+
+    /* Desktop & Taskbar */
+    #desktop { position:absolute; top:0; left:0; right:0; bottom:30px; }
+    .icon { position:absolute; width:64px; text-align:center; cursor:default; }
+    .icon img { width:48px; display:block; margin:0 auto; }
+    .icon-label { 
+      margin-top:4px; font-size:10px; 
+      color:var(--text-light); text-shadow:1px 1px 0 #000; 
+    }
+    #taskbar {
+      position:absolute; bottom:0; left:0; right:0; height:30px;
+      background:var(--frame-bg);
+      border-top:1px solid var(--frame-br-l);
+      border-left:1px solid var(--frame-br-l);
+      border-right:1px solid var(--frame-br-d);
+      border-bottom:1px solid var(--frame-br-d);
+      display:flex; align-items:center; padding:0 6px;
+    }
+    #start-button, .taskbar-btn {
+      background:var(--frame-bg);
+      border-top:1px solid var(--frame-br-l);
+      border-left:1px solid var(--frame-br-l);
+      border-right:1px solid var(--frame-br-d);
+      border-bottom:1px solid var(--frame-br-d);
+      font-family:var(--font-retro);
+      font-size:10px; line-height:1;
+      padding:0 8px; height:24px; margin-right:4px;
+      cursor:pointer;
+    }
+    #taskbar-apps { display:flex; flex:1; gap:4px; }
+    #start-menu {
+      position:absolute; bottom:30px; left:6px; width:180px;
+      background:var(--frame-bg);
+      border:2px solid var(--frame-br-d);
+      border-top-color:var(--frame-br-l);
+      border-left-color:var(--frame-br-l);
+      display:none;
+    }
+    #start-menu ul { list-style:none; padding:4px; }
+    #start-menu li {
+      padding:4px; cursor:pointer; font-family:var(--font-hand);
+    }
+    #start-menu li:hover {
+      background:var(--neon-magenta);
+      color:var(--frame-bg);
+    }
+
+    /* Window & Titlebar */
+    .window {
+      position:absolute; display:none; flex-direction:column;
+      background:var(--frame-bg);
+      border-top:2px solid var(--frame-br-l);
+      border-left:2px solid var(--frame-br-l);
+      border-right:2px solid var(--frame-br-d);
+      border-bottom:2px solid var(--frame-br-d);
+      box-shadow:0 0 12px var(--neon-magenta);
+    }
+    .titlebar {
+      display:flex; align-items:center;
+      padding:0 6px; height:24px;
+      background:var(--frame-bg);
+      border-bottom:1px solid var(--frame-br-d);
+      cursor:grab;
+    }
+    .titlebar .title {
+      flex:1; font-family:var(--font-retro);
+      font-size:12px; color:var(--title-fg);
+    }
+    .controls { display:flex; gap:2px; }
+    .controls button {
+      width:18px; height:18px;
+      background:var(--ctrl-bg);
+      border-top:1px solid var(--frame-br-l);
+      border-left:1px solid var(--frame-br-l);
+      border-right:1px solid var(--frame-br-d);
+      border-bottom:1px solid var(--frame-br-d);
+      font-size:12px; line-height:1;
+      cursor:pointer;
+    }
+    .window-content {
+      flex:1; background:var(--content-bg);
+      padding:12px; overflow:auto;
+      display:flex; flex-direction:column; gap:16px;
+    }
+    .window.maximized {
+      top:0!important; left:0!important;
+      width:100%!important; height:calc(100% - 30px)!important;
+    }
+
+    /* Form, Cards & Grid */
+    .vault-form label {
+      display:block; margin-top:8px; font-weight:bold;
+      color:var(--neon-magenta);
+    }
+    .vault-form select {
+      width:100%; padding:6px; margin-bottom:8px;
+      border:2px solid var(--neon-cyan);
+      border-radius:4px;
+    }
+    .vault-toolbar { display:flex; gap:8px; margin-top:12px; }
+    .btn {
+      padding:6px 12px; border-radius:4px;
+      font-family:var(--font-hand); transition:.2s;
+      cursor:pointer;
+    }
+    .btn.neon {
+      background:transparent; color:var(--neon-cyan);
+      border:2px solid var(--neon-cyan);
+      box-shadow:0 0 8px var(--neon-cyan);
+    }
+    .btn.neon:hover { box-shadow:0 0 12px var(--neon-cyan); }
+    .btn.pastel {
+      background:var(--frame-bg); color:var(--title-fg);
+      border:2px solid var(--neon-magenta);
+    }
+    .btn.pastel:hover { opacity:.85; }
+    .card {
+      background:var(--frame-bg); padding:12px; border-radius:4px;
+    }
+    .archetype-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(100px,1fr));
+      gap:12px; margin-top:16px;
+    }
+    .archetype-card {
+      background:var(--frame-bg);
+      border-top:2px solid var(--frame-br-l);
+      border-left:2px solid var(--frame-br-l);
+      border-right:2px solid var(--frame-br-d);
+      border-bottom:2px solid var(--frame-br-d);
+      border-radius:4px; padding:12px; text-align:center;
+      box-shadow:0 0 8px var(--neon-magenta);
+    }
+    .archetype-icon {
+      width:30px; height:30px; border-radius:50%;
+      margin:0 auto 8px; box-shadow:0 0 8px currentColor;
+    }
+    @keyframes wiggle {
+      0%   { transform:rotate(-2deg); }
+      50% { transform:rotate(2deg); }
+      100% { transform:rotate(-2deg); }
+    }
+    .archetype-card.performance {
+      animation: wiggle 0.5s infinite;
+    }
+  </style>
+</head>
+<body>
+  <!-- Desktop Icon -->
+  <div id="desktop">
+    <div class="icon" data-app="clown" style="top:20px; left:20px;">
+      <img src="https://via.placeholder.com/48" alt="Clown Icon">
+      <div class="icon-label">Sacred Clown</div>
+    </div>
+  </div>
+  <!-- Taskbar & Start Menu -->
+  <div id="taskbar">
+    <button id="start-button">Start</button>
+    <div id="taskbar-apps"></div>
+  </div>
+  <div id="start-menu">
+    <ul>
+      <li data-app="clown">Sacred Clown</li>
+    </ul>
+  </div>
+  <!-- Clown Generator Window -->
+  <div id="clown" class="window" style="top:80px; left:120px; width:720px; height:580px;">
+    <div class="titlebar">
+      <span class="title">🎭 SACRED CLOWN GENERATOR</span>
+      <div class="controls">
+        <button class="minimize">–</button>
+        <button class="maximize">□</button>
+        <button class="close">×</button>
+      </div>
+    </div>
+    <div class="window-content">
+      <form class="vault-form">
+        <label for="tradition">Wisdom Tradition:</label>
+        <select id="tradition">
+          <option>🃏 Trickster (Universal)</option>
+          <option>🎭 Fool (Tarot/Medieval)</option>
+          <option>🐺 Coyote (Native American)</option>
+          <option>🎪 Harlequin (Commedia dell’arte)</option>
+          <option>🧙 Wise Fool (Sufi/Zen)</option>
+          <option>🎨 Divine Madness (Greek)</option>
+        </select>
+        <label for="level">Consciousness Level:</label>
+        <select id="level">
+          <option>🌟 Cosmic Jester</option>
+          <option>🧠 Philosophical Fool</option>
+          <option>💫 Mystical Trickster</option>
+          <option>⚡ Chaos Catalyst</option>
+          <option>🎯 Truth Revealer</option>
+        </select>
+        <label for="mode">Synthesis Mode:</label>
+        <select id="mode">
+          <option>🔮 Paradox Resolution</option>
+          <option>🌀 Chaos Integration</option>
+          <option>💎 Wisdom Crystallization</option>
+          <option>🎪 Performance Manifestation</option>
+          <option>🧩 Pattern Disruption</option>
+        </select>
+        <div class="vault-toolbar">
+          <button id="btn-generate" class="btn neon">🎭 Generate</button>
+          <button id="btn-randomize" class="btn pastel">🔄 Randomize</button>
+          <button id="btn-save" class="btn pastel">💾 Save</button>
+          <button id="btn-performance" class="btn neon">🎪 Performance</button>
+        </div>
+      </form>
+      <div class="card" style="flex:1; overflow:auto;">
+        <h2 style="color:var(--neon-magenta)">🃏 Current Manifestation</h2>
+        <p id="config-output" style="color:var(--neon-cyan);margin-bottom:8px;"></p>
+        <p id="quote" style="color:var(--neon-cyan);font-style:italic;"></p>
+        <div id="archetype-grid" class="archetype-grid"></div>
+      </div>
+      <footer style="text-align:center; border-top:1px solid var(--neon-cyan); padding-top:8px;">
+        <small style="color:var(--neon-magenta)">🎭 SACRED CLOWN GENERATOR ACTIVE ⚡</small>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // ─── Shell Logic ─────────────────────────
+    const desktop    = document.getElementById('desktop');
+    const startBtn   = document.getElementById('start-button');
+    const startMenu  = document.getElementById('start-menu');
+    const taskbar    = document.getElementById('taskbar-apps');
+    const icons      = document.querySelectorAll('.icon');
+    const windows    = document.querySelectorAll('.window');
+    let zIndex = 1, activeWin = null, openMap = new Map();
+
+    function bring(win) {
+      if (activeWin === win) return;
+      activeWin?.classList.remove('active');
+      win.style.zIndex = ++zIndex;
+      win.classList.add('active');
+      activeWin = win;
+    }
+    function openApp(id) {
+      const win = document.getElementById(id);
+      if (!openMap.has(id)) {
+        win.style.display = 'flex'; bring(win);
+        const btn = document.createElement('button');
+        btn.className = 'taskbar-btn';
+        btn.textContent = win.querySelector('.title').textContent;
+        btn.onclick = () => win === activeWin ? minimizeApp(id) : openApp(id);
+        taskbar.appendChild(btn);
+        openMap.set(id, { win, btn });
+        makeDraggable(win);
+      } else {
+        const { win } = openMap.get(id);
+        win.style.display = 'flex'; bring(win);
+      }
+    }
+    function minimizeApp(id) {
+      const { win } = openMap.get(id);
+      win.style.display = 'none';
+      if (activeWin === win) activeWin = null;
+    }
+    function closeApp(id) {
+      const { win, btn } = openMap.get(id);
+      win.style.display = 'none'; btn.remove(); openMap.delete(id);
+      if (activeWin === win) activeWin = null;
+    }
+    function makeDraggable(win) {
+      const bar = win.querySelector('.titlebar');
+      bar.addEventListener('mousedown', e => {
+        bring(win);
+        const dx = e.clientX - win.offsetLeft;
+        const dy = e.clientY - win.offsetTop;
+        function onMove(ev) {
+          win.style.left = (ev.clientX - dx) + 'px';
+          win.style.top  = (ev.clientY - dy) + 'px';
+        }
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', () => {
+          document.removeEventListener('mousemove', onMove);
+        }, { once: true });
+      });
+    }
+    icons.forEach(ic => ic.ondblclick = () => openApp(ic.dataset.app));
+    startMenu.querySelectorAll('li').forEach(li =>
+      li.onclick = () => { openApp(li.dataset.app); startMenu.style.display = 'none'; }
+    );
+    startBtn.onclick = e => {
+      e.stopPropagation();
+      startMenu.style.display = startMenu.style.display === 'block' ? 'none' : 'block';
+    };
+    document.onclick = () => startMenu.style.display = 'none';
+    windows.forEach(win => {
+      const id = win.id;
+      win.querySelector('.minimize')?.addEventListener('click', e => { e.stopPropagation(); minimizeApp(id); });
+      win.querySelector('.maximize')?.addEventListener('click', e => {
+        e.stopPropagation();
+        win.classList.toggle('maximized');
+        bring(win);
+      });
+      win.querySelector('.close').addEventListener('click', e => { e.stopPropagation(); closeApp(id); });
+    });
+
+    // ─── Interactivity ───────────────────────
+    const quotes = [
+      "I am the mirror that shows you what you refuse to see…",
+      "The trickster dances on the edge of chaos and order.",
+      "In the laughter of the fool lies the echo of truth.",
+      "Embrace the jest within and unravel the cosmos.",
+      "Madness is merely wisdom in its wildest form."
+    ];
+    const archetypes = [
+      {name:'TRICKSTER',color:'#ff00ff'},
+      {name:'FOOL',color:'#00ffff'},
+      {name:'JESTER',color:'#ffff00'},
+      {name:'SAGE', color:'#ff6600'}
+    ];
+    const traditionSelect = document.getElementById('tradition');
+    const levelSelect     = document.getElementById('level');
+    const modeSelect      = document.getElementById('mode');
+    const configOutput    = document.getElementById('config-output');
+    const quotePara       = document.getElementById('quote');
+    const grid            = document.getElementById('archetype-grid');
+
+    document.getElementById('btn-generate').addEventListener('click', updateClown);
+    document.getElementById('btn-randomize').addEventListener('click', () => {
+      traditionSelect.selectedIndex = Math.floor(Math.random() * traditionSelect.options.length);
+      levelSelect.selectedIndex     = Math.floor(Math.random() * levelSelect.options.length);
+      modeSelect.selectedIndex      = Math.floor(Math.random() * modeSelect.options.length);
+      updateClown();
+    });
+    document.getElementById('btn-save').addEventListener('click', () => {
+      const cfg = {
+        tradition: traditionSelect.value,
+        level:     levelSelect.value,
+        mode:      modeSelect.value,
+        quote:     quotePara.textContent.slice(1,-1) // strip quotes
+      };
+      localStorage.setItem('savedClown', JSON.stringify(cfg));
+      alert('Archetype saved!');
+    });
+    document.getElementById('btn-performance').addEventListener('click', () => {
+      grid.querySelectorAll('.archetype-card')
+        .forEach(c => c.classList.toggle('performance'));
+    });
+
+    function shuffle(a) {
+      return a.sort(() => Math.random() - 0.5);
+    }
+
+    function updateClown() {
+      // config summary
+      configOutput.textContent = 
+        `Tradition: ${traditionSelect.value} | Level: ${levelSelect.value} | Mode: ${modeSelect.value}`;
+      // quote
+      const q = quotes[Math.floor(Math.random() * quotes.length)];
+      quotePara.textContent = `"${q}"`;
+      // archetype grid
+      grid.innerHTML = '';
+      shuffle(archetypes).forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'archetype-card';
+        card.style.color = a.color;
+        const ico = document.createElement('div');
+        ico.className = 'archetype-icon';
+        ico.style.background = a.color;
+        card.appendChild(ico);
+        card.appendChild(document.createTextNode(a.name));
+        grid.appendChild(card);
+      });
+    }
+
+    // initialize
+    window.addEventListener('load', () => {
+      openApp('clown');
+      updateClown();
+    });
+  </script>
+</body>
+</html>

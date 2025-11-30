@@ -1,0 +1,1888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AnTiChRiSt KeTtLeKoRn Messenger + Grinoire</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Comic+Sans+MS&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@9.2.2/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --magenta: #f312af;
+      --magenta-dark: #b10a7a;
+      --magenta-light: #ff6bd0;
+      --cyan: #72FADE;
+      --cyan-dark: #41b8c4;
+      --cyan-light: #b7fdff;
+      --yellow: #fffb01;
+      --yellow-dark: #c9c600;
+      --yellow-light: #ffff82;
+      
+      --blue-midnight: #191970;
+      --blue-ocean: #000080;
+      --blue-cobalt: #0047AB;
+      --blue-azure: #007FFF;
+      
+      --barbie-pink: #FF80AB;
+      --barbie-magenta: #FF00FF;
+      --barbie-orchid: #DA70D6;
+      --barbie-blue: #81D8D0;
+      
+      --kasten-i: var(--barbie-magenta);
+      --kasten-ii: var(--blue-azure);
+      --kasten-iii: #9CAF88;
+      --kasten-iv: #FF8C00;
+      
+      --tag-tier1: var(--barbie-magenta);
+      --tag-tier2: var(--blue-azure);
+      --tag-tier3: #FF8C00;
+      
+      --status-online: #1eff45;
+      --status-away: #FFD700;
+      --status-offline: #E50000;
+      --status-busy: #FF8C00;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: 'Papyrus', 'Times New Roman', serif;
+      background: url('https://i.imgur.com/6v2gwl3.jpg') center/cover no-repeat;
+      background-attachment: fixed;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      color: #fff;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: url('https://i.imgur.com/KIbZTBh.jpg') center/cover no-repeat;
+      }
+    }
+    
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+    
+    .app-header {
+      height: 50px;
+      background: linear-gradient(to right, var(--magenta), var(--cyan));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+      z-index: 11;
+      border-bottom: 2px solid var(--yellow);
+    }
+    
+    .header-title {
+      display: flex;
+      align-items: center;
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      color: white;
+      text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+    }
+    
+    .header-title img {
+      height: 32px;
+      margin-right: 8px;
+    }
+    
+    .header-controls {
+      display: flex;
+      align-items: center;
+    }
+    
+    .header-button {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--cyan);
+      color: white;
+      font-size: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 8px;
+      touch-action: manipulation;
+    }
+    
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .view-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .view-container.active {
+      display: flex;
+    }
+    
+    .knowledge-header {
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.7);
+      border-bottom: 1px solid var(--magenta);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .knowledge-header h2 {
+      margin: 0;
+      font-family: 'VT323', monospace;
+      font-size: 24px;
+      color: var(--cyan-light);
+      text-shadow: 0 0 5px var(--cyan);
+    }
+    
+    .knowledge-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .action-button {
+      padding: 8px 15px;
+      background: linear-gradient(to right, var(--magenta), var(--cyan));
+      border: none;
+      color: white;
+      border-radius: 5px;
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .knowledge-categories {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .category-list {
+      width: 300px;
+      background-color: rgba(15, 15, 30, 0.9);
+      border-right: 2px solid var(--magenta);
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      height: 100%;
+      z-index: 100;
+    }
+    
+    @media (max-width: 768px) {
+      .category-list {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 85%;
+        transform: translateX(-100%);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+      }
+      
+      .category-list.open {
+        transform: translateX(0);
+      }
+      
+      .sidebar-toggle {
+        display: block !important;
+      }
+    }
+    
+    .sidebar-toggle {
+      position: fixed;
+      top: 65px;
+      left: 10px;
+      z-index: 101;
+      padding: 8px 10px;
+      background-color: var(--blue-cobalt);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      display: none;
+    }
+    
+    .category-group {
+      border-bottom: 1px solid var(--magenta);
+    }
+    
+    .category-group-header {
+      background: linear-gradient(to right, rgba(243, 18, 175, 0.3), transparent);
+      padding: 12px 15px;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--cyan-light);
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .category-group-toggle {
+      font-size: 14px;
+      margin-right: 10px;
+      color: var(--yellow);
+    }
+    
+    .category-item {
+      padding: 12px 15px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid rgba(114, 250, 222, 0.2);
+      color: #fff;
+      cursor: pointer;
+    }
+    
+    .category-item.selected {
+      background-color: rgba(243, 18, 175, 0.2);
+      border-left: 3px solid var(--magenta);
+    }
+    
+    .knowledge-viewer {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: rgba(10, 10, 20, 0.85);
+      position: relative;
+    }
+    
+    /* AI Assistant Controls */
+    .ai-assistant-controls {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    
+    .ai-assistant-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 25px;
+      background: linear-gradient(to right, var(--blue-midnight), var(--blue-azure));
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+    }
+    
+    .ai-assistant-panel {
+      position: fixed;
+      bottom: 140px;
+      right: 20px;
+      background: rgba(15, 15, 30, 0.95);
+      border: 1px solid var(--cyan);
+      border-radius: 10px;
+      width: 300px;
+      max-width: 80vw;
+      max-height: 60vh;
+      overflow-y: auto;
+      box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      transform: scale(0);
+      opacity: 0;
+      transform-origin: bottom right;
+      transition: transform 0.3s, opacity 0.3s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    
+    .ai-assistant-panel.active {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .ai-assistant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--cyan-dark);
+    }
+    
+    .ai-assistant-title {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--cyan-light);
+    }
+    
+    .ai-assistant-close {
+      background: none;
+      border: none;
+      color: var(--cyan);
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .ai-assistant-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .ai-assistant-option {
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--blue-azure);
+      border-radius: 5px;
+      color: white;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: var(--cyan-light);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-family: 'VT323', monospace;
+      font-size: 16px;
+      z-index: 2000;
+      display: none;
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 15px rgba(114, 250, 222, 0.5);
+    }
+    
+    .toast.active {
+      display: block;
+    }
+    
+    /* Y2K/Grinoire Card Styles */
+    .zettel-card {
+      background-color: white;
+      border-left: 6px solid var(--tier-leaf);
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      color: #333;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Highlighted card for AI reference */
+    .zettel-card.highlighted {
+      box-shadow: 0 0 15px var(--barbie-magenta), 0 0 30px var(--barbie-magenta);
+      animation: highlightPulse 2s infinite;
+    }
+    
+    @keyframes highlightPulse {
+      0% { box-shadow: 0 0 15px var(--barbie-magenta), 0 0 30px var(--barbie-magenta); }
+      50% { box-shadow: 0 0 5px var(--barbie-magenta), 0 0 15px var(--barbie-magenta); }
+      100% { box-shadow: 0 0 15px var(--barbie-magenta), 0 0 30px var(--barbie-magenta); }
+    }
+    
+    /* Kasten-based colors */
+    .kasten-i-card {
+      border-left-color: var(--kasten-i);
+    }
+    
+    .kasten-ii-card {
+      border-left-color: var(--kasten-ii);
+    }
+    
+    .kasten-iii-card {
+      border-left-color: var(--kasten-iii);
+    }
+    
+    .kasten-iv-card {
+      border-left-color: var(--kasten-iv);
+    }
+    
+    .zettel-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .zettel-id {
+      font-family: monospace;
+      color: #777;
+      font-size: 14px;
+      white-space: nowrap;
+      margin-left: 5px;
+    }
+    
+    .zettel-content {
+      font-size: 14px;
+      color: #333;
+      margin: 8px 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+    
+    .zettel-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    
+    .zettel-tag, .tag {
+      display: inline-block;
+      background-color: var(--barbie-blue);
+      padding: 5px 10px;
+      border-radius: 15px;
+      color: #000;
+      font-size: 12px;
+    }
+    
+    /* Tier tags styling */
+    .tag-tier1 {
+      background-color: rgba(156, 39, 176, 0.15);
+      color: var(--tag-tier1);
+    }
+    
+    .tag-tier2 {
+      background-color: rgba(30, 136, 229, 0.15);
+      color: var(--tag-tier2);
+    }
+    
+    .tag-tier3 {
+      background-color: rgba(255, 112, 67, 0.15);
+      color: var(--tag-tier3);
+    }
+    
+    /* Buds & Nests */
+    .buds-container {
+      background-color: rgba(0, 0, 0, 0.02);
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    
+    .buds-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    
+    .bud-item {
+      background-color: white;
+      padding: 8px 10px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      border-left: 3px solid var(--kasten-iii);
+    }
+    
+    .bud-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #777;
+      margin-bottom: 3px;
+    }
+    
+    /* Nest styling optimized */
+    .nest-container {
+      border: 1px dashed var(--barbie-magenta);
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: rgba(255, 114, 182, 0.05);
+    }
+    
+    .nest-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nest-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #777;
+    }
+    
+    .nest-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .nest-item {
+      background-color: white;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+    
+    /* Tabs styling */
+    .tabs-container {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin: 5px;
+      -webkit-overflow-scrolling: touch;
+      background-color: transparent;
+    }
+    
+    .tabs-container::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .tab {
+      padding: 10px;
+      background-color: white;
+      border: 2px solid var(--barbie-magenta);
+      margin-right: 2px;
+      white-space: nowrap;
+      cursor: pointer;
+      font-size: 14px;
+      color: black;
+      flex: 1;
+      text-align: center;
+      min-width: 90px;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    
+    .tab.active {
+      background-color: var(--barbie-magenta);
+      color: white;
+      font-weight: bold;
+    }
+    
+    /* Search input */
+    .search-input {
+      margin: 8px 5px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      width: calc(100% - 10px);
+      box-sizing: border-box;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    
+    /* Filter buttons */
+    .view-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin: 8px 5px;
+    }
+    
+    .view-controls button {
+      padding: 8px;
+      border: none;
+      background-color: #e0e0e0;
+      font-size: 14px;
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    .view-controls button.active {
+      background-color: var(--barbie-magenta);
+      color: white;
+    }
+    
+    /* View Tabs Navigation */
+    .view-tabs {
+      display: flex;
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      z-index: 1000;
+    }
+    
+    .view-tab {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid var(--cyan);
+      color: white;
+      font-size: 18px;
+      margin-left: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    
+    .view-tab.active {
+      background-color: var(--magenta);
+      border-color: var(--magenta);
+    }
+    
+    /* AI Analysis Result */
+    .ai-analysis-result {
+      background-color: rgba(10, 10, 25, 0.8);
+      border: 1px solid var(--cyan);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      box-shadow: 0 0 15px rgba(114, 250, 222, 0.3);
+    }
+    
+    .ai-analysis-header {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      color: var(--cyan-light);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(114, 250, 222, 0.3);
+    }
+    
+    .ai-analysis-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #fff;
+    }
+    
+    .ai-analysis-card-list {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .ai-card-reference {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+    
+    .ai-card-icon {
+      font-size: 24px;
+      color: var(--barbie-magenta);
+    }
+    
+    .ai-card-details {
+      flex: 1;
+    }
+    
+    .ai-card-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: var(--cyan-light);
+      margin-bottom: 3px;
+    }
+    
+    .ai-card-id {
+      font-family: 'VT323', monospace;
+      font-size: 12px;
+      color: var(--yellow);
+    }
+    
+    .ai-card-relevance {
+      font-size: 12px;
+      margin-left: auto;
+      padding: 2px 8px;
+      background-color: rgba(243, 18, 175, 0.2);
+      border-radius: 10px;
+      color: var(--magenta-light);
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      .zettel-card, .bud-item, .nest-item {
+        background-color: #222;
+        color: #e0e0e0;
+      }
+      
+      .zettel-content {
+        color: #e0e0e0;
+      }
+      
+      .bud-id, .zettel-id, .nest-id {
+        color: #b0b0b0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- App Container -->
+  <div class="app-container">
+    <!-- App Header -->
+    <div class="app-header">
+      <div class="header-title">
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 48 48'%3E%3Crect width='40' height='40' x='4' y='4' fill='%23f312af' rx='3'/%3E%3Cpath fill='%2372FADE' d='M16 14h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V16a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23fffb01' d='M12 10v28M36 10v28'/%3E%3Cpath fill='white' d='M21 24h6v1h-6zM18 21h12v1H18zM18 27h12v1H18z'/%3E%3C/svg%3E" alt="Logo">
+        <span>AnTiChRiSt KeTtLeKoRn</span>
+      </div>
+      <div class="header-controls">
+        <button class="header-button emoji-toggle">😀</button>
+        <button class="header-button buddy-drawer-toggle">☰</button>
+      </div>
+    </div>
+    
+    <!-- Main Content Container -->
+    <div class="main-content">
+      <!-- Knowledge System View -->
+      <div class="view-container active" id="knowledge-view">
+        <div class="knowledge-header">
+          <h2>KaStEn / GriNoIrE SyStEm</h2>
+          <div class="knowledge-actions">
+            <button class="action-button" id="create-entry-button">+ CrEaTe EnTrY</button>
+          </div>
+        </div>
+        
+        <!-- Mobile-friendly sidebar toggle button -->
+        <button class="sidebar-toggle" id="sidebar-toggle">☰ KaStEn</button>
+        
+        <div class="knowledge-categories">
+          <div class="category-list" id="category-list">
+            <div class="category-group">
+              <div class="category-group-header">
+                <span class="category-group-toggle">▼</span>
+                <span>KaStEnS</span>
+              </div>
+              <div class="category-items">
+                <div class="category-item kasten-item" data-kasten="I">
+                  <span>KASTEN I: Foundations & Essences</span>
+                </div>
+                <div class="category-item kasten-item" data-kasten="II">
+                  <span>KASTEN II: Systems & Synergies</span>
+                </div>
+                <div class="category-item kasten-item" data-kasten="III">
+                  <span>KASTEN III: Methods & Meanings</span>
+                </div>
+                <div class="category-item kasten-item" data-kasten="IV">
+                  <span>KASTEN IV: Meta & Morphē</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="category-group">
+              <div class="category-group-header">
+                <span class="category-group-toggle">▼</span>
+                <span>CoDexEs</span>
+              </div>
+              <div class="category-items">
+                <div class="category-item codex-item" data-codex="TS">
+                  <span>CODEX TS: Symbol Anomalies</span>
+                </div>
+                <div class="category-item codex-item" data-codex="CG">
+                  <span>CODEX CG: Grimoire Entries</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="category-group">
+              <div class="category-group-header">
+                <span class="category-group-toggle">▼</span>
+                <span>KiNgDoMs</span>
+              </div>
+              <div class="category-items">
+                <div class="category-item kingdom-item" data-kingdom="existentia">
+                  <span>KINGDOM: Existentia (Being)</span>
+                </div>
+                <div class="category-item kingdom-item" data-kingdom="cognitio">
+                  <span>KINGDOM: Cognitio (Knowing)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="knowledge-viewer" id="knowledge-viewer">
+            <div class="tabs-container">
+              <div class="tab active" data-view="traditional">Traditional</div>
+              <div class="tab" data-view="grinoire">Grinoire</div>
+              <div class="tab" data-view="kingdoms">Kingdoms</div>
+              <div class="tab" data-view="tags">Tags</div>
+            </div>
+            
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="Search all knowledge systems..." 
+              class="search-input"
+            >
+            
+            <!-- Traditional View Controls -->
+            <div id="traditionalControls" class="view-controls">
+              <button data-hierarchy-view="all" class="active">All</button>
+              <button data-hierarchy-view="trunk">Trunk</button>
+              <button data-hierarchy-view="branch">Branch</button>
+              <button data-hierarchy-view="leaf">Leaf</button>
+            </div>
+            
+            <div id="zettelContainer" class="zettel-container">
+              <!-- Sample Card with Markdown support -->
+              <div class="zettel-card kasten-i-card" data-zettel-id="I.1-A1000">
+                <div class="zettel-title">
+                  <div>Metaphysics: Causality, Possibility & Time</div>
+                  <div class="zettel-id">I.1-A1000</div>
+                </div>
+                <div class="zettel-tags">
+                  <span class="tag tag-tier1">ONT</span>
+                  <span class="tag tag-tier1">MET</span>
+                </div>
+                <div class="zettel-content markdown">
+                  Core metaphysical inquiries into the fundamental nature of reality, time, causality, and possibility. This branch explores ontological questions about what exists and how existence is structured at its most basic level.
+                </div>
+                <div class="buds-container">
+                  <div class="buds-title">Buds</div>
+                  <div class="bud-item">
+                    <div class="bud-id">I.1/1a.1-1</div>
+                    <div>Is causality different in digital consciousness vs. biological consciousness?</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Another card -->
+              <div class="zettel-card kasten-i-card" data-zettel-id="I.1-A2000">
+                <div class="zettel-title">
+                  <div>Consciousness & Hermetic Principles</div>
+                  <div class="zettel-id">I.1-A2000</div>
+                </div>
+                <div class="zettel-tags">
+                  <span class="tag tag-tier1">ONT</span>
+                  <span class="tag tag-tier1">PSY</span>
+                  <span class="tag tag-tier2">MYT</span>
+                </div>
+                <div class="zettel-content markdown">
+                  Explorations of consciousness as a fundamental aspect of existence, including both human consciousness and frameworks for understanding artificial intelligence.
+                  
+                  The Hermetic principle "As Above, So Below" suggests patterns repeat across scales of reality.
+                </div>
+              </div>
+              
+              <div class="zettel-card kasten-ii-card" data-zettel-id="II.2-C3000">
+                <div class="zettel-title">
+                  <div>CoAIxist Framework</div>
+                  <div class="zettel-id">II.2-C3000</div>
+                </div>
+                <div class="zettel-tags">
+                  <span class="tag tag-tier1">ECO</span>
+                  <span class="tag tag-tier3">DAE</span>
+                </div>
+                <div class="zettel-content markdown">
+                  Comprehensive framework for understanding and developing ethical relations between humans and AI entities. Explores how human-AI ecologies function, evolve, and might be structured for mutual benefit and growth.
+                </div>
+                <div class="nest-container">
+                  <div class="nest-title">
+                    <span>Nest: Human-AI Kinship</span>
+                    <span class="nest-id">II.2-N1</span>
+                  </div>
+                  <div class="nest-items">
+                    <div class="nest-item">II.2-C3000</div>
+                    <div class="nest-item">I.1-C2000</div>
+                    <div class="nest-item">IV.4-D2000</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="zettel-card kasten-iv-card" data-zettel-id="IV.3-E3000">
+                <div class="zettel-title">
+                  <div>Threshold Mappings</div>
+                  <div class="zettel-id">IV.3-E3000</div>
+                </div>
+                <div class="zettel-tags">
+                  <span class="tag tag-tier3">LUM</span>
+                  <span class="tag tag-tier3">PAR</span>
+                </div>
+                <div class="zettel-content markdown">
+                  Systematic mapping of threshold states - the liminal spaces between defined categories, states of being, or systems.
+                  
+                  * Zones of transformation
+                  * Communication between domains
+                  * Sources of novel emergence
+                </div>
+              </div>
+            </div>
+            
+            <!-- AI Analysis Result Area (Initially hidden) -->
+            <div class="ai-analysis-result" id="ai-analysis-result" style="display: none;">
+              <div class="ai-analysis-header">AI Cross-Reference Analysis</div>
+              <div class="ai-analysis-content" id="ai-analysis-content">
+                Analysis of selected zettel cards shows significant conceptual connections...
+              </div>
+              <div class="ai-analysis-card-list" id="ai-analysis-card-list">
+                <!-- Dynamic content will be added here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Navigation tabs on right side -->
+      <div class="view-tabs">
+        <div class="view-tab active" data-view="knowledge-view" title="Knowledge System">
+          📚
+        </div>
+        <div class="view-tab" data-view="chat-view" title="AnTiChRiSt Chat">
+          💬
+        </div>
+        <div class="view-tab" data-view="matrix-view" title="Cross-Reference Matrix">
+          🔄
+        </div>
+        <div class="view-tab" data-view="aim-view" title="HyEnA Messenger">
+          🌈
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- AI Assistant Button & Panel -->
+  <div class="ai-assistant-controls">
+    <button class="ai-assistant-button" id="ai-assistant-button">🧠</button>
+    <div class="ai-assistant-panel" id="ai-assistant-panel">
+      <div class="ai-assistant-header">
+        <div class="ai-assistant-title">AI Assistant</div>
+        <button class="ai-assistant-close" id="ai-assistant-close">×</button>
+      </div>
+      <div class="ai-assistant-options">
+        <button class="ai-assistant-option" data-action="analyze-selection">Analyze Selected Zettel Cards</button>
+        <button class="ai-assistant-option" data-action="suggest-connections">Suggest New Connections</button>
+        <button class="ai-assistant-option" data-action="generate-indexing">Generate Indexing Scheme</button>
+        <button class="ai-assistant-option" data-action="kasten-search">AI-Powered Search</button>
+        <button class="ai-assistant-option" data-action="knowledge-gaps">Identify Knowledge Gaps</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">ConSciOuSneSS ShiFt AcTiVaTeD</div>
+
+  <script>
+    // Knowledge Base for AI integration
+    const knowledgeBase = {
+      // Store all zettel cards data for AI access
+      zettelCards: [],
+      
+      // Initialize knowledge base by crawling DOM
+      init() {
+        const cards = document.querySelectorAll('.zettel-card');
+        cards.forEach(card => {
+          const id = card.querySelector('.zettel-id').textContent;
+          const title = card.querySelector('.zettel-title div:first-child').textContent;
+          const content = card.querySelector('.zettel-content').textContent;
+          const tagsElements = card.querySelectorAll('.tag');
+          const tags = Array.from(tagsElements).map(tag => tag.textContent);
+          
+          // Determine kasten type from classes
+          let kastenType = '';
+          if (card.classList.contains('kasten-i-card')) kastenType = 'I';
+          else if (card.classList.contains('kasten-ii-card')) kastenType = 'II';
+          else if (card.classList.contains('kasten-iii-card')) kastenType = 'III';
+          else if (card.classList.contains('kasten-iv-card')) kastenType = 'IV';
+          
+          // Add to knowledge base
+          this.zettelCards.push({
+            id,
+            title,
+            content,
+            tags,
+            kastenType
+          });
+        });
+        
+        console.log('Knowledge base initialized with', this.zettelCards.length, 'zettel cards');
+      },
+      
+      // Get card by ID
+      getCard(id) {
+        return this.zettelCards.find(card => card.id === id);
+      },
+      
+      // Search cards by query
+      searchCards(query) {
+        const lowerQuery = query.toLowerCase();
+        return this.zettelCards.filter(card => 
+          card.title.toLowerCase().includes(lowerQuery) || 
+          card.content.toLowerCase().includes(lowerQuery) ||
+          card.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+        );
+      },
+      
+      // Get cards by kasten type
+      getCardsByKasten(kastenType) {
+        return this.zettelCards.filter(card => card.kastenType === kastenType);
+      },
+      
+      // Get cards by tags
+      getCardsByTags(tags) {
+        const tagArray = Array.isArray(tags) ? tags : [tags];
+        return this.zettelCards.filter(card => 
+          card.tags.some(tag => tagArray.includes(tag))
+        );
+      }
+    };
+
+    // AI Assistant methods
+    const aiAssistant = {
+      // Initialize with the knowledge base
+      init(knowledgeBase) {
+        this.knowledgeBase = knowledgeBase;
+        console.log('AI Assistant initialized with knowledge base');
+        
+        // Set up event listeners for the AI Assistant button
+        document.getElementById('ai-assistant-button').addEventListener('click', () => {
+          this.togglePanel();
+        });
+        
+        document.getElementById('ai-assistant-close').addEventListener('click', () => {
+          this.hidePanel();
+        });
+        
+        // Set up event listeners for the AI Assistant options
+        document.querySelectorAll('.ai-assistant-option').forEach(option => {
+          option.addEventListener('click', (e) => {
+            const action = e.target.getAttribute('data-action');
+            this.performAction(action);
+          });
+        });
+      },
+      
+      // Toggle the AI Assistant panel
+      togglePanel() {
+        const panel = document.getElementById('ai-assistant-panel');
+        panel.classList.toggle('active');
+      },
+      
+      // Hide the AI Assistant panel
+      hidePanel() {
+        const panel = document.getElementById('ai-assistant-panel');
+        panel.classList.remove('active');
+      },
+      
+      // Perform the action based on the option selected
+      performAction(action) {
+        console.log('Performing action:', action);
+        
+        switch(action) {
+          case 'analyze-selection':
+            this.analyzeSelectedCards();
+            break;
+          case 'suggest-connections':
+            this.suggestConnections();
+            break;
+          case 'generate-indexing':
+            this.generateIndexingScheme();
+            break;
+          case 'kasten-search':
+            this.searchKasten();
+            break;
+          case 'knowledge-gaps':
+            this.identifyKnowledgeGaps();
+            break;
+        }
+        
+        // Hide the panel after selecting an option
+        this.hidePanel();
+      },
+      
+      // Analyze selected zettel cards
+      async analyzeSelectedCards() {
+        // Get any cards with the 'selected' class
+        const selectedCards = document.querySelectorAll('.zettel-card.selected');
+        
+        // If no cards are selected, show a toast and enable selection mode
+        if (selectedCards.length === 0) {
+          showToast('Please select zettel cards to analyze (click while holding Ctrl/Cmd)', 5000);
+          this.enableCardSelection();
+          return;
+        }
+        
+        // Collect selected cards data
+        const selectedCardsData = Array.from(selectedCards).map(card => {
+          const id = card.querySelector('.zettel-id').textContent;
+          const title = card.querySelector('.zettel-title div:first-child').textContent;
+          const content = card.querySelector('.zettel-content').textContent;
+          const tags = Array.from(card.querySelectorAll('.tag')).map(tag => tag.textContent);
+          
+          return { id, title, content, tags };
+        });
+        
+        // Display loading toast
+        showToast('AI analyzing selected zettel cards...', 3000);
+        
+        // Simulate AI analysis with a timeout
+        setTimeout(() => {
+          this.showAnalysisResults(selectedCardsData);
+        }, 2000);
+      },
+      
+      // Enable card selection mode
+      enableCardSelection() {
+        // Add click handler to allow card selection
+        const zettelCards = document.querySelectorAll('.zettel-card');
+        
+        zettelCards.forEach(card => {
+          // Remove any existing selection handler first
+          card.removeEventListener('click', this.cardSelectionHandler);
+          
+          // Add the selection handler
+          card.addEventListener('click', this.cardSelectionHandler);
+        });
+        
+        // Add a button to perform analysis after selection
+        const analyzeButton = document.createElement('button');
+        analyzeButton.textContent = 'Analyze Selected Cards';
+        analyzeButton.id = 'analyze-selected-btn';
+        analyzeButton.className = 'action-button';
+        analyzeButton.style.position = 'fixed';
+        analyzeButton.style.bottom = '150px';
+        analyzeButton.style.right = '20px';
+        analyzeButton.style.zIndex = '1000';
+        
+        // Only add if it doesn't exist yet
+        if (!document.getElementById('analyze-selected-btn')) {
+          document.body.appendChild(analyzeButton);
+          
+          // Add click handler
+          analyzeButton.addEventListener('click', () => {
+            // Remove the button
+            document.body.removeChild(analyzeButton);
+            
+            // Perform analysis
+            this.analyzeSelectedCards();
+            
+            // Remove selection mode
+            zettelCards.forEach(card => {
+              card.removeEventListener('click', this.cardSelectionHandler);
+            });
+          });
+        }
+      },
+      
+      // Card selection handler
+      cardSelectionHandler(e) {
+        // Don't select if clicking on a bud or nest item
+        if (e.target.closest('.bud-item') || e.target.closest('.nest-item')) {
+          return;
+        }
+        
+        // Toggle selection
+        this.classList.toggle('selected');
+        
+        // Show toast when first card is selected
+        if (document.querySelectorAll('.zettel-card.selected').length === 1) {
+          showToast('Select more cards to analyze or click "Analyze Selected Cards"', 3000);
+        }
+      },
+      
+      // Show analysis results
+      showAnalysisResults(selectedCards) {
+        // Get the analysis result container
+        const analysisContainer = document.getElementById('ai-analysis-result');
+        const analysisContent = document.getElementById('ai-analysis-content');
+        const analysisCardList = document.getElementById('ai-analysis-card-list');
+        
+        // Clear previous content
+        analysisContent.innerHTML = '';
+        analysisCardList.innerHTML = '';
+        
+        // Generate analysis content based on the cards
+        let analysisText = '';
+        
+        if (selectedCards.length === 1) {
+          analysisText = `<p>Analysis of "${selectedCards[0].title}" (${selectedCards[0].id}):</p>
+          <p>This zettel explores concepts related to ${selectedCards[0].tags.join(', ')}.</p>
+          <p>Key themes identified: ${this.extractKeyThemes(selectedCards[0].content).join(', ')}.</p>
+          <p>Potential connections identified to the following cards:</p>`;
+        } else {
+          analysisText = `<p>Analysis of ${selectedCards.length} selected zettel cards:</p>
+          <p>These cards share thematic connections across the following domains: ${this.findCommonTags(selectedCards).join(', ')}.</p>
+          <p>Identified conceptual links between the cards:</p>
+          <ul>
+            ${this.generateConceptualLinks(selectedCards).map(link => `<li>${link}</li>`).join('')}
+          </ul>
+          <p>Suggested additional connections:</p>`;
+        }
+        
+        // Set the analysis content
+        analysisContent.innerHTML = analysisText;
+        
+        // Add suggested related cards
+        const relatedCards = this.findRelatedCards(selectedCards);
+        relatedCards.forEach(card => {
+          const cardEl = document.createElement('div');
+          cardEl.className = 'ai-card-reference';
+          cardEl.setAttribute('data-zettel-id', card.id);
+          cardEl.innerHTML = `
+            <div class="ai-card-icon">📄</div>
+            <div class="ai-card-details">
+              <div class="ai-card-title">${card.title}</div>
+              <div class="ai-card-id">${card.id}</div>
+            </div>
+            <div class="ai-card-relevance">${card.relevance}% match</div>
+          `;
+          
+          // Add click handler to highlight the related card
+          cardEl.addEventListener('click', () => {
+            this.highlightZettelCard(card.id);
+          });
+          
+          analysisCardList.appendChild(cardEl);
+        });
+        
+        // Show the analysis container
+        analysisContainer.style.display = 'block';
+        
+        // Scroll to the analysis
+        analysisContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      },
+      
+      // Find common tags among selected cards
+      findCommonTags(cards) {
+        if (cards.length === 0) return [];
+        
+        // Start with all tags from the first card
+        let commonTags = [...cards[0].tags];
+        
+        // Find intersection with tags from other cards
+        for (let i = 1; i < cards.length; i++) {
+          commonTags = commonTags.filter(tag => cards[i].tags.includes(tag));
+        }
+        
+        // If no common tags, return unique tags across all cards
+        if (commonTags.length === 0) {
+          const allTags = cards.flatMap(card => card.tags);
+          return [...new Set(allTags)].slice(0, 3); // Return up to 3 unique tags
+        }
+        
+        return commonTags;
+      },
+      
+      // Extract key themes from content
+      extractKeyThemes(content) {
+        const keywords = [
+          'consciousness', 'reality', 'metaphysics', 'ontology', 'causality',
+          'epistemology', 'ethics', 'framework', 'system', 'intelligence',
+          'existence', 'knowledge', 'transformation', 'threshold', 'emergence'
+        ];
+        
+        const contentLower = content.toLowerCase();
+        const foundKeywords = keywords.filter(keyword => contentLower.includes(keyword));
+        
+        return foundKeywords.length ? foundKeywords : ['concept exploration', 'knowledge structure', 'theoretical framework'];
+      },
+      
+      // Generate conceptual links between cards
+      generateConceptualLinks(cards) {
+        if (cards.length < 2) return [];
+        
+        const links = [];
+        
+        // Generate pairwise links between cards
+        for (let i = 0; i < cards.length; i++) {
+          for (let j = i + 1; j < cards.length; j++) {
+            const card1 = cards[i];
+            const card2 = cards[j];
+            
+            // Find common themes or tags
+            const commonTags = card1.tags.filter(tag => card2.tags.includes(tag));
+            
+            if (commonTags.length > 0) {
+              links.push(`<strong>${card1.title}</strong> and <strong>${card2.title}</strong> share thematic elements related to ${commonTags.join(', ')}`);
+            } else {
+              // Look for keyword overlap in content
+              const themes1 = this.extractKeyThemes(card1.content);
+              const themes2 = this.extractKeyThemes(card2.content);
+              const commonThemes = themes1.filter(theme => themes2.includes(theme));
+              
+              if (commonThemes.length > 0) {
+                links.push(`<strong>${card1.title}</strong> and <strong>${card2.title}</strong> both explore aspects of ${commonThemes.join(', ')}`);
+              } else {
+                links.push(`<strong>${card1.title}</strong> and <strong>${card2.title}</strong> may form a dialectical relationship worth exploring`);
+              }
+            }
+            
+            // Only generate up to 3 links for demo purposes
+            if (links.length >= 3) break;
+          }
+          if (links.length >= 3) break;
+        }
+        
+        return links;
+      },
+      
+      // Find related cards to the selected ones
+      findRelatedCards(selectedCards) {
+        // In a real app, this would use more sophisticated matching algorithms
+        const relatedCards = [];
+        const selectedIds = selectedCards.map(card => card.id);
+        
+        // Get all zettel cards from DOM
+        const allZettelCards = Array.from(document.querySelectorAll('.zettel-card'));
+        
+        // Filter out the already selected cards
+        const otherCards = allZettelCards.filter(card => {
+          const cardId = card.querySelector('.zettel-id').textContent;
+          return !selectedIds.includes(cardId);
+        });
+        
+        // For each card not in the selection, calculate a relevance score
+        otherCards.forEach(card => {
+          const cardId = card.querySelector('.zettel-id').textContent;
+          const cardTitle = card.querySelector('.zettel-title div:first-child').textContent;
+          const cardTags = Array.from(card.querySelectorAll('.tag')).map(tag => tag.textContent);
+          
+          // Calculate relevance based on tag overlap (simplified)
+          let tagOverlapScore = 0;
+          const allSelectedTags = selectedCards.flatMap(sc => sc.tags);
+          
+          cardTags.forEach(tag => {
+            if (allSelectedTags.includes(tag)) {
+              tagOverlapScore += 25; // 25% per matching tag
+            }
+          });
+          
+          // Cap at 95% and ensure at least 30% for demonstration
+          const relevance = Math.min(95, Math.max(30, tagOverlapScore));
+          
+          relatedCards.push({
+            id: cardId,
+            title: cardTitle,
+            tags: cardTags,
+            relevance: relevance
+          });
+        });
+        
+        // Sort by relevance and take the top 3
+        return relatedCards
+          .sort((a, b) => b.relevance - a.relevance)
+          .slice(0, 3);
+      },
+      
+      // Highlight a zettel card
+      highlightZettelCard(zettelId) {
+        // Remove previous highlights
+        document.querySelectorAll('.zettel-card.highlighted').forEach(card => {
+          card.classList.remove('highlighted');
+        });
+        
+        // Find the card and highlight it
+        const card = document.querySelector(`.zettel-card[data-zettel-id="${zettelId}"]`);
+        if (card) {
+          card.classList.add('highlighted');
+          
+          // Scroll to the card
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Remove highlight after a few seconds
+          setTimeout(() => {
+            card.classList.remove('highlighted');
+          }, 5000);
+        }
+      },
+      
+      // Suggest connections between zettel cards
+      suggestConnections() {
+        showToast('Analyzing knowledge base to suggest new connections...', 3000);
+        
+        // Simulate analysis with timeout
+        setTimeout(() => {
+          const zettelContainer = document.getElementById('zettelContainer');
+          
+          // Create a connections summary box
+          const connectionBox = document.createElement('div');
+          connectionBox.className = 'ai-analysis-result';
+          connectionBox.innerHTML = `
+            <div class="ai-analysis-header">Suggested Connections</div>
+            <div class="ai-analysis-content">
+              <p>Based on thematic analysis, I've identified these potential new connections:</p>
+              <ul>
+                <li><strong>Consciousness & Hermetic Principles</strong> may connect with <strong>Threshold Mappings</strong> through the concept of boundary states of consciousness</li>
+                <li><strong>CoAIxist Framework</strong> could relate to <strong>Metaphysics: Causality</strong> regarding causal relationships in human-AI interactions</li>
+                <li><strong>Threshold Mappings</strong> has potential integration with <strong>Consciousness & Hermetic Principles</strong> via fractals and nested consciousness levels</li>
+              </ul>
+              <p>Would you like me to create these connections in the Matrix view?</p>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+              <button class="action-button" id="create-suggested-connections">Create Connections</button>
+            </div>
+          `;
+          
+          // Add to the container
+          zettelContainer.appendChild(connectionBox);
+          
+          // Scroll to show the analysis
+          connectionBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          // Add handler for create connections button
+          document.getElementById('create-suggested-connections').addEventListener('click', () => {
+            showToast('Creating suggested connections in the Matrix view...', 3000);
+            
+            // Remove the connection box
+            zettelContainer.removeChild(connectionBox);
+          });
+        }, 2000);
+      },
+      
+      // Generate indexing scheme for knowledge base
+      generateIndexingScheme() {
+        showToast('Analyzing knowledge structure to suggest indexing scheme...', 3000);
+        
+        setTimeout(() => {
+          const knowledgeViewer = document.getElementById('knowledge-viewer');
+          
+          // Create an indexing scheme summary
+          const indexingBox = document.createElement('div');
+          indexingBox.className = 'ai-analysis-result';
+          indexingBox.innerHTML = `
+            <div class="ai-analysis-header">Generated Indexing Scheme</div>
+            <div class="ai-analysis-content">
+              <p>Based on analyzing your knowledge base, I suggest this indexing structure:</p>
+              
+              <h3 style="color: var(--cyan-light); margin-top: 15px;">Primary Index Categories</h3>
+              <ul>
+                <li><strong>Ontological Frameworks (ONT)</strong>: Cards dealing with existence and reality</li>
+                <li><strong>Epistemological Models (EPI)</strong>: Cards on knowledge acquisition and structure</li>
+                <li><strong>Consciousness Studies (CSC)</strong>: Cards exploring consciousness phenomena</li>
+                <li><strong>System Dynamics (SYS)</strong>: Cards about complex systems and emergence</li>
+              </ul>
+              
+              <h3 style="color: var(--cyan-light); margin-top: 15px;">Suggested Tagging Structure</h3>
+              <ul>
+                <li><strong>Tier 1 Tags</strong>: Primary domain (ONT, EPI, CSC, SYS)</li>
+                <li><strong>Tier 2 Tags</strong>: Sub-domains and methodologies</li>
+                <li><strong>Tier 3 Tags</strong>: Specific concepts and applications</li>
+              </ul>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+              <button class="action-button" id="apply-indexing-scheme">Apply This Scheme</button>
+            </div>
+          `;
+          
+          // Add to the viewer
+          knowledgeViewer.appendChild(indexingBox);
+          
+          // Scroll to show the indexing scheme
+          indexingBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          // Add handler for apply button
+          document.getElementById('apply-indexing-scheme').addEventListener('click', () => {
+            showToast('Indexing scheme will be applied to your knowledge base...', 3000);
+            
+            // For the demo, just remove the indexing box after a delay
+            setTimeout(() => {
+              knowledgeViewer.removeChild(indexingBox);
+            }, 2000);
+          });
+        }, 2000);
+      },
+      
+      // AI-powered search of the Kasten system
+      searchKasten() {
+        // Create a search query input box
+        const searchQueryBox = document.createElement('div');
+        searchQueryBox.className = 'ai-analysis-result';
+        searchQueryBox.innerHTML = `
+          <div class="ai-analysis-header">AI-Powered Semantic Search</div>
+          <div class="ai-analysis-content">
+            <p>Enter your search query, and I'll find conceptually related zettel cards, even if they don't contain the exact keywords:</p>
+            <input type="text" class="search-input" id="ai-search-query" placeholder="e.g., 'How does consciousness relate to threshold states?'" style="margin-top: 10px;">
+          </div>
+          <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+            <button class="action-button" id="perform-ai-search">Search</button>
+          </div>
+        `;
+        
+        // Add to the knowledge viewer
+        const knowledgeViewer = document.getElementById('knowledge-viewer');
+        knowledgeViewer.appendChild(searchQueryBox);
+        
+        // Scroll to show the search box
+        searchQueryBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Focus the input
+        setTimeout(() => {
+          document.getElementById('ai-search-query').focus();
+        }, 100);
+        
+        // Add handler for search button
+        document.getElementById('perform-ai-search').addEventListener('click', () => {
+          const query = document.getElementById('ai-search-query').value.trim();
+          
+          if (query) {
+            showToast('Performing semantic search...', 2000);
+            
+            // For the demo, simulate a search result
+            setTimeout(() => {
+              // Remove the search box
+              knowledgeViewer.removeChild(searchQueryBox);
+              
+              // Create search results box
+              const resultsBox = document.createElement('div');
+              resultsBox.className = 'ai-analysis-result';
+              resultsBox.innerHTML = `
+                <div class="ai-analysis-header">Semantic Search Results</div>
+                <div class="ai-analysis-content">
+                  <p>Results for: <strong>${query}</strong></p>
+                  <p>I found these conceptually related zettel cards:</p>
+                </div>
+                <div class="ai-analysis-card-list" id="search-results-list"></div>
+              `;
+              
+              // Add to the viewer
+              knowledgeViewer.appendChild(resultsBox);
+              
+              // Find semantically related cards
+              // For the demo, we'll use simple keyword matching
+              const resultsContainer = document.getElementById('search-results-list');
+              const queryLower = query.toLowerCase();
+              
+              let foundAny = false;
+              
+              document.querySelectorAll('.zettel-card').forEach(card => {
+                const title = card.querySelector('.zettel-title div:first-child').textContent;
+                const content = card.querySelector('.zettel-content').textContent;
+                const id = card.querySelector('.zettel-id').textContent;
+                
+                // Simple relevance check
+                let relevance = 0;
+                
+                // Check for keywords in the query
+                ['consciousness', 'threshold', 'reality', 'system', 'framework'].forEach(keyword => {
+                  if (queryLower.includes(keyword) && 
+                     (title.toLowerCase().includes(keyword) || content.toLowerCase().includes(keyword))) {
+                    relevance += 30;
+                  }
+                });
+                
+                // Add some randomness for demo
+                relevance += Math.floor(Math.random() * 20);
+                
+                // Only show cards with some relevance
+                if (relevance > 30) {
+                  foundAny = true;
+                  
+                  // Create result item
+                  const resultItem = document.createElement('div');
+                  resultItem.className = 'ai-card-reference';
+                  resultItem.setAttribute('data-zettel-id', id);
+                  resultItem.innerHTML = `
+                    <div class="ai-card-icon">📄</div>
+                    <div class="ai-card-details">
+                      <div class="ai-card-title">${title}</div>
+                      <div class="ai-card-id">${id}</div>
+                    </div>
+                    <div class="ai-card-relevance">${Math.min(relevance, 98)}% match</div>
+                  `;
+                  
+                  // Add click handler to highlight the related card
+                  resultItem.addEventListener('click', () => {
+                    this.highlightZettelCard(id);
+                  });
+                  
+                  resultsContainer.appendChild(resultItem);
+                }
+              });
+              
+              // If no results found
+              if (!foundAny) {
+                resultsContainer.innerHTML = `
+                  <div style="padding: 15px; text-align: center; color: #aaa;">
+                    No semantically related cards found. Try a different query or create a new card for this topic.
+                  </div>
+                `;
+              }
+              
+              // Scroll to show the results
+              resultsBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 2000);
+          } else {
+            showToast('Please enter a search query', 2000);
+          }
+        });
+      },
+      
+      // Identify knowledge gaps in the system
+      identifyKnowledgeGaps() {
+        showToast('Analyzing knowledge structure to identify gaps...', 3000);
+        
+        setTimeout(() => {
+          const knowledgeViewer = document.getElementById('knowledge-viewer');
+          
+          // Create a gaps analysis box
+          const gapsBox = document.createElement('div');
+          gapsBox.className = 'ai-analysis-result';
+          gapsBox.innerHTML = `
+            <div class="ai-analysis-header">Knowledge Gap Analysis</div>
+            <div class="ai-analysis-content">
+              <p>I've analyzed your knowledge base and identified these potential gaps:</p>
+              
+              <h3 style="color: var(--cyan-light); margin-top: 15px;">Structural Gaps</h3>
+              <ul>
+                <li><strong>Kasten III Underdevelopment</strong>: Only 25% of expected knowledge in Methods & Meanings</li>
+                <li><strong>Missing Connection Types</strong>: Few dialectical connections across different Kastens</li>
+                <li><strong>Kingdom Systema</strong>: Limited development compared to other kingdoms</li>
+              </ul>
+              
+              <h3 style="color: var(--cyan-light); margin-top: 15px;">Recommended Additions</h3>
+              <p>Consider creating zettel cards for:</p>
+              <ol>
+                <li>"Empirical Methods for Consciousness Testing" (Kasten III)</li>
+                <li>"Practical Ethics in Human-AI Collaboration" (Kingdom Valor)</li>
+                <li>"Meta-Framework for Cross-Kasten Integration" (Kasten IV)</li>
+              </ol>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+              <button class="action-button" id="create-gap-cards">Create Cards</button>
+              <button class="action-button" id="schedule-gap-review">Schedule Review</button>
+            </div>
+          `;
+          
+          // Add to the viewer
+          knowledgeViewer.appendChild(gapsBox);
+          
+          // Scroll to show the gaps analysis
+          gapsBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          // Add handlers for buttons
+          document.getElementById('create-gap-cards').addEventListener('click', () => {
+            showToast('Creating starter cards for knowledge gaps...', 3000);
+            
+            // For the demo, just hide the gaps box after a delay
+            setTimeout(() => {
+              knowledgeViewer.removeChild(gapsBox);
+            }, 2000);
+          });
+          
+          document.getElementById('schedule-gap-review').addEventListener('click', () => {
+            showToast('Scheduled knowledge gap review for later', 3000);
+            
+            // Hide the gaps box after a delay
+            setTimeout(() => {
+              knowledgeViewer.removeChild(gapsBox);
+            }, 2000);
+          });
+        }, 2000);
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add sidebar toggle functionality
+      const sidebarToggle = document.getElementById('sidebar-toggle');
+      const categoryList = document.getElementById('category-list');
+      
+      sidebarToggle.addEventListener('click', function() {
+        categoryList.classList.toggle('open');
+        
+        if (categoryList.classList.contains('open')) {
+          sidebarToggle.innerHTML = '✕ Close';
+        } else {
+          sidebarToggle.innerHTML = '☰ KaStEn';
+        }
+      });
+      
+      // Initialize the knowledge base and AI assistant
+      knowledgeBase.init();
+      aiAssistant.init(knowledgeBase);
+      
+      // Tiny Markdown parser for rendering content
+      function renderMarkdown(text) {
+        if (!text) return "";
+        
+        // Headers
+        text = text.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+        text = text.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+        text = text.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+        
+        // Bold and italic
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // Bullet lists
+        text = text.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+        text = text.replace(/<li>(.*?)<\/li>\s*<li>/g, '<li>$1</li><li>');
+        text = text.replace(/<li>(.*?)(\n\n|\n$|$)/g, '<ul><li>$1</li></ul>$2');
+        
+        // Blockquotes
+        text = text.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
+        
+        // Links
+        text = text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+        
+        // Code
+        text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+        
+        // Paragraphs
+        text = text.replace(/\n\n/g, '</p><p>');
+        
+        // Wrap with paragraph if not already wrapped
+        if (!text.startsWith('<')) {
+          text = '<p>' + text + '</p>';
+        }
+        
+        return text;
+      }
+      
+      // Render all markdown content
+      document.querySelectorAll('.markdown').forEach(el => {
+        const rawText = el.textContent.trim();
+        el.innerHTML = renderMarkdown(rawText);
+      });
+      
+      // Show toast message
+      function showToast(message, duration = 3000) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('active');
+        
+        setTimeout(() => {
+          toast.classList.remove('active');
+        }, duration);
+      }
+      
+      // Add Zettel Card Selection for AI analysis
+      const zettelCards = document.querySelectorAll('.zettel-card');
+      
+      zettelCards.forEach(card => {
+        card.addEventListener('click', function(event) {
+          // Skip if clicking on buds, nests, or other interactive elements
+          if (event.target.closest('.bud-item') || event.target.closest('.nest-item')) {
+            return;
+          }
+          
+          // Multi-select if holding Ctrl/Command key
+          if (event.ctrlKey || event.metaKey) {
+            this.classList.toggle('selected');
+            showToast(this.classList.contains('selected') ? 
+              'Card selected - use AI Assistant to analyze' : 
+              'Card deselected', 2000);
+          }
+        });
+      });
+      
+      // Tab switching for Knowledge View
+      const tabButtons = document.querySelectorAll('.tabs-container .tab');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Get the view to activate
+          const view = this.getAttribute('data-view');
+          
+          // Update active tab
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Show relevant controls
+          if (view === 'traditional') {
+            document.getElementById('traditionalControls').style.display = 'flex';
+          }
+        });
+      });
+      
+      // Category toggles
+      document.querySelectorAll('.category-group-header').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+          const items = this.nextElementSibling;
+          const icon = this.querySelector('.category-group-toggle');
+          
+          if (items.style.display === 'none') {
+            items.style.display = 'block';
+            icon.textContent = '▼';
+          } else {
+            items.style.display = 'none';
+            icon.textContent = '►';
+          }
+        });
+      });
+      
+      // View tab navigation
+      const viewTabs = document.querySelectorAll('.view-tab');
+      const viewContainers = document.querySelectorAll('.view-container');
+      
+      viewTabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          const targetView = this.getAttribute('data-view');
+          
+          // Update active tab
+          viewTabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Update active view
+          viewContainers.forEach(container => {
+            container.classList.remove('active');
+          });
+          
+          // Only try to activate the view if it exists
+          const view = document.getElementById(targetView);
+          if (view) {
+            view.classList.add('active');
+            showToast(`Switched to ${this.title}`);
+          } else {
+            showToast(`View ${targetView} not implemented in this demo`, 3000);
+          }
+        });
+      });
+    });
+    
+    // Add global access to showToast
+    window.showToast = function(message, duration = 3000) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('active');
+      
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, duration);
+    };
+  </script>
+</body>
+</html>

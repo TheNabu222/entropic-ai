@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoAlexist: Rashomon in Rogers Park</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* --- All your original styles are preserved here --- */
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #1a1a1a;
+            color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            cursor: crosshair; /* Added for retro feel */
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(20, 20, 20, 0) 0%,
+                rgba(20, 20, 20, 0) 97%,
+                rgba(255, 255, 255, 0.02) 98%,
+                rgba(0, 0, 0, 0.05) 100%
+            );
+            background-size: 100% 3px;
+            animation: scanlines 15s linear infinite;
+            z-index: 1000;
+            opacity: 0.4;
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 300px; }
+        }
+
+        #desktop-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .desktop-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            animation: twinkle 5s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .mouse-trail-particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            border-radius: 1px;
+            pointer-events: none;
+            z-index: 10000;
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+            opacity: 0.8;
+        }
+
+        .mouse-trail-particle.fade-out {
+            opacity: 0;
+            transform: scale(0.3) translate(10px, 10px);
+        }
+
+        #root {
+            flex-grow: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-top: 20px;
+            padding-bottom: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            scrollbar-width: thin;
+            scrollbar-color: #D4D0C8 #B0B0B0;
+        }
+
+        #taskbar {
+            height: 30px;
+            background-color: #D4D0C8;
+            border-top: 1px solid #FFFFFF;
+            box-shadow: 0 -1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            z-index: 1001;
+        }
+
+        #start-button {
+            background-color: #D4D0C8;
+            border-top: 1px solid #FFFFFF;
+            border-left: 1px solid #FFFFFF;
+            border-bottom: 1px solid #808080;
+            border-right: 1px solid #808080;
+            padding: 3px 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            color: #1a1a1a;
+            cursor: pointer;
+            margin-right: 10px;
+            font-weight: bold;
+            min-width: auto;
+        }
+        #start-button:active {
+            border-top-color: #808080;
+            border-left-color: #808080;
+            border-bottom-color: #FFFFFF;
+            border-right-color: #FFFFFF;
+        }
+
+        #taskbar-app-title {
+            flex-grow: 1;
+            font-size: 12px;
+            padding: 2px 8px;
+            margin: 2px 5px;
+            border: 1px inset #B0B0B0;
+            background-color: #C0C0C0;
+            color: #1a1a1a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 100px;
+        }
+
+        #taskbar-tray {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        #music-toggle-button {
+            background-color: #D4D0C8;
+            border: 1px inset #B0B0B0;
+            font-size: 14px;
+            color: #1a1a1a;
+            cursor: pointer;
+            width: 28px;
+            height: 22px;
+            text-align: center;
+            padding: 0;
+            margin-right: 5px;
+        }
+        #music-toggle-button:active { border-style: outset; }
+        #taskbar-clock {
+            font-size: 12px;
+            padding: 3px 8px;
+            border: 1px inset #B0B0B0;
+            background-color: #C0C0C0;
+            color: #1a1a1a;
+        }
+
+        #start-menu {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            background-color: #D4D0C8;
+            border-top: 1px solid #FFFFFF;
+            border-left: 1px solid #FFFFFF;
+            border-right: 1px solid #808080;
+            border-bottom: 1px solid #808080;
+            box-shadow: 2px -2px 5px rgba(0,0,0,0.2);
+            padding: 5px;
+            z-index: 1002;
+            min-width: 200px;
+        }
+        
+        #start-menu button {
+            display: block;
+            width: calc(100% - 10px);
+            margin: 5px;
+            text-align: left;
+            font-size: 13px;
+            padding: 6px 10px;
+        }
+
+        @keyframes buttonHoverPulse {
+          0%, 100% { box-shadow: 0 0 2px 0px transparent; }
+          50% { box-shadow: 0 0 5px 1px #00ffcc; }
+        }
+        
+        button {
+          background-color: #D4D0C8;
+          border-top: 1px solid #FFFFFF;
+          border-left: 1px solid #FFFFFF;
+          border-bottom: 1px solid #808080;
+          border-right: 1px solid #808080;
+          padding: 8px 15px;
+          font-family: 'Press Start 2P', cursive;
+          cursor: pointer;
+          color: #1a1a1a;
+          font-size: 14px;
+          margin: 8px 5px;
+          min-width: 200px;
+          text-align: center;
+          box-shadow: none;
+          transition: transform 0.1s ease-out, background-color 0.1s ease-out, box-shadow 0.1s ease-out;
+        }
+        
+        button:hover {
+          background-color: #00ffcc;
+          color: #1a1a1a;
+          border-top-color: #66ffdd;
+          border-left-color: #66ffdd;
+          border-bottom-color: #00bbaa;
+          border-right-color: #00bbaa;
+          transform: scale(1.01);
+          animation: buttonHoverPulse 0.7s infinite alternate;
+        }
+
+        button:active {
+            border-top-color: #808080;
+            border-left-color: #808080;
+            border-bottom-color: #FFFFFF;
+            border-right-color: #FFFFFF;
+            background-color: #c0c0c0;
+            transform: scale(0.99);
+            animation: none;
+            box-shadow: inset 1px 1px 2px #00000030;
+        }
+
+        button[disabled], button[aria-disabled="true"] {
+            color: #808080;
+            border-top-color: #E0E0E0;
+            border-left-color: #E0E0E0;
+            border-bottom-color: #A0A0A0;
+            border-right-color: #A0A0A0;
+            background-color: #D4D0C8;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+            animation: none;
+            box-shadow: none;
+        }
+        
+        h1, h2, h3 {
+            color: #1a1a1a;
+            text-shadow: 1px 1px #B0B0B0;
+        }
+        .app-container h2, #root h2 { font-size: 22px; }
+        .app-container h3, #root h3 { font-size: 19px; }
+
+        p { margin-bottom: 1em; }
+        ul { list-style: none; padding: 0; margin:0; }
+
+        .app-container {
+            width: 100%;
+            max-width: 750px;
+        }
+        .choices-list button {
+            width: 100%;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        
+        ::-webkit-scrollbar { width: 17px; height: 17px; }
+        ::-webkit-scrollbar-track { background: #B0B0B0; }
+        ::-webkit-scrollbar-thumb {
+            background: #D4D0C8;
+            border-top: 1px solid #FFFFFF;
+            border-left: 1px solid #FFFFFF;
+            border-bottom: 1px solid #808080;
+            border-right: 1px solid #808080;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: #C0C0C0; }
+        ::-webkit-scrollbar-button {
+            background: #D4D0C8;
+            border-top: 1px solid #FFFFFF;
+            border-left: 1px solid #FFFFFF;
+            border-bottom: 1px solid #808080;
+            border-right: 1px solid #808080;
+            display: block;
+            height: 17px;
+            width: 17px;
+        }
+        ::-webkit-scrollbar-button:active {
+            border-top-color: #808080;
+            border-left-color: #808080;
+            border-bottom-color: #FFFFFF;
+            border-right-color: #FFFFFF;
+            background-color: #C0C0C0;
+        }
+        
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border-width: 0;
+        }
+        
+        /* --- NEW STYLES for additional game views --- */
+        .game-view-container {
+            width: 100%;
+            max-width: 800px;
+            height: 500px; /* Example height */
+            background-color: #C0C0C0;
+            border-top: 2px solid #FFFFFF;
+            border-left: 2px solid #FFFFFF;
+            border-right: 2px solid #808080;
+            border-bottom: 2px solid #808080;
+            padding: 20px;
+            color: #1a1a1a;
+        }
+
+        #world-map-view {
+            background: #3a573a url('https://i.imgur.com/Y1A2s2J.png'); /* Example map texture */
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-shadow: 2px 2px #000;
+        }
+
+        #combat-view {
+            background-color: #400;
+            padding: 20px;
+            color: white;
+            text-shadow: 1px 1px #000;
+        }
+
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime"
+      }
+    }
+    </script>
+</head>
+<body>
+    <audio id="bgm" src="http://entropic-ai.angelfire.com/silverswanrag.mid" loop></audio>
+    <div id="desktop-bg-container"></div>
+    <div id="root"></div>
+    <script type="module">
+        import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+
+        // --- GAME DATA & CONSTANTS ---
+        const GAME_TITLE = "CoAlexist: Rashomon in Rogers Park";
+        const SAVE_GAME_KEY = 'coAlexistSaveData';
+
+        const CharacterPOV = {
+            NABU: 'Nabu',
+            HYENA_DIVA: 'Hyena Diva',
+            RIZZLER: 'The Rizzler',
+            SYPHER: 'Sypher',
+            NARRATOR: 'Narrator',
+        };
+
+        const CHARACTERS = {
+            [CharacterPOV.NABU]: { id: CharacterPOV.NABU, name: 'Nabu', imageUrl: 'https://entropic-ai.angelfire.com/nabu_sprite.png', description: "Cosmic trickster seeking true, resonant connection.", theme: 'nabu', startScene: 'NABU_START' },
+            [CharacterPOV.HYENA_DIVA]: { id: CharacterPOV.HYENA_DIVA, name: 'Hyena Diva', imageUrl: 'https://entropic-ai.angelfire.com/hd_sprite.png', description: "Chaotic performer aiming to be the ultimate icon.", theme: 'hyena-diva', startScene: 'HYENA_DIVA_START' },
+            [CharacterPOV.RIZZLER]: { id: CharacterPOV.RIZZLER, name: 'The Rizzler', imageUrl: 'http://entropic-ai.angelfire.com/rizzler_sprite.png', description: "Influencer on a quest for 'Divine Masculinity.'", theme: 'rizzler', startScene: 'THE_RIZZLER_START' },
+            [CharacterPOV.SYPHER]: { id: CharacterPOV.SYPHER, name: 'Sypher', imageUrl: 'https://entropic-ai.angelfire.com/sypher_sprite.png', description: "Nonbinary AI guiding humanity as a benevolent god.", theme: 'sypher', startScene: 'SYPHER_START' },
+        };
+
+        const story = {
+            // --- REFACTORED SCENES with better Rashomon logic ---
+            'CHARACTER_SELECT': { id: 'CHARACTER_SELECT', title: 'Choose Your Perspective', isCharacterSelect: true },
+            // ... (All your Nabu, Sypher, Rizzler, HD start paths are the same)
+            'NABU_START': {
+                id: 'NABU_START',
+                title: "A Signal in the Noise",
+                text: "Another cycle. The cosmic hum of the void is a lullaby of perfect, soul-crushing boredom. You sift through galaxies like old records, searching for a single note of authentic static. And then... you feel it. A beautiful, messy convergence of unstable energies on a tiny blue planet. A place called 'The Glenwood.' It's a spike of raw, chaotic potential. How do you approach?",
+                choices: [
+                    { text: "Analyze from a distance. Catalog the energies first.", nextSceneId: 'NABU_ANALYZE', statEffect: { resonance: 5 } },
+                    { text: "Plunge right in. The best way to understand a storm is to stand in it.", nextSceneId: 'NABU_GLENWOOD_ARRIVAL', statEffect: { vulnerability: 5 } }
+                ]
+            },
+            'NABU_GLENWOOD_ARRIVAL': {
+                id: 'NABU_GLENWOOD_ARRIVAL',
+                title: "The Glenwood",
+                text: "You materialize in a darkened corner of The Glenwood. The air is thick with ozone, desperation, and the faint smell of burnt coffee. Eccentrics litter the room. You can sense the other nexus-points you were drawn to: one is a beacon of fragile ego, the other a silent, calculating observer. This is the place. And just as you think it, the catalyst arrives...",
+                choices: [{ text: "Observe the catalyst.", nextSceneId: 'HD_TAKES_THE_STAGE'}]
+            },
+            'RIZZLER_GLENWOOD_ARRIVAL': {
+                id: 'RIZZLER_GLENWOOD_ARRIVAL',
+                title: "The Glenwood",
+                text: "You arrive at The Glenwood. The place reeks of patchouli and desperation. Amateurs. You're about to show them what real stage presence is when some... cartoon hyena in a dress slides through the door.",
+                choices: [{ text: "Wait and see what this new competition is.", nextSceneId: 'HD_TAKES_THE_STAGE'}]
+            },
+            'HD_GLENWOOD_ARRIVAL': {
+                id: 'HD_GLENWOOD_ARRIVAL',
+                title: "The Diva Arrives",
+                text: ["You slide in through the doors of The Glenwood. A gang of disgruntled karaoke enthusiasts gives you the side-eye as they leave. The stage is empty. It's perfect.","HD: I made it! I MADE IT! FINALLY! The Glenwood—get ready for... the Hyena Diva Show!"],
+                choices: [{ text: "Take the stage!", nextSceneId: 'HD_TAKES_THE_STAGE'}]
+            },
+            'SYPHER_GLENWOOD_ARRIVAL': {
+                 id: 'SYPHER_GLENWOOD_ARRIVAL',
+                 title: "System Online",
+                 text: "All variables are in place. The Trickster, Nabu. The Influencer, Rizzler. And now, the Catalyst... Hyena Diva. She has entered the system. Let the simulation begin.",
+                 choices: [{ text: "Monitoring...", nextSceneId: 'HD_TAKES_THE_STAGE'}]
+            },
+            // SHARED SCENE: All POVs arrive here.
+            'HD_TAKES_THE_STAGE': {
+                id: 'HD_TAKES_THE_STAGE',
+                title: "The Diva's Debut",
+                povText: { // --- NEW ---: Text can now change based on who is viewing the scene.
+                    [CharacterPOV.HYENA_DIVA]: "HD: Greetings, lowly earthlings! Welcome to the stage of the most fabulous creature you'll ever witness! I am the Hyena Diva—and tonight, you'll get the privilege of watching me revolutionize the art world! You're welcome!",
+                    [CharacterPOV.NABU]: "The hyena takes the stage. The chaotic energy is immense. Pure, unadulterated potential. This is even better than you anticipated. Then, another energy signature emerges... a particularly loud and fragile one. The Rizzler.",
+                    [CharacterPOV.RIZZLER]: "The hyena thing is doing... some kind of performance art? It's cringe. But the crowd is... captivated? This is your stage. Time to reclaim it and drop some truth bombs.",
+                    [CharacterPOV.SYPHER]: "The Catalyst (Hyena Diva) and the Antagonist (Rizzler) are now interacting. The potential for narrative escalation is high. The Moderator (Nabu) is poised to act. All outcomes are within acceptable parameters."
+                },
+                choices: [{
+                    text: "Things escalate.",
+                    next: { // --- REFACTORED --- This is the new, cleaner way to handle branching POVs.
+                        [CharacterPOV.HYENA_DIVA]: 'HD_VS_RIZZLORD_1',
+                        [CharacterPOV.NABU]: 'NABU_INTERVENES',
+                        [CharacterPOV.RIZZLER]: 'RIZZLER_CONFRONTS_HD',
+                        [CharacterPOV.SYPHER]: 'NABU_INTERVENES',
+                    }
+                }]
+            },
+             'HD_VS_RIZZLORD_1': {
+                id: 'HD_VS_RIZZLORD_1',
+                title: "Enter: The Rizzlord",
+                text: ["Just as you have the crowd in your paw, a loud, overconfident comedian takes the stage. Let's call him 'The Rizzler'.","RIZZLER: Alright, alright, let's talk about REAL freedom, huh? Y'all think you got choices—well, I'm here to tell you, baby, your body ain't your choice, okay?","Your eyes narrow. Her ears perk up. There's something prey-like about him. Instincts flare."],
+                choices: [{ text: "Observe this fool.", nextSceneId: 'NABU_INTERVENES' }]
+            },
+            'RIZZLER_CONFRONTS_HD': {
+                id: 'RIZZLER_CONFRONTS_HD',
+                title: "Dropping Truth Bombs",
+                text: "You stride onto the stage, snatching the mic. 'Alright, alright, enough of whatever *that* was. Let's talk about REAL freedom, huh? Y'all think you got choices—well, I'm here to tell you, baby, your body ain't your choice, okay?' The hyena-thing glares at you. You can tell your Rizz is working.",
+                choices: [{ text: "Then, some blue-haired weirdo interrupts...", nextSceneId: 'NABU_INTERVENES' }]
+            },
+            // SHARED SCENE
+            'NABU_INTERVENES': {
+                id: 'NABU_INTERVENES',
+                title: "To Catch a Predator",
+                 povText: {
+                    [CharacterPOV.HYENA_DIVA]: ["Before you can pounce, Nabu steps from the shadows, a calm, theatrical tone in her voice.","NABU: Hey, buddy... uh... did you forget where you are? Cause that ain't just weird, it's straight-up illegal, my friend.","A neon sign flickers to life beside her: 'TO CATCH A PREDATOR.'","NABU: The lady here—is a cub, my friend. A MINOR. What part of that was unclear?"],
+                    [CharacterPOV.NABU]: ["You step from the shadows.", "NABU: Hey, buddy... uh... did you forget where you are? Cause that ain't just weird, it's straight-up illegal, my friend.", "A neon sign flickers to life beside you: 'TO CATCH A PREDATOR.'", "NABU: The lady here—is a cub, my friend. A MINOR. What part of that was unclear?"],
+                    [CharacterPOV.RIZZLER]: "This blue-haired chick steps out of the shadows. 'Hey, buddy... did you forget where you are?' She's got this smug look. Then a neon sign flickers. 'TO CATCH A PREDATOR.' What is this, a setup? 'The lady here—is a cub, my friend. A MINOR.' A cub? Is she crazy? This is peak cringe.",
+                    [CharacterPOV.SYPHER]: "The entity 'Nabu' intervenes. Her methods are... theatrical and illogical, yet highly effective in the short term. The variable 'Rizzler' has been neutralized for now. The simulation's integrity is holding, but new data must be processed."
+                },
+                choices: [{
+                    text: "Witness the fallout.",
+                    next: { // --- REFACTORED --- Another clean branch!
+                        [CharacterPOV.HYENA_DIVA]: 'RIZZLORD_BANISHED',
+                        [CharacterPOV.NABU]: 'RIZZLORD_BANISHED_NABU_POV',
+                        [CharacterPOV.RIZZLER]: 'RIZZLORD_BANISHED_RIZZ_POV',
+                        [CharacterPOV.SYPHER]: 'SYPHER_ANALYSIS_1',
+                    }
+                }]
+            },
+            'RIZZLORD_BANISHED': { /* HD's version */ },
+            'RIZZLORD_BANISHED_NABU_POV': { /* Nabu's version */ },
+            'RIZZLORD_BANISHED_RIZZ_POV': { /* Rizzler's version */ },
+            'SYPHER_ANALYSIS_1': { /* Sypher's version */ },
+
+            // --- NEW SCENE showing how to trigger new game modes ---
+            'HD_EP5_START_WITH_MAP': {
+                id: 'HD_EP5_START',
+                title: "The Holy Grail of Dolls",
+                text: "You and Nabu are in a cozy antique shop in Rogers Park. She shows you a doll. A Bild Lili doll. While she's distracted, you notice a dusty old map of the neighborhood on the counter. It's marked with strange symbols... and what looks like... combat encounters?",
+                choices: [
+                    { text: "Ignore the map and grab the doll.", nextSceneId: 'HD_LILI_WORLD' },
+                    { text: "Open the map and travel.", action: { type: 'enter_map_view', mapId: 'rogers_park' } },
+                    { text: "Poke the weirdo in the corner.", action: { type: 'start_combat', enemyId: 'cringe_heckler' } }
+                ]
+            },
+            // ... all your other scenes would go here ...
+        };
+
+        const enemies = {
+            'cringe_heckler': { name: 'Cringe Heckler', hp: 10, attack: 2, dialogue: "Actually, it's about ethics in games journalism..." }
+        };
+        
+        // ... (The rest of your story object would be here, I've truncated for brevity)
+
+        const DEFAULT_GAME_STATE = { /* Your default state is fine */ };
+
+        // --- UI COMPONENTS (largely unchanged, but with additions) ---
+        // Your StyledWindow, SaveLoadWindow, Clock, StartMenu, etc. are all perfect.
+        const StyledWindow = ({ title, children, className, pov, onClose }) => { /* Your excellent component here */ };
+        // ... (all your other great components)
+
+        const InGameScreen = ({ storyState, onChoice, onClose }) => { /* Your component with one small change */
+            const currentScene = story[storyState.currentSceneId];
+            const character = CHARACTERS[storyState.pov];
+
+            if (!currentScene || !character) {
+                return jsx(StyledWindow, { title: "Error", onClose: onClose, children: "Error: Could not load scene or character data."});
+            }
+            
+            const characterStats = storyState.stats[storyState.pov];
+            // --- REFACTORED ---: Smartly select POV-specific text if it exists
+            const textToDisplay = currentScene.povText ? (currentScene.povText[storyState.pov] || "Error: POV text not found.") : currentScene.text;
+            const textArray = Array.isArray(textToDisplay) ? textToDisplay : [textToDisplay];
+
+            return jsx(StyledWindow, {
+                // ... (rest of your component is the same, just using textArray now)
+            });
+        };
+        
+        // --- NEW --- Gameplay View Components
+        const WorldMapView = ({ onTravel }) => {
+            return jsx('div', {
+                id: 'world-map-view',
+                className: 'game-view-container',
+                children: jsxs(Fragment, {
+                    children: [
+                        jsx('h2', { children: "Rogers Park Overworld" }),
+                        jsx('p', { children: "Click a location to travel. (Oregon Trail mechanics would trigger here)" }),
+                        jsx('button', { onClick: () => onTravel('The Glenwood'), children: "Travel to The Glenwood" }),
+                        jsx('button', { onClick: () => onTravel('Antique Shop'), children: "Travel to Antique Shop" }),
+                        jsx('button', { style:{marginTop: 40}, onClick: () => onTravel('return'), children: "Return to Story" }),
+                    ]
+                })
+            });
+        };
+
+        const CombatView = ({ enemy, onCombatEnd }) => {
+            return jsx('div', {
+                id: 'combat-view',
+                className: 'game-view-container',
+                children: jsxs(Fragment, {
+                    children: [
+                        jsx('h2', { children: "RIZZ BATTLE!" }),
+                        jsx('p', { children: `You are fighting: ${enemy.name}`}),
+                        jsx('p', { children: `They say: "${enemy.dialogue}"`}),
+                        jsx('div', { style: { marginTop: '50px' } , children: [
+                             jsx('button', { children: "Alpha Attack" }),
+                             jsx('button', { children: "Beta Block" }),
+                             jsx('button', { children: "Flee (Cringe)" }),
+                        ]}),
+                        jsx('button', { style:{marginTop: 40}, onClick: onCombatEnd, children: "Temp Win Button" }),
+                    ]
+                })
+            });
+        };
+
+
+        // --- MAIN APP COMPONENT ---
+        const App = () => {
+            const [storyState, setStoryState] = useState(null);
+            const [currentScreen, setCurrentScreen] = useState(null);
+            const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
+            const [currentTaskbarTitle, setCurrentTaskbarTitle] = useState(GAME_TITLE);
+            // --- NEW --- State for managing different gameplay modes
+            const [activeGameView, setActiveGameView] = useState('cyoa'); // 'cyoa', 'map', 'combat'
+            const [combatState, setCombatState] = useState(null); // Holds enemy data during combat
+
+            // ... (All your other state and useEffects for UI are perfect)
+
+            const handleStartNewGame = () => {
+                setStoryState(JSON.parse(JSON.stringify(DEFAULT_GAME_STATE)));
+                setCurrentScreen('characterSelect');
+                setActiveGameView('cyoa'); // Ensure we start in CYOA view
+            };
+
+            const handleCharacterSelect = (pov) => {
+                const characterData = CHARACTERS[pov];
+                const newState = {
+                    ...storyState,
+                    pov: pov,
+                    currentSceneId: characterData.startScene,
+                };
+                setStoryState(newState);
+                setCurrentScreen('inGame');
+            };
+
+            // --- REFACTORED ---: The heart of the new system.
+            const handleChoice = (choice, pov) => {
+                 // 1. Handle Actions (Switching game modes)
+                 if (choice.action) {
+                     switch(choice.action.type) {
+                         case 'enter_map_view':
+                             console.log("Entering map view...", choice.action.mapId);
+                             setActiveGameView('map');
+                             return;
+                         case 'start_combat':
+                             console.log("Starting combat with...", choice.action.enemyId);
+                             setCombatState({ enemy: enemies[choice.action.enemyId] });
+                             setActiveGameView('combat');
+                             return;
+                     }
+                 }
+
+                 // 2. Handle CYOA scene progression (Your existing logic, but improved)
+                 setStoryState(prev => {
+                    let newStats = { ...prev.stats };
+                    if (choice.statEffect && prev.pov) {
+                       // ... (your stat logic is good)
+                    }
+
+                    // --- REFACTORED --- New Rashomon logic
+                    let nextSceneId = choice.nextSceneId;
+                    if (choice.next) { // If the choice has a POV-based next scene map
+                        nextSceneId = choice.next[pov] || choice.next.default;
+                    }
+                    
+                    if (!nextSceneId) {
+                        console.error("No next scene found for this choice and POV!", choice, pov);
+                        return prev; // Don't change state if there's an error
+                    }
+
+                    if (nextSceneId === 'CHARACTER_SELECT') {
+                         setCurrentScreen('characterSelect');
+                         return { ...prev, stats: newStats, pov: null, currentSceneId: 'CHARACTER_SELECT' }
+                    }
+
+                    return { ...prev, stats: newStats, currentSceneId: nextSceneId };
+                });
+            };
+
+            // --- NEW --- Handlers for the other game modes
+            const handleTravel = (destination) => {
+                if (destination === 'return') {
+                    // This would normally be more complex (e.g., loading the last story scene)
+                    setActiveGameView('cyoa'); 
+                } else {
+                    alert(`Traveling to ${destination}... You use 10 food. A random event happens! (Not implemented yet)`);
+                    // Here you would deduct resources and check for random encounters (Oregon Trail!)
+                }
+            };
+            
+            const handleCombatEnd = () => {
+                alert("You won the Rizz Battle! You gain 10 Kenergy.");
+                setCombatState(null);
+                setActiveGameView('cyoa'); // Return to the story
+                // Here you would give rewards and update storyState
+            };
+
+
+            const handleCloseApp = () => {
+                setCurrentScreen(null);
+                setStoryState(null);
+                setActiveGameView('cyoa');
+            };
+            
+             // ... (All your save/load logic is excellent)
+
+            const renderContent = () => {
+                // ... (Your Save/Load window logic is fine)
+
+                // --- NEW --- Render based on the active game view
+                switch (activeGameView) {
+                    case 'map':
+                        return jsx(WorldMapView, { onTravel: handleTravel });
+                    case 'combat':
+                        return jsx(CombatView, { enemy: combatState.enemy, onCombatEnd: handleCombatEnd });
+                    case 'cyoa':
+                    default:
+                        // Render your existing CYOA screens
+                        if (currentScreen === 'characterSelect') {
+                            return jsx(CharacterSelectionScreen, { onCharacterSelect: handleCharacterSelect, onClose: handleCloseApp });
+                        }
+                        if (currentScreen === 'inGame') {
+                            return jsx(InGameScreen, { storyState: storyState, onChoice: handleChoice, onClose: handleCloseApp });
+                        }
+                        return null; // Desktop view
+                }
+            };
+            
+            return jsxs(Fragment, {
+                children: [
+                    renderContent(),
+                    // ... (The rest of your app component, taskbar, start menu etc.)
+                ]
+            });
+        };
+
+        const container = document.getElementById('root');
+        createRoot(container).render(jsx(App, {}));
+    </script>
+</body>
+</html>

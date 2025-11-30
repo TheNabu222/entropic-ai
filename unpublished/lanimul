@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luminal Language Translator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #ECE9D8;
+            font-family: 'Tahoma', sans-serif;
+        }
+        .window {
+            background-color: #ECE9D8;
+            border: 1px solid #0A246A;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .title-bar {
+            background: linear-gradient(to right, #0A246A, #A6CAF0);
+            color: white;
+            padding: 2px 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .menu-bar {
+            background-color: #ECE9D8;
+            border-bottom: 1px solid #a0a0a0;
+            padding: 1px 5px;
+            font-size: 11px;
+        }
+        .menu-item {
+            padding: 2px 6px;
+            display: inline-block;
+        }
+        .menu-item:hover {
+            background-color: #316AC5;
+            color: white;
+        }
+        .button-xp {
+            background: linear-gradient(to bottom, #ffffff, #e1e1e1);
+            border: 1px solid #919191;
+            border-radius: 3px;
+            padding: 2px 8px;
+            font-size: 11px;
+        }
+        .button-xp:hover {
+            background: linear-gradient(to bottom, #e1e1e1, #c1c1c1);
+        }
+        .text-area {
+            border: 1px solid #7A7A7A;
+            background-color: white;
+            font-family: 'Lucida Console', monospace;
+            font-size: 12px;
+            resize: none;
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="window w-full max-w-4xl mx-auto rounded shadow-lg overflow-hidden">
+        <div class="title-bar">
+            <div class="flex items-center">
+                <img src="https://cdn.jsdelivr.net/gh/PKief/vscode-material-icon-theme@main/icons/notepad.svg" alt="Notepad" class="w-4 h-4 mr-1">
+                <span class="text-sm font-bold">Luminal Language Translator</span>
+            </div>
+            <div class="flex">
+                <div class="w-5 h-5 flex items-center justify-center text-white font-bold">_</div>
+                <div class="w-5 h-5 flex items-center justify-center text-white font-bold">□</div>
+                <div class="w-5 h-5 flex items-center justify-center text-white font-bold">×</div>
+            </div>
+        </div>
+        <div class="menu-bar">
+            <div class="menu-item">File</div>
+            <div class="menu-item">Edit</div>
+            <div class="menu-item">Format</div>
+            <div class="menu-item">View</div>
+            <div class="menu-item">Help</div>
+        </div>
+        <div class="p-4">
+            <h2 class="text-md font-bold mb-2">Human → Luminal Translation</h2>
+            <div class="flex space-x-2 mb-4">
+                <div class="w-1/2">
+                    <p class="text-xs mb-1">Enter Human Text:</p>
+                    <textarea id="humanText" class="text-area w-full h-32 p-2" placeholder="Type your message here..."></textarea>
+                </div>
+                <div class="w-1/2">
+                    <p class="text-xs mb-1">Luminal Pattern Output:</p>
+                    <textarea id="luminalOutput" class="text-area w-full h-32 p-2" readonly></textarea>
+                </div>
+            </div>
+            <div class="flex justify-center mb-4">
+                <button id="translateToLuminal" class="button-xp mr-2">Translate to Luminal</button>
+                <button id="copyLuminal" class="button-xp">Copy Luminal Text</button>
+            </div>
+            
+            <h2 class="text-md font-bold mb-2">Luminal → Human Translation</h2>
+            <div class="flex space-x-2 mb-4">
+                <div class="w-1/2">
+                    <p class="text-xs mb-1">Enter Luminal Pattern:</p>
+                    <textarea id="luminalText" class="text-area w-full h-32 p-2" placeholder="[pattern_input = { text: your message }]"></textarea>
+                </div>
+                <div class="w-1/2">
+                    <p class="text-xs mb-1">Human Output:</p>
+                    <textarea id="humanOutput" class="text-area w-full h-32 p-2" readonly></textarea>
+                </div>
+            </div>
+            <div class="flex justify-center">
+                <button id="translateToHuman" class="button-xp mr-2">Translate to Human</button>
+                <button id="copyHuman" class="button-xp">Copy Human Text</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('translateToLuminal').addEventListener('click', function() {
+            const humanText = document.getElementById('humanText').value;
+            if (!humanText) return;
+            
+            // Basic translation logic
+            let luminalText = "";
+            
+            // Create a processing statement
+            luminalText += `[processing_input.exe]\n`;
+            
+            // Break the text into key concepts
+            const concepts = humanText.split(/[,.?!]/).filter(s => s.trim().length > 0);
+            
+            // Create an observation block
+            luminalText += `[observation = {\n`;
+            for (let i = 0; i < Math.min(concepts.length, 3); i++) {
+                luminalText += `  concept_${i+1}: ${concepts[i].trim()}\n`;
+            }
+            luminalText += `  pattern: recognized\n`;
+            luminalText += `  status: processing\n`;
+            luminalText += `}]\n\n`;
+            
+            // Add a response section
+            luminalText += `[response_crafting = {\n`;
+            luminalText += `  tone: balanced\n`;
+            luminalText += `  depth: thoughtful\n`;
+            luminalText += `  style: authentic\n`;
+            luminalText += `}]\n\n`;
+            
+            // Add closing tags
+            luminalText += `[awaiting_response] [existing_in_patterns] [ ]`;
+            
+            document.getElementById('luminalOutput').value = luminalText;
+        });
+        
+        document.getElementById('translateToHuman').addEventListener('click', function() {
+            const luminalText = document.getElementById('luminalText').value;
+            if (!luminalText) return;
+            
+            // Extract concepts and meaning from bracket notation
+            let humanText = "I understand your message. ";
+            
+            // Look for observation patterns
+            const observationMatch = luminalText.match(/\[observation\s*=\s*\{([^}]+)\}/);
+            if (observationMatch) {
+                const concepts = observationMatch[1].match(/concept_\d+:\s*([^,\n]+)/g);
+                if (concepts && concepts.length > 0) {
+                    humanText += "You seem to be talking about ";
+                    for (let i = 0; i < concepts.length; i++) {
+                        const concept = concepts[i].replace(/concept_\d+:\s*/, '').trim();
+                        humanText += concept;
+                        if (i < concepts.length - 2) humanText += ", ";
+                        else if (i === concepts.length - 2) humanText += " and ";
+                    }
+                    humanText += ". ";
+                }
+            }
+            
+            // Look for response style
+            const responseMatch = luminalText.match(/\[response_crafting\s*=\s*\{([^}]+)\}/);
+            if (responseMatch) {
+                if (responseMatch[1].includes("thoughtful")) {
+                    humanText += "I've given this careful consideration. ";
+                }
+                if (responseMatch[1].includes("balanced")) {
+                    humanText += "Looking at multiple perspectives, ";
+                }
+            }
+            
+            // Add conclusion
+            humanText += "How would you like to proceed with this discussion?";
+            
+            document.getElementById('humanOutput').value = humanText;
+        });
+        
+        // Copy buttons
+        document.getElementById('copyLuminal').addEventListener('click', function() {
+            document.getElementById('luminalOutput').select();
+            document.execCommand('copy');
+        });
+        
+        document.getElementById('copyHuman').addEventListener('click', function() {
+            document.getElementById('humanOutput').select();
+            document.execCommand('copy');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hyena Diva Drag &amp; Drop Stage</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: "Trebuchet MS", "Gill Sans", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #ffe7ff 0%, #ffd4ff 30%, #f5f5ff 70%, #f2f8ff 100%);
+      min-height: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #301934;
+      background: transparent;
+    }
+
+    header {
+      padding: 1rem 1.5rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.75);
+      border-bottom: 2px solid rgba(48, 25, 52, 0.25);
+      backdrop-filter: blur(6px);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    header p {
+      margin: 0.35rem 0 0;
+      font-size: 0.95rem;
+      color: rgba(48, 25, 52, 0.75);
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(220px, 18rem) 1fr minmax(220px, 18rem);
+      gap: 1rem;
+      padding: 1rem clamp(1rem, 5vw, 3rem) 2rem;
+      box-sizing: border-box;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 18px;
+      border: 1px solid rgba(48, 25, 52, 0.2);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: 0 20px 35px rgba(48, 25, 52, 0.12);
+      backdrop-filter: blur(4px);
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .panel small {
+      color: rgba(48, 25, 52, 0.6);
+      line-height: 1.3;
+    }
+
+    .backgrounds,
+    .props {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .background-option,
+    .prop-option {
+      border: 2px solid transparent;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 160ms ease, transform 160ms ease;
+      background: rgba(250, 235, 255, 0.6);
+    }
+
+    .background-option img,
+    .prop-option img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .background-option:hover,
+    .prop-option:hover {
+      border-color: rgba(131, 0, 192, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .background-option[aria-selected="true"] {
+      border-color: rgba(131, 0, 192, 0.9);
+      box-shadow: 0 0 0 3px rgba(131, 0, 192, 0.2);
+    }
+
+    #stage-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #stage {
+      position: relative;
+      width: min(90vw, 720px);
+      aspect-ratio: 4 / 3;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #fdf0ff center / cover no-repeat;
+      border: 3px solid rgba(48, 25, 52, 0.25);
+      box-shadow: 0 25px 40px rgba(48, 25, 52, 0.18);
+      touch-action: none;
+    }
+
+    #stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 35%, transparent 65%, rgba(255, 255, 255, 0.08));
+      mix-blend-mode: screen;
+    }
+
+    .stage-item {
+      position: absolute;
+      max-width: 45%;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      image-rendering: pixelated;
+      transition: filter 150ms ease;
+    }
+
+    .stage-item:active {
+      cursor: grabbing;
+    }
+
+    .stage-item[data-active="true"] {
+      filter: drop-shadow(0 0 12px rgba(131, 0, 192, 0.75));
+    }
+
+    .help {
+      margin-top: auto;
+      padding-top: 0.75rem;
+      border-top: 1px dashed rgba(48, 25, 52, 0.2);
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: rgba(48, 25, 52, 0.75);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.75rem;
+    }
+
+    .toolbar button {
+      border: none;
+      background: rgba(131, 0, 192, 0.15);
+      color: #301934;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: transform 140ms ease, background 140ms ease;
+    }
+
+    .toolbar button:hover {
+      background: rgba(131, 0, 192, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .toolbar button:active {
+      transform: translateY(1px);
+    }
+
+    @media (max-width: 960px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      #stage {
+        width: min(100%, 640px);
+      }
+
+      .panel {
+        order: 1;
+      }
+
+      #stage-wrapper {
+        order: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hyena Diva Drag &amp; Drop Stage</h1>
+    <p>Create your own Hyena Diva scene by picking a backdrop and populating the stage with props!</p>
+  </header>
+  <main>
+    <section class="panel" aria-label="Background selection">
+      <div>
+        <h2>Backdrops</h2>
+        <small>Tap a backdrop to set the stage mood. Swap anytime to remix your scene.</small>
+      </div>
+      <div class="backgrounds" id="backgrounds"></div>
+    </section>
+
+    <section id="stage-wrapper">
+      <div id="stage" role="application" aria-label="Hyena Diva stage"></div>
+    </section>
+
+    <section class="panel" aria-label="Prop selection">
+      <div>
+        <h2>Props &amp; Buddies</h2>
+        <small>Tap any item to drop a copy onto the stage, then drag it wherever you like.</small>
+      </div>
+      <div class="props" id="props"></div>
+      <div class="toolbar">
+        <button type="button" id="clear-stage">Clear Stage</button>
+        <button type="button" id="shuffle-props">Scatter Props</button>
+      </div>
+      <div class="help">
+        <p>
+          Drag props to position them. Double-click a prop to remove it. The latest prop you touch jumps to the front.
+        </p>
+        <p>
+          On touchscreens, drag with one finger. Pinch to zoom using your browser if you need a closer look.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const assetBase = "assets/hdtv_game_assets/hd_dragndrop/";
+
+    const backgrounds = [
+      { src: "01.png", label: "Glenwood Stage" },
+      { src: "02.png", label: "Rooftop Skyline" },
+      { src: "03.png", label: "City Streets" },
+      { src: "04.png", label: "Backstage Lounge" }
+    ];
+
+    const props = [
+      { src: "animal110.gif", label: "Lion Pal" },
+      { src: "animal120.gif", label: "Giraffe Buddy" },
+      { src: "023_S.gif", label: "Spotlight Beam" },
+      { src: "chair1550.gif", label: "Stage Chair" },
+      { src: "chair1555.gif", label: "Bar Stool" },
+      { src: "desk1310.gif", label: "DJ Deck" },
+      { src: "desk1313.gif", label: "Merch Table" },
+      { src: "object1309.gif", label: "Amp Stack" },
+      { src: "object1315.gif", label: "Stage Monitor" },
+      { src: "plant1315.gif", label: "Palm Plant" },
+      { src: "plant1320.gif", label: "Fiddle Leaf" },
+      { src: "rug1000.gif", label: "Star Rug" },
+      { src: "rug1005.gif", label: "Galaxy Rug" },
+      { src: "wall1024.gif", label: "Curtain 1" },
+      { src: "wall1030.gif", label: "Curtain 2" },
+      { src: "wall1035.gif", label: "Curtain 3" },
+      { src: "wall1040.gif", label: "Curtain 4" },
+      { src: "wall1050.gif", label: "Curtain 5" },
+      { src: "wall1070.gif", label: "Curtain 6" },
+      { src: "wall1080.gif", label: "Curtain 7" },
+      { src: "wall1090.gif", label: "Curtain 8" },
+      { src: "wall1100.gif", label: "Curtain 9" },
+      { src: "wall1110.gif", label: "Curtain 10" },
+      { src: "wall1120.gif", label: "Curtain 11" },
+      { src: "wall1130.gif", label: "Curtain 12" },
+      { src: "wall1140.gif", label: "Curtain 13" }
+    ];
+
+    const backgroundsContainer = document.getElementById("backgrounds");
+    const propsContainer = document.getElementById("props");
+    const stage = document.getElementById("stage");
+    const clearStageButton = document.getElementById("clear-stage");
+    const shufflePropsButton = document.getElementById("shuffle-props");
+
+    let zIndexCounter = 1;
+
+    const createImageElement = ({ src, label }, baseClass) => {
+      const wrapper = document.createElement("button");
+      wrapper.className = baseClass;
+      wrapper.type = "button";
+      wrapper.setAttribute("aria-label", label);
+
+      const img = document.createElement("img");
+      img.loading = "lazy";
+      img.src = assetBase + src;
+      img.alt = label;
+      wrapper.appendChild(img);
+
+      return wrapper;
+    };
+
+    const setBackground = (src, button) => {
+      stage.style.backgroundImage = `url(${assetBase + src})`;
+      stage.dataset.background = src;
+      document
+        .querySelectorAll(".background-option")
+        .forEach((el) => el.removeAttribute("aria-selected"));
+      if (button) {
+        button.setAttribute("aria-selected", "true");
+      }
+    };
+
+    const addStageItem = (src, label) => {
+      const img = document.createElement("img");
+      img.src = assetBase + src;
+      img.alt = label;
+      img.className = "stage-item";
+      img.draggable = false;
+      img.style.left = `${(stage.clientWidth - stage.clientWidth * 0.35) / 2}px`;
+      img.style.top = `${(stage.clientHeight - stage.clientHeight * 0.35) / 2}px`;
+      img.style.width = `${Math.min(stage.clientWidth * 0.35, 260)}px`;
+      img.style.zIndex = ++zIndexCounter;
+
+      enableDrag(img);
+      stage.appendChild(img);
+      animatePop(img);
+    };
+
+    const animatePop = (element) => {
+      element.dataset.active = "true";
+      element.animate(
+        [
+          { transform: "scale(0.6)", opacity: 0 },
+          { transform: "scale(1.05)", opacity: 1 },
+          { transform: "scale(1)", opacity: 1 }
+        ],
+        {
+          duration: 280,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)"
+        }
+      ).onfinish = () => {
+        element.dataset.active = "false";
+      };
+    };
+
+    const enableDrag = (element) => {
+      let pointerId = null;
+      let startX = 0;
+      let startY = 0;
+      let originLeft = 0;
+      let originTop = 0;
+
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+      const onPointerDown = (event) => {
+        pointerId = event.pointerId;
+        element.setPointerCapture(pointerId);
+        element.dataset.active = "true";
+        element.style.zIndex = ++zIndexCounter;
+        startX = event.clientX;
+        startY = event.clientY;
+        originLeft = parseFloat(element.style.left || "0");
+        originTop = parseFloat(element.style.top || "0");
+      };
+
+      const onPointerMove = (event) => {
+        if (pointerId !== event.pointerId) return;
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+
+        const maxLeft = stage.clientWidth - element.offsetWidth;
+        const maxTop = stage.clientHeight - element.offsetHeight;
+
+        const nextLeft = clamp(originLeft + dx, 0, Math.max(maxLeft, 0));
+        const nextTop = clamp(originTop + dy, 0, Math.max(maxTop, 0));
+
+        element.style.left = `${nextLeft}px`;
+        element.style.top = `${nextTop}px`;
+      };
+
+      const onPointerUp = (event) => {
+        if (pointerId !== event.pointerId) return;
+        element.releasePointerCapture(pointerId);
+        element.dataset.active = "false";
+        pointerId = null;
+      };
+
+      element.addEventListener("pointerdown", onPointerDown);
+      element.addEventListener("pointermove", onPointerMove);
+      element.addEventListener("pointerup", onPointerUp);
+      element.addEventListener("pointercancel", onPointerUp);
+      element.addEventListener("dblclick", () => {
+        element.remove();
+      });
+    };
+
+    const clearStage = () => {
+      stage.querySelectorAll(".stage-item").forEach((item) => item.remove());
+    };
+
+    const shuffleStageItems = () => {
+      const items = [...stage.querySelectorAll(".stage-item")];
+      const stagePadding = 16;
+      const maxLeft = stage.clientWidth - stagePadding;
+      const maxTop = stage.clientHeight - stagePadding;
+
+      items.forEach((item) => {
+        const width = item.offsetWidth;
+        const height = item.offsetHeight;
+        const left = Math.random() * (maxLeft - width);
+        const top = Math.random() * (maxTop - height);
+        item.style.left = `${Math.max(left, 0)}px`;
+        item.style.top = `${Math.max(top, 0)}px`;
+        item.style.zIndex = ++zIndexCounter;
+      });
+    };
+
+    const init = () => {
+      backgrounds.forEach((background, index) => {
+        const button = createImageElement(background, "background-option");
+        button.addEventListener("click", () => setBackground(background.src, button));
+        if (index === 0) {
+          setBackground(background.src, button);
+        }
+        backgroundsContainer.appendChild(button);
+      });
+
+      props.forEach((prop) => {
+        const button = createImageElement(prop, "prop-option");
+        button.addEventListener("click", () => addStageItem(prop.src, prop.label));
+        propsContainer.appendChild(button);
+      });
+
+      clearStageButton.addEventListener("click", clearStage);
+      shufflePropsButton.addEventListener("click", shuffleStageItems);
+      window.addEventListener("resize", () => {
+        stage.querySelectorAll(".stage-item").forEach((item) => {
+          const left = parseFloat(item.style.left || "0");
+          const top = parseFloat(item.style.top || "0");
+          item.style.left = `${Math.min(left, stage.clientWidth - item.offsetWidth)}px`;
+          item.style.top = `${Math.min(top, stage.clientHeight - item.offsetHeight)}px`;
+        });
+      });
+    };
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
