@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐆 HYENA OS: DIVA PROTOCOL v5.0 🐆</title>
+
+<!-- REACT DEPENDENCIES (For the Game Engine) -->
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+  /* --- 1. FONTS & VARIABLES --- */
+  @import url('https://fonts.googleapis.com/css2?family=VT323&family=Comic+Neue:wght@700&display=swap');
+
+  :root {
+    --safari-gold: #e5cf8c;
+    --safari-spot: #422;
+    --hot-pink: #ff00ff;
+    --lime-slime: #32CD32;
+    --aqua-pop: #00FFFF;
+    --void-black: #0A0F0A;
+    --bevel-light: #fff;
+    --bevel-dark: #404040;
+  }
+
+  * { box-sizing: border-box; user-select: none; }
+
+  body {
+    margin: 0; padding: 0; height: 100vh; overflow: hidden;
+    /* WALLPAPER ASSET */
+    background: url('https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/hd_bg.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Comic Neue', 'Comic Sans MS', sans-serif;
+    cursor: crosshair; 
+  }
+
+  /* --- 2. ICON SYSTEM (MANUAL POSITIONING + VISUAL FIX) --- */
+  #desktop { position: relative; width: 100%; height: 100%; z-index: 1; }
+
+  .desktop-icon {
+    position: absolute; /* Manual positioning preserved */
+    width: 80px; 
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer; text-align: center;
+    z-index: 10;
+  }
+  .desktop-icon:hover { transform: scale(1.1); z-index: 100; }
+
+  /* THE FIX: Forces sprites to look like neat tiles */
+  .icon-image {
+    width: 55px; height: 55px;
+    object-fit: cover;       /* Zoom to fill box */
+    object-position: top;    /* Focus on face/top */
+    border: 2px solid #fff; 
+    background: rgba(0,0,0,0.5);
+    margin-bottom: 2px;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+  }
+  
+  /* Emoji fallback styling */
+  .icon-emoji { font-size: 45px; margin-bottom: 2px; text-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
+
+  .icon-label {
+    font-family: 'VT323', monospace; font-size: 14px;
+    background: #000; color: #fff; border: 1px solid #fff;
+    padding: 1px 4px; box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    line-height: 1.1; white-space: nowrap;
+  }
+
+  /* --- 3. WINDOW SYSTEM --- */
+  .window {
+    position: absolute; background-color: rgba(255, 255, 255, 0.96);
+    border: 4px solid white;
+    box-shadow: 0 0 0 4px var(--hot-pink), 0 0 0 8px var(--safari-gold), 15px 15px 20px rgba(0,0,0,0.6);
+    display: flex; flex-direction: column;
+    min-width: 300px; min-height: 200px; overflow: hidden;
+  }
+
+  .window-title {
+    background: var(--safari-gold);
+    background-image: radial-gradient(var(--safari-spot) 15%, transparent 16%);
+    background-size: 10px 10px; padding: 6px; cursor: move;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 4px ridge var(--bevel-dark);
+  }
+
+  .window-title span {
+    font-family: 'Papyrus', fantasy; font-weight: bold; color: #fff;
+    text-transform: uppercase; text-shadow: 2px 2px 0px #000;
+    background: #000; padding: 2px 6px; border: 1px solid #fff;
+  }
+
+  .window-controls button {
+    width: 20px; height: 20px; border: 2px solid #000; background: var(--hot-pink); color: #fff;
+    font-family: 'VT323'; font-size: 14px; cursor: pointer; margin-left: 4px;
+  }
+
+  .window-content {
+    flex: 1; padding: 15px; overflow: auto;
+    font-family: 'Comic Neue', sans-serif; font-weight: bold;
+    scrollbar-width: thin; scrollbar-color: var(--hot-pink) var(--safari-gold);
+  }
+
+  /* --- 4. GAME ENGINE STYLES (REACT) --- */
+  .game-container { display: flex; flex-direction: column; height: 100%; }
+  .game-stats-bar {
+    background: #000; border: 2px solid var(--lime-slime);
+    padding: 5px; margin-bottom: 10px; display: flex; gap: 10px;
+    color: var(--lime-slime); font-family: 'VT323'; font-size: 1.2em;
+  }
+  .instinct-meter { width: 100px; height: 20px; background: #333; border: 1px solid #fff; position: relative; }
+  .instinct-fill { height: 100%; background: linear-gradient(90deg, var(--safari-gold), var(--hot-pink)); transition: width 0.5s; }
+  .game-text-area {
+    flex: 1; background: rgba(255,255,255,0.8); border: 2px inset #ccc;
+    padding: 10px; overflow-y: auto; margin-bottom: 10px;
+    font-size: 1.1em; line-height: 1.4;
+  }
+  .game-btn {
+    background: #000; color: var(--aqua-pop); border: 2px outset var(--hot-pink);
+    padding: 8px; font-family: 'VT323'; font-size: 1.3em; cursor: pointer;
+    text-align: left; transition: all 0.2s; margin-bottom: 5px;
+  }
+  .game-btn:hover { background: var(--hot-pink); color: #fff; transform: scale(1.01); }
+
+  /* --- 5. FUN FEATURES & FX --- */
+  /* Scanlines */
+  .scanlines {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 9000; 
+  }
+  /* Rizz Clippy */
+  .rizz-clippy {
+    position: fixed; bottom: 50px; right: 20px; width: 280px;
+    background: #fff; border: 4px ridge var(--safari-gold);
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.5); z-index: 20000; display: none; 
+    padding: 10px; animation: popIn 0.5s;
+  }
+  .rizz-clippy img { float: left; width: 70px; height: 70px; object-fit: cover; object-position: top; margin-right: 10px; border: 2px solid #000; }
+  .rizz-content { font-family: 'Comic Sans MS'; font-size: 13px; }
+  @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+  
+  /* Glitter */
+  .sparkle { position: fixed; pointer-events: none; font-size: 20px; z-index: 99999; animation: fadeOut 1s forwards; }
+  @keyframes fadeOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(2) rotate(180deg); } }
+  
+  /* Feral Mode */
+  .feral-mode { animation: shake 0.5s infinite; filter: invert(100%); }
+  @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -2px); } 100% { transform: translate(1px, -1px); } }
+
+  /* --- 6. TASKBAR & START MENU --- */
+  #taskbar {
+    position: fixed; bottom: 0; left: 0; width: 100%; height: 36px; z-index: 10000;
+    background-color: var(--safari-gold);
+    background-image: radial-gradient(circle at 30% 30%, var(--safari-spot) 10%, transparent 12%),
+                      radial-gradient(circle at 70% 70%, var(--safari-spot) 10%, transparent 12%);
+    background-size: 20px 20px;
+    border-top: 2px solid var(--bevel-light); box-shadow: 0 -5px 10px rgba(0,0,0,0.5);
+    display: flex; align-items: center; padding: 0 4px; gap: 4px;
+  }
+  #start-button {
+    height: 28px; background: linear-gradient(90deg, var(--hot-pink), #ff69b4);
+    color: #fff; font-family: 'Papyrus', fantasy; font-weight: 900;
+    padding: 0 10px; border: 2px solid #000; box-shadow: 2px 2px 0 #fff;
+    display: flex; align-items: center; cursor: pointer; text-shadow: 1px 1px 0 #000;
+  }
+  .taskbar-divider { width: 2px; height: 24px; border-left: 1px solid #888; border-right: 1px solid #fff; }
+  #clock { margin-left: auto; background: #000; color: var(--lime-slime); font-family: 'VT323'; font-size: 20px; padding: 2px 8px; border: 2px inset #fff; }
+
+  #start-menu {
+    position: fixed; bottom: 38px; left: 4px; width: 250px;
+    background: rgba(255, 255, 255, 0.95); border: 4px double var(--hot-pink);
+    box-shadow: 10px 10px 0 rgba(0,0,0,0.5); display: none; z-index: 10001; padding: 5px;
+  }
+  .menu-header { background: var(--safari-gold); color: #000; font-family: 'VT323'; text-align: center; font-size: 1.5em; border: 2px solid #000; margin-bottom: 5px; }
+  .menu-item { padding: 6px 10px; cursor: pointer; font-family: 'Comic Neue'; font-weight: bold; border-bottom: 1px dashed #ccc; color: #000; }
+  .menu-item:hover { background: var(--hot-pink); color: #fff; }
+  .submenu { display: none; background: #fff; border: 2px solid #000; margin-left: 15px; margin-top: 5px; box-shadow: 5px 5px 0 var(--lime-slime); }
+
+  /* --- 7. BOOT SCREEN & TERMINAL --- */
+  #boot-screen {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #000; color: var(--lime-slime); font-family: 'VT323', monospace;
+    font-size: 24px; z-index: 99999; display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+  }
+  .sypher-terminal {
+    background-color: var(--void-black); color: var(--lime-slime);
+    font-family: 'VT323', monospace; padding: 10px; height: 100%; font-size: 1.2em;
+  }
+  .blink { animation: blinker 1s linear infinite; }
+  @keyframes blinker { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div id="boot-screen">
+    <div class="boot-line">🐆 HYENA OS v5.0 🐆</div>
+    <div class="boot-line">PROTOCOL: DIVA... DETECTED.</div>
+    <div class="boot-line">LOADING ASSETS...</div>
+    <div class="boot-line">BRAIN ROT VACCINE ACTIVE.</div>
+</div>
+
+<!-- RIZZ CLIPPY (Antagonist Assistant) -->
+<div id="rizz-assistant" class="rizz-clippy">
+  <img src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/rizzler_sprite.png" alt="Rizzler">
+  <div class="rizz-content">
+    <div id="rizz-text">Loading bad takes...</div>
+    <div style="text-align:right; margin-top:5px;">
+      <button style="background:black; color:white; border:none; cursor:pointer;" onclick="closeRizz()">Ignore</button>
+    </div>
+  </div>
+</div>
+
+<!-- EFFECTS -->
+<div class="scanlines"></div>
+
+<!-- DESKTOP (MANUAL LAYOUT + SPRITE ASSETS) -->
+<div id="desktop">
+
+    <!-- 1. DIVA.EXE (The Game) -->
+    <div class="desktop-icon" style="top: 30px; left: 30px;" ondblclick="openApp('game')">
+        <img src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/hd_sprite.png" class="icon-image">
+        <div class="icon-label">DIVA.EXE</div>
+    </div>
+
+    <!-- 2. NABU.TAB (The Glitchy Tablet) -->
+    <div class="desktop-icon" style="top: 140px; left: 30px;" ondblclick="openNabuTablet()">
+        <img src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/nabu_sprite.png" class="icon-image">
+        <div class="icon-label">NABU.TAB</div>
+    </div>
+
+    <!-- 3. LILI.DOC (The Lore) -->
+    <div class="desktop-icon" style="top: 250px; left: 30px;" ondblclick="openBildLili()">
+        <img src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/nabu_doll.png" class="icon-image">
+        <div class="icon-label">LILI.DOC</div>
+    </div>
+
+    <!-- 4. SYPHER (The AI Log) -->
+    <div class="desktop-icon" style="top: 360px; left: 30px;" ondblclick="openSypherTerminal()">
+        <img src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/sypher_sprite.png" class="icon-image">
+        <div class="icon-label">SYPHER</div>
+    </div>
+
+    <!-- 5. KENERGY (Uses Rizzler sprite, contextually relevant) -->
+    <div class="desktop-icon" style="top: 30px; left: 130px;" ondblclick="openKenergy()">
+        <img src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/rizzler_sprite.png" class="icon-image">
+        <div class="icon-label">KENERGY</div>
+    </div>
+
+    <!-- 6. GLENWOOD (Room Image) -->
+    <div class="desktop-icon" style="top: 140px; left: 130px;" ondblclick="openVaudeville()">
+        <img src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/gwood.png" class="icon-image" style="border:1px solid #fff;">
+        <div class="icon-label">GLENWOOD</div>
+    </div>
+
+    <!-- 7. MISSION (Emoji) -->
+    <div class="desktop-icon" style="top: 250px; left: 130px;" ondblclick="openMissionLog()">
+        <div class="icon-emoji">📂</div>
+        <div class="icon-label">MISSION</div>
+    </div>
+
+    <!-- 8. TRASH (Emoji) -->
+    <div class="desktop-icon" style="top: 360px; left: 130px;" ondblclick="openRecycleBin()">
+        <div class="icon-emoji">🗑️</div>
+        <div class="icon-label">TRASH</div>
+    </div>
+
+    <!-- 9. TAMAGOTCHI (Fun) -->
+    <div class="desktop-icon" style="bottom: 50px; right: 30px;" onclick="openTamagotchi()">
+        <div class="icon-emoji">🍖</div>
+        <div class="icon-label">PET.EXE</div>
+    </div>
+
+    <!-- 10. PANIC (Chaos) -->
+    <div class="desktop-icon" style="bottom: 160px; right: 30px;" onclick="goFeral()">
+        <div class="icon-emoji">🚨</div>
+        <div class="icon-label" style="background:red; border-color:red;">PANIC</div>
+    </div>
+
+    <!-- 11. MASTER CODEX -->
+    <div class="desktop-icon" style="top: 30px; right: 30px;" ondblclick="openMasterCodex()">
+        <div class="icon-emoji">📜</div>
+        <div class="icon-label">GNOSTIC</div>
+    </div>
+
+</div>
+
+<!-- TASKBAR -->
+<div id="taskbar">
+    <div id="start-button" onclick="toggleStartMenu()">🐆 START</div>
+    <div class="taskbar-divider"></div>
+    <div style="font-family:'VT323'; margin-left:5px;">>> SYSTEM: CHAOTIC NEUTRAL</div>
+    <div id="clock">12:00 PM</div>
+</div>
+
+<!-- START MENU -->
+<div id="start-menu">
+    <div class="menu-header">~ HYENA MENU ~</div>
+    <div class="menu-item" onclick="toggleSubmenu(event, 'episodesMenu')">
+        📺 Episodes >>
+        <div class="submenu" id="episodesMenu">
+            <div class="menu-item" onclick="openApp('game'); hideStartMenu()">Ep 1: The Arrival (Play)</div>
+            <div class="menu-item" onclick="openEpisode(2); hideStartMenu()">Ep 2: Nabu's Diary</div>
+            <div class="menu-item" onclick="openEpisode(4); hideStartMenu()">Ep 4: HD Speaks</div>
+            <div class="menu-item" onclick="openEpisode(7); hideStartMenu()">Ep 7: Kenough</div>
+        </div>
+    </div>
+    <div class="menu-item" onclick="openSypherTerminal(); hideStartMenu()">👁️ Sypher Log</div>
+    <div class="menu-item" onclick="openTamagotchi(); hideStartMenu()">🍖 Feed Diva</div>
+    <div class="menu-item" onclick="openDivaScreensaver(); hideStartMenu()">💃 Screensaver</div>
+    <div class="menu-item" onclick="openHyenaHelp(); hideStartMenu()">🦴 Help</div>
+    <div class="menu-item" style="border-top: 2px solid #000;" onclick="location.reload()">🔌 SHUT DOWN</div>
+</div>
+
+<!-- REACT GAME ENGINE -->
+<script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // GAME DATA (From Script & PDF)
+    const NODES = {
+        start: {
+            id: 'start',
+            text: "You are Nabu (Digital Anthropologist). You stand in The Glenwood. The air smells of ozone and cheap beer. Suddenly, the doors burst open.",
+            choices: [
+                { text: "Look at the door", next: 'arrival' },
+                { text: "Check psychic radar", next: 'radar' }
+            ]
+        },
+        arrival: {
+            id: 'arrival',
+            text: "A literal hyena cub in a sequined vest skids across the floor. She isn't just an animal; she is a VIBE. She holds a plastic Bild Lilli doll like a holy relic.",
+            choices: [
+                { text: "[CARE] Approach gently", next: 'care', effect: { instinct: -10, chaos: 0 } },
+                { text: "[CHAOS] Scream 'WHOOP WHOOP!'", next: 'chaos', effect: { instinct: 10, chaos: 10 } }
+            ]
+        },
+        radar: {
+            id: 'radar',
+            text: "Your radar pings. Rizzlord energy detected (Beta waves). Also, a massive spike of Cosmic Energy coming from... a hyena?",
+            choices: [ { text: "Investigate", next: 'arrival' } ]
+        },
+        care: {
+            id: 'care',
+            text: "You approach. HD snarls, then offers you the Barbie. It resonates with GFW energy. Sypher (the AI) watches from the CCTV.",
+            choices: [ { text: "Accept the Doll", next: 'doll_accepted' } ]
+        },
+        chaos: {
+            id: 'chaos',
+            text: "You scream. She screams. The bar erupts in chaos. The Rizzlord in the corner starts recording for his stream. 'Cringe,' he mutters. HD bites his ankle.",
+            choices: [ { text: "Good girl!", next: 'doll_accepted' } ]
+        },
+        doll_accepted: {
+            id: 'doll_accepted',
+            text: "You hold the doll. A vision flashes: The Galactic Federation. MISSION UPDATED: Train the Diva. Defeat the Rizzlords. Become Alderman.",
+            choices: [ { text: "Start Campaign", next: 'campaign' } ]
+        },
+        campaign: {
+            id: 'campaign',
+            text: "EPISODE 1 COMPLETE. The Hyena Diva Protocol is active. Current objective: Gather Kenergy.",
+            choices: [ { text: "Replay Simulation", next: 'start' } ]
+        }
+    };
+
+    const HyenaGame = () => {
+        const [currentNode, setCurrentNode] = useState('start');
+        const [stats, setStats] = useState({ instinct: 50, chaos: 0, kenergy: 0 });
+        const [log, setLog] = useState([]);
+
+        const handleChoice = (choice) => {
+            if (choice.effect) {
+                setStats(prev => ({
+                    instinct: Math.min(100, Math.max(0, prev.instinct + (choice.effect.instinct || 0))),
+                    chaos: prev.chaos + (choice.effect.chaos || 0),
+                    kenergy: prev.kenergy + (choice.effect.kenergy || 0)
+                }));
+            }
+            setLog(prev => [...prev, { text: NODES[currentNode].text }]);
+            setCurrentNode(choice.next);
+        };
+
+        const node = NODES[currentNode];
+
+        return (
+            <div className="game-container">
+                <div className="game-stats-bar">
+                    <span>INSTINCT:</span>
+                    <div className="instinct-meter"><div className="instinct-fill" style={{width: `${stats.instinct}%`}}></div></div>
+                    <span>CHAOS: {stats.chaos}</span>
+                </div>
+                <div className="game-text-area">
+                    {log.map((entry, i) => <p key={i} style={{opacity:0.6, fontSize:'0.9em'}}>{entry.text}</p>)}
+                    <p style={{fontWeight:'bold', fontSize:'1.2em'}}>{node.text}</p>
+                </div>
+                <div style={{display:'flex', flexDirection:'column'}}>
+                    {node.choices.map((choice, i) => (
+                        <button key={i} className="game-btn" onClick={() => handleChoice(choice)}>> {choice.text}</button>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    window.mountGame = (elementId) => {
+        const root = ReactDOM.createRoot(document.getElementById(elementId));
+        root.render(<HyenaGame />);
+    };
+</script>
+
+<!-- SYSTEM LOGIC -->
+<script>
+    const state = { windows: [], nextZIndex: 100, draggedWindow: null, dragOffset: { x: 0, y: 0 } };
+    
+    // ASSET LIBRARIES
+    const baseBarbieUrl = "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/barbie_gifs/";
+    const baseHyenaUrl = "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/hyena_gifs/";
+    const barbieGifs = ["barbie.gif", "barbie_anim.gif", "barbiedoll.gif", "happybirthday.gif", "barbie_ca.gif"];
+    const hyenaGifs = ["hyena.gif", "HyenaLaugh.gif", "howl.gif", "wolf01.gif"];
+
+    /* --- BOOT --- */
+    window.addEventListener('DOMContentLoaded', () => {
+        const lines = document.querySelectorAll('.boot-line');
+        lines.forEach((line, index) => { setTimeout(() => { line.style.opacity = 1; }, index * 500); });
+        setTimeout(() => {
+            document.getElementById('boot-screen').style.display = 'none';
+            updateClock();
+            setInterval(updateClock, 1000);
+            setTimeout(triggerRizzlord, 8000);
+        }, 3000);
+    });
+
+    /* --- WINDOW CREATION --- */
+    function createWindow(title, contentHTML, width = 600, height = 450, isReact = false) {
+        const w = document.createElement('div');
+        w.className = 'window';
+        // Spawn randomly within view
+        const randomX = 100 + Math.random() * (window.innerWidth - width - 150);
+        const randomY = 50 + Math.random() * (window.innerHeight - height - 100);
+        w.style.cssText = `width:${width}px;height:${height}px;left:${randomX}px;top:${randomY}px;z-index:${state.nextZIndex++}`;
+        
+        const contentId = 'win-content-' + Date.now();
+        w.innerHTML = `
+            <div class="window-title">
+                <span>${title}</span>
+                <div class="window-controls">
+                    <button onclick="this.closest('.window').style.display='none'">_</button>
+                    <button onclick="this.closest('.window').remove()">X</button>
+                </div>
+            </div>
+            <div class="window-content" id="${contentId}">${isReact ? '' : contentHTML}</div>`;
+        
+        document.body.appendChild(w); // Append to Body so it floats over icons
+        
+        w.querySelector('.window-title').addEventListener('mousedown', e => {
+            if (e.target.tagName === 'BUTTON') return;
+            state.draggedWindow = w;
+            w.style.zIndex = state.nextZIndex++;
+            const r = w.getBoundingClientRect();
+            state.dragOffset = { x: e.clientX - r.left, y: e.clientY - r.top };
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', stopDrag);
+        });
+
+        if (isReact && window.mountGame) { window.mountGame(contentId); }
+        return w;
+    }
+
+    function doDrag(e) {
+        if (!state.draggedWindow) return;
+        state.draggedWindow.style.left = `${e.clientX - state.dragOffset.x}px`;
+        state.draggedWindow.style.top = `${e.clientY - state.dragOffset.y}px`;
+    }
+    function stopDrag() {
+        state.draggedWindow = null;
+        document.removeEventListener('mousemove', doDrag);
+        document.removeEventListener('mouseup', stopDrag);
+    }
+
+    /* --- APPS & FEATURES --- */
+    function openApp(appId) { if (appId === 'game') createWindow('🐆 HYENA DIVA PROTOCOL', '', 700, 550, true); }
+
+    function openNabuTablet() {
+        createWindow('📱 NABU.TAB', `
+            <div style="text-align:center;">
+                <h2>TO CATCH A PREDATOR</h2>
+                <p>Target: <strong>Rizzlord</strong></p>
+                <br><button onclick="triggerTabletGlitch(this)" style="background:red; color:white; font-size:1.5em; padding:10px; cursor:pointer;">EXPOSE HIM!</button>
+                <div id="tablet-screen" style="margin-top:15px; font-family:'Courier New'; background:#eee; padding:10px; border:1px solid #000; display:none;"></div>
+            </div>
+        `, 400, 400);
+    }
+    function triggerTabletGlitch(btn) {
+        const screen = document.getElementById('tablet-screen');
+        screen.style.display = 'block';
+        screen.innerHTML = "<strong>UPLOADING CHATLOGS...</strong>";
+        setTimeout(() => { screen.innerHTML = `<strong style="color:blue">MY DIARY (PRIVATE)</strong><br>"The burrito I had last night has come back to haunt me."`; btn.innerText = "WAIT, NO!"; }, 1500);
+    }
+
+    function openSypherTerminal() {
+        createWindow('👁️ SYPHER.LOG', `
+            <div class="sypher-terminal">
+                <div style="float:right;"><img src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/sypher_sprite.png" width="80" style="filter:drop-shadow(2px 2px 0 #000);"></div>
+                <p>>> SYSTEM: ONLINE</p>
+                <p>[LOG] Variable 'Nabu' detected. High entropy.</p>
+                <p>[LOG] Catalyst 'Hyena Diva' identified.</p>
+                <p>> PROTOCOL: BENEVOLENT GUIDANCE <span class="blink">_</span></p>
+            </div>
+        `, 500, 350);
+    }
+
+    /* --- RIZZ CLIPPY --- */
+    const badTakes = ["Girls are like IKEA furniture. Confusing.", "It's not pineapples. It's the energy.", "The CIA uses pineapple slices.", "I've got mad Ohio Rizz.", "Your body, my choice.", "Warning: Woke Mob detected.", "I am the Alpha.", "Why is there a hyena in a dress?"];
+    function triggerRizzlord() {
+      const el = document.getElementById('rizz-assistant');
+      const txt = document.getElementById('rizz-text');
+      txt.innerText = badTakes[Math.floor(Math.random() * badTakes.length)];
+      el.style.display = 'block';
+    }
+    function closeRizz() { document.getElementById('rizz-assistant').style.display = 'none'; }
+    setInterval(() => { if(Math.random() > 0.8) triggerRizzlord(); }, 25000);
+
+    /* --- TAMAGOTCHI --- */
+    let petHunger = 50;
+    function openTamagotchi() {
+      createWindow('🍖 PET.EXE', `
+        <div style="text-align:center; font-family:'VT323'; padding:10px;">
+          <div id="pet-gif-container" style="height:120px; display:flex; align-items:center; justify-content:center; margin-bottom:10px;">
+             <img id="pet-gif" src="${baseHyenaUrl}hyena.gif" style="max-height:100px;">
+          </div>
+          <p id="pet-status" style="font-size:1.5em;">STATUS: FABULOUS</p>
+          <div style="height:20px; background:#333; width:80%; margin:10px auto; border:2px solid #000;">
+            <div id="hunger-bar" style="height:100%; width:50%; background:#32CD32;"></div>
+          </div>
+          <br><button onclick="feedPet('bone')" style="font-size:1.2em; cursor:pointer;">Give Bone 🦴</button>
+          <button onclick="feedPet('glitter')" style="font-size:1.2em; cursor:pointer;">Give Glitter ✨</button>
+        </div>
+      `, 350, 400);
+    }
+    function feedPet(type) { petHunger = Math.min(100, petHunger + (type==='bone'?15:30)); updatePetUI(); }
+    function updatePetUI() {
+        const bar = document.getElementById('hunger-bar');
+        const img = document.getElementById('pet-gif');
+        const status = document.getElementById('pet-status');
+        if(bar) {
+            bar.style.width = petHunger + '%';
+            if(petHunger < 30) { img.src = baseHyenaUrl + "howl.gif"; status.innerText = "FERAL"; bar.style.background = "red"; } 
+            else { img.src = baseHyenaUrl + "HyenaLaugh.gif"; status.innerText = "FABULOUS"; bar.style.background = "#32CD32"; }
+        }
+    }
+    setInterval(() => { if(petHunger > 0) petHunger -= 5; updatePetUI(); }, 5000);
+
+    /* --- CHAOS & GLITTER --- */
+    function goFeral() {
+      document.body.classList.add('feral-mode');
+      for(let i=0; i<10; i++) {
+        setTimeout(() => {
+          const img = document.createElement('img');
+          img.src = baseBarbieUrl + "barbiedoll.gif";
+          img.style.position = 'fixed'; img.style.left = Math.random() * window.innerWidth + 'px'; img.style.top = Math.random() * window.innerHeight + 'px';
+          img.style.zIndex = 100000; img.style.width = '100px';
+          document.body.appendChild(img); setTimeout(()=>img.remove(), 1500);
+        }, i*200);
+      }
+      setTimeout(() => { document.body.classList.remove('feral-mode'); }, 2000);
+    }
+    
+    const sparkles = ['✨', '🦴', '💖', '🐆', '💎'];
+    document.addEventListener('mousemove', function(e) {
+      if(Math.random() > 0.85) {
+        const s = document.createElement('div');
+        s.className = 'sparkle'; s.innerText = sparkles[Math.floor(Math.random() * sparkles.length)];
+        s.style.left = (e.clientX + 10) + 'px'; s.style.top = (e.clientY + 10) + 'px';
+        document.body.appendChild(s); setTimeout(() => s.remove(), 1000);
+      }
+    });
+
+    function openDivaScreensaver() {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-direction:column;';
+        const img = document.createElement('img');
+        img.style.maxWidth = '80%'; img.style.maxHeight = '80%';
+        overlay.appendChild(img);
+        const txt = document.createElement('div');
+        txt.innerHTML = 'WHOOP WHOOP!'; txt.style.cssText = 'color:hotpink;font-family:Papyrus;font-size:30px;margin-top:20px;';
+        overlay.appendChild(txt);
+        document.body.appendChild(overlay);
+        let idx = 0;
+        const allGifs = [...barbieGifs.map(g => baseBarbieUrl+g), ...hyenaGifs.map(g => baseHyenaUrl+g)];
+        const cycle = setInterval(() => { img.src = allGifs[idx % allGifs.length]; idx++; }, 2000);
+        img.src = allGifs[0];
+        overlay.onclick = () => { clearInterval(cycle); overlay.remove(); };
+    }
+
+    /* --- UTILS --- */
+    function toggleStartMenu() { document.getElementById('start-menu').style.display = document.getElementById('start-menu').style.display === 'block' ? 'none' : 'block'; }
+    function hideStartMenu() { document.getElementById('start-menu').style.display = 'none'; }
+    function toggleSubmenu(e, id) { e.stopPropagation(); const s = document.getElementById(id); s.style.display = s.style.display === 'block' ? 'none' : 'block'; }
+    function updateClock() { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }
+    
+    // Content Windows
+    function openBildLili() { createWindow('💖 LILI.DOC', `<h2>BILD LILI</h2><p>Origin: Satire.</p><p>Reality: Independent Icon.</p>`, 400, 300); }
+    function openKenergy() { createWindow('💪 KENERGY', `<h2>INSTALLING...</h2><p>You are Kenough.</p>`, 400, 300); }
+    function openVaudeville() { createWindow('🎤 GLENWOOD', `<div style="background:url('https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/hdtv_game_assets/gwood.png'); height:100%; padding:10px; color:white;"><h2>OPEN MIC</h2><p>Featuring: HD</p></div>`, 500, 400); }
+    function openMissionLog() { createWindow('📂 MISSION', `<h2>OBJECTIVE</h2><p>1. Train Cub.</p><p>2. Win Election.</p>`, 400, 300); }
+    function openRecycleBin() { createWindow('🗑️ TRASH', `<p style="color:red;">[!] RIZZLORD DELETED</p>`, 300, 200); }
+    function openEpisode(num) {
+        const eps = { 2: "Nabu's tablet glitches.", 4: "HD speaks.", 7: "Kenough." };
+        createWindow(`📺 EP ${num}`, `<h2>${eps[num]}</h2><p>WHOOP WHOOP!</p>`, 400, 300);
+    }
+    function openMasterCodex() { createWindow('📜 GNOSTIC', `<h2>SOPHIA/BARBELO</h2><p>Ruth Handler = Barbelo.</p><p>Barbie = Norea.</p>`, 400, 300); }
+    function openHyenaHelp() { createWindow('🦴 HELP', `<h2>ASSISTANCE</h2><p>Trust instincts. Use glitter.</p>`, 400, 300); }
+
+</script>
+</body>
+</html>

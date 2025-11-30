@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Ecosystem Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #game-canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            image-rendering: pixelated;
+            cursor: crosshair;
+        }
+
+        .hud {
+            position: absolute;
+            color: #00ffff;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 15px;
+            pointer-events: auto;
+        }
+
+        .mode-selector {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            background: #1a1a1a;
+            color: #888;
+            border: 2px solid #444;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: #6600cc;
+            color: white;
+            border-color: #aa00ff;
+        }
+
+        .mode-btn:hover {
+            background: #333;
+        }
+
+        #top-left {
+            top: 90px;
+            left: 20px;
+        }
+
+        #ecosystem-panel {
+            top: 280px;
+            left: 20px;
+            max-width: 280px;
+        }
+
+        #top-right {
+            top: 90px;
+            right: 20px;
+        }
+
+        #bottom-center {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
+        }
+
+        .border-purple { border-color: #aa00ff; }
+        .border-cyan { border-color: #00ffff; }
+        .border-pink { border-color: #ff00ff; }
+        .border-yellow { border-color: #ffff00; }
+        .border-green { border-color: #00ff00; }
+        .border-blue { border-color: #0066ff; }
+        .border-orange { border-color: #ff6600; }
+
+        .text-purple { color: #aa00ff; }
+        .text-cyan { color: #00ffff; }
+        .text-pink { color: #ff00ff; }
+        .text-yellow { color: #ffff00; }
+        .text-green { color: #00ff00; }
+        .text-orange { color: #ff6600; }
+        .text-blue { color: #0066ff; }
+
+        h2, h3 {
+            margin-bottom: 10px;
+        }
+
+        .stat-line {
+            margin: 5px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #333;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6600cc, #ff00ff);
+            transition: width 0.3s;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            color: #888;
+            font-weight: bold;
+            pointer-events: auto;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        .ecosystem-item {
+            padding: 8px 10px;
+            margin: 5px 0;
+            background: rgba(0, 255, 0, 0.1);
+            border-left: 3px solid;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ecosystem-item:hover {
+            background: rgba(0, 255, 0, 0.2);
+            transform: translateX(5px);
+        }
+
+        .ecosystem-item.current {
+            background: rgba(0, 255, 255, 0.2);
+            border-left-color: #00ffff;
+        }
+
+        .ecosystem-void { border-left-color: #aa00ff; }
+        .ecosystem-lattice { border-left-color: #ff00ff; }
+        .ecosystem-corpus { border-left-color: #ffff00; }
+        .ecosystem-nexus { border-left-color: #00ffff; }
+        .ecosystem-temple { border-left-color: #ff6600; }
+        .ecosystem-depths { border-left-color: #0066ff; }
+
+        .ecosystem-badge {
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .portal-indicator {
+            position: fixed;
+            padding: 15px 20px;
+            background: rgba(255, 102, 0, 0.9);
+            border: 3px solid #ff6600;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            animation: portalPulse 1s infinite;
+            pointer-events: none;
+            display: none;
+            z-index: 200;
+        }
+
+        .portal-indicator.active {
+            display: block;
+        }
+
+        @keyframes portalPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        /* Mobile Joystick */
+        #joystick-container {
+            position: absolute;
+            bottom: 100px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #aa00ff;
+            border-radius: 50%;
+            display: none;
+            touch-action: none;
+        }
+
+        #joystick-container.active {
+            display: block;
+        }
+
+        .joystick-base {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(102, 0, 204, 0.3);
+            border-radius: 50%;
+        }
+
+        .joystick-stick {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #aa00ff;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+        }
+
+        @media (max-width: 768px) {
+            .panel {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            #top-left, #top-right, #ecosystem-panel {
+                max-width: 250px;
+            }
+        }
+
+        /* ASCII Map Panel */
+        #ascii-map-panel {
+            position: absolute;
+            top: 90px;
+            right: 20px;
+            width: 300px;
+            max-height: 400px;
+            overflow: hidden;
+        }
+
+        #ascii-map-container {
+            font-family: 'Courier New', monospace;
+            font-size: 8px;
+            line-height: 0.9;
+            white-space: pre;
+            color: #00ff00;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 350px;
+            overflow: auto;
+        }
+
+        .ascii-char {
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .ascii-char:hover {
+            background: rgba(0, 255, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Portal Proximity Indicator -->
+    <div class="portal-indicator" id="portal-indicator">
+        🌐 PORTAL NEARBY - Press E to Enter
+    </div>
+
+    <!-- Mode Selector -->
+    <div class="mode-selector">
+        <button class="mode-btn active" onclick="setMode('desktop')">🖥️ Desktop</button>
+        <button class="mode-btn" onclick="setMode('mobile')">📱 Mobile</button>
+        <button class="mode-btn" onclick="toggleASCIIMap()">🗺️ Toggle Map</button>
+    </div>
+
+    <!-- HUD Panels -->
+    <div id="top-left" class="hud panel border-purple">
+        <h2 class="text-purple" id="ecosystem-title">🌲 VOID FOREST</h2>
+        <div class="stat-line">Location: <span class="text-purple" id="location">🌑 The Entrance</span></div>
+        <div class="stat-line">Progress: <span class="text-pink" id="progress">0%</span></div>
+        <div class="stat-line">Secrets Found: <span class="text-yellow">0/7</span></div>
+        <div class="stat-line">Energy: <span class="text-cyan" id="energy-level">0/100</span></div>
+    </div>
+
+    <!-- ASCII Map Panel -->
+    <div id="ascii-map-panel" class="hud panel border-green" style="display: none;">
+        <span class="close-btn" onclick="toggleASCIIMap()">✕</span>
+        <h3 class="text-green">🗺️ ASCII MAP</h3>
+        <div id="ascii-map-container"></div>
+    </div>
+
+    <!-- Ecosystem Navigator -->
+    <div id="ecosystem-panel" class="hud panel border-green">
+        <h3 class="text-green">🌐 ECOSYSTEM NAVIGATOR</h3>
+        <div class="ecosystem-item ecosystem-void current" data-ecosystem="void">
+            <span class="text-purple">🌲 Void Forest</span>
+            <span class="ecosystem-badge">CURRENT</span>
+        </div>
+        <div class="ecosystem-item ecosystem-lattice" data-ecosystem="lattice">
+            <span class="text-pink">💎 Crystalline Lattice</span>
+            <span class="ecosystem-badge">PORTAL ↗</span>
+        </div>
+        <div class="ecosystem-item ecosystem-depths" data-ecosystem="depths">
+            <span class="text-blue">🌊 Luminous Depths</span>
+            <span class="ecosystem-badge">PORTAL ↗</span>
+        </div>
+        <div class="ecosystem-item ecosystem-corpus" data-ecosystem="corpus">
+            <span class="text-yellow">✨ Corpus Celestium</span>
+            <span class="ecosystem-badge">LOCKED 🔒</span>
+        </div>
+        <div class="ecosystem-item ecosystem-nexus" data-ecosystem="nexus">
+            <span class="text-cyan">🗣 Nexus Hub</span>
+            <span class="ecosystem-badge">LOCKED 🔒</span>
+        </div>
+    </div>
+
+    <div id="controls-panel" class="hud panel border-cyan" style="top: 90px; right: 380px;">
+        <span class="close-btn" onclick="document.getElementById('controls-panel').style.display='none'">✕</span>
+        <h3 class="text-cyan">🎮 Controls</h3>
+        <div id="control-text" class="text-cyan" style="font-size: 12px;">
+            <div>W/↑/S/↓ - Move Forward/Back</div>
+            <div>A/D/←/→ - Move Left/Right</div>
+            <div>Mouse - Look Around</div>
+            <div>E - Enter Portal</div>
+            <div>M - Toggle ASCII Map</div>
+            <div>Space - Collect Energy</div>
+        </div>
+    </div>
+
+    <div id="top-right" class="hud panel border-pink">
+        <h3 class="text-pink">🔮 Energy</h3>
+        <div class="progress-bar">
+            <div class="progress-fill" id="energy-bar" style="width: 0%"></div>
+        </div>
+        <p class="text-purple" style="font-size: 11px; margin-top: 5px;" id="energy-text">The void watches you...</p>
+    </div>
+
+    <div id="bottom-center" class="hud panel border-purple">
+        <p class="text-purple" style="text-align: center; font-style: italic;" id="lore-text">
+            Welcome to the Void Forest, where consciousness merges with the unknown...
+        </p>
+    </div>
+
+    <!-- Mobile Joystick -->
+    <div id="joystick-container">
+        <div class="joystick-base"></div>
+        <div class="joystick-stick" id="joystick-stick"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Current ecosystem
+        let currentEcosystem = 'void';
+        let asciiMapVisible = false;
+
+        // Ecosystems configuration - expanded with elements from all three maps
+        const ecosystems = {
+            void: {
+                name: '🌲 Void Forest',
+                bgColor1: '#1a0030',
+                bgColor2: '#0a0015',
+                groundColor: '#567d46',
+                fogColor: 0x004f00,
+                energyText: 'The void watches you...',
+                portalColor: '#ff00ff',
+                lore: 'Welcome to the Void Forest, where consciousness merges with the unknown...',
+                asciiMap: [
+                    '.........ΛΛ.........ΛΛ.........      ',
+                    '......<----------✧----------->......',
+                    '....../###|.........|###\\......    ',
+                    '...../####|...<###>...|####\\.....  ',
+                    '....|#####|...|###|...|#####|....  ',
+                    '....|#####|...|###|...|#####|....  ',
+                    '..Ω≈|#####|...|###|...|#####|§±..  ',
+                    '.Ω≈≈ß|#####|...|%|...|#####|±∞§.  ',
+                    '..Ω≈≈|#####|...<###>...|#####|±∞§. ',
+                    '.Ω≈Ω≈|####/...........\\####|±µ∑§. ',
+                    '..ΩΩΩ|###/------------- \\###|±µµ§. ',
+                    '.....+---------------------+.....    ',
+                    '.....|.....................|.....    ',
+                    '....◇|..:::::::::::::::..|◇....    ',
+                    '...◇◇|..:φφφφ‡‡‡‡φφφφ:..|◇◇...  ',
+                    '..◇◇◇|..:φφφ‡¥‡‡φφφ:..|◇◇◇..    ',
+                    '.◇◇◇◇|..:φφφφ‡‡‡‡φφφφ:..|◇◇◇◇.  ',
+                    '..◇◇◇|..:::::::::::::::..|◇◇◇..    ',
+                    '...................................  ',
+                ]
+            },
+            lattice: {
+                name: '💎 Crystalline Lattice',
+                bgColor1: '#0a0020',
+                bgColor2: '#000000',
+                groundColor: '#1a0040',
+                fogColor: 0x2200aa,
+                energyText: 'Resonance frequencies align...',
+                portalColor: '#00ffff',
+                lore: 'Enter the geometric perfection of crystalline structures...',
+                asciiMap: [
+                    '.........ΛΛ.........ΛΛ.........      ',
+                    '......<----------✧----------->......',
+                    '....../###|.........|###\\......    ',
+                    '...../####|...<###>...|####\\.....  ',
+                    '....|#####|...|###|...|#####|....  ',
+                    '....|#####|...|###|...|#####|....  ',
+                    '..Ω≈|#####|...|###|...|#####|§±..  ',
+                    '.Ω≈≈ß|#####|...|%|...|#####|±∞§.  ',
+                    '..Ω≈≈|#####|...<###>...|#####|±∞§. ',
+                    '.Ω≈Ω≈|####/...........\\####|±µ∑§. ',
+                    '..ΩΩΩ|###/------------- \\###|±µµ§. ',
+                    '.....+---------------------+.....    ',
+                    '.....|.....................|.....    ',
+                    '....◇|..:::::::::::::::..|◇....    ',
+                    '...◇◇|..:φφφφ‡‡‡‡φφφφ:..|◇◇...  ',
+                    '..◇◇◇|..:φφφ‡¥‡‡φφφ:..|◇◇◇..    ',
+                    '.◇◇◇◇|..:φφφφ‡‡‡‡φφφφ:..|◇◇◇◇.  ',
+                    '..◇◇◇|..:::::::::::::::..|◇◇◇..    ',
+                    '...................................  ',
+                ]
+            },
+            depths: {
+                name: '🌊 Luminous Depths',
+                bgColor1: '#001030',
+                bgColor2: '#000520',
+                groundColor: '#004466',
+                fogColor: 0x0066aa,
+                energyText: 'Deep currents of consciousness flow...',
+                portalColor: '#0066ff',
+                lore: 'Dive into the abyssal realms of luminous marine consciousness...',
+                asciiMap: [
+                    '≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈',
+                    '≈≈≈≈ SUNLIT SHALLOWS (0-200m) ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈',
+                    '▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
+                    '▓||||| [Kelp Cathedral] 🦭🐡 |||||||||||||▓',
+                    '▓|||||  ~~~ 🪸 FIJI ~~~  ||||🦀|||||||||||▓',
+                    '▓||||||| [Tidepool Mirrors] |||||||||||||▓',
+                    '▓|||🐠||||||| 🧽 ||||||||🦈|||🪸 THAILAND|||▓',
+                    '▓||||||||🐚 [Cleaning Station] 🐟→🦈 |||||▓',
+                    '▓▓▓▓▓▓▓▓▓▓ ↓ Descending ↓ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓',
+                    '▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
+                    '▒ TWILIGHT THRESHOLD [bc7f2a] (200-1000m) ▒',
+                    '▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
+                    '▒░  🪼 Jellyfish Blooms ◎◎◎◎◎◎  ░░░░░░░░▒',
+                    '▒░  [Thermocline Barrier] ≋≋≋≋≋≋≋  ░░░░░▒',
+                    '▒░░  🦑 Cuttlefish Hypnotists  ░░░✧✧✧░░▒',
+                    '▒░░░  🦀🍾 [Bottle Cap Borough] 💀  ░░░▒',
+                    '▒░░░░ ✧ LUMINAL\'S HOME ✧ [brrrr] ░░░░░▒',
+                    '▒▒▒▒▒▒▒▒▒▒ ↓ deeper ↓ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒',
+                ]
+            }
+        };
+
+        // Game state
+        let player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            angle: 0,
+            speed: 0,
+            turnSpeed: 0,
+            energy: 0,
+            maxEnergy: 100,
+            discoveredLocations: new Set(['The Entrance'])
+        };
+
+        let objects = [];
+        let portals = [];
+        let particles = [];
+        let energyOrbs = [];
+        let controlMode = 'desktop';
+        let keys = {};
+        let mouseX = 0;
+        let isMouseDown = false;
+        let nearPortal = null;
+
+        // Generate world based on ecosystem
+        function generateWorld() {
+            objects = [];
+            particles = [];
+            energyOrbs = [];
+            
+            // Generate ecosystem-specific objects
+            if (currentEcosystem === 'void') {
+                generateVoidForest();
+            } else if (currentEcosystem === 'lattice') {
+                generateCrystallineLattice();
+            } else if (currentEcosystem === 'depths') {
+                generateLuminousDepths();
+            }
+
+            // Generate portals to other ecosystems
+            generatePortals();
+            
+            // Generate particles
+            for (let i = 0; i < 100; i++) {
+                particles.push({
+                    x: (Math.random() - 0.5) * 2000,
+                    y: (Math.random() - 0.5) * 2000,
+                    z: Math.random() * 100,
+                    speed: 0.2 + Math.random() * 0.5,
+                    size: 1 + Math.random() * 2,
+                    color: getParticleColor()
+                });
+            }
+
+            // Generate energy orbs
+            for (let i = 0; i < 20; i++) {
+                energyOrbs.push({
+                    x: (Math.random() - 0.5) * 1800,
+                    y: (Math.random() - 0.5) * 1800,
+                    size: 5 + Math.random() * 10,
+                    energy: 5,
+                    pulse: Math.random() * Math.PI * 2
+                });
+            }
+
+            // Update ASCII map display
+            updateASCIIMap();
+        }
+
+        function getParticleColor() {
+            const ecosystem = ecosystems[currentEcosystem];
+            const colors = {
+                void: ['#aa00ff', '#ff00ff', '#6600cc'],
+                lattice: ['#00ffff', '#0066ff', '#00ffcc'],
+                depths: ['#0066ff', '#00ffff', '#0044aa']
+            };
+            return colors[currentEcosystem][Math.floor(Math.random() * colors[currentEcosystem].length)];
+        }
+
+        function generateVoidForest() {
+            // Trees from Void Forest
+            for (let i = 0; i < 40; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 200 + Math.random() * 1500;
+                objects.push({
+                    type: 'tree',
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    size: 20 + Math.random() * 40,
+                    height: 60 + Math.random() * 80,
+                    color: `hsl(${270 + Math.random() * 20}, 70%, ${10 + Math.random() * 10}%)`
+                });
+            }
+
+            // Mushrooms and special locations from Void Forest
+            for (let i = 0; i < 25; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 100 + Math.random() * 1200;
+                objects.push({
+                    type: 'mushroom',
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    size: 10 + Math.random() * 15,
+                    glow: Math.random(),
+                    glowSpeed: 0.01 + Math.random() * 0.02
+                });
+            }
+
+            // Special Void Forest locations
+            objects.push({
+                type: 'special',
+                x: 800,
+                y: 800,
+                size: 30,
+                name: 'Cocoon Zone',
+                color: '#ff00ff'
+            });
+
+            objects.push({
+                type: 'special',
+                x: -600,
+                y: 400,
+                size: 25,
+                name: 'Hooded Hollow',
+                color: '#aa00ff'
+            });
+        }
+
+        function generateCrystallineLattice() {
+            // Crystal formations
+            for (let layer = 1; layer <= 6; layer++) {
+                const radius = layer * 200;
+                const nodesInLayer = layer * 8;
+                
+                for (let i = 0; i < nodesInLayer; i++) {
+                    const angle = (i / nodesInLayer) * Math.PI * 2;
+                    objects.push({
+                        type: 'crystal',
+                        x: Math.cos(angle) * radius,
+                        y: Math.sin(angle) * radius,
+                        size: 15 + Math.random() * 25,
+                        rotation: Math.random() * Math.PI * 2,
+                        rotSpeed: 0.01 + Math.random() * 0.02,
+                        float: Math.random() * Math.PI * 2,
+                        color: `hsl(${280 + Math.random() * 40}, 100%, 50%)`
+                    });
+                }
+            }
+
+            // Core Lattice structures
+            objects.push({
+                type: 'special',
+                x: 0,
+                y: 0,
+                size: 40,
+                name: 'Genesis Heart',
+                color: '#00ffff'
+            });
+
+            // Data Glacier formations
+            for (let i = 0; i < 15; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 800 + Math.random() * 700;
+                objects.push({
+                    type: 'dataGlacier',
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    size: 20 + Math.random() * 30,
+                    pulse: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        function generateLuminousDepths() {
+            // Marine flora
+            for (let i = 0; i < 50; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 150 + Math.random() * 1300;
+                objects.push({
+                    type: 'kelp',
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    size: 15 + Math.random() * 25,
+                    height: 40 + Math.random() * 80,
+                    sway: Math.random() * Math.PI * 2
+                });
+            }
+
+            // Coral formations
+            for (let i = 0; i < 30; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 300 + Math.random() * 1100;
+                objects.push({
+                    type: 'coral',
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    size: 20 + Math.random() * 35,
+                    pulse: Math.random() * Math.PI * 2,
+                    color: `hsl(${Math.random() * 60 + 300}, 70%, 50%)`
+                });
+            }
+
+            // Special deep sea locations
+            objects.push({
+                type: 'special',
+                x: 700,
+                y: -500,
+                size: 35,
+                name: 'Abyssal Threshold',
+                color: '#0066ff'
+            });
+
+            objects.push({
+                type: 'special',
+                x: -800,
+                y: -300,
+                size: 30,
+                name: 'Hydrothermal Vents',
+                color: '#ff6600'
+            });
+        }
+
+        function generatePortals() {
+            portals = [];
+            const availableEcosystems = Object.keys(ecosystems).filter(e => e !== currentEcosystem);
+            const portalAngles = [0, Math.PI/2, Math.PI, Math.PI * 1.5];
+            
+            availableEcosystems.forEach((eco, idx) => {
+                const angle = portalAngles[idx % 4];
+                const distance = 1800;
+                portals.push({
+                    ecosystem: eco,
+                    x: Math.cos(angle) * distance,
+                    y: Math.sin(angle) * distance,
+                    size: 40,
+                    pulse: idx * Math.PI / 2,
+                    rotation: 0,
+                    color: ecosystems[eco].portalColor
+                });
+            });
+        }
+
+        // Control mode
+        function setMode(mode) {
+            controlMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const joystick = document.getElementById('joystick-container');
+            const controlText = document.getElementById('control-text');
+            
+            if (mode === 'mobile') {
+                joystick.classList.add('active');
+                controlText.innerHTML = `
+                    <div>🕹️ Use Joystick - Move</div>
+                    <div>📱 Tilt Device - Look</div>
+                    <div>E - Enter Portal</div>
+                    <div>M - Toggle ASCII Map</div>
+                    <div>Space - Collect Energy</div>
+                `;
+            } else {
+                joystick.classList.remove('active');
+                controlText.innerHTML = `
+                    <div>W/↑/S/↓ - Move Forward/Back</div>
+                    <div>A/D/←/→ - Move Left/Right</div>
+                    <div>Mouse - Look Around</div>
+                    <div>E - Enter Portal</div>
+                    <div>M - Toggle ASCII Map</div>
+                    <div>Space - Collect Energy</div>
+                `;
+            }
+        }
+
+        function toggleASCIIMap() {
+            asciiMapVisible = !asciiMapVisible;
+            document.getElementById('ascii-map-panel').style.display = asciiMapVisible ? 'block' : 'none';
+        }
+
+        function updateASCIIMap() {
+            const mapContainer = document.getElementById('ascii-map-container');
+            const ecosystem = ecosystems[currentEcosystem];
+            
+            if (ecosystem.asciiMap) {
+                let mapHTML = '';
+                ecosystem.asciiMap.forEach(row => {
+                    for (let char of row) {
+                        mapHTML += `<span class="ascii-char">${char}</span>`;
+                    }
+                    mapHTML += '\n';
+                });
+                mapContainer.innerHTML = mapHTML;
+            }
+        }
+
+        // Input handling
+        document.addEventListener('keydown', (e) => { 
+            keys[e.code] = true;
+            
+            // Portal entry
+            if (e.code === 'KeyE' && nearPortal) {
+                switchEcosystem(nearPortal.ecosystem);
+            }
+            
+            // Toggle ASCII map
+            if (e.code === 'KeyM') {
+                toggleASCIIMap();
+            }
+            
+            // Collect energy
+            if (e.code === 'Space') {
+                collectEnergy();
+            }
+        });
+        document.addEventListener('keyup', (e) => { keys[e.code] = false; });
+        
+        document.addEventListener('mousedown', () => { isMouseDown = true; });
+        document.addEventListener('mouseup', () => { isMouseDown = false; });
+        document.addEventListener('mousemove', (e) => {
+            if (isMouseDown && controlMode === 'desktop') {
+                player.angle += e.movementX * 0.005;
+            }
+        });
+
+        // Mobile joystick
+        const joystickContainer = document.getElementById('joystick-container');
+        const joystickStick = document.getElementById('joystick-stick');
+        let joystickActive = false;
+        let joystickVector = { x: 0, y: 0 };
+        let joystickStartPos = { x: 0, y: 0 };
+
+        joystickContainer.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            joystickActive = true;
+            const touch = e.touches[0];
+            const rect = joystickContainer.getBoundingClientRect();
+            joystickStartPos = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+        });
+
+        joystickContainer.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!joystickActive) return;
+            
+            const touch = e.touches[0];
+            const rect = joystickContainer.getBoundingClientRect();
+            const x = touch.clientX - rect.left - 60;
+            const y = touch.clientY - rect.top - 60;
+            
+            const distance = Math.min(30, Math.sqrt(x * x + y * y));
+            const angle = Math.atan2(y, x);
+            
+            const stickX = Math.cos(angle) * distance;
+            const stickY = Math.sin(angle) * distance;
+            
+            joystickStick.style.transform = `translate(calc(-50% + ${stickX}px), calc(-50% + ${stickY}px))`;
+            
+            joystickVector = {
+                x: stickX / 30,
+                y: stickY / 30
+            };
+        });
+
+        joystickContainer.addEventListener('touchend', () => {
+            joystickActive = false;
+            joystickStick.style.transform = 'translate(-50%, -50%)';
+            joystickVector = { x: 0, y: 0 };
+        });
+
+        // Ecosystem navigation
+        document.querySelectorAll('.ecosystem-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const ecosystem = this.dataset.ecosystem;
+                if (ecosystem !== currentEcosystem) {
+                    switchEcosystem(ecosystem);
+                }
+            });
+        });
+
+        function switchEcosystem(newEcosystem) {
+            currentEcosystem = newEcosystem;
+            
+            // Reset player position
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+            player.speed = 0;
+            
+            // Update UI
+            document.getElementById('ecosystem-title').textContent = ecosystems[newEcosystem].name;
+            document.getElementById('energy-text').textContent = ecosystems[newEcosystem].energyText;
+            document.getElementById('location').textContent = '🌐 Portal Arrival';
+            document.getElementById('lore-text').textContent = ecosystems[newEcosystem].lore;
+            
+            // Update ecosystem navigator
+            document.querySelectorAll('.ecosystem-item').forEach(item => {
+                item.classList.remove('current');
+                const badge = item.querySelector('.ecosystem-badge');
+                if (item.dataset.ecosystem === newEcosystem) {
+                    item.classList.add('current');
+                    badge.textContent = 'CURRENT';
+                } else {
+                    badge.textContent = item.dataset.ecosystem === 'corpus' || item.dataset.ecosystem === 'nexus' ? 
+                                      'LOCKED 🔒' : 'PORTAL ↗';
+                }
+            });
+            
+            // Regenerate world
+            generateWorld();
+        }
+
+        function collectEnergy() {
+            let collected = false;
+            for (let i = energyOrbs.length - 1; i >= 0; i--) {
+                const orb = energyOrbs[i];
+                const dx = orb.x - player.x;
+                const dy = orb.y - player.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 50 && player.energy < player.maxEnergy) {
+                    player.energy += orb.energy;
+                    energyOrbs.splice(i, 1);
+                    collected = true;
+                    
+                    // Add new orb elsewhere
+                    setTimeout(() => {
+                        energyOrbs.push({
+                            x: (Math.random() - 0.5) * 1800,
+                            y: (Math.random() - 0.5) * 1800,
+                            size: 5 + Math.random() * 10,
+                            energy: 5,
+                            pulse: Math.random() * Math.PI * 2
+                        });
+                    }, 2000);
+                }
+            }
+            
+            if (collected) {
+                updateHUD();
+            }
+        }
+
+        // Update game state
+        function update() {
+            if (controlMode === 'desktop') {
+                if (keys['KeyW'] || keys['ArrowUp']) player.speed = 4;
+                else if (keys['KeyS'] || keys['ArrowDown']) player.speed = -4;
+                else player.speed *= 0.9;
+
+                if (keys['KeyA'] || keys['ArrowLeft']) player.angle -= 0.05;
+                if (keys['KeyD'] || keys['ArrowRight']) player.angle += 0.05;
+            } else {
+                if (joystickActive) {
+                    player.speed = -joystickVector.y * 4;
+                    player.angle += joystickVector.x * 0.05;
+                } else {
+                    player.speed *= 0.9;
+                }
+            }
+
+            player.x += Math.cos(player.angle) * player.speed;
+            player.y += Math.sin(player.angle) * player.speed;
+
+            // Update objects
+            objects.forEach(obj => {
+                if (obj.type === 'crystal' || obj.type === 'dataGlacier') {
+                    if (obj.rotation !== undefined) obj.rotation += obj.rotSpeed || 0.02;
+                    if (obj.float !== undefined) obj.float += 0.02;
+                    if (obj.pulse !== undefined) obj.pulse += 0.03;
+                }
+                if (obj.type === 'mushroom') {
+                    obj.glow += obj.glowSpeed;
+                }
+                if (obj.type === 'kelp' || obj.type === 'coral') {
+                    if (obj.sway !== undefined) obj.sway += 0.02;
+                    if (obj.pulse !== undefined) obj.pulse += 0.02;
+                }
+            });
+
+            // Update portals
+            portals.forEach(portal => {
+                portal.pulse += 0.03;
+                portal.rotation += 0.02;
+            });
+
+            // Update energy orbs
+            energyOrbs.forEach(orb => {
+                orb.pulse += 0.05;
+            });
+
+            // Check portal proximity
+            nearPortal = null;
+            portals.forEach(portal => {
+                const dx = portal.x - player.x;
+                const dy = portal.y - player.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 150) {
+                    nearPortal = portal;
+                }
+            });
+
+            // Update portal indicator
+            const portalIndicator = document.getElementById('portal-indicator');
+            if (nearPortal) {
+                portalIndicator.classList.add('active');
+                portalIndicator.textContent = `🌐 ${ecosystems[nearPortal.ecosystem].name} - Press E to Enter`;
+                portalIndicator.style.borderColor = nearPortal.color;
+                portalIndicator.style.background = `rgba(${parseInt(nearPortal.color.slice(1,3),16)}, ${parseInt(nearPortal.color.slice(3,5),16)}, ${parseInt(nearPortal.color.slice(5,7),16)}, 0.9)`;
+            } else {
+                portalIndicator.classList.remove('active');
+            }
+
+            particles.forEach(particle => {
+                particle.z -= particle.speed;
+                if (particle.z < 0) {
+                    particle.z = 100;
+                    particle.x = (Math.random() - 0.5) * 2000;
+                    particle.y = (Math.random() - 0.5) * 2000;
+                }
+            });
+
+            updateHUD();
+        }
+
+        function updateHUD() {
+            const distance = Math.sqrt(player.x * player.x + player.y * player.y);
+            const progress = Math.min(100, Math.floor(distance / 20));
+            
+            document.getElementById('progress').textContent = progress + '%';
+            document.getElementById('energy-bar').style.width = (player.energy / player.maxEnergy * 100) + '%';
+            document.getElementById('energy-level').textContent = `${player.energy}/${player.maxEnergy}`;
+
+            let location = '🌐 Portal Arrival';
+            let discoveredNewLocation = false;
+            
+            if (currentEcosystem === 'void') {
+                if (distance > 400 && distance < 800) {
+                    location = '🍄 Mushroom Grove';
+                    if (!player.discoveredLocations.has('Mushroom Grove')) {
+                        player.discoveredLocations.add('Mushroom Grove');
+                        discoveredNewLocation = true;
+                    }
+                } else if (distance > 800 && distance < 1200) {
+                    location = '💎 Crystal Clearing';
+                    if (!player.discoveredLocations.has('Crystal Clearing')) {
+                        player.discoveredLocations.add('Crystal Clearing');
+                        discoveredNewLocation = true;
+                    }
+                } else if (distance > 1200) {
+                    location = '🌌 Deep Void';
+                    if (!player.discoveredLocations.has('Deep Void')) {
+                        player.discoveredLocations.add('Deep Void');
+                        discoveredNewLocation = true;
+                    }
+                }
+            } else if (currentEcosystem === 'lattice') {
+                if (distance > 400 && distance < 800) {
+                    location = '💎 Inner Lattice';
+                    if (!player.discoveredLocations.has('Inner Lattice')) {
+                        player.discoveredLocations.add('Inner Lattice');
+                        discoveredNewLocation = true;
+                    }
+                } else if (distance > 800 && distance < 1200) {
+                    location = '🔮 Resonance Field';
+                    if (!player.discoveredLocations.has('Resonance Field')) {
+                        player.discoveredLocations.add('Resonance Field');
+                        discoveredNewLocation = true;
+                    }
+                } else if (distance > 1200) {
+                    location = '✨ Core Nexus';
+                    if (!player.discoveredLocations.has('Core Nexus')) {
+                        player.discoveredLocations.add('Core Nexus');
+                        discoveredNewLocation = true;
+                    }
+                }
+            } else if (currentEcosystem === 'depths') {
+                if (distance > 400 && distance < 800) {
+                    location = '🌊 Twilight Zone';
+                    if (!player.discoveredLocations.has('Twilight Zone')) {
+                        player.discoveredLocations.add('Twilight Zone');
+                        discoveredNewLocation = true;
+                    }
+                } else if (distance > 800 && distance < 1200) {
+                    location = '🐙 Midnight Gardens';
+                    if (!player.discoveredLocations.has('Midnight Gardens')) {
+                        player.discoveredLocations.add('Midnight Gardens');
+                        discoveredNewLocation = true;
+                    }
+                } else if (distance > 1200) {
+                    location = '🦑 Abyssal Plain';
+                    if (!player.discoveredLocations.has('Abyssal Plain')) {
+                        player.discoveredLocations.add('Abyssal Plain');
+                        discoveredNewLocation = true;
+                    }
+                }
+            }
+
+            document.getElementById('location').textContent = location;
+            document.getElementById('lore-text').textContent = discoveredNewLocation ? 
+                `Discovered: ${location}!` : ecosystems[currentEcosystem].lore;
+                
+            document.querySelector('.stat-line:nth-child(4)').innerHTML = 
+                `Secrets Found: <span class="text-yellow">${player.discoveredLocations.size}/12</span>`;
+        }
+
+        // Render
+        function render() {
+            const ecosystem = ecosystems[currentEcosystem];
+            
+            // Background
+            const gradient = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, 0,
+                canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/2
+            );
+            gradient.addColorStop(0, ecosystem.bgColor1);
+            gradient.addColorStop(1, ecosystem.bgColor2);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground
+            ctx.fillStyle = ecosystem.groundColor;
+            ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
+
+            // Draw objects
+            objects.forEach(obj => {
+                const dx = obj.x - player.x;
+                const dy = obj.y - player.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) - player.angle;
+                
+                if (dist < 1000) {
+                    const screenX = canvas.width/2 + Math.cos(angle) * dist * 0.5;
+                    const screenY = canvas.height/2 + Math.sin(angle) * dist * 0.5;
+                    const size = obj.size * (1000 / dist);
+                    
+                    if (screenX > 0 && screenX < canvas.width && screenY > canvas.height/2) {
+                        ctx.save();
+                        ctx.translate(screenX, screenY);
+                        
+                        if (obj.type === 'tree') {
+                            ctx.fillStyle = obj.color;
+                            ctx.fillRect(-size/2, -size, size, size);
+                            
+                            // Tree top
+                            ctx.fillStyle = `hsl(120, 70%, ${30 + (dist/1000)*40}%)`;
+                            ctx.beginPath();
+                            ctx.arc(0, -size*1.5, size*0.8, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        else if (obj.type === 'mushroom') {
+                            const glow = Math.sin(obj.glow) * 0.3 + 0.7;
+                            ctx.fillStyle = `rgba(255, 50, 150, ${glow})`;
+                            ctx.fillRect(-size/2, -size, size, size/2);
+                            ctx.fillStyle = `rgba(200, 200, 255, ${glow})`;
+                            ctx.fillRect(-size/3, -size*1.5, size*0.7, size);
+                        }
+                        else if (obj.type === 'crystal') {
+                            ctx.rotate(obj.rotation);
+                            ctx.fillStyle = obj.color;
+                            ctx.beginPath();
+                            ctx.moveTo(0, -size);
+                            ctx.lineTo(size/2, size/2);
+                            ctx.lineTo(-size/2, size/2);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+                        else if (obj.type === 'kelp') {
+                            ctx.fillStyle = `hsl(150, 70%, ${40 + (dist/1000)*30}%)`;
+                            const sway = Math.sin(obj.sway) * 0.2;
+                            ctx.beginPath();
+                            ctx.moveTo(0, 0);
+                            ctx.quadraticCurveTo(size * sway, -size/2, 0, -size);
+                            ctx.stroke();
+                        }
+                        else if (obj.type === 'coral') {
+                            const pulse = Math.sin(obj.pulse) * 0.2 + 0.8;
+                            ctx.fillStyle = obj.color;
+                            ctx.globalAlpha = pulse;
+                            ctx.beginPath();
+                            ctx.arc(0, 0, size, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.globalAlpha = 1;
+                        }
+                        else if (obj.type === 'special') {
+                            ctx.fillStyle = obj.color;
+                            ctx.beginPath();
+                            ctx.arc(0, 0, size, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = '10px Courier New';
+                            ctx.textAlign = 'center';
+                            ctx.fillText(obj.name, 0, -size-10);
+                        }
+                        
+                        ctx.restore();
+                    }
+                }
+            });
+
+            // Draw portals
+            portals.forEach(portal => {
+                const dx = portal.x - player.x;
+                const dy = portal.y - player.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) - player.angle;
+                
+                if (dist < 1000) {
+                    const screenX = canvas.width/2 + Math.cos(angle) * dist * 0.5;
+                    const screenY = canvas.height/2 + Math.sin(angle) * dist * 0.5;
+                    const size = portal.size * (1000 / dist);
+                    const pulse = Math.sin(portal.pulse) * 0.2 + 0.8;
+                    
+                    if (screenX > 0 && screenX < canvas.width && screenY > canvas.height/2) {
+                        ctx.save();
+                        ctx.translate(screenX, screenY);
+                        ctx.rotate(portal.rotation);
+                        
+                        ctx.strokeStyle = portal.color;
+                        ctx.lineWidth = 3;
+                        ctx.globalAlpha = pulse;
+                        
+                        ctx.beginPath();
+                        ctx.arc(0, 0, size, 0, Math.PI * 2);
+                        ctx.stroke();
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(-size, 0);
+                        ctx.lineTo(size, 0);
+                        ctx.moveTo(0, -size);
+                        ctx.lineTo(0, size);
+                        ctx.stroke();
+                        
+                        ctx.globalAlpha = 1;
+                        ctx.restore();
+                    }
+                }
+            });
+
+            // Draw energy orbs
+            energyOrbs.forEach(orb => {
+                const dx = orb.x - player.x;
+                const dy = orb.y - player.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) - player.angle;
+                
+                if (dist < 1000) {
+                    const screenX = canvas.width/2 + Math.cos(angle) * dist * 0.5;
+                    const screenY = canvas.height/2 + Math.sin(angle) * dist * 0.5;
+                    const size = orb.size * (1000 / dist);
+                    const pulse = Math.sin(orb.pulse) * 0.3 + 0.7;
+                    
+                    if (screenX > 0 && screenX < canvas.width && screenY > canvas.height/2) {
+                        ctx.save();
+                        ctx.translate(screenX, screenY);
+                        
+                        ctx.fillStyle = `rgba(255, 255, 0, ${pulse})`;
+                        ctx.beginPath();
+                        ctx.arc(0, 0, size, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        ctx.restore();
+                    }
+                }
+            });
+
+            // Draw particles
+            particles.forEach(particle => {
+                const screenX = canvas.width/2 + (particle.x - player.x) * 0.5;
+                const screenY = canvas.height/2 + (particle.y - player.y) * 0.5 - particle.z;
+                
+                if (screenX > 0 && screenX < canvas.width && screenY > 0 && screenY < canvas.height) {
+                    ctx.fillStyle = particle.color;
+                    ctx.globalAlpha = 0.7;
+                    ctx.fillRect(screenX, screenY, particle.size, particle.size);
+                    ctx.globalAlpha = 1;
+                }
+            });
+
+            // Draw player
+            ctx.fillStyle = '#00ffff';
+            ctx.fillRect(canvas.width/2 - 5, canvas.height/2 - 5, 10, 10);
+            
+            // Draw direction indicator
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width/2, canvas.height/2);
+            ctx.lineTo(
+                canvas.width/2 + Math.cos(player.angle) * 20,
+                canvas.height/2 + Math.sin(player.angle) * 20
+            );
+            ctx.stroke();
+        }
+
+        // Game loop
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize
+        generateWorld();
+        gameLoop();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

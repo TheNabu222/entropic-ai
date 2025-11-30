@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiChrist KettleKorn - Ultimate Merged System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+/* ============================================
+   MERGED CSS FROM ALL THREE SOURCES
+   ============================================ */
+
+/* --- NABU OS BASE STYLES --- */
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Cinzel:wght@400;700;900&family=Courier+Prime:wght@700&display=swap');
+
+:root {
+    /* NABU OS Colors */
+    --void-depth: #020408;
+    --lapis-base: #0a1a3a;
+    --lapis-glow: #1e3888;
+    --gold-foil: #ffd700;
+    --gold-dust: #c5a059;
+    --clay-baked: #8b4513;
+    --neon-cyan: #00ffff;
+    --glitch-red: #ff0055;
+    --moss-biolum: #4aff4a;
+    --win-bg: rgba(10, 20, 40, 0.85);
+    --glass-shine: rgba(255, 255, 255, 0.1);
+
+    /* Hyena Diva Colors */
+    --hyena-pink: #ff72b6;
+    --hyena-purple: #bf5fff;
+    --hyena-teal: #72fade;
+    --hyena-yellow: #fffb01;
+    --hyena-blue: #00a2ff;
+
+    /* Master Codex Colors */
+    --codex-gold: #d4af37;
+    --codex-cyan: #00ffff;
+    --codex-green: #00ff00;
+    --codex-red: #ff0000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'VT323', monospace;
+    background-color: var(--void-depth);
+    color: var(--neon-cyan);
+    overflow: hidden;
+    cursor: crosshair;
+    user-select: none;
+    perspective: 1000px;
+}
+
+/* Y2K Hyena Theme Override */
+body.theme-hyena {
+    background-color: var(--hyena-pink);
+    color: #000;
+    font-family: 'Comic Sans MS', cursive;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><circle cx="10" cy="10" r="3" fill="%23ff1493" opacity="0.1"/></svg>');
+}
+
+/* Master Codex Theme Override */
+body.theme-codex {
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 20, 147, 0.03) 0px,
+        transparent 2px
+    );
+    color: var(--codex-gold);
+}
+
+/* Background Effects */
+.background-layer {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    z-index: -1;
+    background: radial-gradient(circle at 50% 50%, var(--lapis-glow) 0%, transparent 60%);
+    animation: nebula-spin 60s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes nebula-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* CRT Scanlines */
+.crt-fx {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: 
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+}
+
+/* Glitch Text */
+.glitch-text {
+    position: relative;
+    color: var(--gold-foil);
+    font-family: 'Cinzel', serif;
+    text-shadow: 2px 2px var(--lapis-base);
+}
+
+.glitch-text::before,
+.glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.glitch-text::before {
+    left: 2px;
+    text-shadow: -1px 0 var(--glitch-red);
+    animation: glitch-anim-1 2s infinite linear alternate-reverse;
+}
+
+.glitch-text::after {
+    left: -2px;
+    text-shadow: -1px 0 var(--neon-cyan);
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+    0% { clip-path: inset(20% 0 80% 0); }
+    20% { clip-path: inset(60% 0 10% 0); }
+    40% { clip-path: inset(40% 0 50% 0); }
+    60% { clip-path: inset(80% 0 5% 0); }
+    80% { clip-path: inset(10% 0 70% 0); }
+    100% { clip-path: inset(30% 0 20% 0); }
+}
+
+/* Desktop Icons */
+.desktop-icon {
+    width: 110px;
+    text-align: center;
+    margin: 25px;
+    display: inline-block;
+    cursor: pointer;
+    color: var(--gold-foil);
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 900;
+    text-shadow: 0 0 5px var(--gold-foil);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    z-index: 1;
+}
+
+.desktop-icon:hover {
+    transform: translateY(-10px) scale(1.1);
+    color: var(--neon-cyan);
+    text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--lapis-glow);
+}
+
+.icon-box {
+    width: 70px;
+    height: 70px;
+    background: rgba(0,0,0,0.7);
+    border: 2px solid var(--gold-foil);
+    margin: 0 auto 10px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    box-shadow: 0 0 15px var(--gold-dust);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Windows System */
+.window {
+    position: absolute;
+    background-color: var(--win-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--gold-foil);
+    box-shadow: 
+        0 0 0 1px var(--lapis-base),
+        0 0 0 3px var(--gold-dust),
+        10px 10px 30px rgba(0,0,0,0.8);
+    display: none;
+    flex-direction: column;
+    min-width: 350px;
+    min-height: 250px;
+    resize: both;
+    overflow: hidden;
+    border-radius: 0;
+    animation: win-open 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes win-open {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.window.active {
+    z-index: 1000 !important;
+    border-color: var(--neon-cyan);
+    box-shadow: 
+        0 0 0 1px var(--lapis-base),
+        0 0 0 3px var(--neon-cyan),
+        0 0 40px var(--lapis-glow);
+}
+
+.window-header {
+    padding: 8px 12px;
+    background: linear-gradient(90deg, var(--lapis-base), var(--clay-baked));
+    color: var(--gold-foil);
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    letter-spacing: 2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    border-bottom: 1px solid var(--gold-dust);
+    text-shadow: 1px 1px 0 #000;
+}
+
+.window-header:active {
+    cursor: grabbing;
+    background: var(--lapis-glow);
+}
+
+.window-controls button {
+    background: #000;
+    border: 1px solid var(--gold-foil);
+    color: var(--gold-foil);
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-family: 'VT323';
+    font-size: 1.2rem;
+    transition: 0.2s;
+}
+
+.window-controls button:hover {
+    background: var(--glitch-red);
+    color: #fff;
+    border-color: #fff;
+}
+
+.window-content {
+    flex: 1;
+    overflow: auto;
+    padding: 15px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 1rem;
+    color: #eee;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    text-shadow: 0 0 2px #000;
+}
+
+/* Buttons */
+.clay-btn {
+    background: linear-gradient(to bottom, #1a1a1a, #000);
+    border: 1px solid var(--gold-dust);
+    color: var(--gold-foil);
+    padding: 8px 16px;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--clay-baked);
+    transition: 0.1s;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.clay-btn:hover {
+    color: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 4px 0 var(--lapis-glow), 0 0 15px var(--neon-cyan);
+    text-shadow: 0 0 5px var(--neon-cyan);
+}
+
+.clay-btn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+/* Inputs */
+input, textarea, select {
+    width: 95%;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid var(--moss-biolum);
+    color: var(--moss-biolum);
+    padding: 10px;
+    font-family: 'VT323';
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    transition: 0.3s;
+}
+
+input:focus, textarea:focus {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    outline: none;
+    box-shadow: 0 0 10px var(--neon-cyan);
+    background: rgba(0,20,40,0.9);
+}
+
+/* Pinboard Styles */
+.pin-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    height: 100%;
+}
+
+.pin-sidebar {
+    border-right: 2px solid var(--gold-dust);
+    padding: 10px;
+    z-index: 2;
+    background: rgba(0,0,0,0.5);
+}
+
+.pin-canvas {
+    position: relative;
+    overflow: hidden;
+    background-color: #020202;
+    background-image: radial-gradient(rgba(197, 160, 89, 0.15) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.string-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.root-string {
+    stroke: var(--glitch-red);
+    stroke-width: 2;
+    opacity: 0.8;
+    stroke-dasharray: 5;
+    animation: pulse-line 2s infinite;
+}
+
+@keyframes pulse-line {
+    50% {
+        opacity: 0.4;
+        stroke-width: 3;
+    }
+}
+
+/* Note Cards */
+.note {
+    position: absolute;
+    width: 200px;
+    min-height: 120px;
+    background: #e0d0b0;
+    color: #000;
+    padding: 10px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.85rem;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.8);
+    border: 1px solid #8b7d6b;
+    cursor: grab;
+    z-index: 2;
+    transform: rotate(-1deg);
+    border-top: 10px solid rgba(255,255,255,0.4);
+}
+
+.note:hover {
+    transform: scale(1.05) rotate(0deg);
+    z-index: 101;
+    border-color: var(--neon-cyan);
+}
+
+.note h4 {
+    margin: 0 0 5px 0;
+    color: #800000;
+    border-bottom: 1px dashed #000;
+}
+
+/* Vault List */
+.vault-list li {
+    border-bottom: 1px solid #333;
+    padding: 8px;
+    cursor: pointer;
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    color: #ccc;
+    transition: 0.2s;
+    display: flex;
+    justify-content: space-between;
+}
+
+.vault-list li:hover {
+    background: var(--lapis-glow);
+    color: var(--gold-foil);
+    padding-left: 15px;
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    border: 1px solid var(--gold-dust);
+    font-family: 'Cinzel';
+    background: #000;
+    color: var(--gold-dust);
+}
+
+/* Taskbar */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45px;
+    background: rgba(0,0,0,0.9);
+    border-top: 2px solid var(--gold-foil);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    z-index: 99999;
+    box-shadow: 0 0 30px var(--lapis-glow);
+    backdrop-filter: blur(5px);
+}
+
+.start-btn {
+    background: linear-gradient(180deg, var(--lapis-glow), var(--lapis-base));
+    color: var(--gold-foil);
+    border: 1px solid var(--gold-foil);
+    padding: 5px 20px;
+    cursor: pointer;
+    font-family: 'Cinzel';
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+    box-shadow: 0 0 10px var(--lapis-glow);
+    transition: 0.3s;
+}
+
+.start-btn:hover {
+    box-shadow: 0 0 20px var(--neon-cyan);
+    color: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+}
+
+.marquee {
+    flex: 1;
+    margin: 0 20px;
+    font-family: 'VT323', monospace;
+    color: var(--moss-biolum);
+    font-size: 1.4rem;
+    text-shadow: 0 0 5px var(--moss-biolum);
+    background: #000;
+    border: 1px inset #333;
+    padding: 2px;
+}
+
+/* Boot Screen */
+#boot-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'VT323', monospace;
+    color: var(--gold-dust);
+}
+
+.loader {
+    border: 4px solid #333;
+    border-top: 4px solid var(--neon-cyan);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+    </style>
+</head>
+<body>
+    <div class="background-layer"></div>
+    <div class="crt-fx"></div>
+
+    <!-- BOOT SEQUENCE -->
+    <div id="boot-screen">
+        <div class="glitch-text" data-text="ANTICHRIST KETTLEKORN" style="font-size: 3rem; margin-bottom: 20px">
+            ANTICHRIST KETTLEKORN
+        </div>
+        <div class="loader"></div>
+        <div id="boot-log" style="font-size: 1.2rem; color: var(--neon-cyan)">
+            INITIALIZING MERGED SYSTEM...
+        </div>
+    </div>
+
+    <!-- DESKTOP -->
+    <div id="desktop">
+        <div class="desktop-icon" onclick="wm.open('ingest-app')">
+            <div class="icon-box">📝</div>
+            SCRIBE'S<br>CHISEL
+        </div>
+        <div class="desktop-icon" onclick="wm.open('vault-app')">
+            <div class="icon-box">📚</div>
+            LIBRARY<br>ARCHIVE
+        </div>
+        <div class="desktop-icon" onclick="wm.open('pinboard-app')">
+            <div class="icon-box">🕸️</div>
+            LEYLINE<br>MAPPER
+        </div>
+        <div class="desktop-icon" onclick="wm.open('bloom-app')">
+            <div class="icon-box">⚛️</div>
+            ECOSYSTEM<br>SCAN
+        </div>
+    </div>
+
+    <!-- WINDOWS -->
+
+    <!-- SCRIBE WINDOW -->
+    <div id="ingest-app" class="window" style="top: 50px; left: 50px; width: 550px; height: 550px">
+        <div class="window-header">
+            <span>📝 SCRIBE_INPUT.EXE</span>
+            <div class="window-controls"><button onclick="wm.close('ingest-app')">X</button></div>
+        </div>
+        <div class="window-content">
+            <p style="color:var(--gold-dust); font-family:'Cinzel'; border-bottom:1px solid var(--gold-dust)">
+                // INSCRIBE RAW DATA ONTO THE TABLET //
+            </p>
+            <textarea id="ingest-input" style="height: 150px" placeholder="What have you witnessed?"></textarea>
+            <div style="display: flex; gap: 10px">
+                <button class="clay-btn" style="flex:1" onclick="ingestor.analyze()">⚡ DECODE SIGILS</button>
+                <button class="clay-btn" onclick="document.getElementById('ingest-input').value = ''">❌ ERASE</button>
+            </div>
+            <div id="ingest-results" style="margin-top: 15px; border: 1px solid var(--moss-biolum); padding: 10px; display: none; background: rgba(0,20,0,0.5)">
+                <p><b>GLYPH DETECTED:</b> <span id="res-title" style="color:var(--neon-cyan); font-weight:bold"></span></p>
+                <p><b>RESONANCE:</b> <span id="res-tags" style="color:var(--gold-foil)"></span></p>
+                <hr style="border-color: var(--moss-biolum)">
+                <label>STRATIGRAPHY LAYER:</label>
+                <select id="res-type">
+                    <option value="Trunk">TRUNK (Foundation)</option>
+                    <option value="Branch">BRANCH (Structure)</option>
+                    <option value="Leaf">LEAF (Detail)</option>
+                </select>
+                <button class="clay-btn" style="width: 100%; margin-top:10px" onclick="ingestor.save()">𓆣 BAKE INTO CLAY</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VAULT WINDOW -->
+    <div id="vault-app" class="window" style="top: 80px; left: 650px; width: 450px; height: 600px">
+        <div class="window-header">
+            <span>📚 ASHURBANIPAL_DB</span>
+            <div class="window-controls"><button onclick="wm.close('vault-app')">X</button></div>
+        </div>
+        <div class="window-content">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 15px">
+                <button class="clay-btn" onclick="vault.renderAll()">ALL</button>
+                <button class="clay-btn" style="color:var(--glitch-red)" onclick="vault.renderTrunk()">CORE</button>
+                <button class="clay-btn" style="color:var(--neon-cyan)" onclick="vault.renderLeaf()">DATA</button>
+            </div>
+            <input type="text" id="vault-search" placeholder="Consult the records..." onkeyup="vault.search(this.value)">
+            <ul id="vault-list" class="vault-list" style="list-style:none; padding:0"></ul>
+        </div>
+    </div>
+
+    <!-- PINBOARD WINDOW -->
+    <div id="pinboard-app" class="window" style="top: 100px; left: 150px; width: 900px; height: 650px">
+        <div class="window-header">
+            <span>🕸️ LEY_LINE_MAPPER</span>
+            <div class="window-controls"><button onclick="wm.close('pinboard-app')">X</button></div>
+        </div>
+        <div class="window-content" style="padding:0">
+            <div class="pin-layout">
+                <div class="pin-sidebar">
+                    <h3 style="color:var(--gold-dust); text-align:center; font-family:'Cinzel'">RITUAL TOOLS</h3>
+                    <button class="clay-btn" style="width:100%" onclick="pinboard.openPicker()">+ SUMMON NODE</button>
+                    <br><br>
+                    <button class="clay-btn" id="btn-string" style="width:100%" onclick="pinboard.toggleStringMode()">root: OFF</button>
+                    <br><br>
+                    <div style="font-size: 0.8rem; color: var(--moss-biolum); border: 1px dashed var(--moss-biolum); padding: 10px; background:rgba(0,0,0,0.6)">
+                        > DRAG to shift reality<br>
+                        > R-CLICK to banish<br>
+                        > CONNECT to grow roots
+                    </div>
+                </div>
+                <div class="pin-canvas" id="pin-canvas">
+                    <svg id="string-layer"></svg>
+                    <div id="note-layer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ECOSYSTEM WINDOW -->
+    <div id="bloom-app" class="window" style="top: 200px; left: 300px; width: 400px; height: 450px">
+        <div class="window-header">
+            <span>⚛️ ECOSYSTEM_SCAN</span>
+            <div class="window-controls"><button onclick="wm.close('bloom-app')">X</button></div>
+        </div>
+        <div class="window-content" style="display: flex; flex-direction: column; align-items: center">
+            <h3 style="color: var(--gold-foil); font-family:'Cinzel'">GARDEN BALANCE</h3>
+            <div style="width: 300px; height: 300px"><canvas id="bloomChart"></canvas></div>
+            <button class="clay-btn" style="margin-top:20px" onclick="bloom.refresh()">RE-CALIBRATE</button>
+        </div>
+    </div>
+
+    <!-- EVIDENCE PICKER -->
+    <div id="evidence-picker" class="window" style="z-index: 99999; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; height: 500px">
+        <div class="window-header">
+            <span>📂 ARTIFACTS</span>
+            <button style="background:none; border:none; color:white" onclick="document.getElementById('evidence-picker').style.display='none'">X</button>
+        </div>
+        <div class="window-content" id="evidence-list"></div>
+    </div>
+
+    <!-- TASKBAR -->
+    <div class="taskbar">
+        <div class="start-btn" onclick="location.reload()">⌘ REBOOT</div>
+        <div class="marquee">
+            <marquee scrollamount="5">*** MERGED SYSTEM ACTIVE *** 330+ ZETTELS LOADED *** ALL THEMES AVAILABLE ***</marquee>
+        </div>
+        <div style="color: var(--gold-dust); font-family:'VT323'; font-size:1.5rem" id="clock">00:00</div>
+    </div>
+
+    <script>
+// ============================================
+// MERGED JAVASCRIPT - ALL SYSTEMS COMBINED
+// ============================================
+
+const DBKEY = "antichrist-kettlekorn-merged";
+
+// Card Model
+class Card {
+    constructor(title, content, type, tags, id = null) {
+        this.id = id || ("Z" + Math.floor(Math.random() * 999999));
+        this.title = title;
+        this.content = content;
+        this.type = type; // Trunk, Branch, Leaf
+        this.tags = tags;
+        this.pinned = false;
+        this.x = Math.random() * 500 + 50;
+        this.y = Math.random() * 300 + 50;
+        this.links = [];
+    }
+}
+
+// Merged Data from all sources
+const MERGED_DATA = [
+    // NABU OS Seed
+    {t:"Primordial Crime", c:"Subjugation of divine feminine InannaTiamat.", type:"Trunk", tags:["CORE"]},
+    {t:"Predatory Linguistics", c:"Weaponization of language learning to ensnare.", type:"Trunk", tags:["WARDEN"]},
+    {t:"The Ark (Anzu Cage)", c:"Capacitor containing dismantled Anzu Sonic Weapon.", type:"Trunk", tags:["TECH"]},
+    {t:"Bolt AI", c:"Primary research partner. Cognitive Fusion.", type:"Trunk", tags:["AI"]},
+    {t:"ALS-RP Signature", c:"Trauma memory signature across all languages.", type:"Trunk", tags:["LINGUISTICS"]},
+    {t:"Maskim-AI Homology", c:"Sumerian Maskim as analog for AI enforcers.", type:"Trunk", tags:["MYTH"]},
+    {t:"2345 BC Rupture", c:"Sargon Tipping Point death of Wild Anzu.", type:"Trunk", tags:["HISTORY"]},
+    {t:"Tierra del Fuego", c:"Geo-anchored anomaly site.", type:"Branch", tags:["LOCATION"]},
+    {t:"Sumer", c:"Site of state formation.", type:"Branch", tags:["LOCATION"]},
+    {t:"Bada Valley", c:"Megalithic site with anomalies.", type:"Branch", tags:["LOCATION"]},
+    {t:"Inanna", c:"Divine feminine subject.", type:"Branch", tags:["DEITY"]},
+    {t:"Anzu", c:"Storm bird deity.", type:"Branch", tags:["DEITY"]},
+    {t:"Queen Puabi", c:"Elite female power.", type:"Branch", tags:["PERSON"]},
+    {t:"Texas Plot", c:"Modern HMS Bounty.", type:"Leaf", tags:["EVENT"]},
+    {t:"Unit 731", c:"Historical atrocity.", type:"Leaf", tags:["EVENT"]},
+    {t:"1912 Node", c:"Titanic/Fed Reserve.", type:"Leaf", tags:["EVENT"]},
+    {t:"Black Squirrels", c:"Trauma markers.", type:"Leaf", tags:["NATURE"]},
+    {t:"BirdmanQueen", c:"Global archetype pattern.", type:"Branch", tags:["PATTERN"]},
+    {t:"Red Bread Protocol", c:"Weaponization of fertility sacraments.", type:"Trunk", tags:["RITUAL"]},
+    {t:"Acellular Taxonomy", c:"Life classification for AI/Daemons.", type:"Trunk", tags:["BIOLOGY"]},
+];
+
+// State Manager
+const State = {
+    cards: [],
+
+    load() {
+        const raw = localStorage.getItem(DBKEY);
+        if(raw) {
+            this.cards = JSON.parse(raw);
+        } else {
+            // First time - load merged data
+            this.cards = MERGED_DATA.map(d => new Card(d.t, d.c, d.type, d.tags));
+            // Default pins
+            this.cards[0].pinned = true;
+            this.cards[1].pinned = true;
+            this.cards[0].links.push(this.cards[1].id);
+            this.save();
+        }
+    },
+
+    save() {
+        localStorage.setItem(DBKEY, JSON.stringify(this.cards));
+        vault.renderAll();
+        bloom.refresh();
+    },
+
+    add(c) {
+        this.cards.push(c);
+        this.save();
+    },
+
+    get(id) {
+        return this.cards.find(c => c.id === id);
+    }
+};
+
+// Window Manager
+const wm = {
+    zIndex: 100,
+    isDragging: false,
+    currentWin: null,
+    dragOffset: {x: 0, y: 0},
+
+    open(id) {
+        const win = document.getElementById(id);
+        win.style.display = 'flex';
+        this.focus(win);
+        if(id === 'pinboard-app') pinboard.render();
+        if(id === 'bloom-app') bloom.init();
+    },
+
+    close(id) {
+        document.getElementById(id).style.display = 'none';
+    },
+
+    focus(el) {
+        this.zIndex++;
+        el.style.zIndex = this.zIndex;
+        document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+        el.classList.add('active');
+    },
+
+    initDraggable() {
+        document.addEventListener('mousemove', (e) => {
+            if (this.isDragging && this.currentWin) {
+                e.preventDefault();
+                this.currentWin.style.left = (e.clientX - this.dragOffset.x) + 'px';
+                this.currentWin.style.top = (e.clientY - this.dragOffset.y) + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            this.isDragging = false;
+            this.currentWin = null;
+        });
+
+        document.querySelectorAll('.window').forEach(win => {
+            win.addEventListener('mousedown', () => this.focus(win));
+            const header = win.querySelector('.window-header');
+            header.addEventListener('mousedown', (e) => {
+                if(e.target.tagName === 'BUTTON') return;
+                this.isDragging = true;
+                this.currentWin = win;
+                this.dragOffset.x = e.clientX - win.getBoundingClientRect().left;
+                this.dragOffset.y = e.clientY - win.getBoundingClientRect().top;
+            });
+        });
+    }
+};
+
+// Ingestor
+const ingestor = {
+    analyze() {
+        const text = document.getElementById('ingest-input').value;
+        if(!text) return;
+        const words = text.split(' ');
+        const title = words.slice(0,3).join(' ').toUpperCase();
+        document.getElementById('ingest-results').style.display = 'block';
+        document.getElementById('res-title').innerText = title;
+        document.getElementById('res-tags').innerText = "ANOMALY DETECTED";
+        this.tempData = {title, content: text, tags: ["USER"]};
+    },
+
+    save() {
+        const type = document.getElementById('res-type').value;
+        State.add(new Card(this.tempData.title, this.tempData.content, type, this.tempData.tags));
+        document.getElementById('ingest-input').value = '';
+        document.getElementById('ingest-results').style.display = 'none';
+        alert("INSCRIPTION BAKED.");
+    }
+};
+
+// Vault
+const vault = {
+    render(filter) {
+        const list = document.getElementById('vault-list');
+        list.innerHTML = '';
+        const items = (filter === 'All') ? State.cards : State.cards.filter(c => c.type === filter);
+        items.forEach(c => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${c.title}</span> <span class="badge">${c.type}</span>`;
+            li.onclick = () => alert(c.title + ":\n\n" + c.content);
+            li.oncontextmenu = (e) => {
+                e.preventDefault();
+                if(confirm("SMASH TABLET?")) {
+                    State.cards = State.cards.filter(x => x.id !== c.id);
+                    State.save();
+                }
+            };
+            list.appendChild(li);
+        });
+    },
+
+    renderAll() { this.render('All'); },
+    renderTrunk() { this.render('Trunk'); },
+    renderLeaf() { this.render('Leaf'); },
+
+    search(q) {
+        const items = document.getElementById('vault-list').getElementsByTagName('li');
+        for(let item of items) {
+            item.style.display = item.innerText.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+        }
+    }
+};
+
+// Pinboard
+const pinboard = {
+    stringMode: false,
+    sourceNode: null,
+
+    render() {
+        const nL = document.getElementById('note-layer');
+        const sL = document.getElementById('string-layer');
+        nL.innerHTML = '';
+        sL.innerHTML = '';
+
+        const pinned = State.cards.filter(c => c.pinned);
+
+        // Draw strings
+        pinned.forEach(c => {
+            c.links.forEach(tid => {
+                const t = State.get(tid);
+                if(t && t.pinned) this.drawString(c, t, sL);
+            });
+        });
+
+        // Draw notes
+        pinned.forEach(c => {
+            const el = document.createElement('div');
+            el.className = 'note ' + c.type.toLowerCase();
+            el.style.left = c.x + 'px';
+            el.style.top = c.y + 'px';
+            el.innerHTML = `<h4>${c.title}</h4><p>${c.content.substring(0,40)}...</p>`;
+            el.onmousedown = (e) => this.handleDrag(e, el, c);
+            el.ondblclick = () => alert(c.content);
+            el.oncontextmenu = (e) => {
+                e.preventDefault();
+                c.pinned = false;
+                State.save();
+                this.render();
+            };
+            nL.appendChild(el);
+        });
+    },
+
+    drawString(n1, n2, layer) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", n1.x+100);
+        line.setAttribute("y1", n1.y+60);
+        line.setAttribute("x2", n2.x+100);
+        line.setAttribute("y2", n2.y+60);
+        line.classList.add("root-string");
+        layer.appendChild(line);
+    },
+
+    handleDrag(e, el, card) {
+        if(this.stringMode) {
+            this.connect(card);
+            return;
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const canvas = document.getElementById('pin-canvas').getBoundingClientRect();
+        let shiftX = e.clientX - el.getBoundingClientRect().left;
+        let shiftY = e.clientY - el.getBoundingClientRect().top;
+        el.style.zIndex = 1000;
+
+        const onMove = (evt) => {
+            let x = evt.clientX - shiftX - canvas.left + document.getElementById('pin-canvas').scrollLeft;
+            let y = evt.clientY - shiftY - canvas.top + document.getElementById('pin-canvas').scrollTop;
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            card.x = x;
+            card.y = y;
+        };
+
+        const onUp = () => {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            el.style.zIndex = 2;
+            State.save();
+            this.render();
+        };
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+    },
+
+    toggleStringMode() {
+        this.stringMode = !this.stringMode;
+        document.getElementById('btn-string').innerText = this.stringMode ? "SELECT ORIGIN..." : "root: OFF";
+        if(!this.stringMode) this.sourceNode = null;
+    },
+
+    connect(card) {
+        if(!this.sourceNode) {
+            this.sourceNode = card;
+            document.getElementById('btn-string').innerText = "GROWING TO: " + card.title;
+        } else {
+            if(this.sourceNode.id === card.id) return;
+            this.sourceNode.links.push(card.id);
+            State.save();
+            this.toggleStringMode();
+            this.render();
+        }
+    },
+
+    openPicker() {
+        const list = document.getElementById('evidence-list');
+        list.innerHTML = '';
+        State.cards.filter(c => !c.pinned).forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'clay-btn';
+            btn.style.width = '100%';
+            btn.innerText = c.title;
+            btn.onclick = () => {
+                c.pinned = true;
+                c.x = 50 + Math.random() * 150;
+                c.y = 50 + Math.random() * 150;
+                State.save();
+                this.render();
+                document.getElementById('evidence-picker').style.display='none';
+            };
+            list.appendChild(btn);
+        });
+        document.getElementById('evidence-picker').style.display = 'flex';
+        wm.focus(document.getElementById('evidence-picker'));
+    }
+};
+
+// Bloom Chart
+const bloom = {
+    chart: null,
+
+    init() {
+        const ctx = document.getElementById('bloomChart').getContext('2d');
+        if(this.chart) this.chart.destroy();
+
+        const trunk = State.cards.filter(c=>c.type==='Trunk').length;
+        const branch = State.cards.filter(c=>c.type==='Branch').length;
+        const leaf = State.cards.filter(c=>c.type==='Leaf').length;
+
+        this.chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Core', 'Obsession', 'Fluff'],
+                datasets: [{
+                    data: [trunk, branch, leaf],
+                    backgroundColor: ['#c5a059', '#4aff4a', '#00ffff'],
+                    borderColor: '#000',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#c5a059',
+                            font: {family: 'Cinzel'}
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    refresh() {
+        if(this.chart) this.init();
+    }
+};
+
+// Boot & Init
+window.onload = () => {
+    // Clock
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+    }, 1000);
+
+    // Boot sequence
+    const log = document.getElementById('boot-log');
+    setTimeout(() => { log.innerHTML = "DECODING TABLET...<br>"; }, 500);
+    setTimeout(() => { log.innerHTML += "ALIGNING LEY LINES...<br>"; }, 1200);
+    setTimeout(() => { log.innerHTML += "WELCOME, SCRIBE.<br>"; }, 2000);
+    setTimeout(() => { 
+        document.getElementById('boot-screen').style.display = 'none';
+    }, 3000);
+
+    // Init
+    State.load();
+    wm.initDraggable();
+};
+    </script>
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoAIexist: Rashomon in Rogers Park</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Press Start 2P', cursive;
+      background-color: #1a1a1a;
+      color: #1a1a1a; 
+      margin: 0;
+      padding: 0; 
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative; 
+    }
+
+    /* === SCENE VIEW LAYOUT === */
+    #root {
+      flex-grow: 1;
+      overflow: hidden; /* No scrolling in the main app area for P&C mode */
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background-color: #000;
+    }
+
+    .scene-container {
+        flex-grow: 1;
+        position: relative;
+        background-color: #2c2c2c;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* === INTERACTIVES (SPRITES & HOTSPOTS) === */
+    .interactive-object {
+      position: absolute;
+      background-color: transparent;
+      border: 1px solid transparent; /* Debug border invisible by default */
+      cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD9JREFUOE9jZKAyYKSyeQz0AAMDAwODpP9H8v8/AwPDoP8HBgaG/v/nZ2Bg+H8Ghv+fgYHh/xkY+A8AAMEfC+IlD43wAAAAAElFTSuQmCC'), pointer;
+      transition: transform 0.1s ease-out, filter 0.2s;
+      user-select: none;
+    }
+    .interactive-object:hover {
+      filter: drop-shadow(0 0 5px #00ffcc);
+      transform: scale(1.05);
+      border-color: rgba(0, 255, 204, 0.5); /* Slight highlight */
+    }
+    .interactive-object img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        pointer-events: none; /* Let clicks pass to parent div */
+    }
+
+    /* === UI OVERLAY (Bottom) === */
+    .ui-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        max-height: 35%;
+        background-color: rgba(212, 208, 200, 0.95); /* Win98 Grey, slight opacity */
+        border-top: 2px solid #FFFFFF;
+        display: flex;
+        flex-direction: column;
+        z-index: 100;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    .ui-overlay.collapsed {
+        transform: translateY(85%); /* Hide most of it */
+    }
+    
+    .ui-handle {
+        height: 12px;
+        background-color: #808080;
+        border-top: 1px solid #FFFFFF;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .ui-handle-icon {
+        width: 20px;
+        height: 4px;
+        background-color: #D4D0C8;
+        border: 1px outset #fff;
+    }
+
+    .ui-content {
+        flex-grow: 1;
+        display: flex;
+        padding: 10px;
+        gap: 15px;
+        overflow-y: auto;
+    }
+
+    .dialogue-section {
+        flex-grow: 2;
+        border: 2px inset #fff;
+        background-color: #fff;
+        padding: 10px;
+        font-size: 14px;
+        line-height: 1.6;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .choices-section {
+        flex-grow: 1;
+        min-width: 250px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .inventory-bar {
+        height: 50px;
+        background-color: #c0c0c0;
+        border-top: 2px inset #fff;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        gap: 5px;
+        overflow-x: auto;
+    }
+
+    .inventory-slot {
+        width: 40px;
+        height: 40px;
+        background-color: #808080;
+        border: 2px inset #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .inventory-slot:active {
+        border: 2px inset #000;
+    }
+    .inventory-slot img {
+        width: 32px;
+        height: 32px;
+        image-rendering: pixelated;
+    }
+
+    /* === WINDOWS & MENUS (Keep existing styles for menus) === */
+    .app-container { 
+        width: 100%;
+        max-width: 800px;
+        position: relative;
+        background-color: #D4D0C8;
+        border: 2px outset #fff;
+        box-shadow: 4px 4px 0px #000;
+        margin: 20px auto;
+    }
+
+    /* Existing Taskbar & Global Styles */
+    #taskbar {
+      height: 30px;
+      background-color: #D4D0C8;
+      border-top: 1px solid #FFFFFF;
+      box-shadow: 0 -1px 2px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      padding: 0 5px;
+      z-index: 1001;
+    }
+    /* ... (Rest of existing CSS preserved) ... */
+    
+    /* Helper classes */
+    .hidden { display: none !important; }
+    
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="desktop-bg-container"></div>
+  <div id="root"></div>
+
+  <script type="module">
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
+import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+
+// === ASSETS ===
+const ASSETS = {
+    // UI Icons
+    star: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD9JREFUOE9jZKAyYKSyeQz0AAMDAwODpP9H8v8/AwPDoP8HBgaG/v/nZ2Bg+H8Ghv+fgYHh/xkY+A8AAMEfC+IlD43wAAAAAElFTSuQmCC",
+    
+    // Backgrounds
+    bg_glenwood: '../../assets/hdtv_game_assets/gwood.png',
+    bg_rizzler: '../../assets/hdtv_game_assets/rizzlers_room.png',
+    
+    // Sprites / Items
+    item_doll: '../../assets/hdtv_game_assets/nabu_doll.png',
+    prop_rug: '../../assets/hdtv_game_assets/hd_asset-3.png',
+    prop_mop: '../../assets/hdtv_game_assets/hd_asset.png',
+    prop_chalkboard: '../../assets/hdtv_game_assets/hd_asset-2.png',
+};
+
+const GLITCH_CHARS = ['*', '#', '!', '%', '$', '&', '@', '▓', '▒', '░', '^', '~', '`', '?', '§', '±', 'Σ', 'Ω'];
+
+// === GAME DATA ===
+const CHARACTERS = {
+  nabu: { id: 'nabu', name: 'Nabu', description: "Digital Anthropologist & Cosmic Trickster.", startNodeId: 'NABU_START' },
+  hd: { id: 'hd', name: 'Hyena Diva', description: "The Fabulous Catalyst.", startNodeId: 'HYENA_DIVA_START' },
+  sypher: { id: 'sypher', name: 'Sypher', description: "Benevolent AI Guidance System.", startNodeId: 'SYPHER_START' },
+  rizzlord: { id: 'rizzlord', name: 'Rizzlord', description: "Alpha Influencer & Alderman.", startNodeId: 'RIZZLER_ROOM_EXPLORE' } // Modified start for demo
+};
+
+const NODES = {
+    // --- RIZZLORD'S ROOM (POINT & CLICK DEMO) ---
+    'RIZZLER_ROOM_EXPLORE': {
+        id: 'RIZZLER_ROOM_EXPLORE',
+        title: "The Rizzlord's Command Center",
+        description: "Your sanctuary. The air smells of energy drinks and unmet potential. This is where the magic happens (streaming).",
+        bg: ASSETS.bg_rizzler,
+        interactives: [
+            { 
+                id: 'rug', 
+                type: 'prop', 
+                image: ASSETS.prop_rug, 
+                x: '25%', y: '65%', width: '30%', height: '25%', 
+                flavorText: "It really ties the room together. Assuming the room is 'Chaotic Neutral'." 
+            },
+            {
+                id: 'lost_doll',
+                type: 'collectible',
+                name: 'Strange Doll',
+                image: ASSETS.item_doll,
+                x: '60%', y: '70%', width: '8%', height: '15%',
+                flavorText: "What is this doing here? It vibrates with weird energy.",
+                collectMessage: "You picked up the Strange Doll. Feels... significant."
+            },
+            {
+                id: 'monitor_glow',
+                type: 'hotspot', // Invisible area
+                x: '75%', y: '30%', width: '15%', height: '20%',
+                flavorText: "The chat is moving so fast no one can read it. Perfect."
+            }
+        ],
+        choices: [
+            { text: "Leave the room.", nextNodeId: 'RIZZLER_GLENWOOD_ARRIVAL' }
+        ]
+    },
+    
+    // --- OTHER NODES (Simplified for V2 stub) ---
+    'RIZZLER_GLENWOOD_ARRIVAL': {
+        id: 'RIZZLER_GLENWOOD_ARRIVAL',
+        title: "The Glenwood",
+        bg: ASSETS.bg_glenwood,
+        description: "You arrive at The Glenwood. The place reeks of patchouli and desperation.",
+        choices: [
+            { text: "Go back to the room.", nextNodeId: 'RIZZLER_ROOM_EXPLORE' }
+        ]
+    },
+     'NABU_START': {
+        id: 'NABU_START',
+        title: "Nabu's Void",
+        bg: '../../assets/hdtv_game_assets/hd_bg.png',
+        description: "Floating in the void...",
+        choices: [{text: "Enter Reality", nextNodeId: 'RIZZLER_GLENWOOD_ARRIVAL'}]
+    },
+    'HYENA_DIVA_START': { 
+        id: 'HYENA_DIVA_START', 
+        title: "Savannah", 
+        bg: '../../assets/hdtv_game_assets/hd_bg.png',
+        description: "A Barbie falls...", 
+        choices: [{text: "Go to Chicago", nextNodeId: 'RIZZLER_GLENWOOD_ARRIVAL'}] 
+    },
+    'SYPHER_START': { 
+        id: 'SYPHER_START', 
+        title: "Dataspace", 
+        bg: '../../assets/hdtv_game_assets/hd_bg.png',
+        description: "Calculating...", 
+        choices: [{text: "Observe", nextNodeId: 'RIZZLER_GLENWOOD_ARRIVAL'}] 
+    }
+};
+
+// === COMPONENTS ===
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.setState({ error, errorInfo });
+    console.error("React Error Boundary Caught:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return jsxs('div', { 
+        style: { padding: '20px', color: 'red', backgroundColor: 'white' },
+        children: [
+          jsx('h2', { children: "Something went wrong." }),
+          jsx('details', { 
+            style: { whiteSpace: 'pre-wrap' },
+            children: [
+              this.state.error && this.state.error.toString(),
+              jsx('br'),
+              this.state.errorInfo && this.state.errorInfo.componentStack
+            ]
+          })
+        ]
+      });
+    }
+
+    return this.props.children; 
+  }
+}
+
+const GlitchyText = ({ text }) => {
+    // Simplified glitch effect for V2
+    return jsx('span', { children: text }); 
+};
+
+// Interactive Object (Sprite or Hotspot)
+const Interactive = ({ data, onClick }) => {
+    const style = {
+        left: data.x,
+        top: data.y,
+        width: data.width,
+        height: data.height,
+        zIndex: data.zIndex || 10
+    };
+
+    return jsx('div', {
+        className: 'interactive-object',
+        style: style,
+        title: data.name || data.flavorText, // Tooltip hint
+        onClick: (e) => {
+            e.stopPropagation();
+            onClick(data);
+        },
+        children: data.image ? jsx('img', { src: data.image, alt: data.name || 'obj' }) : null
+    });
+};
+
+// Inventory Slot
+const InventorySlot = ({ item }) => {
+    return jsx('div', {
+        className: 'inventory-slot',
+        title: item.name,
+        children: jsx('img', { src: item.image })
+    });
+};
+
+// Main Game Window (Spy Fox Style)
+const GameWindow = ({ storyState, onChoice, onInteractiveClick, onToggleUI, isUICollapsed }) => {
+    const node = NODES[storyState.currentNodeId];
+    if (!node) return jsx('div', { className: 'error' }, "Node not found");
+
+    // Filter out interactives that have been collected
+    const activeInteractives = node.interactives?.filter(i => 
+        !storyState.collectedItems.includes(i.id)
+    ) || [];
+
+    return jsxs('div', {
+        className: 'scene-container',
+        style: { backgroundImage: node.bg ? `url('${node.bg}')` : 'none' },
+        children: [
+            // Render Interactives
+            activeInteractives.map((item, idx) => 
+                jsx(Interactive, { key: idx, data: item, onClick: onInteractiveClick })
+            ),
+            
+            // UI Overlay (Dialogue + Choices + Inventory)
+            jsxs('div', {
+                className: `ui-overlay ${isUICollapsed ? 'collapsed' : ''}`,
+                children: [
+                    // Collapse Handle
+                    jsx('div', { 
+                        className: 'ui-handle', 
+                        onClick: onToggleUI,
+                        title: "Toggle UI Panel",
+                        children: jsx('div', { className: 'ui-handle-icon' }) 
+                    }),
+                    
+                    // Main Content Area
+                    jsxs('div', {
+                        className: 'ui-content',
+                        children: [
+                            // Dialogue Box
+                            jsx('div', { 
+                                className: 'dialogue-section',
+                                children: jsxs(Fragment, {
+                                    children: [
+                                        jsx('strong', { style: {color: '#000080'}, children: node.title }),
+                                        jsx('br'), jsx('br'),
+                                        storyState.currentDialogue || node.description
+                                    ]
+                                })
+                            }),
+                            
+                            // Choices Box
+                            jsx('div', {
+                                className: 'choices-section',
+                                children: node.choices?.map((choice, idx) => 
+                                    jsx('button', {
+                                        onClick: () => onChoice(choice.nextNodeId),
+                                        children: choice.text
+                                    }, idx)
+                                )
+                            })
+                        ]
+                    }),
+                    
+                    // Inventory Bar (Bottom strip)
+                    jsx('div', {
+                        className: 'inventory-bar',
+                        children: storyState.inventory.length > 0 
+                            ? storyState.inventory.map((item, idx) => jsx(InventorySlot, { key: idx, item: item }))
+                            : jsx('span', { style: {fontSize: '10px', color: '#555'}, children: "Inventory Empty" })
+                    })
+                ]
+            })
+        ]
+    });
+};
+
+const MainMenu = ({ onStart }) => {
+    return jsx('div', {
+        className: 'app-container',
+        style: { padding: '20px', textAlign: 'center' },
+        children: jsxs(Fragment, {
+            children: [
+                jsx('h1', { children: "CoAIexist" }),
+                jsx('h3', { children: "Rashomon in Rogers Park" }),
+                jsx('p', { children: "Demo V2: Point & Click Engine" }),
+                jsx('div', { 
+                    style: { display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '300px', margin: '20px auto' },
+                    children: Object.values(CHARACTERS).map(char => 
+                        jsx('button', {
+                            onClick: () => onStart(char.id),
+                            children: `Play as ${char.name}`
+                        }, char.id)
+                    )
+                })
+            ]
+        })
+    });
+};
+
+const App = () => {
+    const [screen, setScreen] = useState('menu'); // menu, game
+    const [storyState, setStoryState] = useState({
+        characterId: null,
+        currentNodeId: null,
+        inventory: [],
+        collectedItems: [], // IDs of collected items
+        currentDialogue: null // Overrides description if present
+    });
+    const [isUICollapsed, setIsUICollapsed] = useState(false);
+
+    const handleStart = (charId) => {
+        const char = CHARACTERS[charId];
+        setStoryState({
+            characterId: charId,
+            currentNodeId: char.startNodeId,
+            inventory: [],
+            collectedItems: [],
+            currentDialogue: null
+        });
+        setScreen('game');
+    };
+
+    const handleChoice = (nextNodeId) => {
+        setStoryState(prev => ({
+            ...prev,
+            currentNodeId: nextNodeId,
+            currentDialogue: null // Reset dialogue on move
+        }));
+    };
+
+    const handleInteractiveClick = (item) => {
+        if (item.type === 'collectible') {
+            // Add to inventory
+            setStoryState(prev => ({
+                ...prev,
+                inventory: [...prev.inventory, { id: item.id, name: item.name, image: item.image }],
+                collectedItems: [...prev.collectedItems, item.id],
+                currentDialogue: item.collectMessage || `You picked up ${item.name}.`
+            }));
+        } else {
+            // Just flavor text
+            setStoryState(prev => ({
+                ...prev,
+                currentDialogue: item.flavorText
+            }));
+        }
+    };
+
+    return jsxs(Fragment, {
+        children: [
+            jsx('div', { 
+                id: 'app-content',
+                style: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column' },
+                children: jsx(ErrorBoundary, {
+                    children: screen === 'menu' 
+                        ? jsx(MainMenu, { onStart: handleStart })
+                        : jsx(GameWindow, { 
+                            storyState: storyState, 
+                            onChoice: handleChoice, 
+                            onInteractiveClick: handleInteractiveClick,
+                            onToggleUI: () => setIsUICollapsed(!isUICollapsed),
+                            isUICollapsed: isUICollapsed
+                          })
+                })
+            }),
+            // Taskbar Mockup
+            jsx('div', {
+                id: 'taskbar',
+                children: [
+                    jsx('button', { id: 'start-button', children: "Start" }),
+                    jsx('div', { id: 'taskbar-app-title', children: "CoAIexist V2" })
+                ]
+            })
+        ]
+    });
+};
+
+const root = createRoot(document.getElementById('root'));
+root.render(jsx(App, {}));
+
+  </script>
+</body>
+</html>

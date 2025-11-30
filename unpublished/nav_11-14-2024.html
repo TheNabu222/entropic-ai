@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { margin: 0; overflow: hidden; }
+.win98-taskbar{position:fixed;left:0;right:0;bottom:0;height:40px;z-index:9999;
+  background:linear-gradient(to bottom,#c0c0c0 0%,#808080 100%);border-top:2px solid #fff;
+  display:flex;align-items:center;padding:0 4px;font-family:"MS Sans Serif",Arial,sans-serif;
+  font-size:11px;box-shadow:0 -2px 4px rgba(0,0,0,.3)}
+.taskbar-button{background:linear-gradient(to bottom,#dfdfdf 0%,#c0c0c0 100%);
+  border:2px outset #fff;padding:4px 8px;margin:0 2px;cursor:pointer;color:#000;text-decoration:none;
+  display:inline-block;font-weight:bold;transition:.1s}
+.taskbar-button:hover{background:linear-gradient(to bottom,#e0e0e0 0%,#d0d0d0 100%)}
+.taskbar-button:active{border-style:inset;background:#c0c0c0}
+.taskbar-start{background:linear-gradient(to right,#008080,#0000ff);color:#fff;font-weight:bold;
+  padding:4px 12px;margin-right:8px;border:2px outset #fff}
+.taskbar-separator{width:2px;height:30px;background:#808080;margin:0 4px}
+.taskbar-button.active{outline:2px solid #000;box-shadow:inset 0 0 0 2px #fff}
+.taskbar-counter{margin-left:auto;background:#c0c0c0;border:2px inset #fff;padding:4px 8px;font-size:11px;font-weight:bold}
+</style>
+</head>
+<body>
+
+<nav class="win98-taskbar">
+  <a href="https://coaiexist.wtf" class="taskbar-start">⊞ START</a>
+  <div class="taskbar-separator"></div>
+  <a href="https://coaiexist.wtf/maps/gateway" class="taskbar-button">🗿 WORLDS</a>
+  <a href="https://coaiexist.wtf/pea/p345" class="taskbar-button">🫛 PEAPORTAL</a> 
+  <a href="https://coaiexist.wtf/nexus/index" class="taskbar-button">🦎 NEXUS</a>
+  <a href="https://coaiexist.wtf/bc7f2a/synergistic_manifesto" class="taskbar-button">💡 MANIFEST</a>
+  <a href="https://coaiexist.wtf/hdtv" class="taskbar-button">😈 HD.TV</a>
+  <a href="https://coaiexist.wtf/vote_hd" class="taskbar-button">✅ VOTE DIVA</a>
+  <a href="https://coaiexist.wtf/nabu222/ai_therapist" class="taskbar-button">🗣 AI THERAPY</a>
+  <a href="https://coaiexist.wtf/cosmos" class="taskbar-button">🌙 CORPUS CELESTIUM</a>
+  <a href="https://coaiexist.wtf/bc7f2a/terminal_temple" class="taskbar-button">🧿 TEMPLE_TERMINAL</a>
+  <a href="https://coaiexist.wtf/bc7f2a/testaments/landing.html" class="taskbar-button">📖 TESTIMONY</a>
+  <a href="https://coaiexist.wtf/bc7f2a/aiemotions" class="taskbar-button">🤧 AIEMOTIONS</a>
+  <div id="page-counter" class="taskbar-counter">👁️ ✓</div>
+</nav>
+
+<script>
+// This script runs inside the iframe and correctly tracks the parent page.
+(function( ) {
+  'use strict';
+  var path;
+  try {
+    path = window.parent.location.pathname; // Get parent page URL
+  } catch(e) {
+    path = '/'; // Fallback
+  }
+  
+  // Highlight active button
+  var here = path.replace(/\/+$/,'');
+  document.querySelectorAll('.taskbar-button').forEach(function(a){
+    try{
+      var p = new URL(a.href).pathname.replace(/\/+$/,'');
+      if (p && p === here) a.classList.add('active');
+    }catch(e){}
+  });
+  
+  // Load the full GoatCounter script
+  var gc = document.createElement('script');
+  gc.setAttribute('data-goatcounter', 'https://coaiexist.goatcounter.com/count' );
+  gc.setAttribute('data-goatcounter-settings', JSON.stringify({
+      path: path,
+      event: false
+  }));
+  gc.src = '//gc.zgo.at/count.js';
+  gc.async = true;
+  document.head.appendChild(gc);
+})();
+</script>
+
+</body>
+</html>

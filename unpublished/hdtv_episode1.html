@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoAIexist: Episode 1 - The Origin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Press Start 2P', cursive;
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none; /* Prevent text selection */
+    }
+
+    /* === Y2K / OS AESTHETIC === */
+    body::after { /* Scanlines */
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        rgba(20, 20, 20, 0) 0%,
+        rgba(20, 20, 20, 0) 97%,
+        rgba(255, 255, 255, 0.02) 98%, 
+        rgba(0, 0, 0, 0.05) 100% 
+      );
+      background-size: 100% 3px; 
+      animation: scanlines 15s linear infinite;
+      z-index: 9999;
+      opacity: 0.3; 
+    }
+    @keyframes scanlines { 0% { background-position: 0 0; } 100% { background-position: 0 300px; } }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    #root {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background-color: #000; /* Letterboxing */
+    }
+
+    /* === MAIN GAME WINDOW === */
+    .game-window {
+      flex-grow: 1;
+      position: relative;
+      background-color: #2c2c2c;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .scene-container {
+      position: relative;
+      width: 800px; /* Fixed aspect ratio target */
+      height: 600px;
+      background-size: cover;
+      background-position: center;
+      border: 2px solid #444;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    /* === HOTSPOTS === */
+    .hotspot {
+      position: absolute;
+      background-color: rgba(255, 0, 0, 0.3); /* Debug: Visible hotspots */
+      cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD9JREFUOE9jZKAyYKSyeQz0AAMDAwODpP9H8v8/AwPDoP8HBgaG/v/nZ2Bg+H8Ghv+fgYHh/xkY+A8AAMEfC+IlD43wAAAAAElFTSuQmCC'), pointer; 
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+    .hotspot:hover {
+      box-shadow: 0 0 10px #00ffcc;
+      transform: scale(1.02);
+      /* border: 1px dashed #00ffcc; */
+    }
+    
+    /* Character Sprites in Scene */
+    .sprite {
+      position: absolute;
+      pointer-events: none; /* Let clicks pass through to hotspots if needed, or make them hotspots */
+      transition: left 0.5s ease-in-out, top 0.5s ease-in-out;
+    }
+
+    /* === UI BAR (Bottom) === */
+    .ui-bar {
+      height: 140px;
+      background-color: #D4D0C8; /* Windows 98 Grey */
+      border-top: 2px solid #FFFFFF;
+      display: flex;
+      padding: 5px;
+      box-sizing: border-box;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      color: #000;
+      z-index: 100;
+    }
+
+    .ui-section {
+      border: 2px inset #fff;
+      background-color: #c0c0c0;
+      padding: 5px;
+      margin-right: 5px;
+    }
+
+    .stats-panel {
+      width: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+    }
+
+    .dialogue-panel {
+      flex-grow: 1;
+      display: flex;
+      gap: 10px;
+    }
+
+    .portrait-box {
+      width: 80px;
+      height: 80px;
+      background-color: #000;
+      border: 2px inset #808080;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .portrait-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .text-box {
+      flex-grow: 1;
+      position: relative;
+      padding: 5px;
+      overflow-y: auto;
+    }
+    
+    .dialogue-text {
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+
+    .choices-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .choice-btn {
+        background: #000080; /* Win98 Title Blue */
+        color: #fff;
+        border: 2px outset #fff;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 10px;
+        text-align: left;
+    }
+    .choice-btn:hover {
+        background: #1084d0;
+    }
+
+    .inventory-panel {
+      width: 200px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 2px;
+      overflow-y: auto;
+    }
+
+    .inventory-slot {
+      width: 40px;
+      height: 40px;
+      background-color: #808080;
+      border: 1px inset #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .inventory-slot:active {
+        border: 1px inset #000;
+    }
+    .inventory-slot img {
+        width: 32px;
+        height: 32px;
+        image-rendering: pixelated;
+    }
+
+    /* === OS TASKBAR === */
+    .os-taskbar {
+      height: 28px;
+      background-color: #D4D0C8;
+      border-top: 1px solid #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+    }
+    
+    .start-btn {
+        background: #D4D0C8;
+        border: 2px outset #fff;
+        font-weight: bold;
+        padding: 2px 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        box-shadow: 1px 1px 0 #000;
+        cursor: pointer;
+    }
+    .start-btn:active {
+        border: 2px inset #fff;
+        box-shadow: none;
+    }
+
+    /* === UTILS === */
+    .hidden { display: none; }
+    
+    .flash-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: white;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 10000;
+        transition: opacity 0.1s;
+    }
+    
+    /* Minigame Styles */
+    .chase-obstacle {
+        position: absolute;
+        background-color: red;
+        color: white;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime"
+  }
+}
+</script>
+</head>
+<body>
+  <div id="root">Loading CoAIexist OS...</div>
+
+  <script type="module">
+import React, { useReducer } from 'react';
+import { createRoot } from 'react-dom/client';
+import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+
+// === ASSETS & DATA ===
+
+// Placeholders for when real assets are missing
+const PLACEHOLDER_BG = (color, text) => {
+    // URL encode the SVG string to be safe in CSS url()
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="${color}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="24" fill="white">${text}</text></svg>`;
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
+
+const ASSETS = {
+    bg_masai_jeep: PLACEHOLDER_BG('#E6BE8A', 'MASAI MARA: SAFARI JEEP'),
+    bg_masai_clan: PLACEHOLDER_BG('#8B4513', 'MASAI MARA: CLAN TERRITORY'),
+    bg_tourist_camp: PLACEHOLDER_BG('#556B2F', 'TOURIST CAMP (DUSK)'),
+    bg_airplane: PLACEHOLDER_BG('#708090', 'AIRPLANE INTERIOR'),
+    bg_chase: PLACEHOLDER_BG('#444444', 'CHICAGO STREETS (CHASE)'),
+    bg_glenwood: '../../assets/hdtv_game_assets/gwood.png', // Relative path to assets
+    
+    // Items
+    icon_barbie: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACoSURBVFhH7ZexDcMwDESf4gEyQYcgE3SAjJEB0k8G8AAZIAMkQ2+QDNABCDJABtABMnxcSpFjS45kOfABH/678+QdSUm2WdO2bQ/gC37wvhWv18ssy05N06zGGC/gB37wvhW2bXthjH01Xdd9gR/4wftW2LZtn+u6ftR13R/4gR+8b4Xv+x/TNP2B3/jB+1Z4njfM8/wHfuMH71vhe98wz/P+3/gB/7beA6/tX/B4uD+YAAAAAElFTSuQmCC', // Pink square placeholder
+    icon_mustache: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABTSURBVFhH7ZOxDYAwDESf4gEcgA2YgA0YgREyQAZgAAZIgAwdA9ABAzAAGTAAG3SM40p5/iS35CQr9p1JljxCCKEX8II3+L/i6XSY57mZt+0BvOAN/i/4wQeSGA551yiaAAAAAElFTSuQmCC', // Black shape
+    
+    // UI Icons
+    star_icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD9JREFUOE9jZKAyYKSyeQz0AAMDAwODpP9H8v8/AwPDoP8HBgaG/v/nZ2Bg+H8Ghv+fgYHh/xkY+A8AAMEfC+IlD43wAAAAAElFTSuQmCC",
+};
+
+// === GAME ENGINE LOGIC ===
+
+// Initial State
+const INITIAL_STATE = {
+    sceneId: 'SCENE_1_SAFARI',
+    inventory: [],
+    flags: {
+        has_barbie: false,
+        met_nabu: false,
+        escaped_clan: false,
+        in_bag: false,
+    },
+    stats: {
+        fabulousness: 10, // HD starts low
+        chaos: 50,
+        rizz: 0,
+    },
+    dialogue: null, // { text: "...", choices: [] }
+    transition: null, // for fade effects
+};
+
+// Reducer for Game State
+function gameReducer(state, action) {
+    switch (action.type) {
+        case 'CHANGE_SCENE':
+            return { ...state, sceneId: action.payload, dialogue: null };
+        case 'ADD_ITEM':
+            return { ...state, inventory: [...state.inventory, action.payload] };
+        case 'REMOVE_ITEM':
+            return { ...state, inventory: state.inventory.filter(id => id !== action.payload) };
+        case 'SET_FLAG':
+            return { ...state, flags: { ...state.flags, [action.payload.flag]: action.payload.value } };
+        case 'UPDATE_STAT':
+            return { 
+                ...state, 
+                stats: { 
+                    ...state.stats, 
+                    [action.payload.stat]: (state.stats[action.payload.stat] || 0) + action.payload.value 
+                } 
+            };
+        case 'SET_DIALOGUE':
+            return { ...state, dialogue: action.payload };
+        case 'CLOSE_DIALOGUE':
+            return { ...state, dialogue: null };
+        default:
+            return state;
+    }
+}
+
+// === SCENE DATA ===
+const SCENES = {
+    'SCENE_1_SAFARI': {
+        id: 'SCENE_1_SAFARI',
+        bg: ASSETS.bg_masai_jeep,
+        music: 'safaribeat', // Placeholder
+        hotspots: [
+            {
+                id: 'jeep',
+                rect: { top: '40%', left: '10%', width: '30%', height: '30%' },
+                hoverText: 'Safari Jeep',
+                onClick: (dispatch) => {
+                    dispatch({ type: 'SET_DIALOGUE', payload: {
+                        speaker: 'Tourists',
+                        text: "Look honey! A hyena! It looks... strangely fabulous?",
+                        choices: [{ text: "Strike a pose", action: (d) => d({ type: 'SET_DIALOGUE', payload: { speaker: 'Tourists', text: "Work it, girl!", choices: [] } }) }]
+                    }});
+                }
+            },
+            {
+                id: 'flying_barbie',
+                rect: { top: '20%', left: '50%', width: '10%', height: '10%' },
+                hoverText: 'Shiny Object!',
+                style: { animation: 'float 2s infinite' }, 
+                condition: (state) => !state.flags.has_barbie,
+                onClick: (dispatch) => {
+                    dispatch({ type: 'ADD_ITEM', payload: 'barbie_doll' });
+                    dispatch({ type: 'SET_FLAG', payload: { flag: 'has_barbie', value: true } });
+                    dispatch({ type: 'UPDATE_STAT', payload: { stat: 'fabulousness', value: 50 } });
+                    dispatch({ type: 'SET_DIALOGUE', payload: {
+                        speaker: 'Baby HD',
+                        text: "(You catch the falling object. It's... beautiful. Plastic. Pink. Perfect. It whispers to your soul.)",
+                        choices: [
+                            { text: "This is my destiny.", action: (d) => d({ type: 'CHANGE_SCENE', payload: 'SCENE_2_CLAN' }) }
+                        ]
+                    }});
+                }
+            }
+        ]
+    },
+    'SCENE_2_CLAN': {
+        id: 'SCENE_2_CLAN',
+        bg: ASSETS.bg_masai_clan,
+        hotspots: [
+            {
+                id: 'matriarch',
+                rect: { top: '30%', left: '40%', width: '20%', height: '40%' },
+                hoverText: 'The Matriarch',
+                onClick: (dispatch) => {
+                    dispatch({ type: 'SET_DIALOGUE', payload: {
+                        speaker: 'Matriarch',
+                        text: "What is that thing, cub? We chew bones, not... plastic humans.",
+                        choices: [
+                            { text: "[Silent Horror] (Harpo Marx style)", action: (d) => d({ type: 'UPDATE_STAT', payload: { stat: 'chaos', value: 10 } }) },
+                            { text: "Run away!", action: (d) => d({ type: 'CHANGE_SCENE', payload: 'SCENE_3_CAMP' }) }
+                        ]
+                    }});
+                }
+            }
+        ]
+    },
+    'SCENE_3_CAMP': {
+        id: 'SCENE_3_CAMP',
+        bg: ASSETS.bg_tourist_camp,
+        hotspots: [
+            {
+                id: 'bag',
+                rect: { top: '60%', left: '60%', width: '15%', height: '15%' },
+                hoverText: 'Open Carry-On',
+                onClick: (dispatch) => {
+                    dispatch({ type: 'SET_DIALOGUE', payload: {
+                        speaker: 'System',
+                        text: "It's tight, but you fit. The little girl winks at you.",
+                        choices: [
+                            { text: "Stow away to America", action: (d) => d({ type: 'CHANGE_SCENE', payload: 'SCENE_4_AIRPLANE' }) }
+                        ]
+                    }});
+                }
+            }
+        ]
+    },
+    'SCENE_4_AIRPLANE': {
+        id: 'SCENE_4_AIRPLANE',
+        bg: ASSETS.bg_airplane,
+        hotspots: [
+            {
+                id: 'window',
+                rect: { top: '20%', left: '10%', width: '20%', height: '30%' },
+                hoverText: 'Window',
+                onClick: (dispatch) => dispatch({ type: 'SET_DIALOGUE', payload: { speaker: 'HD', text: "Clouds. Endless clouds. Goodbye, Savannah.", choices: [] } })
+            },
+            {
+                id: 'magazine',
+                rect: { top: '70%', left: '40%', width: '20%', height: '20%' },
+                hoverText: 'In-Flight Magazine',
+                onClick: (dispatch) => {
+                    dispatch({ type: 'SET_DIALOGUE', payload: { 
+                        speaker: 'Magazine', 
+                        text: "Article: 'Chicago's Rogers Park - The Weirdest Neighborhood on Earth'. Sounds like home.", 
+                        choices: [{ text: "Land in Chicago", action: (d) => d({ type: 'CHANGE_SCENE', payload: 'SCENE_5_CHASE' }) }] 
+                    }});
+                }
+            }
+        ]
+    },
+    'SCENE_5_CHASE': {
+        id: 'SCENE_5_CHASE',
+        bg: ASSETS.bg_chase,
+        // This is a placeholder for the minigame logic
+        hotspots: [
+            {
+                id: 'glenwood_door',
+                rect: { top: '40%', left: '80%', width: '10%', height: '40%' },
+                hoverText: 'The Glenwood',
+                onClick: (dispatch) => dispatch({ type: 'CHANGE_SCENE', payload: 'SCENE_6_GLENWOOD' })
+            }
+        ]
+    },
+    'SCENE_6_GLENWOOD': {
+        id: 'SCENE_6_GLENWOOD',
+        bg: ASSETS.bg_glenwood,
+        hotspots: [
+            {
+                id: 'nabu',
+                rect: { top: '40%', left: '45%', width: '10%', height: '30%' }, // Approximate bar location
+                hoverText: 'Bartender?',
+                onClick: (dispatch) => {
+                    dispatch({ type: 'SET_DIALOGUE', payload: {
+                        speaker: 'Nabu',
+                        portrait: '../../assets/hdtv_game_assets/nabu_sprite.png', 
+                        text: "Well, well. A lost cub with a Barbie doll? You've got taste, kid. The GFW told me you were coming.",
+                        choices: [
+                            { text: "GFW?", action: (d) => d({ type: 'SET_DIALOGUE', payload: { speaker: 'Nabu', text: "Galactic Federation of Worlds. Don't worry about it... yet.", choices: [] } }) },
+                            { text: "My destiny is the stage.", action: (d) => d({ type: 'SET_DIALOGUE', payload: { speaker: 'Nabu', text: "Then welcome home. Episode 1 Complete.", choices: [] } }) }
+                        ]
+                    }});
+                }
+            }
+        ]
+    }
+};
+
+// === COMPONENT: HOTSPOT ===
+const Hotspot = ({ data, dispatch, state }) => {
+    if (data.condition && !data.condition(state)) return null;
+
+    const style = {
+        top: data.rect.top,
+        left: data.rect.left,
+        width: data.rect.width,
+        height: data.rect.height,
+        ...data.style
+    };
+
+    return jsx('div', {
+        className: 'hotspot',
+        style: style,
+        title: data.hoverText,
+        onClick: (e) => {
+            e.stopPropagation();
+            data.onClick(dispatch);
+        }
+    });
+};
+
+// === COMPONENT: SCENE ===
+const Scene = ({ sceneId, dispatch, state }) => {
+    const scene = SCENES[sceneId];
+    if (!scene) return jsx('div', {}, "Error: Scene not found");
+
+    return jsx('div', {
+        className: 'scene-container',
+        style: { backgroundImage: `url('${scene.bg}')` },
+        onClick: () => {
+            // Clicked background (not hotspot)
+            // Could trigger walk logic here
+        },
+        children: [
+            scene.hotspots.map(h => jsx(Hotspot, { key: h.id, data: h, dispatch: dispatch, state: state }))
+        ]
+    });
+};
+
+// === COMPONENT: DIALOGUE BOX ===
+const DialogueBox = ({ dialogue, dispatch }) => {
+    if (!dialogue) return null;
+
+    return jsx('div', {
+        className: 'ui-bar',
+        style: { position: 'absolute', bottom: '30px', width: '800px', height: '150px', zIndex: 200 },
+        children: [
+            jsx('div', { className: 'portrait-box', children: dialogue.portrait ? jsx('img', { src: dialogue.portrait, className: 'portrait-img' }) : null }),
+            jsx('div', { className: 'text-box', children: [
+                jsx('div', { className: 'dialogue-speaker', style: { fontWeight: 'bold', marginBottom: '5px', color: '#000080' }, children: dialogue.speaker }),
+                jsx('div', { className: 'dialogue-text', children: dialogue.text }),
+                jsx('div', { className: 'choices-container', children: 
+                    dialogue.choices.map((choice, idx) => 
+                        jsx('button', {
+                            key: idx,
+                            className: 'choice-btn',
+                            onClick: () => {
+                                if (choice.action) choice.action(dispatch);
+                                else dispatch({ type: 'CLOSE_DIALOGUE' });
+                            },
+                            children: choice.text
+                        })
+                    )
+                })
+            ]})
+        ]
+    });
+};
+
+// === COMPONENT: UI BAR ===
+const UiBar = ({ state }) => {
+    return jsx('div', {
+        className: 'ui-bar',
+        children: [
+            jsx('div', { className: 'ui-section stats-panel', children: [
+                jsx('div', {}, `FABULOUS: ${state.stats.fabulousness}`),
+                jsx('div', {}, `CHAOS: ${state.stats.chaos}`),
+            ]}),
+            jsx('div', { className: 'ui-section inventory-panel', children: 
+                state.inventory.map((item, idx) => 
+                    jsx('div', { key: idx, className: 'inventory-slot', title: item }, 
+                        item === 'barbie_doll' ? jsx('img', { src: ASSETS.icon_barbie }) : item
+                    )
+                )
+            })
+        ]
+    });
+};
+
+// === MAIN APP ===
+const App = () => {
+    const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
+
+    return jsxs('div', {
+        id: 'app-root',
+        children: [
+            jsx('div', {
+                className: 'game-window',
+                children: jsxs(Fragment, {
+                    children: [
+                        jsx(Scene, { sceneId: state.sceneId, dispatch: dispatch, state: state }),
+                        jsx(DialogueBox, { dialogue: state.dialogue, dispatch: dispatch })
+                    ]
+                })
+            }),
+            jsx(UiBar, { state: state }),
+            jsx('div', {
+                className: 'os-taskbar',
+                children: [
+                    jsx('div', { className: 'start-btn', children: [
+                        jsx('img', { src: ASSETS.star_icon, width: 16 }), "Start"
+                    ]}),
+                    jsx('div', { style: { marginLeft: 'auto', fontSize: '10px' }, children: "11:11 PM" })
+                ]
+            })
+        ]
+    });
+};
+
+const root = createRoot(document.getElementById('root'));
+root.render(jsx(App, {}));
+  </script>
+</body>
+</html>
