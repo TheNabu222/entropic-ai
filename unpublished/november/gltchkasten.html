@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☥ ZETTELKASTEN v4.0 :: FUNCTIONAL GLITCH ☥</title>
+    <style>
+        :root {
+            --lapis: #304fff;
+            --gold: #bc7f2a;
+            --barbie: #ca237f;
+            --glacier: #00ffcc;
+            --volcano: #fffb01;
+            --void: #000814;
+            --text: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: var(--void);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Functional header - clean but thematic */
+        .header {
+            background: linear-gradient(135deg, var(--lapis) 0%, var(--void) 100%);
+            padding: 2rem;
+            border-bottom: 3px solid var(--gold);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-family: 'Georgia', serif;
+            color: var(--gold);
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            text-align: center;
+            color: var(--glacier);
+            font-size: 1rem;
+        }
+
+        /* Main layout - actually readable */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+
+        /* Navigation - functional and clean */
+        .nav {
+            background: rgba(48, 79, 255, 0.05);
+            border: 1px solid var(--lapis);
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 2rem;
+        }
+
+        .nav-category {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+            text-align: left;
+            width: 100%;
+        }
+
+        .nav-category:hover {
+            border-color: var(--barbie);
+            background: rgba(202, 35, 127, 0.1);
+        }
+
+        .nav-category.active {
+            border-color: var(--volcano);
+            background: rgba(255, 251, 1, 0.1);
+            color: var(--volcano);
+        }
+
+        .nav-count {
+            float: right;
+            color: var(--glacier);
+            font-size: 0.8rem;
+        }
+
+        /* Search - actually useful */
+        .search-section {
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid var(--glacier);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--volcano);
+            box-shadow: 0 0 10px var(--volcano);
+        }
+
+        /* Zettel grid - readable cards */
+        .zettel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .zettel-card {
+            background: rgba(0, 0, 0, 0.6);
+            border-left: 4px solid;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .zettel-card:hover {
+            transform: translateY(-2px);
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Category colors - subtle but clear */
+        .zettel-card.location { border-color: var(--glacier); }
+        .zettel-card.culture { border-color: var(--barbie); }
+        .zettel-card.deity { border-color: var(--volcano); }
+        .zettel-card.protocol { border-color: var(--lapis); }
+        .zettel-card.concept { border-color: #ff00ff; }
+        .zettel-card.anomaly { border-color: #00ff41; }
+        .zettel-card.pattern { border-color: #8a2be2; }
+
+        .zettel-id {
+            font-weight: bold;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .zettel-name {
+            font-size: 1.3rem;
+            color: var(--text);
+            margin-bottom: 0.75rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .zettel-description {
+            color: var(--glacier);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .zettel-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            padding: 0.25rem 0.5rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid currentColor;
+            font-size: 0.75rem;
+            color: inherit;
+        }
+
+        /* Modal - actually readable content */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 8, 20, 0.95);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--gold);
+            padding: 2rem;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--barbie);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        .modal-title {
+            color: var(--gold);
+            font-family: 'Georgia', serif;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--lapis);
+            padding-bottom: 0.5rem;
+        }
+
+        .modal-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-section h3 {
+            color: var(--glacier);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .modal-section p {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Stats and info */
+        .stats {
+            background: rgba(48, 79, 255, 0.1);
+            padding: 1rem;
+            margin-top: 2rem;
+            border: 1px solid var(--lapis);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav {
+                position: static;
+            }
+            
+            .zettel-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Subtle glitch effects - only on hover */
+        .glitch-on-hover:hover {
+            animation: subtleGlitch 0.3s;
+        }
+
+        @keyframes subtleGlitch {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-1px); }
+            75% { transform: translateX(1px); }
+        }
+
+        /* Focus states for accessibility */
+        button:focus, .zettel-card:focus {
+            outline: 2px solid var(--volcano);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>𓀀 ZETTELKASTEN v4.0 𓀀</h1>
+        <div class="subtitle">Primordial Crime Archive • 330+ Zettels • Interactive Research Interface</div>
+    </header>
+
+    <div class="container">
+        <nav class="nav">
+            <div class="search-section">
+                <input type="text" class="search-box" placeholder="Search zettels..." id="searchInput">
+            </div>
+            
+            <button class="nav-category active" data-category="all">
+                All Zettels <span class="nav-count" id="count-all">0</span>
+            </button>
+            <button class="nav-category" data-category="location">
+                Locations <span class="nav-count" id="count-location">0</span>
+            </button>
+            <button class="nav-category" data-category="culture">
+                Cultures <span class="nav-count" id="count-culture">0</span>
+            </button>
+            <button class="nav-category" data-category="deity">
+                Deities <span class="nav-count" id="count-deity">0</span>
+            </button>
+            <button class="nav-category" data-category="protocol">
+                Protocols <span class="nav-count" id="count-protocol">0</span>
+            </button>
+            <button class="nav-category" data-category="concept">
+                Concepts <span class="nav-count" id="count-concept">0</span>
+            </button>
+            <button class="nav-category" data-category="anomaly">
+                Anomalies <span class="nav-count" id="count-anomaly">0</span>
+            </button>
+            <button class="nav-category" data-category="pattern">
+                Patterns <span class="nav-count" id="count-pattern">0</span>
+            </button>
+
+            <div class="stats">
+                <strong>Research Status:</strong><br>
+                • Active since 2025<br>
+                • 15 research sheets<br>
+                • 11 categories<br>
+                • AI collaborations: 8+
+            </div>
+        </nav>
+
+        <main>
+            <div class="zettel-grid" id="zettelGrid">
+                <!-- Zettels will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeModal">Close</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Your actual zettel data would go here
+        const zettelData = [
+            {
+                id: "L001",
+                name: "Tierra del Fuego",
+                category: "location",
+                type: "Region",
+                info: "Argentina/Chile :: ~54°S, 68°W",
+                description: "Geo-anchored anomaly, 'frozen body of goddess'. Central to ALS-RP research as site of primordial crime geo-anchor.",
+                related: ["Selk'nam", "Yaghan", "A001"],
+                tags: ["frozen-goddess", "geo-anchored", "als-rp", "witness"],
+                details: {
+                    significance: "Central to ALS-RP research; site of primordial crime geo-anchor",
+                    cultures: "Selk'nam, Yaghan",
+                    anomalies: "Frozen Body of Goddess (A001)",
+                    research_status: "Active investigation",
+                    notes: "The frozen divine feminine manifestation. Yaghan language preserves Emesal phonetic echoes."
+                }
+            },
+            {
+                id: "D001",
+                name: "Inanna",
+                category: "deity", 
+                type: "Goddess",
+                info: "Sumerian :: Love, War, Fertility, Sovereignty",
+                description: "Primary victim of primordial crime. Central figure in Sumerian mythology subjected to patriarchal subjugation.",
+                related: ["Tiamat", "Gilgamesh", "X012"],
+                tags: ["divine-feminine", "primordial-crime", "rejection"],
+                details: {
+                    domain: "Love, war, fertility, sovereignty",
+                    symbols: "Eight-pointed star, lion, dove", 
+                    key_myths: "Descent to Underworld, Sacred Marriage, Gilgamesh rejection",
+                    significance: "Primary victim of primordial crime; rejected by Gilgamesh (X012)",
+                    research_connections: "Connects to global rejection archetypes"
+                }
+            },
+            {
+                id: "A030",
+                name: "The Texas Plot",
+                category: "anomaly",
+                type: "Modern Criminal Pattern", 
+                info: "Texas/Haiti :: 2025",
+                description: "Modern HMS Bounty - men planning island sex-slavery compound. Validates ongoing Gilgamesh archetype patterns.",
+                related: ["Pitcairn", "K038", "K041"],
+                tags: ["modern-bounty", "gilgamesh-archetype", "predatory-linguistics", "trafficking"],
+                details: {
+                    significance: "Proves 'Island Trap' and 'Gilgamesh Entitlement' remain active threats",
+                    methodology: "Men learning Haitian Creole to traffic victims (Predatory Linguistics K038)",
+                    status: "Intercepted - The Defense/Grid Active",
+                    connections: "Parallels to Pitcairn Islands historical pattern",
+                    notes: "Validates necessity of CoAlexist vigilance and Boy Intervention strategy (K041)"
+                }
+            },
+            {
+                id: "K001",
+                name: "Primordial Crime",
+                category: "concept",
+                type: "Core Hypothesis",
+                info: "The Subjugation of Divine Feminine",
+                description: "The subjugation of divine feminine that fractally echoes through history. Foundational research concept.",
+                related: ["D001", "D002", "A001", "A002"],
+                tags: ["primordial-crime", "divine-feminine", "fractal"],
+                details: {
+                    definition: "The subjugation of the divine feminine (Inanna/Tiamat) that fractally echoes through history",
+                    key_components: "Divine feminine subjugation, Fractal historical patterns, Global manifestations",
+                    evidence: "Sumerian state formation, Selk'nam Hain ceremony, Global gender subjugation patterns",
+                    implications: "Universal trauma signature, Geo-anchored manifestations, Mythological recapitulations",
+                    research_status: "Core hypothesis with cross-cultural validation"
+                }
+            },
+            {
+                id: "P001",
+                name: "ALS-RP Protocol",
+                category: "protocol",
+                type: "Linguistic Analysis",
+                info: "Auld Lang Syne Resonance Protocol",
+                description: "Core research methodology finding unconscious thematic echoes across unrelated languages.",
+                related: ["P007", "K003", "K004"],
+                tags: ["als-rp", "linguistic", "methodology"],
+                details: {
+                    purpose: "Find unconscious thematic echoes across unrelated languages",
+                    methodology: "Bypass traditional comparative linguistics, identify trauma/memory patterns",
+                    key_principles: "Kinship, memory, water themes; primordial language signature",
+                    applications: "Cross-cultural mythology analysis, linguistic archaeology",
+                    notes: "Often used interchangeably with TECHATER/LDR (P007). Validated across multiple AI systems."
+                }
+            }
+        ];
+
+        let currentCategory = 'all';
+        let searchTerm = '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCounts();
+            renderZettels();
+            setupEventListeners();
+        });
+
+        // Update category counts
+        function updateCounts() {
+            const counts = {
+                all: zettelData.length,
+                location: zettelData.filter(z => z.category === 'location').length,
+                culture: zettelData.filter(z => z.category === 'culture').length,
+                deity: zettelData.filter(z => z.category === 'deity').length,
+                protocol: zettelData.filter(z => z.category === 'protocol').length,
+                concept: zettelData.filter(z => z.category === 'concept').length,
+                anomaly: zettelData.filter(z => z.category === 'anomaly').length,
+                pattern: zettelData.filter(z => z.category === 'pattern').length
+            };
+
+            Object.keys(counts).forEach(category => {
+                const element = document.getElementById(`count-${category}`);
+                if (element) {
+                    element.textContent = counts[category];
+                }
+            });
+        }
+
+        // Render zettels
+        function renderZettels() {
+            const grid = document.getElementById('zettelGrid');
+            grid.innerHTML = '';
+            
+            const filtered = zettelData.filter(z => {
+                const matchesCategory = currentCategory === 'all' || z.category === currentCategory;
+                const matchesSearch = searchTerm === '' || 
+                    z.id.toLowerCase().includes(searchTerm) ||
+                    z.name.toLowerCase().includes(searchTerm) ||
+                    z.description.toLowerCase().includes(searchTerm) ||
+                    z.tags.some(tag => tag.includes(searchTerm));
+                return matchesCategory && matchesSearch;
+            });
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--barbie);">
+                        <h3>No zettels found</h3>
+                        <p>Try a different search term or category</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filtered.forEach(zettel => {
+                const card = document.createElement('div');
+                card.className = `zettel-card ${zettel.category} glitch-on-hover`;
+                card.onclick = () => openModal(zettel);
+                card.tabIndex = 0; // Make focusable for accessibility
+                
+                card.innerHTML = `
+                    <div class="zettel-id">${zettel.id}</div>
+                    <div class="zettel-name">${zettel.name}</div>
+                    <div class="zettel-info"><strong>${zettel.type}</strong> • ${zettel.info}</div>
+                    <div class="zettel-description">${zettel.description}</div>
+                    <div class="zettel-tags">
+                        ${zettel.tags.map(tag => `<span class="tag">#${tag}</span>`).join('')}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Open modal with detailed view
+        function openModal(zettel) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            
+            const categoryColors = {
+                location: 'var(--glacier)',
+                culture: 'var(--barbie)',
+                deity: 'var(--volcano)',
+                protocol: 'var(--lapis)',
+                concept: '#ff00ff',
+                anomaly: '#00ff41',
+                pattern: '#8a2be2'
+            };
+            
+            const color = categoryColors[zettel.category];
+            
+            let detailsHTML = '';
+            if (zettel.details) {
+                detailsHTML = Object.entries(zettel.details)
+                    .map(([key, value]) => `
+                        <div class="modal-section">
+                            <h3>${key.replace(/_/g, ' ').toUpperCase()}</h3>
+                            <p>${value}</p>
+                        </div>
+                    `).join('');
+            }
+            
+            modalBody.innerHTML = `
+                <h1 class="modal-title" style="border-bottom-color: ${color}">${zettel.id} :: ${zettel.name}</h1>
+                <div class="modal-section">
+                    <h3>BASIC INFORMATION</h3>
+                    <p><strong>Type:</strong> ${zettel.type}</p>
+                    <p><strong>Info:</strong> ${zettel.info}</p>
+                    <p><strong>Description:</strong> ${zettel.description}</p>
+                </div>
+                ${detailsHTML}
+                <div class="modal-section">
+                    <h3>CONNECTIONS</h3>
+                    <p><strong>Related Entities:</strong> ${zettel.related.join(', ')}</p>
+                    <div class="zettel-tags">
+                        ${zettel.tags.map(tag => `<span class="tag" style="color: ${color}">#${tag}</span>`).join(' ')}
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        // Event listeners
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-category').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-category').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    renderZettels();
+                });
+            });
+            
+            // Search
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                searchTerm = e.target.value.toLowerCase();
+                renderZettels();
+            });
+            
+            // Modal
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            document.getElementById('modal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            
+            // Keyboard
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+        }
+    </script>
+</body>
+</html>

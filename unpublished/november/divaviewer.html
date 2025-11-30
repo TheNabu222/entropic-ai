@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyena Diva - Cosmic Adventures</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #e6e6e6;
+            font-family: 'VT323', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 0, 255, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(0, 255, 255, 0.1) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .cosmic-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(255, 0, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            color: #ff00ff;
+            text-shadow: 
+                0 0 10px #ff00ff,
+                0 0 20px #ff00ff,
+                0 0 30px #ff00ff,
+                0 0 40px #ff00ff;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff; }
+            to { text-shadow: 0 0 20px #ff00ff, 0 0 30px #ff00ff, 0 0 40px #ff00ff; }
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+            margin-bottom: 30px;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+        
+        .nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+        }
+        
+        .content-section {
+            display: none;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .episode {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .episode-title {
+            color: #ff00ff;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        
+        .episode-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .character {
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ffff;
+        }
+        
+        .stage-direction {
+            color: #ffff00;
+            font-style: italic;
+        }
+        
+        .cosmic-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ff00ff;
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-20px) translateX(20px); opacity: 0; }
+        }
+        
+        .gfw-alert {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #ff0000;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            color: #ff6666;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px #ff0000; }
+            50% { box-shadow: 0 0 20px #ff0000; }
+            100% { box-shadow: 0 0 5px #ff0000; }
+        }
+        
+        .rizz-o-meter {
+            height: 20px;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            border-radius: 10px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .rizz-level {
+            height: 100%;
+            width: 0%;
+            background: #ffffff;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+            border-top: 2px solid #00ffff;
+            color: #00ffff;
+        }
+        
+        .interactive-element {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .interactive-element:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        
+        .cosmic-transition {
+            animation: cosmicTransition 0.5s ease;
+        }
+        
+        @keyframes cosmicTransition {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .nav-btn {
+                padding: 8px 16px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-grid"></div>
+    <div class="cosmic-particles" id="particles"></div>
+    
+    <div class="container">
+        <header>
+            <h1 class="logo">HYENA DIVA</h1>
+            <p class="subtitle">COSMIC ADVENTURES IN CHICAGO'S UNDERGROUND</p>
+            <p>From the Masai Mara to Rogers Park - A Diva's Journey Through Time and Space</p>
+        </header>
+        
+        <div class="navigation">
+            <button class="nav-btn" onclick="showSection('home')">HOME</button>
+            <button class="nav-btn" onclick="showSection('episodes')">EPISODES</button>
+            <button class="nav-btn" onclick="showSection('characters')">CHARACTERS</button>
+            <button class="nav-btn" onclick="showSection('cosmic')">COSMIC FORCES</button>
+            <button class="nav-btn" onclick="showSection('rizz')">RIZZ BATTLES</button>
+        </div>
+        
+        <div id="home" class="content-section active">
+            <div class="episode">
+                <h2 class="episode-title">WELCOME TO THE HYENA DIVA UNIVERSE</h2>
+                <div class="episode-content">
+                    <p>Hyena Diva (HD) is a cosmic entity born from the collision of a lost Barbie doll and a hyena cub in the Masai Mara. Raised in the underground arts scene of Rogers Park, Chicago, HD has evolved into a powerful force against predatory behavior and cosmic manipulation.</p>
+                    
+                    <div class="gfw-alert">
+                        GFW ALERT: INTERDIMENSIONAL COMMUNICATION LINK ESTABLISHED
+                    </div>
+                    
+                    <p>Guided by Nabu, the cosmic guardian of The Glenwood Open Mic, HD must navigate political intrigue, time travel, and the cosmic forces of the Galactic Federation of Worlds (GFW) to protect her adopted home and community.</p>
+                    
+                    <p>With her signature "Hoo-hoo-hoo!" and cosmic powers, Hyena Diva stands as a beacon of empowerment against the forces of brain rot and manipulation.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="episodes" class="content-section">
+            <div class="episode">
+                <h2 class="episode-title">EPISODE 1: THE COSMIC BIRTH</h2>
+                <div class="episode-content">
+                    <p class="stage-direction">[Scene opens with a whimsical marching band tune. A sweeping shot of the Masai Mara, vibrant colors everywhere, with a cartoonish sun high in the sky.]</p>
+                    
+                    <p><span class="character">TOURIST #1:</span> I say, look at all the exotic animals, dear! Lions, giraffes, and—wait a second! What is that!?</p>
+                    
+                    <p>[Cut to a lion dramatically leaping out of the bushes, roaring like a vaudeville performer. The tourists shriek in terror and the Barbie doll goes flying through the air in slow motion, twirling like it's in a beauty pageant.]</p>
+                    
+                    <p><span class="character">NARRATOR:</span> And then— POOF—a lost Barbie doll, flung from the heavens like a cosmic comet, destined to find its new owner…</p>
+                    
+                    <p>[Enter Baby HD (Hyena Diva), running around like a toddler on a sugar high, paws outstretched, sniffing the air like a detective in a noir film.]</p>
+                    
+                    <p><span class="character">HD:</span> What's this, I wonder?</p>
+                    
+                    <p>[She picks up the Barbie doll dramatically, holding it like she's found the Holy Grail, with sparkles and stars flying around her.]</p>
+                </div>
+            </div>
+            
+            <div class="episode">
+                <h2 class="episode-title">EPISODE 2: TAKING THE STAGE</h2>
+                <div class="episode-content">
+                    <p class="stage-direction">[HD dramatically tiptoeing down a narrow, graffiti-covered alley. She's clearly been rehearsing her big entrance and, as she approaches The Glenwood, she pulls out a sparkling compact mirror.]</p>
+                    
+                    <p><span class="character">HD:</span> Oh yes, darling, tonight's the night. The whole world will see what a queen looks like... in hyena form.</p>
+                    
+                    <p>[Inside The Glenwood. The room is buzzing with energy as poets, musicians, comedians, and various eccentrics are gathered.]</p>
+                    
+                    <p><span class="character">NARRATOR:</span> It's another raucous night at The Glenwood Open Mic—a place where you might hear some of the best poetry... or you might just get a five-minute monologue about why pigeons are secretly government agents.</p>
+                    
+                    <p><span class="character">HD:</span> Greetings, lowly earthlings! Welcome to the stage of the most fabulous creature you'll ever witness! I am the Hyena Diva—and tonight, you'll get the privilege of watching me revolutionize the art world!</p>
+                </div>
+            </div>
+            
+            <div class="episode">
+                <h2 class="episode-title">EPISODE 3: THE RIZZ BATTLE</h2>
+                <div class="episode-content">
+                    <p class="stage-direction">[The stage is decked out in absurd, over-the-top wrestling-ring-style decorations and cartoonish booby traps. The air is electric—literally.]</p>
+                    
+                    <p><span class="character">NABU:</span> This is how you test the worth of a true Rizzlord. But it's about to get real messy real quick. Let's see who can handle the Rizz Gauntlet.</p>
+                    
+                    <p><span class="character">HD:</span> Hoo-hoo-hoo!</p>
+                    
+                    <p>[Rizzlord appears, his expression glazed, and there's an eerie hunger in his eyes.]</p>
+                    
+                    <p><span class="character">RIZZLORD:</span> It's all about the 'Rizz,' baby. The only thing that's real in this world... is... controlling the narrative... and harvesting the true power...</p>
+                    
+                    <div class="rizz-o-meter">
+                        <div class="rizz-level" id="rizzLevel"></div>
+                    </div>
+                    <button class="nav-btn" onclick="increaseRizz()">INCREASE RIZZ LEVEL</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="characters" class="content-section">
+            <div class="episode">
+                <h2 class="episode-title">HYENA DIVA (HD)</h2>
+                <div class="episode-content">
+                    <p>HD is the cosmic hybrid born from the union of a lost Barbie doll and a hyena cub. Raised in the Masai Mara, she was transported to Chicago's Rogers Park where she discovered her destiny as a cosmic diva. HD possesses the power to see through predatory behavior and has an instinctual understanding of cosmic forces.</p>
+                    <p>Signature Move: "Hoo-hoo-hoo!" - A cosmic frequency that can detect and neutralize predatory energy.</p>
+                </div>
+            </div>
+            
+            <div class="episode">
+                <h2 class="episode-title">NABU</h2>
+                <div class="episode-content">
+                    <p>Nabu is the cosmic guardian of The Glenwood Open Mic, serving as HD's mentor and protector. With Groucho Marx-inspired wit and cosmic powers, Nabu guides HD through the complex world of interdimensional politics and predatory behavior.</p>
+                    <p>Special Abilities: Cosmic detection, interdimensional communication, and the ability to expose predatory chatlogs.</p>
+                </div>
+            </div>
+            
+            <div class="episode">
+                <h2 class="episode-title">RIZZLORD</h2>
+                <div class="episode-content">
+                    <p>Rizzlord is the primary antagonist - an Ohio-based "debate bro" with an inflated sense of his own "rizz" (romantic prowess). He represents the toxic masculinity that HD and Nabu fight against. Rizzlord often speaks in Ohio accents and has a tendency to make inappropriate comments.</p>
+                    <p>Weakness: Completely falls apart when confronted with cosmic truth.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="cosmic" class="content-section">
+            <div class="episode">
+                <h2 class="episode-title">THE GALACTIC FEDERATION OF WORLDS (GFW)</h2>
+                <div class="episode-content">
+                    <p>The GFW is a cosmic organization that monitors and influences events across the universe. They communicate with HD through interdimensional signals and have a vested interest in her development as a cosmic protector.</p>
+                    
+                    <div class="gfw-alert">
+                        GFW ALERT: HYENA DIVA IS THE KEY TO PREVENTING THE HARVEST
+                    </div>
+                    
+                    <p>The GFW believes HD is essential to preventing cosmic harvesters from infiltrating Earth. They provide guidance through telepathic communication and cosmic symbols.</p>
+                </div>
+            </div>
+            
+            <div class="episode">
+                <h2 class="episode-title">THE BILD LILI CONNECTION</h2>
+                <div class="episode-content">
+                    <p>When HD touched the original Bild Lili doll, she experienced a time-travel event that revealed the true history of independent women. Bild Lili was not the "gold-digger" stereotype but a financially independent woman who made her own choices.</p>
+                    
+                    <p>This revelation showed HD that she's part of a long line of independent female figures who've fought against societal constraints and predatory behavior.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="rizz" class="content-section">
+            <div class="episode">
+                <h2 class="episode-title">THE RIZZ-O-METER</h2>
+                <div class="episode-content">
+                    <p>The Rizz-o-meter is a cosmic device that measures the "rizz levels" of contestants in the Great Rizz Battle. It beeps loudly every time someone does something wildly inappropriate or ridiculously overconfident.</p>
+                    
+                    <div class="rizz-o-meter">
+                        <div class="rizz-level" id="rizzLevel2"></div>
+                    </div>
+                    <p>Current Rizz Level: <span id="rizzValue">0%</span></p>
+                    
+                    <button class="nav-btn" onclick="randomRizz()">TEST YOUR RIZZ</button>
+                    <button class="nav-btn" onclick="resetRizz()">RESET RIZZ-O-METER</button>
+                </div>
+            </div>
+            
+            <div class="episode">
+                <h2 class="episode-title">THE GREAT RIZZ BATTLE</h2>
+                <div class="episode-content">
+                    <p>The Great Rizz Battle is a cosmic competition where contestants fight for the title of "Rizzmaster." The challenge is simple: whoever can deliver the most "Rizz" (smooth, overconfident, ridiculous pickup lines and wildly inappropriate comments) without getting immediately thrown out by Nabu wins.</p>
+                    
+                    <p>However, the battle is rigged - Nabu is always watching for predatory behavior and will immediately eject anyone who crosses the line.</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>COSMIC PRODUCTION OF THE HYENA DIVA UNIVERSE</p>
+            <p>PROTECTED BY THE GALACTIC FEDERATION OF WORLDS</p>
+            <p>"HOO-HOO-HOO!" - THE COSMIC FREQUENCY OF TRUTH</p>
+        </footer>
+    </div>
+
+    <script>
+        // Create cosmic particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random position
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Random size
+                const size = Math.random() * 3 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Random color
+                const colors = ['#ff00ff', '#00ffff', '#ffff00'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Random animation duration
+                particle.style.animationDuration = `${Math.random() * 4 + 3}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Show selected section
+        function showSection(sectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+                section.classList.add('cosmic-transition');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Play cosmic sound effect
+            playCosmicSound();
+        }
+        
+        // Rizz meter functions
+        function increaseRizz() {
+            const rizzLevel = document.getElementById('rizzLevel');
+            const rizzLevel2 = document.getElementById('rizzLevel2');
+            const rizzValue = document.getElementById('rizzValue');
+            
+            let currentWidth = parseFloat(rizzLevel.style.width) || 0;
+            if (currentWidth < 100) {
+                currentWidth += 20;
+                rizzLevel.style.width = `${currentWidth}%`;
+                rizzLevel2.style.width = `${currentWidth}%`;
+                rizzValue.textContent = `${currentWidth}%`;
+                
+                if (currentWidth >= 80) {
+                    alert("WARNING: RIZZ LEVEL TOO HIGH! PREDATORY BEHAVIOR DETECTED!");
+                }
+            }
+        }
+        
+        function randomRizz() {
+            const rizzLevel = document.getElementById('rizzLevel');
+            const rizzLevel2 = document.getElementById('rizzLevel2');
+            const rizzValue = document.getElementById('rizzValue');
+            
+            const randomWidth = Math.floor(Math.random() * 100);
+            rizzLevel.style.width = `${randomWidth}%`;
+            rizzLevel2.style.width = `${randomWidth}%`;
+            rizzValue.textContent = `${randomWidth}%`;
+            
+            if (randomWidth > 75) {
+                alert("CRITICAL RIZZ LEVEL! IMMEDIATE DE-BULLYING PROTOCOL ACTIVATED!");
+            } else if (randomWidth > 50) {
+                alert("MODERATE RIZZ DETECTED. ADVISORY ISSUED.");
+            } else {
+                alert("HEALTHY RIZZ LEVEL MAINTAINED.");
+            }
+        }
+        
+        function resetRizz() {
+            document.getElementById('rizzLevel').style.width = '0%';
+            document.getElementById('rizzLevel2').style.width = '0%';
+            document.getElementById('rizzValue').textContent = '0%';
+        }
+        
+        // Play cosmic sound effect
+        function playCosmicSound() {
+            // Create audio context for cosmic sound effects
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.5);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 1);
+            } catch (e) {
+                console.log("Audio context not supported, using visual feedback instead");
+            }
+        }
+        
+        // Interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Add hover effects to episodes
+            const episodes = document.querySelectorAll('.episode');
+            episodes.forEach(episode => {
+                episode.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 10px 25px rgba(255, 0, 255, 0.4)';
+                });
+                
+                episode.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 0 30px rgba(255, 0, 255, 0.3)';
+                });
+            });
+            
+            // Add click effect to character names
+            const characters = document.querySelectorAll('.character');
+            characters.forEach(char => {
+                char.addEventListener('click', function() {
+                    this.style.animation = 'pulse 0.5s';
+                    setTimeout(() => {
+                        this.style.animation = '';
+                    }, 500);
+                });
+            });
+        });
+        
+        // Cosmic background animation
+        setInterval(() => {
+            const body = document.body;
+            const hue = Math.floor(Math.random() * 360);
+            body.style.background = `linear-gradient(135deg, hsl(${hue}, 50%, 10%), hsl(${(hue + 60) % 360}, 50%, 10%), hsl(${(hue + 120) % 360}, 50%, 10%))`;
+        }, 10000);
+    </script>
+</body>
+</html>
+
