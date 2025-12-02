@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entropic AI – Repository WYSIWYG Studio</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #f5f7fb 0%, #eef3ff 100%);
+      }
+      #rtf-editor {
+        min-height: 360px;
+        border: 2px dashed #d3d7ff;
+        padding: 1.5rem;
+        background: #fff;
+        border-radius: 8px;
+      }
+      #rtf-editor:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(74, 92, 255, 0.2);
+      }
+      .toolbar button {
+        margin-right: 0.25rem;
+      }
+      .file-item.is-active {
+        background: #f0f4ff;
+      }
+      .property-apply {
+        background: #f6f7fb;
+        border-radius: 6px;
+      }
+      .scroll-panel {
+        max-height: 520px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="hero is-primary is-bold">
+      <div class="hero-body">
+        <div class="container">
+          <p class="subtitle is-6 has-text-white">Entropic-AI Toolkit</p>
+          <h1 class="title is-2">Repository WYSIWYG &amp; CSS Lab</h1>
+          <p class="subtitle">
+            Bulma-styled rich text playground powered by the in-page RtfEditor.
+            Load any HTML artifact from the repo, edit visually, and apply every
+            requested CSS property (from align-content to z-index).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <main class="section">
+      <div class="container">
+        <div class="columns is-variable is-5">
+          <div class="column is-one-quarter">
+            <div class="box">
+              <p class="title is-5">HTML files</p>
+              <p class="subtitle is-7" id="file-count">Loading index…</p>
+              <div class="field">
+                <label class="label is-small">Search</label>
+                <div class="control has-icons-left">
+                  <input
+                    id="file-search"
+                    class="input"
+                    type="search"
+                    placeholder="Filter by name or path"
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-search"></i>
+                  </span>
+                </div>
+              </div>
+              <div class="panel scroll-panel" id="file-list" aria-label="HTML file list"></div>
+              <div class="buttons mt-3">
+                <button class="button is-link is-fullwidth" id="load-file" disabled>
+                  Load selected HTML
+                </button>
+                <button class="button is-light is-fullwidth" id="download-html">
+                  Download edited HTML
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="column is-half">
+            <div class="box">
+              <p class="title is-4 mb-2">RtfEditor workspace</p>
+              <p class="subtitle is-7">
+                Use the toolbar for common formatting, then the CSS lab to apply
+                the requested properties directly to your selection.
+              </p>
+              <div class="buttons toolbar" id="rtf-toolbar">
+                <button class="button is-small" data-command="bold">Bold</button>
+                <button class="button is-small" data-command="italic">Italic</button>
+                <button class="button is-small" data-command="underline">Underline</button>
+                <button class="button is-small" data-command="strikeThrough">
+                  Strike
+                </button>
+                <button class="button is-small" data-command="insertUnorderedList">
+                  Bullets
+                </button>
+                <button class="button is-small" data-command="insertOrderedList">
+                  Numbered
+                </button>
+                <button class="button is-small" data-command="justifyLeft">
+                  Align left
+                </button>
+                <button class="button is-small" data-command="justifyCenter">
+                  Center
+                </button>
+                <button class="button is-small" data-command="justifyRight">
+                  Align right
+                </button>
+                <button class="button is-small" data-command="createLink">Link</button>
+                <button class="button is-small" data-command="removeFormat">
+                  Clear
+                </button>
+              </div>
+
+              <div class="notification is-info is-light property-apply">
+                <p class="title is-6">CSS property lab</p>
+                <p class="subtitle is-7">
+                  Apply any of the requested properties by selecting content in
+                  the editor, picking a property, and providing a value.
+                </p>
+                <div class="columns is-mobile">
+                  <div class="column">
+                    <label class="label is-small">Property</label>
+                    <input
+                      class="input"
+                      list="css-property-list"
+                      id="css-property"
+                      placeholder="e.g. align-content"
+                    />
+                    <datalist id="css-property-list"></datalist>
+                  </div>
+                  <div class="column">
+                    <label class="label is-small">Value</label>
+                    <input
+                      class="input"
+                      id="css-value"
+                      placeholder="e.g. center / 2rem / ease"
+                    />
+                  </div>
+                  <div class="column is-narrow is-flex is-align-items-flex-end">
+                    <button class="button is-primary" id="apply-style">
+                      Apply style
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="rtf-editor" contenteditable="true" class="content">
+                <h2 class="title is-4">Welcome to the Entropic-AI WYSIWYG studio</h2>
+                <p>
+                  Select an HTML artifact from the left to load it here. Use the
+                  toolbar for quick formatting or the CSS property lab to apply
+                  deeper styling such as <code>align-content</code>,
+                  <code>animation</code>, or <code>grid-template</code>.
+                </p>
+              </div>
+            </div>
+            <div class="notification is-light" id="rtf-status">
+              Ready to edit.
+            </div>
+          </div>
+
+          <div class="column is-one-quarter">
+            <div class="box">
+              <p class="title is-5">Property reference</p>
+              <p class="subtitle is-7">
+                Every property from the request is cataloged below, grouped by
+                category so you can explore flexbox, grid, backgrounds, borders,
+                transitions, typography, and more.
+              </p>
+              <div id="property-browser" class="scroll-panel"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://kit.fontawesome.com/a2d045eae3.js" crossorigin="anonymous"></script>
+    <script src="../js/rtfeditor.js"></script>
+  </body>
+</html>
