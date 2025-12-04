@@ -391,6 +391,14 @@
             </div>
             
             <div class="tree-content" id="siteTree">
+                <div class="section-title">📡 FULL REPO (GITHUB PAGES)</div>
+                <div class="tree-item">
+                    <span class="folder expanded" onclick="toggle(this)">/entropic-ai</span>
+                    <ul class="nested active" id="repoTree">
+                        <li class="tree-item"><span class="file">Loading repo HTML files...</span></li>
+                    </ul>
+                </div>
+
                 <div class="tree-item">
                     <span class="folder" onclick="toggle(this)">coaiexist.wtf</span>
                     <ul class="nested active">
@@ -636,6 +644,89 @@
     <div class="brrrr" onclick="brrrrVibration()">✨</div>
     
     <script>
+        const repoBaseUrl = 'https://TheNabu222.github.io/entropic-ai/';
+        const repoListPath = `${repoBaseUrl}reports/repo-html-files.json`;
+
+        function buildRepoTreeStructure(files) {
+            const root = {};
+
+            files.forEach(fullPath => {
+                const segments = fullPath.split('/');
+                let node = root;
+
+                segments.forEach((segment, index) => {
+                    const isFile = index === segments.length - 1;
+
+                    if (isFile) {
+                        node.__files = node.__files || [];
+                        node.__files.push({ name: segment, path: fullPath });
+                    } else {
+                        node.__folders = node.__folders || {};
+                        node.__folders[segment] = node.__folders[segment] || {};
+                        node = node.__folders[segment];
+                    }
+                });
+            });
+
+            return root;
+        }
+
+        function renderRepoNode(node, container, currentPath = '') {
+            const folders = Object.keys(node.__folders || {}).sort((a, b) => a.localeCompare(b));
+            const files = (node.__files || []).sort((a, b) => a.name.localeCompare(b.name));
+
+            folders.forEach(folderName => {
+                const li = document.createElement('li');
+                li.className = 'tree-item';
+
+                const folderSpan = document.createElement('span');
+                folderSpan.className = 'folder';
+                folderSpan.textContent = `/${folderName}`;
+                folderSpan.onclick = () => toggle(folderSpan);
+
+                const nested = document.createElement('ul');
+                nested.className = 'nested';
+
+                li.appendChild(folderSpan);
+                li.appendChild(nested);
+                container.appendChild(li);
+
+                renderRepoNode(node.__folders[folderName], nested, `${currentPath}${folderName}/`);
+            });
+
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.className = 'tree-item';
+
+                const fileSpan = document.createElement('span');
+                fileSpan.className = 'file html';
+                fileSpan.textContent = file.name;
+                fileSpan.onclick = () => addPreview(`${repoBaseUrl}${file.path}`, file.path);
+
+                li.appendChild(fileSpan);
+                container.appendChild(li);
+            });
+        }
+
+        async function initializeRepoTree() {
+            const repoTree = document.getElementById('repoTree');
+            if (!repoTree) return;
+
+            try {
+                const response = await fetch(repoListPath);
+                const files = await response.json();
+                const treeData = buildRepoTreeStructure(files);
+
+                repoTree.innerHTML = '';
+                renderRepoNode(treeData, repoTree);
+            } catch (error) {
+                console.error('Failed to load repo HTML list', error);
+                repoTree.innerHTML = '<li class="tree-item"><span class="file">Unable to load repo listing.</span></li>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeRepoTree);
+
         let previewCounter = 0;
         
         function toggle(element) {
