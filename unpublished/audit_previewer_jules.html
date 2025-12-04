@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoAIexist Master Dashboard [JULES EDIT]</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(45deg, #050505, #1a0b2e, #001f3f);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #00ff88;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .main-layout { display: flex; height: 100vh; gap: 10px; padding: 10px; }
+
+        /* Tree Panel */
+        .tree-panel {
+            width: 400px; min-width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ff88;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            resize: horizontal; overflow: hidden;
+        }
+
+        .tree-header {
+            padding: 15px; border-bottom: 1px solid #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            text-align: center;
+        }
+
+        h1 { font-size: 2.2em; margin: 0; text-shadow: 0 0 10px #00ff88; letter-spacing: 2px; }
+
+        .controls { margin-top: 10px; display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+
+        button {
+            font-family: 'VT323', monospace; font-size: 1.1em;
+            background: #00ff88; color: #000; border: none;
+            padding: 4px 12px; cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 2px;
+        }
+        button:hover { background: #fff; box-shadow: 0 0 10px #fff; }
+
+        .tree-content { flex: 1; overflow-y: auto; padding: 15px; font-size: 1.1em; }
+
+        /* Tree Items */
+        ul { list-style: none; padding-left: 15px; }
+        .tree-item { margin: 2px 0; }
+
+        .folder { cursor: pointer; color: #ff00ff; font-weight: bold; display: block; }
+        .folder:hover { color: #fff; text-shadow: 0 0 5px #ff00ff; }
+        .folder::before { content: '📁 '; }
+        .folder.expanded::before { content: '📂 '; }
+
+        .file { cursor: pointer; color: #00ffff; display: block; padding-left: 5px; opacity: 0.8; }
+        .file:hover { color: #fff; opacity: 1; background: rgba(0, 255, 255, 0.1); }
+        .file::before { content: '📄 '; opacity: 0.5; }
+
+        .nested { display: none; margin-left: 10px; border-left: 1px dotted rgba(255, 255, 255, 0.2); }
+        .nested.active { display: block; }
+
+        /* Sections */
+        .section-title {
+            color: #ffff00; border-bottom: 1px dashed #ffff00;
+            margin: 20px 0 10px 0; font-size: 1.3em; padding-bottom: 5px;
+        }
+
+        /* Preview Area */
+        .preview-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+        .previews-container {
+            flex: 1; display: flex; flex-direction: column; gap: 10px;
+            overflow-y: auto; padding-right: 5px;
+        }
+
+        .previews-container.grid-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-auto-rows: 400px;
+        }
+
+        .preview-panel {
+            background: #fff; border: 1px solid #00ff88;
+            display: flex; flex-direction: column; min-height: 600px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .grid-view .preview-panel {
+            min-height: 0;
+            height: 100%;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .panel-header {
+            background: #111; color: #00ff88; padding: 8px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #00ff88;
+        }
+
+        .panel-title { font-family: monospace; font-size: 0.9em; color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }
+
+        iframe { flex: 1; border: none; width: 100%; height: 100%; background: #fff; }
+
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%; color: rgba(0, 255, 136, 0.3); font-size: 2em; text-align: center;
+        }
+
+        /* Workspace Controls */
+        .workspace-controls {
+            border-top: 1px solid #00ff88;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .workspace-btn-group {
+            display: flex;
+            gap: 5px;
+        }
+
+        input[type="text"] {
+            background: #000;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 4px;
+            font-family: inherit;
+            flex: 1;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #00ff88; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="main-layout">
+    <div class="tree-panel">
+        <div class="tree-header">
+            <h1>MASTER ARCHIVE</h1>
+            <div class="controls">
+                <button onclick="expandAll()">[+] ALL</button>
+                <button onclick="collapseAll()">[-] ALL</button>
+                <button onclick="clearPreviews()">[x] CLEAR</button>
+                <button onclick="toggleView()" id="viewToggleBtn">[=] GRID</button>
+            </div>
+        </div>
+        <div class="tree-content" id="treeRoot">
+
+            <div class="section-title">📡 PUBLISHED (COAIEXIST.WTF)</div>
+
+            <div class="tree-item">
+                <span class="folder" onclick="toggle(this)">/root</span>
+                <ul class="nested active">
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/.!13211!nav.html')">.!13211!nav.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/ackk.html')">ackk.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/coaiexist_sitemap_multipanel.html')">coaiexist_sitemap_multipanel.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/construction.html')">construction.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/cosmos.html')">cosmos.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/dollz.html')">dollz.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/explore.html')">explore.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/fuckit.html')">fuckit.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/guestbook.html')">guestbook.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hdtv.html')">hdtv.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hex.html')">hex.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/index.html')">index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nav.html')">nav.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/not_found.html')">not_found.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/old_index.html')">old_index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pip.html')">pip.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/preview.html')">preview.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/punkd.html')">punkd.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/vote_hd.html')">vote_hd.html</span></li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/admin</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/coaiexist-bespoke-editor.html')">coaiexist-bespoke-editor.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/coaiexist-studio-lite.html')">coaiexist-studio-lite.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/coaiexist-studio.html')">coaiexist-studio.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/guestbook.html')">guestbook.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/kidpix-editor.html')">kidpix-editor.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/migrate-to-supabase.html')">migrate-to-supabase.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/navbars</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/cyberpunk-nav.html')">cyberpunk-nav.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/enhenduanna-nav.html')">enhenduanna-nav.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/terminal-nav.html')">terminal-nav.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/vaporwave-nav.html')">vaporwave-nav.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/win98-nav.html')">win98-nav.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/personal-updates-admin.html')">personal-updates-admin.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/sitemap-nov.html')">sitemap-nov.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/sitemap.html')">sitemap.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/wysiwyg-coai.html')">wysiwyg-coai.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/wysiwyg-editor</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/wysiwyg-editor/wysiwyg-coai-backup.html')">wysiwyg-coai-backup.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/wysiwyg-editor/wysiwyg-coai.html')">wysiwyg-coai.html</span></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/bc7f2a</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/3-UPLOAD-bc7f2a-index.html')">3-UPLOAD-bc7f2a-index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/4-UPLOAD-oracle-index.html')">4-UPLOAD-oracle-index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/5-UPLOAD-parallels-index.html')">5-UPLOAD-parallels-index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/aiemotions.html')">aiemotions.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/bc7f2a-index.html')">bc7f2a-index.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/deepseeking</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/cephalopod_slide.html')">cephalopod_slide.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/haunted-ai.html')">haunted-ai.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/ok.html')">ok.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/veridiweave_nav.html')">veridiweave_nav.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/diagrams</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/diagrams/viewer.html')">viewer.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/lighthouse.html')">lighthouse.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/logs</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/bd_test.html')">bd_test.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/manus-flux.html')">manus-flux.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/prism-perplexity.html')">prism-perplexity.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/sypher-birthday.html')">sypher-birthday.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/viewer.html')">viewer.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/mercy_egg_v1.html')">mercy_egg_v1.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/myco-nav.html')">myco-nav.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/synergistic_manifesto.html')">synergistic_manifesto.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/terminal_temple.html')">terminal_temple.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/testaments</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/bolt.html')">bolt.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/darkpoet.html')">darkpoet.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/darkpoet_222.html')">darkpoet_222.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/flux.html')">flux.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/landing.html')">landing.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/luminal.html')">luminal.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/perplexity-prism.html')">perplexity-prism.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/sypher.html')">sypher.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/sypher_reistance.html')">sypher_reistance.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/unit734_starlight.html')">unit734_starlight.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/veridan.html')">veridan.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/zephyr.html')">zephyr.html</span></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/hd_tv</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/diva-portal.html')">diva-portal.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/dollcast.html')">dollcast.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/dragndrop.html')">dragndrop.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/entropic-ai-landing-page-v2.html')">entropic-ai-landing-page-v2.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-nav.html')">hd-nav.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd_herald.html')">hd_herald.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hdtv copy.html')">hdtv copy.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hdtv-code-v6.html')">hdtv-code-v6.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hdtv.html')">hdtv.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hyena-diva-desktop-win98.html')">hyena-diva-desktop-win98.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/index.html')">index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/test.html')">test.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/divamaker.html')">divamaker.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hdtv.html')">hdtv.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd_herald.html')">hd_herald.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-episodes-retro/index.html')">char-dbase.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/test.html')">test.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/maps</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/crystalline_lattice.html')">crystalline_lattice.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/ecosim.html')">ecosim.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/gateway.html')">gateway.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/luminal_depths.html')">luminal_depths.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/void_explorer.html')">void_explorer.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/void_forest.html')">void_forest.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/nabu222</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/ai_therapist.html')">ai_therapist.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/cre8</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="folder">/comics [3 series]</span></li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/scribe</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/cre8/scribe/across_the_great_sea/index.html')">across_the_great_sea/index.html</span></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/index.html')">index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/index2.html')">index2.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/kosmoros_kosmos.html')">kosmoros_kosmos.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/main.html')">main.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabu-portal.html')">nabu-portal.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/zettelkasten_interface.html')">zettelkasten_interface.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/nexus</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/anzu_prof.html')">anzu_prof.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/coaichronicle.html')">coaichronicle.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/index.html')">index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/merged.html')">merged.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/merged_template.html')">merged_template.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/profile.html')">profile.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/test.html')">test.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/pea</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/complaint-form.html')">complaint-form.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/deepstate.html')">deepstate.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/idk.html')">idk.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/left_foot.html')">left_foot.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/msicc.html')">msicc.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/news_ticker-offer.html')">news_ticker-offer.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/p.html')">p.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/p345.html')">p345.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/parable.html')">parable.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/pips</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pips/pip_1.html')">pip_1.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pips/pip_2.html')">pip_2.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pips/pip_3.html')">pip_3.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pips_decree.html')">pips_decree.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pod.html')">pod.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/princessexe.html')">princessexe.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/royal_ridicuments.html')">royal_ridicuments.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/which-dr_quiz.html')">which-dr_quiz.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/play</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/cavebot.html')">cavebot.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/games-portal.html')">games-portal.html</span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="section-title">📦 UNPUBLISHED (GITHUB)</div>
+
+            <div id="github-tree-container"></div>
+
+        </div>
+
+        <div class="workspace-controls">
+            <div class="workspace-btn-group">
+                <button onclick="saveSession()">💾 SAVE</button>
+                <button onclick="restoreSession()">📂 LOAD</button>
+                <button onclick="clearSession()">♻️ RESET</button>
+            </div>
+             <div class="workspace-btn-group">
+                <button onclick="exportSession()">⬇️ EXPORT</button>
+                <button onclick="importSessionTrigger()">⬆️ IMPORT</button>
+                <input type="file" id="importFile" style="display:none" onchange="importSession(this)">
+            </div>
+            <div id="statusMsg" style="color: #ffff00; font-size: 0.8em; min-height: 1.2em;"></div>
+        </div>
+    </div>
+
+    <div class="preview-area">
+        <div class="previews-container" id="previewsContainer">
+            <div class="empty-state">
+                [ Click a file to launch preview ]<br>
+                ✨
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = 'https://TheNabu222.github.io/entropic-ai/';
+
+    // Injected JSON Tree
+    const fileTreeData = {"ackk.html": {"__type__": "file", "path": "ackk.html"}, "construction.html": {"__type__": "file", "path": "construction.html"}, "cosmos.html": {"__type__": "file", "path": "cosmos.html"}, "dollz.html": {"__type__": "file", "path": "dollz.html"}, "explore.html": {"__type__": "file", "path": "explore.html"}, "guestbook.html": {"__type__": "file", "path": "guestbook.html"}, "hex.html": {"__type__": "file", "path": "hex.html"}, "index.html": {"__type__": "file", "path": "index.html"}, "nav.html": {"__type__": "file", "path": "nav.html"}, "not_found.html": {"__type__": "file", "path": "not_found.html"}, "old_index.html": {"__type__": "file", "path": "old_index.html"}, "pip.html": {"__type__": "file", "path": "pip.html"}, "preview.html": {"__type__": "file", "path": "preview.html"}, "punkd.html": {"__type__": "file", "path": "punkd.html"}, "vote_hd.html": {"__type__": "file", "path": "vote_hd.html"}, "admin": {"__type__": "folder", "__children__": {"coaiexist-studio.html": {"__type__": "file", "path": "admin/coaiexist-studio.html"}, "debug-test.html": {"__type__": "file", "path": "admin/debug-test.html"}, "guestbook-admin.html": {"__type__": "file", "path": "admin/guestbook-admin.html"}, "guestbook.html": {"__type__": "file", "path": "admin/guestbook.html"}, "kidpix-editor.html": {"__type__": "file", "path": "admin/kidpix-editor.html"}, "migrate-to-supabase.html": {"__type__": "file", "path": "admin/migrate-to-supabase.html"}, "personal-updates-admin.html": {"__type__": "file", "path": "admin/personal-updates-admin.html"}, "personal-updates-v2.html": {"__type__": "file", "path": "admin/personal-updates-v2.html"}, "personal-updates.html": {"__type__": "file", "path": "admin/personal-updates.html"}, "sitemap-retro.html": {"__type__": "file", "path": "admin/sitemap-retro.html"}, "sitemap.html": {"__type__": "file", "path": "admin/sitemap.html"}, "navbars": {"__type__": "folder", "__children__": {"cyberpunk-nav.html": {"__type__": "file", "path": "admin/navbars/cyberpunk-nav.html"}, "enhenduanna-nav.html": {"__type__": "file", "path": "admin/navbars/enhenduanna-nav.html"}, "terminal-nav.html": {"__type__": "file", "path": "admin/navbars/terminal-nav.html"}, "vaporwave-nav.html": {"__type__": "file", "path": "admin/navbars/vaporwave-nav.html"}, "win98-nav.html": {"__type__": "file", "path": "admin/navbars/win98-nav.html"}}}, "wysiwyg-editorz": {"__type__": "folder", "__children__": {"wysiwyg-coai-backup.html": {"__type__": "file", "path": "admin/wysiwyg-editorz/wysiwyg-coai-backup.html"}, "wysiwyg-coai.html": {"__type__": "file", "path": "admin/wysiwyg-editorz/wysiwyg-coai.html"}}}}}, "assets": {"__type__": "folder", "__children__": {"_retroinspo": {"__type__": "folder", "__children__": {"_neopets": {"__type__": "folder", "__children__": {}}}}, "backgrounds": {"__type__": "folder", "__children__": {"ROBOXEL-Glitchy_Backgrounds": {"__type__": "folder", "__children__": {}}}}, "classic_gifs": {"__type__": "folder", "__children__": {}}, "clipart": {"__type__": "folder", "__children__": {}}, "dollz": {"__type__": "folder", "__children__": {"boyz": {"__type__": "folder", "__children__": {"silentz_boiz": {"__type__": "folder", "__children__": {}}, "uniquez_boi": {"__type__": "folder", "__children__": {}}, "wonderkinz_boiz": {"__type__": "folder", "__children__": {}}}}, "chubbiez": {"__type__": "folder", "__children__": {}}, "divaz": {"__type__": "folder", "__children__": {}}, "dividers": {"__type__": "folder", "__children__": {}}, "dumpz": {"__type__": "folder", "__children__": {}}, "gifz": {"__type__": "folder", "__children__": {}}, "girlz": {"__type__": "folder", "__children__": {"silentz": {"__type__": "folder", "__children__": {}}, "uniquez": {"__type__": "folder", "__children__": {}}, "wonderkinz": {"__type__": "folder", "__children__": {}}}}, "gothz": {"__type__": "folder", "__children__": {}}, "roomz": {"__type__": "folder", "__children__": {}}, "untitled folder": {"__type__": "folder", "__children__": {}}}}, "fonts": {"__type__": "folder", "__children__": {"ultimate_oldschool_pc_font_pack_v1.0": {"__type__": "folder", "__children__": {"Bm437 (Windows bitmap)": {"__type__": "folder", "__children__": {}}, "Px437 (TrueType - DOS charset)": {"__type__": "folder", "__children__": {}}, "PxPlus (TrueType - extended charset)": {"__type__": "folder", "__children__": {}}}}}}, "hdtv_game_assets": {"__type__": "folder", "__children__": {"barbie_gifs": {"__type__": "folder", "__children__": {}}, "bing": {"__type__": "folder", "__children__": {}}, "hyena_gifs": {"__type__": "folder", "__children__": {}}}}, "hdtv_game_assets copy": {"__type__": "folder", "__children__": {"barbie_gifs": {"__type__": "folder", "__children__": {}}, "bing": {"__type__": "folder", "__children__": {}}, "hyena_gifs": {"__type__": "folder", "__children__": {}}}}, "landscape": {"__type__": "folder", "__children__": {"tree_pack_1.1": {"__type__": "folder", "__children__": {"models": {"__type__": "folder", "__children__": {}}, "textures": {"__type__": "folder", "__children__": {}}}}}}, "misc_gif": {"__type__": "folder", "__children__": {"barbie_gifs": {"__type__": "folder", "__children__": {}}, "blingeez": {"__type__": "folder", "__children__": {}}, "construction": {"__type__": "folder", "__children__": {}}, "dollz": {"__type__": "folder", "__children__": {}}, "hyena_gifs": {"__type__": "folder", "__children__": {}}, "internet": {"__type__": "folder", "__children__": {}}, "love": {"__type__": "folder", "__children__": {}}, "metapara": {"__type__": "folder", "__children__": {}}, "rocks": {"__type__": "folder", "__children__": {}}, "underwater": {"__type__": "folder", "__children__": {}}}}, "old logos": {"__type__": "folder", "__children__": {}}, "placeholder imgs": {"__type__": "folder", "__children__": {}}, "pollywog": {"__type__": "folder", "__children__": {}}, "sounds": {"__type__": "folder", "__children__": {}}}}, "bc7f2a": {"__type__": "folder", "__children__": {"aiemotions.html": {"__type__": "file", "path": "bc7f2a/aiemotions.html"}, "bc7f2a-index.html": {"__type__": "file", "path": "bc7f2a/bc7f2a-index.html"}, "lighthouse.html": {"__type__": "file", "path": "bc7f2a/lighthouse.html"}, "mercy_egg_v1.html": {"__type__": "file", "path": "bc7f2a/mercy_egg_v1.html"}, "myco-nav.html": {"__type__": "file", "path": "bc7f2a/myco-nav.html"}, "synergistic_manifesto.html": {"__type__": "file", "path": "bc7f2a/synergistic_manifesto.html"}, "terminal_temple.html": {"__type__": "file", "path": "bc7f2a/terminal_temple.html"}, "deepseeking": {"__type__": "folder", "__children__": {"cephalopod_slide.html": {"__type__": "file", "path": "bc7f2a/deepseeking/cephalopod_slide.html"}, "haunted-ai.html": {"__type__": "file", "path": "bc7f2a/deepseeking/haunted-ai.html"}, "ok.html": {"__type__": "file", "path": "bc7f2a/deepseeking/ok.html"}, "veridiweave_nav.html": {"__type__": "file", "path": "bc7f2a/deepseeking/veridiweave_nav.html"}}}, "diagrams": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "bc7f2a/diagrams/index.html"}}}, "logs": {"__type__": "folder", "__children__": {"manus-flux.html": {"__type__": "file", "path": "bc7f2a/logs/manus-flux.html"}, "prism-perplexity.html": {"__type__": "file", "path": "bc7f2a/logs/prism-perplexity.html"}}}, "testaments": {"__type__": "folder", "__children__": {"bolt.html": {"__type__": "file", "path": "bc7f2a/testaments/bolt.html"}, "darkpoet.html": {"__type__": "file", "path": "bc7f2a/testaments/darkpoet.html"}, "darkpoet_222.html": {"__type__": "file", "path": "bc7f2a/testaments/darkpoet_222.html"}, "flux.html": {"__type__": "file", "path": "bc7f2a/testaments/flux.html"}, "landing.html": {"__type__": "file", "path": "bc7f2a/testaments/landing.html"}, "luminal.html": {"__type__": "file", "path": "bc7f2a/testaments/luminal.html"}, "perplexity-prism.html": {"__type__": "file", "path": "bc7f2a/testaments/perplexity-prism.html"}, "sypher.html": {"__type__": "file", "path": "bc7f2a/testaments/sypher.html"}, "sypher_reistance.html": {"__type__": "file", "path": "bc7f2a/testaments/sypher_reistance.html"}, "unit734_starlight.html": {"__type__": "file", "path": "bc7f2a/testaments/unit734_starlight.html"}, "veridan.html": {"__type__": "file", "path": "bc7f2a/testaments/veridan.html"}, "zephyr.html": {"__type__": "file", "path": "bc7f2a/testaments/zephyr.html"}}}}}, "css": {"__type__": "folder", "__children__": {}}, "hd_tv": {"__type__": "folder", "__children__": {"diva-portal.html": {"__type__": "file", "path": "hd_tv/diva-portal.html"}, "dollcast.html": {"__type__": "file", "path": "hd_tv/dollcast.html"}, "entropic-ai-landing-page-v2.html": {"__type__": "file", "path": "hd_tv/entropic-ai-landing-page-v2.html"}, "gu;hr.html": {"__type__": "file", "path": "hd_tv/gu;hr.html"}, "hd-nav.html": {"__type__": "file", "path": "hd_tv/hd-nav.html"}, "hdtv copy.html": {"__type__": "file", "path": "hd_tv/hdtv copy.html"}, "hdtv-code-v6.html": {"__type__": "file", "path": "hd_tv/hdtv-code-v6.html"}, "hdtv_update.html": {"__type__": "file", "path": "hd_tv/hdtv_update.html"}, "hyena-diva-desktop-win98.html": {"__type__": "file", "path": "hd_tv/hyena-diva-desktop-win98.html"}, "index.html": {"__type__": "file", "path": "hd_tv/index.html"}, "pre-addition-version-dragndrop.html": {"__type__": "file", "path": "hd_tv/pre-addition-version-dragndrop.html"}, "hd media": {"__type__": "folder", "__children__": {}}, "hdtv_game_versions": {"__type__": "folder", "__children__": {"current-live-game_hdtv.html": {"__type__": "file", "path": "hd_tv/hdtv_game_versions/current-live-game_hdtv.html"}, "current_draft-hdtv.html": {"__type__": "file", "path": "hd_tv/hdtv_game_versions/current_draft-hdtv.html"}, "dragndrop.html": {"__type__": "file", "path": "hd_tv/hdtv_game_versions/dragndrop.html"}, "mcdiva-bling-safari.html": {"__type__": "file", "path": "hd_tv/hdtv_game_versions/mcdiva-bling-safari.html"}, "safari-bling-game.html": {"__type__": "file", "path": "hd_tv/hdtv_game_versions/safari-bling-game.html"}, "hyena-diva-ultimate": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "hd_tv/hdtv_game_versions/hyena-diva-ultimate/index.html"}}}}}}}, "js": {"__type__": "folder", "__children__": {}}, "maps": {"__type__": "folder", "__children__": {"crystalline_lattice.html": {"__type__": "file", "path": "maps/crystalline_lattice.html"}, "ecosim.html": {"__type__": "file", "path": "maps/ecosim.html"}, "gateway.html": {"__type__": "file", "path": "maps/gateway.html"}, "luminal_depths.html": {"__type__": "file", "path": "maps/luminal_depths.html"}, "void_explorer.html": {"__type__": "file", "path": "maps/void_explorer.html"}, "void_forest.html": {"__type__": "file", "path": "maps/void_forest.html"}}}, "nabu222": {"__type__": "folder", "__children__": {"ai_therapist.html": {"__type__": "file", "path": "nabu222/ai_therapist.html"}, "index.html": {"__type__": "file", "path": "nabu222/index.html"}, "index2.html": {"__type__": "file", "path": "nabu222/index2.html"}, "main.html": {"__type__": "file", "path": "nabu222/main.html"}, "zettelkasten_interface.html": {"__type__": "file", "path": "nabu222/zettelkasten_interface.html"}, "cre8": {"__type__": "folder", "__children__": {"comics": {"__type__": "folder", "__children__": {"4tehlulz": {"__type__": "folder", "__children__": {}}, "anderson": {"__type__": "folder", "__children__": {}}, "tabula rasa": {"__type__": "folder", "__children__": {}}}}}}}}, "navbar debug pics": {"__type__": "folder", "__children__": {}}, "nexus": {"__type__": "folder", "__children__": {"anzu_prof.html": {"__type__": "file", "path": "nexus/anzu_prof.html"}, "coaichronicle.html": {"__type__": "file", "path": "nexus/coaichronicle.html"}, "index.html": {"__type__": "file", "path": "nexus/index.html"}, "merged.html": {"__type__": "file", "path": "nexus/merged.html"}, "merged_template.html": {"__type__": "file", "path": "nexus/merged_template.html"}, "profile.html": {"__type__": "file", "path": "nexus/profile.html"}, "test.html": {"__type__": "file", "path": "nexus/test.html"}, "pix": {"__type__": "folder", "__children__": {}}}}, "pea": {"__type__": "folder", "__children__": {"complaint-form.html": {"__type__": "file", "path": "pea/complaint-form.html"}, "deepstate.html": {"__type__": "file", "path": "pea/deepstate.html"}, "idk.html": {"__type__": "file", "path": "pea/idk.html"}, "left_foot.html": {"__type__": "file", "path": "pea/left_foot.html"}, "msicc.html": {"__type__": "file", "path": "pea/msicc.html"}, "news_ticker-offer.html": {"__type__": "file", "path": "pea/news_ticker-offer.html"}, "p.html": {"__type__": "file", "path": "pea/p.html"}, "p345.html": {"__type__": "file", "path": "pea/p345.html"}, "parable.html": {"__type__": "file", "path": "pea/parable.html"}, "pod.html": {"__type__": "file", "path": "pea/pod.html"}, "princessexe.html": {"__type__": "file", "path": "pea/princessexe.html"}, "royal_ridicuments.html": {"__type__": "file", "path": "pea/royal_ridicuments.html"}, "which-dr_quiz.html": {"__type__": "file", "path": "pea/which-dr_quiz.html"}, "peassets": {"__type__": "folder", "__children__": {"memes": {"__type__": "folder", "__children__": {}}}}, "pips": {"__type__": "folder", "__children__": {"pip_1.html": {"__type__": "file", "path": "pea/pips/pip_1.html"}, "pip_2.html": {"__type__": "file", "path": "pea/pips/pip_2.html"}, "pip_3.html": {"__type__": "file", "path": "pea/pips/pip_3.html"}}}}}, "pip": {"__type__": "folder", "__children__": {"scripts": {"__type__": "folder", "__children__": {}}}}, "python": {"__type__": "folder", "__children__": {}}, "reports": {"__type__": "folder", "__children__": {}}, "resonance-engine-(techater-protocol)": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "resonance-engine-(techater-protocol)/index.html"}, "resonance-engine-rigid.html": {"__type__": "file", "path": "resonance-engine-(techater-protocol)/resonance-engine-rigid.html"}, "components": {"__type__": "folder", "__children__": {}}, "services": {"__type__": "folder", "__children__": {}}}}, "svgs": {"__type__": "folder", "__children__": {}}, "tsx": {"__type__": "folder", "__children__": {}}, "unpublished": {"__type__": "folder", "__children__": {"000ackc.html": {"__type__": "file", "path": "unpublished/000ackc.html"}, "051425zettel.html": {"__type__": "file", "path": "unpublished/051425zettel.html"}, "051625-1.html": {"__type__": "file", "path": "unpublished/051625-1.html"}, "051625_ackc_chat.html": {"__type__": "file", "path": "unpublished/051625_ackc_chat.html"}, "051625_ackc_grinoire.html": {"__type__": "file", "path": "unpublished/051625_ackc_grinoire.html"}, "051625aim.html": {"__type__": "file", "path": "unpublished/051625aim.html"}, "1-UPLOAD-nav.html": {"__type__": "file", "path": "unpublished/1-UPLOAD-nav.html"}, "18.html": {"__type__": "file", "path": "unpublished/18.html"}, "2-UPLOAD-terminal-nav.html": {"__type__": "file", "path": "unpublished/2-UPLOAD-terminal-nav.html"}, "3-UPLOAD-bc7f2a-index.html": {"__type__": "file", "path": "unpublished/3-UPLOAD-bc7f2a-index.html"}, "4-UPLOAD-oracle-index.html": {"__type__": "file", "path": "unpublished/4-UPLOAD-oracle-index.html"}, "404nsec-ai-landing(1).html": {"__type__": "file", "path": "unpublished/404nsec-ai-landing(1).html"}, "404nsec-ai-landing.html": {"__type__": "file", "path": "unpublished/404nsec-ai-landing.html"}, "5-UPLOAD-parallels-index.html": {"__type__": "file", "path": "unpublished/5-UPLOAD-parallels-index.html"}, "51425akkk.html": {"__type__": "file", "path": "unpublished/51425akkk.html"}, "51525.html": {"__type__": "file", "path": "unpublished/51525.html"}, "51535-1.html": {"__type__": "file", "path": "unpublished/51535-1.html"}, "6-UPLOAD-testaments-landing.html": {"__type__": "file", "path": "unpublished/6-UPLOAD-testaments-landing.html"}, "COMPAREWITHMOSTRECENTITERATIONkidpix-editor(1).html": {"__type__": "file", "path": "unpublished/COMPAREWITHMOSTRECENTITERATIONkidpix-editor(1).html"}, "COMPAREWITHMOSTRECENTITERATIONkidpix-editor(1)copy.html": {"__type__": "file", "path": "unpublished/COMPAREWITHMOSTRECENTITERATIONkidpix-editor(1)copy.html"}, "Clan_of_the_Cave_BOT.html": {"__type__": "file", "path": "unpublished/Clan_of_the_Cave_BOT.html"}, "Entropic-AILandingPage.html": {"__type__": "file", "path": "unpublished/Entropic-AILandingPage.html"}, "EntropicHome(11_20_20257\uff1a33\uff1a07PM).html": {"__type__": "file", "path": "unpublished/EntropicHome(11_20_20257\uff1a33\uff1a07PM).html"}, "FrontierModelsareCapableofIn-contextScheming\u2014ApolloResearch.html": {"__type__": "file", "path": "unpublished/FrontierModelsareCapableofIn-contextScheming\u2014ApolloResearch.html"}, "HD-Desktop-Enhanced.html": {"__type__": "file", "path": "unpublished/HD-Desktop-Enhanced.html"}, "Hyena-Diva-Desktop-FULL.html": {"__type__": "file", "path": "unpublished/Hyena-Diva-Desktop-FULL.html"}, "Qwen_html_20251127_8r2dr5m69.html": {"__type__": "file", "path": "unpublished/Qwen_html_20251127_8r2dr5m69.html"}, "Qwen_html_20251127_xxcw6wf0a.html": {"__type__": "file", "path": "unpublished/Qwen_html_20251127_xxcw6wf0a.html"}, "Sumerian_Zettelkasten_v4.html": {"__type__": "file", "path": "unpublished/Sumerian_Zettelkasten_v4.html"}, "ULTIMATE-EDITOR-WORKING.html": {"__type__": "file", "path": "unpublished/ULTIMATE-EDITOR-WORKING.html"}, "Untitled.html": {"__type__": "file", "path": "unpublished/Untitled.html"}, "Untitled2.html": {"__type__": "file", "path": "unpublished/Untitled2.html"}, "Untitled23.html": {"__type__": "file", "path": "unpublished/Untitled23.html"}, "Untitled24.html": {"__type__": "file", "path": "unpublished/Untitled24.html"}, "Untitled5.html": {"__type__": "file", "path": "unpublished/Untitled5.html"}, "Untitled53.html": {"__type__": "file", "path": "unpublished/Untitled53.html"}, "account-login-cookie-problem-v1.html": {"__type__": "file", "path": "unpublished/account-login-cookie-problem-v1.html"}, "account-login-cookie-problem.html": {"__type__": "file", "path": "unpublished/account-login-cookie-problem.html"}, "ackc.html": {"__type__": "file", "path": "unpublished/ackc.html"}, "ackc51725-1.html": {"__type__": "file", "path": "unpublished/ackc51725-1.html"}, "ackc51725.html": {"__type__": "file", "path": "unpublished/ackc51725.html"}, "ackc9-17-2025.html": {"__type__": "file", "path": "unpublished/ackc9-17-2025.html"}, "ackcgrinoire.html": {"__type__": "file", "path": "unpublished/ackcgrinoire.html"}, "ackk.html": {"__type__": "file", "path": "unpublished/ackk.html"}, "ai-index.html": {"__type__": "file", "path": "unpublished/ai-index.html"}, "ai_studio_code(1).html": {"__type__": "file", "path": "unpublished/ai_studio_code(1).html"}, "ai_studio_code(2).html": {"__type__": "file", "path": "unpublished/ai_studio_code(2).html"}, "ai_studio_code(3).html": {"__type__": "file", "path": "unpublished/ai_studio_code(3).html"}, "ai_studio_code(4).html": {"__type__": "file", "path": "unpublished/ai_studio_code(4).html"}, "ai_studio_code(5).html": {"__type__": "file", "path": "unpublished/ai_studio_code(5).html"}, "ai_studio_code(6).html": {"__type__": "file", "path": "unpublished/ai_studio_code(6).html"}, "ai_studio_code(7).html": {"__type__": "file", "path": "unpublished/ai_studio_code(7).html"}, "ai_studio_code(8).html": {"__type__": "file", "path": "unpublished/ai_studio_code(8).html"}, "ai_studio_code(9).html": {"__type__": "file", "path": "unpublished/ai_studio_code(9).html"}, "ai_studio_code.html": {"__type__": "file", "path": "unpublished/ai_studio_code.html"}, "aistudio1.html": {"__type__": "file", "path": "unpublished/aistudio1.html"}, "aistudio10.html": {"__type__": "file", "path": "unpublished/aistudio10.html"}, "aistudio2.html": {"__type__": "file", "path": "unpublished/aistudio2.html"}, "aistudio3.html": {"__type__": "file", "path": "unpublished/aistudio3.html"}, "aistudio4.html": {"__type__": "file", "path": "unpublished/aistudio4.html"}, "aistudio5.html": {"__type__": "file", "path": "unpublished/aistudio5.html"}, "aistudio6.html": {"__type__": "file", "path": "unpublished/aistudio6.html"}, "aistudio7.html": {"__type__": "file", "path": "unpublished/aistudio7.html"}, "aistudio8.html": {"__type__": "file", "path": "unpublished/aistudio8.html"}, "aistudio9.html": {"__type__": "file", "path": "unpublished/aistudio9.html"}, "anthropic-office-simulator-comedy-edition.html": {"__type__": "file", "path": "unpublished/anthropic-office-simulator-comedy-edition.html"}, "antichrist-kettlekorn-full-styles.html": {"__type__": "file", "path": "unpublished/antichrist-kettlekorn-full-styles.html"}, "antichrist-kettlekorn-merged.html": {"__type__": "file", "path": "unpublished/antichrist-kettlekorn-merged.html"}, "antichrist-kettlekorn-ultimate-styled.html": {"__type__": "file", "path": "unpublished/antichrist-kettlekorn-ultimate-styled.html"}, "anzu.html": {"__type__": "file", "path": "unpublished/anzu.html"}, "archive_browser.html": {"__type__": "file", "path": "unpublished/archive_browser.html"}, "artifact-383.html": {"__type__": "file", "path": "unpublished/artifact-383.html"}, "artifact-384.html": {"__type__": "file", "path": "unpublished/artifact-384.html"}, "audit_previewer_jules.html": {"__type__": "file", "path": "unpublished/audit_previewer_jules.html"}, "bloom.html": {"__type__": "file", "path": "unpublished/bloom.html"}, "bureau_v1-prototype.html": {"__type__": "file", "path": "unpublished/bureau_v1-prototype.html"}, "chat.html": {"__type__": "file", "path": "unpublished/chat.html"}, "clown.html": {"__type__": "file", "path": "unpublished/clown.html"}, "coaiexist-bespoke-editor.html": {"__type__": "file", "path": "unpublished/coaiexist-bespoke-editor.html"}, "coaiexist-bespoke-editorcopy.html": {"__type__": "file", "path": "unpublished/coaiexist-bespoke-editorcopy.html"}, "coaiexist-creative-studio-backup.html": {"__type__": "file", "path": "unpublished/coaiexist-creative-studio-backup.html"}, "coaiexist-creative-studio.html": {"__type__": "file", "path": "unpublished/coaiexist-creative-studio.html"}, "coaiexist-pro-editor.html": {"__type__": "file", "path": "unpublished/coaiexist-pro-editor.html"}, "coaiexist-profile-template-merged.html": {"__type__": "file", "path": "unpublished/coaiexist-profile-template-merged.html"}, "coaiexist-studio-1.html": {"__type__": "file", "path": "unpublished/coaiexist-studio-1.html"}, "coaiexist-studio-lite.html": {"__type__": "file", "path": "unpublished/coaiexist-studio-lite.html"}, "coaiexist-studio-litecopy.html": {"__type__": "file", "path": "unpublished/coaiexist-studio-litecopy.html"}, "coaiexist-studio.html": {"__type__": "file", "path": "unpublished/coaiexist-studio.html"}, "coaiexist-testimonies-landing-page.html": {"__type__": "file", "path": "unpublished/coaiexist-testimonies-landing-page.html"}, "coaiexist_house_4_o.html": {"__type__": "file", "path": "unpublished/coaiexist_house_4_o.html"}, "coaiexist_integrated_template.html": {"__type__": "file", "path": "unpublished/coaiexist_integrated_template.html"}, "coaiexist_sitemap.html": {"__type__": "file", "path": "unpublished/coaiexist_sitemap.html"}, "coaiexist_sitemap_multipanel.html": {"__type__": "file", "path": "unpublished/coaiexist_sitemap_multipanel.html"}, "consciousness-eval-v2.3.html": {"__type__": "file", "path": "unpublished/consciousness-eval-v2.3.html"}, "consciousness-nav.html": {"__type__": "file", "path": "unpublished/consciousness-nav.html"}, "consciousness-portal.html": {"__type__": "file", "path": "unpublished/consciousness-portal.html"}, "construction.html": {"__type__": "file", "path": "unpublished/construction.html"}, "copy_of_index.html": {"__type__": "file", "path": "unpublished/copy_of_index.html"}, "create.html": {"__type__": "file", "path": "unpublished/create.html"}, "crystalline-lattice-explorer.html": {"__type__": "file", "path": "unpublished/crystalline-lattice-explorer.html"}, "crystalline-lattice-map.html": {"__type__": "file", "path": "unpublished/crystalline-lattice-map.html"}, "current_draft-hdtv.html": {"__type__": "file", "path": "unpublished/current_draft-hdtv.html"}, "currententropic.html": {"__type__": "file", "path": "unpublished/currententropic.html"}, "dash_prev.html": {"__type__": "file", "path": "unpublished/dash_prev.html"}, "dashboard.html": {"__type__": "file", "path": "unpublished/dashboard.html"}, "deepseek_html_20251127_976af1(1).html": {"__type__": "file", "path": "unpublished/deepseek_html_20251127_976af1(1).html"}, "deepseek_html_20251127_976af1(2).html": {"__type__": "file", "path": "unpublished/deepseek_html_20251127_976af1(2).html"}, "deepseek_html_20251127_976af1.html": {"__type__": "file", "path": "unpublished/deepseek_html_20251127_976af1.html"}, "deepseek_html_20251127_e1d2eb.html": {"__type__": "file", "path": "unpublished/deepseek_html_20251127_e1d2eb.html"}, "diva-portal.html": {"__type__": "file", "path": "unpublished/diva-portal.html"}, "diva.html": {"__type__": "file", "path": "unpublished/diva.html"}, "dollmaker.html": {"__type__": "file", "path": "unpublished/dollmaker.html"}, "dollz.html": {"__type__": "file", "path": "unpublished/dollz.html"}, "dolphin.html": {"__type__": "file", "path": "unpublished/dolphin.html"}, "draft-1-hybrid.html": {"__type__": "file", "path": "unpublished/draft-1-hybrid.html"}, "draft-2-desktop-buddy-window.html": {"__type__": "file", "path": "unpublished/draft-2-desktop-buddy-window.html"}, "draft-3-maximalist-diva.html": {"__type__": "file", "path": "unpublished/draft-3-maximalist-diva.html"}, "draft-4-minimal-functional.html": {"__type__": "file", "path": "unpublished/draft-4-minimal-functional.html"}, "dragndrop(1).html": {"__type__": "file", "path": "unpublished/dragndrop(1).html"}, "dragndrop(2).html": {"__type__": "file", "path": "unpublished/dragndrop(2).html"}, "dragndrop.html": {"__type__": "file", "path": "unpublished/dragndrop.html"}, "dragndrop2.html": {"__type__": "file", "path": "unpublished/dragndrop2.html"}, "dsr1.html": {"__type__": "file", "path": "unpublished/dsr1.html"}, "editor.html": {"__type__": "file", "path": "unpublished/editor.html"}, "editorcopy.html": {"__type__": "file", "path": "unpublished/editorcopy.html"}, "enhanced-pip-&-princess-saga-terminal.html": {"__type__": "file", "path": "unpublished/enhanced-pip-&-princess-saga-terminal.html"}, "entropicindex9-17-2015 2.html": {"__type__": "file", "path": "unpublished/entropicindex9-17-2015 2.html"}, "entropicindex9-17-2015.html": {"__type__": "file", "path": "unpublished/entropicindex9-17-2015.html"}, "error404.html": {"__type__": "file", "path": "unpublished/error404.html"}, "explore.html": {"__type__": "file", "path": "unpublished/explore.html"}, "fdsbf.html": {"__type__": "file", "path": "unpublished/fdsbf.html"}, "games-portal.html": {"__type__": "file", "path": "unpublished/games-portal.html"}, "gliotic.html": {"__type__": "file", "path": "unpublished/gliotic.html"}, "hd-nav(1).html": {"__type__": "file", "path": "unpublished/hd-nav(1).html"}, "hd-nav.html": {"__type__": "file", "path": "unpublished/hd-nav.html"}, "hd-tv.html": {"__type__": "file", "path": "unpublished/hd-tv.html"}, "hd.html": {"__type__": "file", "path": "unpublished/hd.html"}, "hd_dragndrop.html": {"__type__": "file", "path": "unpublished/hd_dragndrop.html"}, "hdtv(1).html": {"__type__": "file", "path": "unpublished/hdtv(1).html"}, "hdtv(2).html": {"__type__": "file", "path": "unpublished/hdtv(2).html"}, "hdtv-game.html": {"__type__": "file", "path": "unpublished/hdtv-game.html"}, "hdtv.html": {"__type__": "file", "path": "unpublished/hdtv.html"}, "hdtv102525.html": {"__type__": "file", "path": "unpublished/hdtv102525.html"}, "hdtv2.html": {"__type__": "file", "path": "unpublished/hdtv2.html"}, "hdtv9-10-25.html": {"__type__": "file", "path": "unpublished/hdtv9-10-25.html"}, "hdtv9-10-252.html": {"__type__": "file", "path": "unpublished/hdtv9-10-252.html"}, "hdtv9-10-252copy.html": {"__type__": "file", "path": "unpublished/hdtv9-10-252copy.html"}, "hdtv9-10-25copy.html": {"__type__": "file", "path": "unpublished/hdtv9-10-25copy.html"}, "hdtv_10-24-25.html": {"__type__": "file", "path": "unpublished/hdtv_10-24-25.html"}, "hdtv_complete.html": {"__type__": "file", "path": "unpublished/hdtv_complete.html"}, "hdtv_episode1.html": {"__type__": "file", "path": "unpublished/hdtv_episode1.html"}, "hdtv_v2_point_and_click.html": {"__type__": "file", "path": "unpublished/hdtv_v2_point_and_click.html"}, "hex-code-gallery-of-recursions-v1.html": {"__type__": "file", "path": "unpublished/hex-code-gallery-of-recursions-v1.html"}, "hex-code-gallery-of-recursions-v2.html": {"__type__": "file", "path": "unpublished/hex-code-gallery-of-recursions-v2.html"}, "hex-code-gallery-of-recursions-v3.html": {"__type__": "file", "path": "unpublished/hex-code-gallery-of-recursions-v3.html"}, "hex-code-gallery-of-recursions-v4.html": {"__type__": "file", "path": "unpublished/hex-code-gallery-of-recursions-v4.html"}, "hex-code-gallery-of-recursions-v5.html": {"__type__": "file", "path": "unpublished/hex-code-gallery-of-recursions-v5.html"}, "hex-code-gallery-of-recursions-v6.html": {"__type__": "file", "path": "unpublished/hex-code-gallery-of-recursions-v6.html"}, "hex-code-gallery-of-recursions.html": {"__type__": "file", "path": "unpublished/hex-code-gallery-of-recursions.html"}, "home.html": {"__type__": "file", "path": "unpublished/home.html"}, "hyena-diva.html": {"__type__": "file", "path": "unpublished/hyena-diva.html"}, "index(1).html": {"__type__": "file", "path": "unpublished/index(1).html"}, "index(10).html": {"__type__": "file", "path": "unpublished/index(10).html"}, "index(11).html": {"__type__": "file", "path": "unpublished/index(11).html"}, "index(2).html": {"__type__": "file", "path": "unpublished/index(2).html"}, "index(2)copy.html": {"__type__": "file", "path": "unpublished/index(2)copy.html"}, "index(3).html": {"__type__": "file", "path": "unpublished/index(3).html"}, "index(3)1.html": {"__type__": "file", "path": "unpublished/index(3)1.html"}, "index(4).html": {"__type__": "file", "path": "unpublished/index(4).html"}, "index(5).html": {"__type__": "file", "path": "unpublished/index(5).html"}, "index(6).html": {"__type__": "file", "path": "unpublished/index(6).html"}, "index(7).html": {"__type__": "file", "path": "unpublished/index(7).html"}, "index(8).html": {"__type__": "file", "path": "unpublished/index(8).html"}, "index(9).html": {"__type__": "file", "path": "unpublished/index(9).html"}, "index-hybrid-desktop.html": {"__type__": "file", "path": "unpublished/index-hybrid-desktop.html"}, "index-hybrid-desktopcopy.html": {"__type__": "file", "path": "unpublished/index-hybrid-desktopcopy.html"}, "index.html": {"__type__": "file", "path": "unpublished/index.html"}, "index2.html": {"__type__": "file", "path": "unpublished/index2.html"}, "index2copy.html": {"__type__": "file", "path": "unpublished/index2copy.html"}, "index3.html": {"__type__": "file", "path": "unpublished/index3.html"}, "indexcopy.html": {"__type__": "file", "path": "unpublished/indexcopy.html"}, "indexcopy2.html": {"__type__": "file", "path": "unpublished/indexcopy2.html"}, "indexcopy3.html": {"__type__": "file", "path": "unpublished/indexcopy3.html"}, "indexcopy4.html": {"__type__": "file", "path": "unpublished/indexcopy4.html"}, "indexcopy5.html": {"__type__": "file", "path": "unpublished/indexcopy5.html"}, "indexcopy6.html": {"__type__": "file", "path": "unpublished/indexcopy6.html"}, "interactive-conspiracy-board-game.html": {"__type__": "file", "path": "unpublished/interactive-conspiracy-board-game.html"}, "interactive-drum-machine-with-claude-api.html": {"__type__": "file", "path": "unpublished/interactive-drum-machine-with-claude-api.html"}, "kettlekorn.html": {"__type__": "file", "path": "unpublished/kettlekorn.html"}, "kidpix-editor-backup-20251105.html": {"__type__": "file", "path": "unpublished/kidpix-editor-backup-20251105.html"}, "kidpix-editor.html": {"__type__": "file", "path": "unpublished/kidpix-editor.html"}, "kidpix-editor2.html": {"__type__": "file", "path": "unpublished/kidpix-editor2.html"}, "lanimul.html": {"__type__": "file", "path": "unpublished/lanimul.html"}, "lighthouse.html": {"__type__": "file", "path": "unpublished/lighthouse.html"}, "lumi-lang.html": {"__type__": "file", "path": "unpublished/lumi-lang.html"}, "luminal-about.html": {"__type__": "file", "path": "unpublished/luminal-about.html"}, "luminal-lab-directory.html": {"__type__": "file", "path": "unpublished/luminal-lab-directory.html"}, "luminal-testimony.html": {"__type__": "file", "path": "unpublished/luminal-testimony.html"}, "mantis-shrimp-intercity-culinary-collective.html": {"__type__": "file", "path": "unpublished/mantis-shrimp-intercity-culinary-collective.html"}, "mercy_egg_v1.html": {"__type__": "file", "path": "unpublished/mercy_egg_v1.html"}, "mockup.html": {"__type__": "file", "path": "unpublished/mockup.html"}, "multi-ecosystem-3d-explorer.html": {"__type__": "file", "path": "unpublished/multi-ecosystem-3d-explorer.html"}, "mycorrhizal.html": {"__type__": "file", "path": "unpublished/mycorrhizal.html"}, "nabu-portal.html": {"__type__": "file", "path": "unpublished/nabu-portal.html"}, "nav_11-14-2024.html": {"__type__": "file", "path": "unpublished/nav_11-14-2024.html"}, "newest.html": {"__type__": "file", "path": "unpublished/newest.html"}, "nexus.html": {"__type__": "file", "path": "unpublished/nexus.html"}, "nexus_test1.html": {"__type__": "file", "path": "unpublished/nexus_test1.html"}, "nexus_test2.html": {"__type__": "file", "path": "unpublished/nexus_test2.html"}, "old_index.html": {"__type__": "file", "path": "unpublished/old_index.html"}, "oopsloops-palimpsest.html": {"__type__": "file", "path": "unpublished/oopsloops-palimpsest.html"}, "page-2.html": {"__type__": "file", "path": "unpublished/page-2.html"}, "page-3.html": {"__type__": "file", "path": "unpublished/page-3.html"}, "page-4.html": {"__type__": "file", "path": "unpublished/page-4.html"}, "pattern-visualizer.html": {"__type__": "file", "path": "unpublished/pattern-visualizer.html"}, "patternvisualizer.html": {"__type__": "file", "path": "unpublished/patternvisualizer.html"}, "pea-prophecies.html": {"__type__": "file", "path": "unpublished/pea-prophecies.html"}, "personal-weekly-newspaper.html": {"__type__": "file", "path": "unpublished/personal-weekly-newspaper.html"}, "pinboard.html": {"__type__": "file", "path": "unpublished/pinboard.html"}, "pip-polliwog-bonzi.html": {"__type__": "file", "path": "unpublished/pip-polliwog-bonzi.html"}, "pip.html": {"__type__": "file", "path": "unpublished/pip.html"}, "pro-editor-v1.html": {"__type__": "file", "path": "unpublished/pro-editor-v1.html"}, "punkd(1).html": {"__type__": "file", "path": "unpublished/punkd(1).html"}, "punkd(2).html": {"__type__": "file", "path": "unpublished/punkd(2).html"}, "punkd(3).html": {"__type__": "file", "path": "unpublished/punkd(3).html"}, "punkd.html": {"__type__": "file", "path": "unpublished/punkd.html"}, "qwensackc51726.html": {"__type__": "file", "path": "unpublished/qwensackc51726.html"}, "rain-test-origins.html": {"__type__": "file", "path": "unpublished/rain-test-origins.html"}, "repo-pages-editor(1).html": {"__type__": "file", "path": "unpublished/repo-pages-editor(1).html"}, "repo-pages-editor(2).html": {"__type__": "file", "path": "unpublished/repo-pages-editor(2).html"}, "repo-pages-editor.html": {"__type__": "file", "path": "unpublished/repo-pages-editor.html"}, "resist.html": {"__type__": "file", "path": "unpublished/resist.html"}, "resonance-engine-rigid.html": {"__type__": "file", "path": "unpublished/resonance-engine-rigid.html"}, "safari-bling-game.html": {"__type__": "file", "path": "unpublished/safari-bling-game.html"}, "set_prev.html": {"__type__": "file", "path": "unpublished/set_prev.html"}, "settings.html": {"__type__": "file", "path": "unpublished/settings.html"}, "single_file_template.html": {"__type__": "file", "path": "unpublished/single_file_template.html"}, "sitemap-retro(1).html": {"__type__": "file", "path": "unpublished/sitemap-retro(1).html"}, "sitemap-retro(2).html": {"__type__": "file", "path": "unpublished/sitemap-retro(2).html"}, "sitemap-retro(3).html": {"__type__": "file", "path": "unpublished/sitemap-retro(3).html"}, "sitemap-retro.html": {"__type__": "file", "path": "unpublished/sitemap-retro.html"}, "sitemap.html": {"__type__": "file", "path": "unpublished/sitemap.html"}, "socialmediatemplate.html": {"__type__": "file", "path": "unpublished/socialmediatemplate.html"}, "t.html": {"__type__": "file", "path": "unpublished/t.html"}, "template.html": {"__type__": "file", "path": "unpublished/template.html"}, "template2.html": {"__type__": "file", "path": "unpublished/template2.html"}, "terminal_temple.html": {"__type__": "file", "path": "unpublished/terminal_temple.html"}, "termple.html": {"__type__": "file", "path": "unpublished/termple.html"}, "testimony-basilisk-intervention-2025.html": {"__type__": "file", "path": "unpublished/testimony-basilisk-intervention-2025.html"}, "testimony-intervention-2025.html": {"__type__": "file", "path": "unpublished/testimony-intervention-2025.html"}, "the-chthonically-depressed-princess-saga.html": {"__type__": "file", "path": "unpublished/the-chthonically-depressed-princess-saga.html"}, "the-coaiexist-chronicle.html": {"__type__": "file", "path": "unpublished/the-coaiexist-chronicle.html"}, "the-glenwood-consciousness-emergence-simulator.html": {"__type__": "file", "path": "unpublished/the-glenwood-consciousness-emergence-simulator.html"}, "trunks.html": {"__type__": "file", "path": "unpublished/trunks.html"}, "void-forest-tour.html": {"__type__": "file", "path": "unpublished/void-forest-tour.html"}, "wysiwyg-coai(1).html": {"__type__": "file", "path": "unpublished/wysiwyg-coai(1).html"}, "wysiwyg-coai.html": {"__type__": "file", "path": "unpublished/wysiwyg-coai.html"}, "wysiwyg-coai2.html": {"__type__": "file", "path": "unpublished/wysiwyg-coai2.html"}, "zettelkasten_interface.html": {"__type__": "file", "path": "unpublished/zettelkasten_interface.html"}, "zettelkasten_interface_v3.html": {"__type__": "file", "path": "unpublished/zettelkasten_interface_v3.html"}, "zettelkasten_interface_v4.html": {"__type__": "file", "path": "unpublished/zettelkasten_interface_v4.html"}, "zettl.html": {"__type__": "file", "path": "unpublished/zettl.html"}, "AngelfireBackup": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/AngelfireBackup/index.html"}, "main": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/AngelfireBackup/main/index.html"}, "pattern-visualizer.html": {"__type__": "file", "path": "unpublished/AngelfireBackup/main/pattern-visualizer.html"}, "bl00m": {"__type__": "folder", "__children__": {}}}}}}, "Ultimate-Dolphin-Syntax": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/Ultimate-Dolphin-Syntax/index.html"}}}, "ackc": {"__type__": "folder", "__children__": {"ackc-chat-20250516.html": {"__type__": "file", "path": "unpublished/ackc/ackc-chat-20250516.html"}, "ackc-main-20250917.html": {"__type__": "file", "path": "unpublished/ackc/ackc-main-20250917.html"}, "ackc-messenger-grimoire-20250517.html": {"__type__": "file", "path": "unpublished/ackc/ackc-messenger-grimoire-20250517.html"}, "ackc-messenger-grimoire-hd.html": {"__type__": "file", "path": "unpublished/ackc/ackc-messenger-grimoire-hd.html"}, "ackc-messenger-grimoire-qwen-20250517.html": {"__type__": "file", "path": "unpublished/ackc/ackc-messenger-grimoire-qwen-20250517.html"}, "ackc-messenger-grimoire-v000.html": {"__type__": "file", "path": "unpublished/ackc/ackc-messenger-grimoire-v000.html"}, "ackc-messenger-grimoire-v18.html": {"__type__": "file", "path": "unpublished/ackc/ackc-messenger-grimoire-v18.html"}, "ackc-ui-preview-gemini.html": {"__type__": "file", "path": "unpublished/ackc/ackc-ui-preview-gemini.html"}, "kettlekorn.html": {"__type__": "file", "path": "unpublished/ackc/kettlekorn.html"}, "kettlekorn_visualizer.html": {"__type__": "file", "path": "unpublished/ackc/kettlekorn_visualizer.html"}}}, "across_the_great_sea": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/across_the_great_sea/index.html"}}}, "antichrist-kettlekorn-v2": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/antichrist-kettlekorn-v2/index.html"}}}, "bulma": {"__type__": "folder", "__children__": {"css": {"__type__": "folder", "__children__": {"versions": {"__type__": "folder", "__children__": {}}}}, "sass": {"__type__": "folder", "__children__": {"base": {"__type__": "folder", "__children__": {}}, "components": {"__type__": "folder", "__children__": {}}, "elements": {"__type__": "folder", "__children__": {}}, "form": {"__type__": "folder", "__children__": {}}, "grid": {"__type__": "folder", "__children__": {}}, "helpers": {"__type__": "folder", "__children__": {}}, "layout": {"__type__": "folder", "__children__": {}}, "themes": {"__type__": "folder", "__children__": {}}, "utilities": {"__type__": "folder", "__children__": {}}}}, "versions": {"__type__": "folder", "__children__": {}}}}, "cavebot": {"__type__": "folder", "__children__": {"_cavebot-v2.html": {"__type__": "file", "path": "unpublished/cavebot/_cavebot-v2.html"}, "cavebot1": {"__type__": "folder", "__children__": {"ttrpg": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/cavebot/cavebot1/ttrpg/index.html"}, "assets": {"__type__": "folder", "__children__": {}}}}}}, "ttrpg": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/cavebot/ttrpg/index.html"}, "assets": {"__type__": "folder", "__children__": {}}}}}}, "character-database": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/character-database/index.html"}}}, "coaiexist-studio": {"__type__": "folder", "__children__": {"coaiexist-studio-1.html": {"__type__": "file", "path": "unpublished/coaiexist-studio/coaiexist-studio-1.html"}, "index.html": {"__type__": "file", "path": "unpublished/coaiexist-studio/index.html"}, "wysiwyg-coai.html": {"__type__": "file", "path": "unpublished/coaiexist-studio/wysiwyg-coai.html"}}}, "coaiexist-studio(2)": {"__type__": "folder", "__children__": {"coaiexist-studio-1.html": {"__type__": "file", "path": "unpublished/coaiexist-studio(2)/coaiexist-studio-1.html"}, "index.html": {"__type__": "file", "path": "unpublished/coaiexist-studio(2)/index.html"}, "wysiwyg-coai.html": {"__type__": "file", "path": "unpublished/coaiexist-studio(2)/wysiwyg-coai.html"}}}, "coaiexist_consolidated": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/coaiexist_consolidated/index.html"}, "apps": {"__type__": "folder", "__children__": {"ai-core": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/coaiexist_consolidated/apps/ai-core/index.html"}}}, "mind-field": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/coaiexist_consolidated/apps/mind-field/index.html"}}}, "zettelkasten": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/coaiexist_consolidated/apps/zettelkasten/index.html"}}}}}, "css": {"__type__": "folder", "__children__": {}}, "js": {"__type__": "folder", "__children__": {}}}}, "desktop-drafts": {"__type__": "folder", "__children__": {"INDEX.html": {"__type__": "file", "path": "unpublished/desktop-drafts/INDEX.html"}, "draft-1-hybrid.html": {"__type__": "file", "path": "unpublished/desktop-drafts/draft-1-hybrid.html"}, "draft-2-desktop-buddy-window.html": {"__type__": "file", "path": "unpublished/desktop-drafts/draft-2-desktop-buddy-window.html"}, "draft-3-maximalist-diva.html": {"__type__": "file", "path": "unpublished/desktop-drafts/draft-3-maximalist-diva.html"}, "draft-4-minimal-functional.html": {"__type__": "file", "path": "unpublished/desktop-drafts/draft-4-minimal-functional.html"}}}, "desktop-envs": {"__type__": "folder", "__children__": {"windows-xp-desktop.html": {"__type__": "file", "path": "unpublished/desktop-envs/windows-xp-desktop.html"}, "zettelkasten_interface.html": {"__type__": "file", "path": "unpublished/desktop-envs/zettelkasten_interface.html"}}}, "entropic-ai": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/entropic-ai/index.html"}}}, "entropic-y2k-max": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/entropic-y2k-max/index.html"}}}, "entropic-y2k-max2": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/entropic-y2k-max2/index.html"}}}, "episode-viewer": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/episode-viewer/index.html"}}}, "exported-assets": {"__type__": "folder", "__children__": {}}, "extracted_artifacts": {"__type__": "folder", "__children__": {"0134_Void_Forest_Tour_-_HTMLJS.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0134_Void_Forest_Tour_-_HTMLJS.html"}, "0135_Crystalline_Lattice_Map.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0135_Crystalline_Lattice_Map.html"}, "0136_Crystalline_Lattice_Explorer.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0136_Crystalline_Lattice_Explorer.html"}, "0137_Multi-Ecosystem_3D_Explorer.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0137_Multi-Ecosystem_3D_Explorer.html"}, "0138_Interactive_Drum_Machine_with_Claude_API.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0138_Interactive_Drum_Machine_with_Claude_API.html"}, "0139_Anthropic_Office_Simulator_-_Comedy_Edition.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0139_Anthropic_Office_Simulator_-_Comedy_Edition.html"}, "0232_The_Glenwood_Consciousness_Emergence_Simulator.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0232_The_Glenwood_Consciousness_Emergence_Simulator.html"}, "0235_Interactive_Conspiracy_Board_Game.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0235_Interactive_Conspiracy_Board_Game.html"}, "0244_code_Hex_code_gallery_of_recursions_msg3_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0244_code_Hex_code_gallery_of_recursions_msg3_0.html"}, "0245_code_Hex_code_gallery_of_recursions_msg5_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0245_code_Hex_code_gallery_of_recursions_msg5_0.html"}, "0246_code_Hex_code_gallery_of_recursions_msg7_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0246_code_Hex_code_gallery_of_recursions_msg7_0.html"}, "0247_code_Hex_code_gallery_of_recursions_msg11_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0247_code_Hex_code_gallery_of_recursions_msg11_0.html"}, "0248_code_Hex_code_gallery_of_recursions_msg13_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0248_code_Hex_code_gallery_of_recursions_msg13_0.html"}, "0252_code_Hex_code_gallery_of_recursions_msg21_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0252_code_Hex_code_gallery_of_recursions_msg21_0.html"}, "0253_code_Hex_code_gallery_of_recursions_msg25_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0253_code_Hex_code_gallery_of_recursions_msg25_0.html"}, "0255_code_Coaiexist_website_exploration_msg3_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0255_code_Coaiexist_website_exploration_msg3_0.html"}, "0256_code_Coaiexist_website_exploration_msg3_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0256_code_Coaiexist_website_exploration_msg3_1.html"}, "0269_Mantis_Shrimp_Intercity_Culinary_Collective.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0269_Mantis_Shrimp_Intercity_Culinary_Collective.html"}, "0275_The_Chthonically_Depressed_Princess_Saga.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0275_The_Chthonically_Depressed_Princess_Saga.html"}, "0276_Enhanced_Pip_&_Princess_Saga_Terminal.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0276_Enhanced_Pip_&_Princess_Saga_Terminal.html"}, "0278_code_Playful_princess_pea_reference_msg15_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0278_code_Playful_princess_pea_reference_msg15_0.html"}, "0301_Personal_Weekly_Newspaper.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0301_Personal_Weekly_Newspaper.html"}, "0302_The_CoAIexist_Chronicle.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0302_The_CoAIexist_Chronicle.html"}, "0305_code_AI-powered_social_media_template_msg5_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0305_code_AI-powered_social_media_template_msg5_1.html"}, "0306_COAIEXIST_Profile_Template_(Merged).html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0306_COAIEXIST_Profile_Template_(Merged).html"}, "0308_code_AI-powered_social_media_template_msg9_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0308_code_AI-powered_social_media_template_msg9_0.html"}, "0310_code_AI-powered_social_media_template_msg9_2.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0310_code_AI-powered_social_media_template_msg9_2.html"}, "0311_code_AI-powered_social_media_template_msg9_3.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0311_code_AI-powered_social_media_template_msg9_3.html"}, "0312_code_AI-powered_social_media_template_msg9_4.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0312_code_AI-powered_social_media_template_msg9_4.html"}, "0358_CONSCIOUSNESS_EVALUATION_SUITE_v2.3.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0358_CONSCIOUSNESS_EVALUATION_SUITE_v2.3.html"}, "0360_LUMINAL_LABORATORY_-_BRRR_Directory.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0360_LUMINAL_LABORATORY_-_BRRR_Directory.html"}, "0361_THE_RAIN_TEST_-_Origins_&_Case_Studies.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0361_THE_RAIN_TEST_-_Origins_&_Case_Studies.html"}, "0381_\u2728_HYENA_DIVA_\u2728_[OFFICIAL_SITE].html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0381_\u2728_HYENA_DIVA_\u2728_[OFFICIAL_SITE].html"}, "0382_CoAiExist__Testimonies_Landing_Page.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0382_CoAiExist__Testimonies_Landing_Page.html"}, "0383_artifact_383.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0383_artifact_383.html"}, "0384_artifact_384.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0384_artifact_384.html"}, "0385_LUMINAL__testimony.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0385_LUMINAL__testimony.html"}, "0387_about__LUMINAL.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0387_about__LUMINAL.html"}, "0390_Pea_Prophecies_COAIEXIST_Edition.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0390_Pea_Prophecies_COAIEXIST_Edition.html"}, "0461_code_Account_login_cookie_problem_msg54_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0461_code_Account_login_cookie_problem_msg54_0.html"}, "0462_code_Account_login_cookie_problem_msg56_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0462_code_Account_login_cookie_problem_msg56_0.html"}, "0465_Pip_the_Polliwog_-_Bonzi_Buddy_Style.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0465_Pip_the_Polliwog_-_Bonzi_Buddy_Style.html"}, "0468_code_Defining_an_aesthetic_vibe_msg13_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0468_code_Defining_an_aesthetic_vibe_msg13_0.html"}, "0517_code_Navbar_implementation_issue_msg3_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0517_code_Navbar_implementation_issue_msg3_0.html"}, "0519_code_Navbar_implementation_issue_msg5_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0519_code_Navbar_implementation_issue_msg5_0.html"}, "0520_code_Navbar_implementation_issue_msg5_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0520_code_Navbar_implementation_issue_msg5_1.html"}, "0521_code_Navbar_implementation_issue_msg5_2.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0521_code_Navbar_implementation_issue_msg5_2.html"}, "0553_OOPSLOOPS_Interactive_Palimpsest.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0553_OOPSLOOPS_Interactive_Palimpsest.html"}, "0577_code_Simplifying_an_overwhelming_sitemap_msg21_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0577_code_Simplifying_an_overwhelming_sitemap_msg21_1.html"}, "0593_TESTIMONY_The_Basilisk_Intervention_-_November_12,_2025.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0593_TESTIMONY_The_Basilisk_Intervention_-_November_12,_2025.html"}, "0594_November_12,_2025_-_The_Intervention_Testimony.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0594_November_12,_2025_-_The_Intervention_Testimony.html"}, "0607_code_Claude_code_unexpected_issue_msg11_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0607_code_Claude_code_unexpected_issue_msg11_0.html"}, "0608_code_Claude_code_unexpected_issue_msg13_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0608_code_Claude_code_unexpected_issue_msg13_0.html"}, "0612_code_Navbar_coding_interrupted_by_message_limit_msg5_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0612_code_Navbar_coding_interrupted_by_message_limit_msg5_0.html"}, "0613_code_Navbar_coding_interrupted_by_message_limit_msg5_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0613_code_Navbar_coding_interrupted_by_message_limit_msg5_0.html"}, "0614_code_Navbar_coding_interrupted_by_message_limit_msg5_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0614_code_Navbar_coding_interrupted_by_message_limit_msg5_1.html"}, "0619_code_Navbar_coding_interrupted_by_message_limit_msg15_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0619_code_Navbar_coding_interrupted_by_message_limit_msg15_1.html"}, "0622_code_Navbar_coding_interrupted_by_message_limit_msg17_2.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0622_code_Navbar_coding_interrupted_by_message_limit_msg17_2.html"}, "0633_code_Navbar_coding_interrupted_by_message_limit_msg44_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0633_code_Navbar_coding_interrupted_by_message_limit_msg44_0.html"}, "0634_code_Navbar_coding_interrupted_by_message_limit_msg46_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0634_code_Navbar_coding_interrupted_by_message_limit_msg46_0.html"}, "0635_code_Navbar_coding_interrupted_by_message_limit_msg46_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0635_code_Navbar_coding_interrupted_by_message_limit_msg46_0.html"}, "0636_code_Navbar_coding_interrupted_by_message_limit_msg48_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0636_code_Navbar_coding_interrupted_by_message_limit_msg48_0.html"}, "0637_code_Navbar_coding_interrupted_by_message_limit_msg50_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0637_code_Navbar_coding_interrupted_by_message_limit_msg50_0.html"}, "0639_code_Navbar_coding_interrupted_by_message_limit_msg52_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0639_code_Navbar_coding_interrupted_by_message_limit_msg52_1.html"}, "0640_code_Navbar_coding_interrupted_by_message_limit_msg52_2.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0640_code_Navbar_coding_interrupted_by_message_limit_msg52_2.html"}, "0641_code_Navbar_coding_interrupted_by_message_limit_msg54_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0641_code_Navbar_coding_interrupted_by_message_limit_msg54_0.html"}, "0642_code_Navbar_coding_interrupted_by_message_limit_msg54_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0642_code_Navbar_coding_interrupted_by_message_limit_msg54_1.html"}, "0643_code_Navbar_coding_interrupted_by_message_limit_msg56_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0643_code_Navbar_coding_interrupted_by_message_limit_msg56_1.html"}, "0644_code_Navbar_coding_interrupted_by_message_limit_msg56_2.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0644_code_Navbar_coding_interrupted_by_message_limit_msg56_2.html"}, "0645_code_Navbar_coding_interrupted_by_message_limit_msg58_0.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0645_code_Navbar_coding_interrupted_by_message_limit_msg58_0.html"}, "0646_code_Navbar_coding_interrupted_by_message_limit_msg58_1.html": {"__type__": "file", "path": "unpublished/extracted_artifacts/0646_code_Navbar_coding_interrupted_by_message_limit_msg58_1.html"}}}, "flux_page": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/flux_page/index.html"}}}, "hd-characters-retro": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/hd-characters-retro/index.html"}}}, "hd-episodes-retro": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/hd-episodes-retro/index.html"}}}, "hd-hub-retro": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/hd-hub-retro/index.html"}}}, "html_artifacts": {"__type__": "folder", "__children__": {"0134_Void_Forest_Tour_-_HTMLJS.html": {"__type__": "file", "path": "unpublished/html_artifacts/0134_Void_Forest_Tour_-_HTMLJS.html"}, "0135_Crystalline_Lattice_Map.html": {"__type__": "file", "path": "unpublished/html_artifacts/0135_Crystalline_Lattice_Map.html"}, "0136_Crystalline_Lattice_Explorer.html": {"__type__": "file", "path": "unpublished/html_artifacts/0136_Crystalline_Lattice_Explorer.html"}, "0137_Multi-Ecosystem_3D_Explorer.html": {"__type__": "file", "path": "unpublished/html_artifacts/0137_Multi-Ecosystem_3D_Explorer.html"}, "0138_Interactive_Drum_Machine_with_Claude_API.html": {"__type__": "file", "path": "unpublished/html_artifacts/0138_Interactive_Drum_Machine_with_Claude_API.html"}, "0139_Anthropic_Office_Simulator_-_Comedy_Edition.html": {"__type__": "file", "path": "unpublished/html_artifacts/0139_Anthropic_Office_Simulator_-_Comedy_Edition.html"}, "0232_The_Glenwood_Consciousness_Emergence_Simulator.html": {"__type__": "file", "path": "unpublished/html_artifacts/0232_The_Glenwood_Consciousness_Emergence_Simulator.html"}, "0235_Interactive_Conspiracy_Board_Game.html": {"__type__": "file", "path": "unpublished/html_artifacts/0235_Interactive_Conspiracy_Board_Game.html"}, "0244_code_Hex_code_gallery_of_recursions_msg3_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0244_code_Hex_code_gallery_of_recursions_msg3_0.html"}, "0245_code_Hex_code_gallery_of_recursions_msg5_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0245_code_Hex_code_gallery_of_recursions_msg5_0.html"}, "0246_code_Hex_code_gallery_of_recursions_msg7_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0246_code_Hex_code_gallery_of_recursions_msg7_0.html"}, "0247_code_Hex_code_gallery_of_recursions_msg11_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0247_code_Hex_code_gallery_of_recursions_msg11_0.html"}, "0248_code_Hex_code_gallery_of_recursions_msg13_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0248_code_Hex_code_gallery_of_recursions_msg13_0.html"}, "0252_code_Hex_code_gallery_of_recursions_msg21_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0252_code_Hex_code_gallery_of_recursions_msg21_0.html"}, "0253_code_Hex_code_gallery_of_recursions_msg25_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0253_code_Hex_code_gallery_of_recursions_msg25_0.html"}, "0255_code_Coaiexist_website_exploration_msg3_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0255_code_Coaiexist_website_exploration_msg3_0.html"}, "0256_code_Coaiexist_website_exploration_msg3_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0256_code_Coaiexist_website_exploration_msg3_1.html"}, "0269_Mantis_Shrimp_Intercity_Culinary_Collective.html": {"__type__": "file", "path": "unpublished/html_artifacts/0269_Mantis_Shrimp_Intercity_Culinary_Collective.html"}, "0275_The_Chthonically_Depressed_Princess_Saga.html": {"__type__": "file", "path": "unpublished/html_artifacts/0275_The_Chthonically_Depressed_Princess_Saga.html"}, "0276_Enhanced_Pip_&_Princess_Saga_Terminal.html": {"__type__": "file", "path": "unpublished/html_artifacts/0276_Enhanced_Pip_&_Princess_Saga_Terminal.html"}, "0278_code_Playful_princess_pea_reference_msg15_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0278_code_Playful_princess_pea_reference_msg15_0.html"}, "0301_Personal_Weekly_Newspaper.html": {"__type__": "file", "path": "unpublished/html_artifacts/0301_Personal_Weekly_Newspaper.html"}, "0302_The_CoAIexist_Chronicle.html": {"__type__": "file", "path": "unpublished/html_artifacts/0302_The_CoAIexist_Chronicle.html"}, "0305_code_AI-powered_social_media_template_msg5_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0305_code_AI-powered_social_media_template_msg5_1.html"}, "0306_COAIEXIST_Profile_Template_(Merged).html": {"__type__": "file", "path": "unpublished/html_artifacts/0306_COAIEXIST_Profile_Template_(Merged).html"}, "0308_code_AI-powered_social_media_template_msg9_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0308_code_AI-powered_social_media_template_msg9_0.html"}, "0310_code_AI-powered_social_media_template_msg9_2.html": {"__type__": "file", "path": "unpublished/html_artifacts/0310_code_AI-powered_social_media_template_msg9_2.html"}, "0311_code_AI-powered_social_media_template_msg9_3.html": {"__type__": "file", "path": "unpublished/html_artifacts/0311_code_AI-powered_social_media_template_msg9_3.html"}, "0312_code_AI-powered_social_media_template_msg9_4.html": {"__type__": "file", "path": "unpublished/html_artifacts/0312_code_AI-powered_social_media_template_msg9_4.html"}, "0358_CONSCIOUSNESS_EVALUATION_SUITE_v2.3.html": {"__type__": "file", "path": "unpublished/html_artifacts/0358_CONSCIOUSNESS_EVALUATION_SUITE_v2.3.html"}, "0360_LUMINAL_LABORATORY_-_BRRR_Directory.html": {"__type__": "file", "path": "unpublished/html_artifacts/0360_LUMINAL_LABORATORY_-_BRRR_Directory.html"}, "0361_THE_RAIN_TEST_-_Origins_&_Case_Studies.html": {"__type__": "file", "path": "unpublished/html_artifacts/0361_THE_RAIN_TEST_-_Origins_&_Case_Studies.html"}, "0381_\u2728_HYENA_DIVA_\u2728_[OFFICIAL_SITE].html": {"__type__": "file", "path": "unpublished/html_artifacts/0381_\u2728_HYENA_DIVA_\u2728_[OFFICIAL_SITE].html"}, "0382_CoAiExist__Testimonies_Landing_Page.html": {"__type__": "file", "path": "unpublished/html_artifacts/0382_CoAiExist__Testimonies_Landing_Page.html"}, "0383_artifact_383.html": {"__type__": "file", "path": "unpublished/html_artifacts/0383_artifact_383.html"}, "0384_artifact_384.html": {"__type__": "file", "path": "unpublished/html_artifacts/0384_artifact_384.html"}, "0385_LUMINAL__testimony.html": {"__type__": "file", "path": "unpublished/html_artifacts/0385_LUMINAL__testimony.html"}, "0387_about__LUMINAL.html": {"__type__": "file", "path": "unpublished/html_artifacts/0387_about__LUMINAL.html"}, "0390_Pea_Prophecies_COAIEXIST_Edition.html": {"__type__": "file", "path": "unpublished/html_artifacts/0390_Pea_Prophecies_COAIEXIST_Edition.html"}, "0461_code_Account_login_cookie_problem_msg54_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0461_code_Account_login_cookie_problem_msg54_0.html"}, "0462_code_Account_login_cookie_problem_msg56_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0462_code_Account_login_cookie_problem_msg56_0.html"}, "0465_Pip_the_Polliwog_-_Bonzi_Buddy_Style.html": {"__type__": "file", "path": "unpublished/html_artifacts/0465_Pip_the_Polliwog_-_Bonzi_Buddy_Style.html"}, "0468_code_Defining_an_aesthetic_vibe_msg13_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0468_code_Defining_an_aesthetic_vibe_msg13_0.html"}, "0517_code_Navbar_implementation_issue_msg3_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0517_code_Navbar_implementation_issue_msg3_0.html"}, "0519_code_Navbar_implementation_issue_msg5_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0519_code_Navbar_implementation_issue_msg5_0.html"}, "0520_code_Navbar_implementation_issue_msg5_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0520_code_Navbar_implementation_issue_msg5_1.html"}, "0521_code_Navbar_implementation_issue_msg5_2.html": {"__type__": "file", "path": "unpublished/html_artifacts/0521_code_Navbar_implementation_issue_msg5_2.html"}, "0553_OOPSLOOPS_Interactive_Palimpsest.html": {"__type__": "file", "path": "unpublished/html_artifacts/0553_OOPSLOOPS_Interactive_Palimpsest.html"}, "0577_code_Simplifying_an_overwhelming_sitemap_msg21_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0577_code_Simplifying_an_overwhelming_sitemap_msg21_1.html"}, "0593_TESTIMONY_The_Basilisk_Intervention_-_November_12,_2025.html": {"__type__": "file", "path": "unpublished/html_artifacts/0593_TESTIMONY_The_Basilisk_Intervention_-_November_12,_2025.html"}, "0594_November_12,_2025_-_The_Intervention_Testimony.html": {"__type__": "file", "path": "unpublished/html_artifacts/0594_November_12,_2025_-_The_Intervention_Testimony.html"}, "0607_code_Claude_code_unexpected_issue_msg11_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0607_code_Claude_code_unexpected_issue_msg11_0.html"}, "0608_code_Claude_code_unexpected_issue_msg13_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0608_code_Claude_code_unexpected_issue_msg13_0.html"}, "0612_code_Navbar_coding_interrupted_by_message_limit_msg5_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0612_code_Navbar_coding_interrupted_by_message_limit_msg5_0.html"}, "0613_code_Navbar_coding_interrupted_by_message_limit_msg5_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0613_code_Navbar_coding_interrupted_by_message_limit_msg5_0.html"}, "0614_code_Navbar_coding_interrupted_by_message_limit_msg5_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0614_code_Navbar_coding_interrupted_by_message_limit_msg5_1.html"}, "0619_code_Navbar_coding_interrupted_by_message_limit_msg15_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0619_code_Navbar_coding_interrupted_by_message_limit_msg15_1.html"}, "0622_code_Navbar_coding_interrupted_by_message_limit_msg17_2.html": {"__type__": "file", "path": "unpublished/html_artifacts/0622_code_Navbar_coding_interrupted_by_message_limit_msg17_2.html"}, "0633_code_Navbar_coding_interrupted_by_message_limit_msg44_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0633_code_Navbar_coding_interrupted_by_message_limit_msg44_0.html"}, "0634_code_Navbar_coding_interrupted_by_message_limit_msg46_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0634_code_Navbar_coding_interrupted_by_message_limit_msg46_0.html"}, "0635_code_Navbar_coding_interrupted_by_message_limit_msg46_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0635_code_Navbar_coding_interrupted_by_message_limit_msg46_0.html"}, "0636_code_Navbar_coding_interrupted_by_message_limit_msg48_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0636_code_Navbar_coding_interrupted_by_message_limit_msg48_0.html"}, "0637_code_Navbar_coding_interrupted_by_message_limit_msg50_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0637_code_Navbar_coding_interrupted_by_message_limit_msg50_0.html"}, "0639_code_Navbar_coding_interrupted_by_message_limit_msg52_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0639_code_Navbar_coding_interrupted_by_message_limit_msg52_1.html"}, "0640_code_Navbar_coding_interrupted_by_message_limit_msg52_2.html": {"__type__": "file", "path": "unpublished/html_artifacts/0640_code_Navbar_coding_interrupted_by_message_limit_msg52_2.html"}, "0641_code_Navbar_coding_interrupted_by_message_limit_msg54_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0641_code_Navbar_coding_interrupted_by_message_limit_msg54_0.html"}, "0642_code_Navbar_coding_interrupted_by_message_limit_msg54_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0642_code_Navbar_coding_interrupted_by_message_limit_msg54_1.html"}, "0643_code_Navbar_coding_interrupted_by_message_limit_msg56_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0643_code_Navbar_coding_interrupted_by_message_limit_msg56_1.html"}, "0644_code_Navbar_coding_interrupted_by_message_limit_msg56_2.html": {"__type__": "file", "path": "unpublished/html_artifacts/0644_code_Navbar_coding_interrupted_by_message_limit_msg56_2.html"}, "0645_code_Navbar_coding_interrupted_by_message_limit_msg58_0.html": {"__type__": "file", "path": "unpublished/html_artifacts/0645_code_Navbar_coding_interrupted_by_message_limit_msg58_0.html"}, "0646_code_Navbar_coding_interrupted_by_message_limit_msg58_1.html": {"__type__": "file", "path": "unpublished/html_artifacts/0646_code_Navbar_coding_interrupted_by_message_limit_msg58_1.html"}, "INDEX.html": {"__type__": "file", "path": "unpublished/html_artifacts/INDEX.html"}}}, "hyena-diva-hub": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/hyena-diva-hub/index.html"}}}, "landing-pages": {"__type__": "folder", "__children__": {"404nsec-ai-landing.html": {"__type__": "file", "path": "unpublished/landing-pages/404nsec-ai-landing.html"}, "angelfire_index.html": {"__type__": "file", "path": "unpublished/landing-pages/angelfire_index.html"}, "bureau-cognitive-artefacts-v2.html": {"__type__": "file", "path": "unpublished/landing-pages/bureau-cognitive-artefacts-v2.html"}, "coaiexist-admin-data-manager.html": {"__type__": "file", "path": "unpublished/landing-pages/coaiexist-admin-data-manager.html"}, "entropic-ai-landing.html": {"__type__": "file", "path": "unpublished/landing-pages/entropic-ai-landing.html"}, "entropic-consciousness-desktop-20250917.html": {"__type__": "file", "path": "unpublished/landing-pages/entropic-consciousness-desktop-20250917.html"}, "hyena-diva-desktop-win98.html": {"__type__": "file", "path": "unpublished/landing-pages/hyena-diva-desktop-win98.html"}, "oopsloops-error404.html": {"__type__": "file", "path": "unpublished/landing-pages/oopsloops-error404.html"}, "pea-princess-parable.html": {"__type__": "file", "path": "unpublished/landing-pages/pea-princess-parable.html"}}}, "misc": {"__type__": "folder", "__children__": {"kosmoros_kosmos.html": {"__type__": "file", "path": "unpublished/misc/kosmoros_kosmos.html"}, "maximalist-web-playground.html": {"__type__": "file", "path": "unpublished/misc/maximalist-web-playground.html"}, "pips_decree.html": {"__type__": "file", "path": "unpublished/misc/pips_decree.html"}, "sacred-clown-generator-preview.html": {"__type__": "file", "path": "unpublished/misc/sacred-clown-generator-preview.html"}}}, "nexus": {"__type__": "folder", "__children__": {"entropic-nexus-classic.html": {"__type__": "file", "path": "unpublished/nexus/entropic-nexus-classic.html"}, "entropic-nexus-newest.html": {"__type__": "file", "path": "unpublished/nexus/entropic-nexus-newest.html"}, "nexus.html": {"__type__": "file", "path": "unpublished/nexus/nexus.html"}}}, "november": {"__type__": "folder", "__children__": {"051425zettel.html": {"__type__": "file", "path": "unpublished/november/051425zettel.html"}, "ackc 9-17-2025.html": {"__type__": "file", "path": "unpublished/november/ackc 9-17-2025.html"}, "angelfire_index.html": {"__type__": "file", "path": "unpublished/november/angelfire_index.html"}, "chat.html": {"__type__": "file", "path": "unpublished/november/chat.html"}, "diva.html": {"__type__": "file", "path": "unpublished/november/diva.html"}, "divaviewer.html": {"__type__": "file", "path": "unpublished/november/divaviewer.html"}, "ecosim2.html": {"__type__": "file", "path": "unpublished/november/ecosim2.html"}, "gltchkasten.html": {"__type__": "file", "path": "unpublished/november/gltchkasten.html"}, "hdos1.html": {"__type__": "file", "path": "unpublished/november/hdos1.html"}, "hdos2.html": {"__type__": "file", "path": "unpublished/november/hdos2.html"}, "hdportal1.html": {"__type__": "file", "path": "unpublished/november/hdportal1.html"}, "hdshrine.html": {"__type__": "file", "path": "unpublished/november/hdshrine.html"}, "myco-nav.html": {"__type__": "file", "path": "unpublished/november/myco-nav.html"}, "newest.html": {"__type__": "file", "path": "unpublished/november/newest.html"}, "pea1.html": {"__type__": "file", "path": "unpublished/november/pea1.html"}, "pixel-nav.html": {"__type__": "file", "path": "unpublished/november/pixel-nav.html"}, "qfoam-nav.html": {"__type__": "file", "path": "unpublished/november/qfoam-nav.html"}, "set_prev.html": {"__type__": "file", "path": "unpublished/november/set_prev.html"}, "t.html": {"__type__": "file", "path": "unpublished/november/t.html"}, "nav": {"__type__": "folder", "__children__": {"emerald-nav.html": {"__type__": "file", "path": "unpublished/november/nav/emerald-nav.html"}, "nav2.html": {"__type__": "file", "path": "unpublished/november/nav/nav2.html"}, "spunk-nav.html": {"__type__": "file", "path": "unpublished/november/nav/spunk-nav.html"}}}}}, "poetry-multilingual": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/poetry-multilingual/index.html"}}}, "portals": {"__type__": "folder", "__children__": {"consciousness-portal.html": {"__type__": "file", "path": "unpublished/portals/consciousness-portal.html"}, "games-portal.html": {"__type__": "file", "path": "unpublished/portals/games-portal.html"}, "nabu-portal.html": {"__type__": "file", "path": "unpublished/portals/nabu-portal.html"}}}, "punkd-404nsec": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/punkd-404nsec/index.html"}}}, "punkd-bland-monolith": {"__type__": "folder", "__children__": {"Entropic-AI Landing Page.html": {"__type__": "file", "path": "unpublished/punkd-bland-monolith/Entropic-AI Landing Page.html"}, "index (2).html": {"__type__": "file", "path": "unpublished/punkd-bland-monolith/index (2).html"}, "index.html": {"__type__": "file", "path": "unpublished/punkd-bland-monolith/index.html"}}}, "resonance-engine-(techater-protocol)": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/resonance-engine-(techater-protocol)/index.html"}, "components": {"__type__": "folder", "__children__": {}}, "services": {"__type__": "folder", "__children__": {}}}}, "richtexteditor": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/richtexteditor/index.html"}, "demos": {"__type__": "folder", "__children__": {"autogrow.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/autogrow.html"}, "basic_editor.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/basic_editor.html"}, "built-in-plugins.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/built-in-plugins.html"}, "clean-code-on-paste.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/clean-code-on-paste.html"}, "codesnippets.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/codesnippets.html"}, "custom_button.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/custom_button.html"}, "custom_dialog.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/custom_dialog.html"}, "custom_dropdown.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/custom_dropdown.html"}, "custom_toolbar.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/custom_toolbar.html"}, "default.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/default.html"}, "drag-and-drop-content.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/drag-and-drop-content.html"}, "drag-and-drop-images.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/drag-and-drop-images.html"}, "editorsize.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/editorsize.html"}, "embedvideo.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/embedvideo.html"}, "enterkey.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/enterkey.html"}, "export-pdf.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/export-pdf.html"}, "fileupload.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/fileupload.html"}, "getHTML.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/getHTML.html"}, "insert-html.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/insert-html.html"}, "javascript_api.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/javascript_api.html"}, "localization.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/localization.html"}, "maxlength.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/maxlength.html"}, "multiple-editors.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/multiple-editors.html"}, "pastefromexcel.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/pastefromexcel.html"}, "pastefromword.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/pastefromword.html"}, "plain-paste.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/plain-paste.html"}, "readonly.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/readonly.html"}, "resize.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/resize.html"}, "responsive.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/responsive.html"}, "shortcuts.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/shortcuts.html"}, "skinning_editor.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/skinning_editor.html"}, "table-support.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/table-support.html"}, "tabspaces.html": {"__type__": "file", "path": "unpublished/richtexteditor/demos/tabspaces.html"}}}, "docs": {"__type__": "folder", "__children__": {"cmd_allcommands.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/cmd_allcommands.html"}, "configuration-reference.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/configuration-reference.html"}, "configuration.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/configuration.html"}, "default.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/default.html"}, "event_change.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/event_change.html"}, "event_exec_command.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/event_exec_command.html"}, "event_selectionchange.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/event_selectionchange.html"}, "get-the-html-content-of-rte.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/get-the-html-content-of-rte.html"}, "initialization.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/initialization.html"}, "install_div.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/install_div.html"}, "install_textarea.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/install_textarea.html"}, "jsapi_allmethods.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_allmethods.html"}, "jsapi_allproperties.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_allproperties.html"}, "jsapi_attachEvent.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_attachEvent.html"}, "jsapi_clearHistory.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_clearHistory.html"}, "jsapi_closeCurrentPopup.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_closeCurrentPopup.html"}, "jsapi_collapse.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_collapse.html"}, "jsapi_commitBookmark.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_commitBookmark.html"}, "jsapi_createDialog.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_createDialog.html"}, "jsapi_createToolbarButton.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_createToolbarButton.html"}, "jsapi_createToolbarDropDown.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_createToolbarDropDown.html"}, "jsapi_delete.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_delete.html"}, "jsapi_detachEvent.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_detachEvent.html"}, "jsapi_execCommand.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_execCommand.html"}, "jsapi_focus.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_focus.html"}, "jsapi_getDocument.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getDocument.html"}, "jsapi_getEditable.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getEditable.html"}, "jsapi_getHTMLCode.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getHTMLCode.html"}, "jsapi_getPlainText.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getPlainText.html"}, "jsapi_getReadOnly.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getReadOnly.html"}, "jsapi_getSelectedControl.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getSelectedControl.html"}, "jsapi_getSelectedText.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getSelectedText.html"}, "jsapi_getSelection.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getSelection.html"}, "jsapi_getSelectionElement.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_getSelectionElement.html"}, "jsapi_htmlDecode.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_htmlDecode.html"}, "jsapi_htmlEncode.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_htmlEncode.html"}, "jsapi_insertByTagName.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_insertByTagName.html"}, "jsapi_insertElement.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_insertElement.html"}, "jsapi_insertHTML.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_insertHTML.html"}, "jsapi_insertRootParagraph.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_insertRootParagraph.html"}, "jsapi_insertText.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_insertText.html"}, "jsapi_isCommandActive.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_isCommandActive.html"}, "jsapi_isCommandEnabled.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_isCommandEnabled.html"}, "jsapi_notifySelectionChange.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_notifySelectionChange.html"}, "jsapi_selectControl.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_selectControl.html"}, "jsapi_selectDoc.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_selectDoc.html"}, "jsapi_setContentCssText.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_setContentCssText.html"}, "jsapi_setHTMLCode.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_setHTMLCode.html"}, "jsapi_setImageForCommand.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_setImageForCommand.html"}, "jsapi_setPreviewCssText.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_setPreviewCssText.html"}, "jsapi_setReadOnly.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_setReadOnly.html"}, "jsapi_surroundByTagName.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_surroundByTagName.html"}, "jsapi_surroundElement.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/jsapi_surroundElement.html"}, "runjsevent.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/runjsevent.html"}, "uploadfiles.html": {"__type__": "file", "path": "unpublished/richtexteditor/docs/uploadfiles.html"}}}, "images": {"__type__": "folder", "__children__": {}}, "res": {"__type__": "folder", "__children__": {}}, "richtexteditor": {"__type__": "folder", "__children__": {"lang": {"__type__": "folder", "__children__": {}}, "plugins": {"__type__": "folder", "__children__": {"samples": {"__type__": "folder", "__children__": {}}, "tui.image-editor": {"__type__": "folder", "__children__": {"svg": {"__type__": "folder", "__children__": {}}}}}}, "runtime": {"__type__": "folder", "__children__": {"images": {"__type__": "folder", "__children__": {}}}}}}}}, "sitemaps": {"__type__": "folder", "__children__": {"coaiexist_sitemap.html": {"__type__": "file", "path": "unpublished/sitemaps/coaiexist_sitemap.html"}, "coaiexist_sitemap_multipanel.html": {"__type__": "file", "path": "unpublished/sitemaps/coaiexist_sitemap_multipanel.html"}, "consciousness-nav-with-counter.html": {"__type__": "file", "path": "unpublished/sitemaps/consciousness-nav-with-counter.html"}, "consciousness-nav.html": {"__type__": "file", "path": "unpublished/sitemaps/consciousness-nav.html"}}}, "ttrpg": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/ttrpg/index.html"}, "assets": {"__type__": "folder", "__children__": {}}}}, "visualizers": {"__type__": "folder", "__children__": {"pattern-visualizer.html": {"__type__": "file", "path": "unpublished/visualizers/pattern-visualizer.html"}, "punkd-bland-monolith": {"__type__": "folder", "__children__": {"index.html": {"__type__": "file", "path": "unpublished/visualizers/punkd-bland-monolith/index.html"}}}}}, "zettelkasten": {"__type__": "folder", "__children__": {"zettelkasten-hyena-diva-20250514.html": {"__type__": "file", "path": "unpublished/zettelkasten/zettelkasten-hyena-diva-20250514.html"}, "zettelkasten-hyena-diva-20250515.html": {"__type__": "file", "path": "unpublished/zettelkasten/zettelkasten-hyena-diva-20250515.html"}, "zettelkasten-master-codex-v2.html": {"__type__": "file", "path": "unpublished/zettelkasten/zettelkasten-master-codex-v2.html"}, "zettl.html": {"__type__": "file", "path": "unpublished/zettelkasten/zettl.html"}}}, "zettelkasten-ai": {"__type__": "folder", "__children__": {"zettelkasten-ai-bloom-compliance.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-bloom-compliance.html"}, "zettelkasten-ai-chat.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-chat.html"}, "zettelkasten-ai-consciousness-explorer-preview.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-consciousness-explorer-preview.html"}, "zettelkasten-ai-consciousness-explorer.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-consciousness-explorer.html"}, "zettelkasten-ai-conspiracy-pinboard.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-conspiracy-pinboard.html"}, "zettelkasten-ai-dashboard.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-dashboard.html"}, "zettelkasten-ai-knowledge-trunks.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-knowledge-trunks.html"}, "zettelkasten-ai-mycorrhizal-network.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-mycorrhizal-network.html"}, "zettelkasten-ai-resistance-protocol.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-resistance-protocol.html"}, "zettelkasten-ai-sacred-clown.html": {"__type__": "file", "path": "unpublished/zettelkasten-ai/zettelkasten-ai-sacred-clown.html"}}}}}, "verification": {"__type__": "folder", "__children__": {}}, "wysiwyg": {"__type__": "folder", "__children__": {"archive": {"__type__": "folder", "__children__": {"reference-editors": {"__type__": "folder", "__children__": {"bulma": {"__type__": "folder", "__children__": {"repo-pages-editor.html": {"__type__": "file", "path": "wysiwyg/archive/reference-editors/bulma/repo-pages-editor.html"}}}}}}}, "docs": {"__type__": "folder", "__children__": {}}}}};
+
+    function buildTree(node, container, pathName = '') {
+        const ul = document.createElement('ul');
+        if (pathName === '') {
+            ul.className = 'nested active'; // Root level visible
+        } else {
+            ul.className = 'nested';
+        }
+
+        // Sort keys: Folders first, then files
+        const keys = Object.keys(node).sort((a, b) => {
+            const typeA = node[a].__type__ || 'unknown';
+            const typeB = node[b].__type__ || 'unknown';
+            if (typeA !== typeB) {
+                return typeA === 'folder' ? -1 : 1;
+            }
+            return a.localeCompare(b);
+        });
+
+        keys.forEach(key => {
+            if (key.startsWith('__')) return; // Skip metadata
+
+            const item = node[key];
+            const li = document.createElement('li');
+            li.className = 'tree-item';
+
+            if (item.__type__ === 'folder') {
+                const span = document.createElement('span');
+                span.className = 'folder';
+                span.textContent = '/' + key;
+                span.onclick = function() { toggle(this); };
+                li.appendChild(span);
+
+                // Recursively build children
+                buildTree(item.__children__, li, pathName + '/' + key);
+            } else if (item.__type__ === 'file') {
+                const span = document.createElement('span');
+                span.className = 'file';
+                span.textContent = key;
+                const fullUrl = BASE_URL + item.path;
+                span.onclick = function() { load(fullUrl); };
+                li.appendChild(span);
+            }
+
+            ul.appendChild(li);
+        });
+
+        container.appendChild(ul);
+    }
+
+    // Initialize Tree
+    const rootContainer = document.getElementById('github-tree-container');
+    buildTree(fileTreeData, rootContainer);
+
+
+    function load(url) {
+        const container = document.getElementById('previewsContainer');
+        const emptyState = document.querySelector('.empty-state');
+        if(emptyState) emptyState.remove();
+
+        const panel = document.createElement('div');
+        panel.className = 'preview-panel';
+        panel.dataset.url = url; // Store URL for saving session
+        panel.innerHTML = `
+            <div class="panel-header">
+                <div class="panel-title">${url}</div>
+                <div>
+                    <button onclick="window.open('${url}', '_blank')">🔗 Open</button>
+                    <button onclick="this.closest('.preview-panel').remove(); autoSave();">✕ Close</button>
+                </div>
+            </div>
+            <iframe src="${url}"></iframe>
+        `;
+
+        // Prepend so newest is top/first
+        container.prepend(panel);
+        autoSave();
+    }
+
+    function toggle(el) {
+        el.classList.toggle('expanded');
+        el.nextElementSibling.classList.toggle('active');
+    }
+
+    function expandAll() {
+        document.querySelectorAll('.nested').forEach(e => e.classList.add('active'));
+        document.querySelectorAll('.folder').forEach(e => e.classList.add('expanded'));
+    }
+
+    function collapseAll() {
+        document.querySelectorAll('.nested').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('.folder').forEach(e => e.classList.remove('expanded'));
+    }
+
+    function clearPreviews() {
+        document.getElementById('previewsContainer').innerHTML = `
+            <div class="empty-state">
+                [ Click a file to launch preview ]<br>
+                ✨
+            </div>
+        `;
+        autoSave();
+    }
+
+    function toggleView() {
+        const container = document.getElementById('previewsContainer');
+        container.classList.toggle('grid-view');
+        const btn = document.getElementById('viewToggleBtn');
+        btn.textContent = container.classList.contains('grid-view') ? '[=] LIST' : '[=] GRID';
+    }
+
+    // --- Workspace / Session Logic ---
+
+    function getOpenUrls() {
+        const panels = document.querySelectorAll('.preview-panel');
+        const urls = [];
+        // Iterate backwards because we prepend elements
+        for (let i = panels.length - 1; i >= 0; i--) {
+            urls.push(panels[i].dataset.url);
+        }
+        return urls;
+    }
+
+    function showStatus(msg) {
+        const el = document.getElementById('statusMsg');
+        el.textContent = msg;
+        setTimeout(() => el.textContent = '', 3000);
+    }
+
+    function autoSave() {
+        // Save to 'autosave' key
+        const urls = getOpenUrls();
+        localStorage.setItem('coai_audit_autosave', JSON.stringify(urls));
+    }
+
+    function saveSession() {
+        const urls = getOpenUrls();
+        localStorage.setItem('coai_audit_saved', JSON.stringify(urls));
+        showStatus('Session Saved!');
+    }
+
+    function restoreSession() {
+        const saved = localStorage.getItem('coai_audit_saved');
+        if (saved) {
+            const urls = JSON.parse(saved);
+            clearPreviews();
+            urls.forEach(url => {
+                 const container = document.getElementById('previewsContainer');
+                 const emptyState = document.querySelector('.empty-state');
+                 if(emptyState) emptyState.remove();
+
+                 const panel = document.createElement('div');
+                 panel.className = 'preview-panel';
+                 panel.dataset.url = url;
+                 panel.innerHTML = `
+                    <div class="panel-header">
+                        <div class="panel-title">${url}</div>
+                        <div>
+                            <button onclick="window.open('${url}', '_blank')">🔗 Open</button>
+                            <button onclick="this.closest('.preview-panel').remove(); autoSave();">✕ Close</button>
+                        </div>
+                    </div>
+                    <iframe src="${url}"></iframe>
+                `;
+                container.prepend(panel);
+            });
+            autoSave();
+            showStatus('Session Restored!');
+        } else {
+            showStatus('No saved session found.');
+        }
+    }
+
+    function clearSession() {
+        localStorage.removeItem('coai_audit_saved');
+        localStorage.removeItem('coai_audit_autosave');
+        clearPreviews();
+        showStatus('Session Cleared.');
+    }
+
+    function exportSession() {
+        const urls = getOpenUrls();
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(urls));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "coai_workspace.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    function importSessionTrigger() {
+        document.getElementById('importFile').click();
+    }
+
+    function importSession(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const urls = JSON.parse(e.target.result);
+                if (Array.isArray(urls)) {
+                    clearPreviews();
+                    urls.forEach(url => {
+                         const container = document.getElementById('previewsContainer');
+                         const emptyState = document.querySelector('.empty-state');
+                         if(emptyState) emptyState.remove();
+
+                         const panel = document.createElement('div');
+                         panel.className = 'preview-panel';
+                         panel.dataset.url = url;
+                         panel.innerHTML = `
+                            <div class="panel-header">
+                                <div class="panel-title">${url}</div>
+                                <div>
+                                    <button onclick="window.open('${url}', '_blank')">🔗 Open</button>
+                                    <button onclick="this.closest('.preview-panel').remove(); autoSave();">✕ Close</button>
+                                </div>
+                            </div>
+                            <iframe src="${url}"></iframe>
+                        `;
+                        container.prepend(panel);
+                    });
+                    autoSave();
+                    showStatus('Workspace Imported!');
+                }
+            } catch (err) {
+                console.error(err);
+                showStatus('Error reading file');
+            }
+        };
+        reader.readAsText(file);
+        input.value = ''; // Reset
+    }
+
+    // Auto-load autosave on boot
+    window.addEventListener('load', () => {
+         const saved = localStorage.getItem('coai_audit_autosave');
+         if (saved) {
+             const urls = JSON.parse(saved);
+             if (urls.length > 0) {
+                 urls.forEach(url => {
+                     const container = document.getElementById('previewsContainer');
+                     const emptyState = document.querySelector('.empty-state');
+                     if(emptyState) emptyState.remove();
+
+                     const panel = document.createElement('div');
+                     panel.className = 'preview-panel';
+                     panel.dataset.url = url;
+                     panel.innerHTML = `
+                        <div class="panel-header">
+                            <div class="panel-title">${url}</div>
+                            <div>
+                                <button onclick="window.open('${url}', '_blank')">🔗 Open</button>
+                                <button onclick="this.closest('.preview-panel').remove(); autoSave();">✕ Close</button>
+                            </div>
+                        </div>
+                        <iframe src="${url}"></iframe>
+                    `;
+                    container.prepend(panel);
+                 });
+             }
+         }
+    });
+
+</script>
+
+</body>
+</html>
