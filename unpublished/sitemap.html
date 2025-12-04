@@ -161,18 +161,20 @@
             color: #00ff88;
             cursor: pointer;
             transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
         }
-        
+
         .file:hover {
             color: #00ffff;
             text-shadow: 0 0 8px #00ffff;
         }
-        
+
         .file::before {
             content: '📄 ';
             margin-right: 5px;
         }
-        
+
         .file.html::before {
             content: '🌐 ';
         }
@@ -698,12 +700,20 @@
                 const li = document.createElement('li');
                 li.className = 'tree-item';
 
-                const fileSpan = document.createElement('span');
-                fileSpan.className = 'file html';
-                fileSpan.textContent = file.name;
-                fileSpan.onclick = () => addPreview(`${repoBaseUrl}${file.path}`, file.path);
+                const fullUrl = `${repoBaseUrl}${file.path}`;
 
-                li.appendChild(fileSpan);
+                const fileLink = document.createElement('a');
+                fileLink.className = 'file html';
+                fileLink.href = fullUrl;
+                fileLink.textContent = fullUrl;
+                fileLink.target = '_blank';
+                fileLink.rel = 'noopener noreferrer';
+                fileLink.onclick = (event) => {
+                    event.preventDefault();
+                    addPreview(fullUrl, file.path);
+                };
+
+                li.appendChild(fileLink);
                 container.appendChild(li);
             });
         }
