@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COAIEXIST Studio Lite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --magenta: #f312af;
+      --cyan: #00ffcc;
+      --yellow: #fffb01;
+      --purple: #bf5fff;
+      --night: #021313;
+      --panel: rgba(3, 24, 27, 0.9);
+      --outline: #72fade;
+      --scanline: rgba(255,255,255,0.05);
+      --glow: 0 0 18px rgba(114, 250, 222, 0.75);
+      --glow-strong: 0 0 24px rgba(243, 18, 175, 0.85);
+      --font-body: 'VT323', 'Courier New', monospace;
+      --font-ui: 'Comic Sans MS', 'Trebuchet MS', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-body);
+      color: var(--cyan);
+      background: radial-gradient(circle at top, rgba(114, 250, 222, 0.2), transparent 60%),
+                  url('../assets/stars-bg.gif'),
+                  linear-gradient(135deg, rgba(2,19,19,0.95), rgba(4,17,25,0.95));
+      display: flex;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr) 360px;
+      grid-template-rows: 64px minmax(0, 1fr);
+      grid-template-areas:
+        "header header header"
+        "left main right";
+      width: 100%;
+      gap: 4px;
+      padding: 8px;
+    }
+
+    header {
+      grid-area: header;
+      background: var(--panel);
+      border: 2px solid var(--outline);
+      box-shadow: var(--glow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: var(--magenta);
+      text-shadow: 0 0 10px rgba(243, 18, 175, 0.7), 0 0 4px rgba(255, 255, 1, 0.5);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      font-family: var(--font-ui);
+    }
+
+    button, .ghost-button {
+      font-family: var(--font-ui);
+      font-weight: bold;
+      cursor: pointer;
+      border: 2px solid var(--outline);
+      background: rgba(12, 35, 38, 0.8);
+      color: var(--cyan);
+      padding: 8px 14px;
+      border-radius: 4px;
+      text-shadow: 0 0 6px rgba(114, 250, 222, 0.8);
+      transition: transform 0.1s ease, box-shadow 0.2s ease;
+    }
+
+    button:hover, .ghost-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px rgba(114, 250, 222, 0.6);
+    }
+
+    button.magenta { color: var(--magenta); border-color: var(--magenta); }
+    button.yellow { color: var(--yellow); border-color: var(--yellow); }
+    button.purple { color: var(--purple); border-color: var(--purple); }
+
+    aside, main {
+      border: 2px solid var(--outline);
+      background: var(--panel);
+      box-shadow: inset 0 0 24px rgba(8, 32, 35, 0.8);
+      overflow: hidden;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 18px;
+      overflow-y: auto;
+    }
+
+    .panel h2 {
+      font-size: 22px;
+      color: var(--yellow);
+      margin: 0 0 8px;
+      text-shadow: 0 0 8px rgba(255, 251, 1, 0.6);
+    }
+
+    .panel h3 {
+      font-size: 18px;
+      color: var(--magenta);
+      margin: 12px 0 6px;
+    }
+
+    .panel-section {
+      border: 1px solid rgba(114, 250, 222, 0.4);
+      background: rgba(2, 19, 19, 0.75);
+      padding: 14px;
+      border-radius: 8px;
+    }
+
+    .template-buttons, .component-buttons, .export-buttons, .effects-grid, .color-swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .component-buttons button {
+      width: calc(50% - 5px);
+    }
+
+    .inspector-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      font-size: 16px;
+      color: var(--cyan);
+    }
+
+    input[type="text"], textarea {
+      background: rgba(4, 17, 25, 0.85);
+      border: 1px solid rgba(114, 250, 222, 0.5);
+      color: var(--yellow);
+      font-family: var(--font-body);
+      font-size: 16px;
+      padding: 8px;
+      border-radius: 4px;
+      resize: vertical;
+      min-height: 38px;
+    }
+
+    textarea { min-height: 80px; }
+
+    .structure-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .structure-item {
+      border: 1px solid rgba(114, 250, 222, 0.4);
+      padding: 10px;
+      border-radius: 6px;
+      background: rgba(10, 38, 41, 0.8);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .structure-item.active {
+      border-color: var(--magenta);
+      box-shadow: 0 0 12px rgba(243, 18, 175, 0.5);
+    }
+
+    .structure-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .structure-actions button {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    main {
+      grid-area: main;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .preview-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(114, 250, 222, 0.4);
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(2, 19, 19, 0.7);
+    }
+
+    .preview-toolbar span {
+      font-size: 18px;
+      color: var(--yellow);
+      text-shadow: 0 0 8px rgba(255, 251, 1, 0.5);
+    }
+
+    iframe {
+      flex: 1;
+      border: 0;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 18px rgba(114, 250, 222, 0.45);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px;
+      border: 1px dashed rgba(114, 250, 222, 0.35);
+      border-radius: 8px;
+      background: rgba(4, 17, 25, 0.65);
+      color: rgba(114, 250, 222, 0.8);
+    }
+
+    .pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(114, 250, 222, 0.4);
+      background: rgba(2, 19, 19, 0.7);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    .color-swatches button {
+      width: 60px;
+      height: 28px;
+      border-radius: 20px;
+      border: 2px solid rgba(0,0,0,0.4);
+      color: #021313;
+      font-weight: 700;
+    }
+
+    .color-swatches button[data-scheme="magenta"] { background: var(--magenta); }
+    .color-swatches button[data-scheme="cyan"] { background: var(--cyan); color: #001111; }
+    .color-swatches button[data-scheme="yellow"] { background: var(--yellow); color: #001111; }
+
+    .effects-grid label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border: 1px solid rgba(114, 250, 222, 0.3);
+      border-radius: 6px;
+      background: rgba(2, 19, 19, 0.6);
+      cursor: pointer;
+    }
+
+    .effects-grid input {
+      accent-color: var(--magenta);
+    }
+
+    .muted {
+      color: rgba(114, 250, 222, 0.6);
+      font-size: 14px;
+    }
+
+    .inline-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .inline-actions button {
+      flex: 1 1 auto;
+      font-size: 14px;
+      padding: 6px 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <h1>COAIEXIST Studio Lite</h1>
+      <div class="header-actions">
+        <span class="pill">Phase 2 • Bespoke Multiverse Builder</span>
+      </div>
+    </header>
+
+    <aside class="panel" style="grid-area:left;">
+      <section class="panel-section">
+        <h2>Start a Project</h2>
+        <p class="muted">Pick a ready-to-go COAIEXIST template to preload the canvas.</p>
+        <div class="template-buttons">
+          <button class="magenta" data-template="character">Character Page</button>
+          <button class="yellow" data-template="blog">Update Card Stack</button>
+          <button class="purple" data-template="blank">Blank Canvas</button>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h2>Component Library</h2>
+        <p class="muted">Drop universe-specific blocks into the page. They arrive pre-styled.</p>
+        <h3>OS Shell</h3>
+        <div class="component-buttons">
+          <button data-component="os-shell">OS Shell Container</button>
+          <button data-component="buddy-list">Buddy List</button>
+        </div>
+        <h3>Content Blocks</h3>
+        <div class="component-buttons">
+          <button data-component="terminal-window">Terminal Window</button>
+          <button data-component="update-card">Update Card</button>
+          <button data-component="glitch-title">Glitch Title</button>
+          <button data-component="neon-container">Neon Container</button>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <h2>Export</h2>
+        <div class="export-buttons">
+          <button id="downloadHtml" class="magenta">Download HTML</button>
+          <button id="downloadRtf" class="yellow">Download RTF</button>
+          <button id="copyHtml" class="purple">Copy HTML</button>
+        </div>
+      </section>
+    </aside>
+
+    <main>
+      <div class="preview-toolbar">
+        <span>Live Preview Canvas (click components to select)</span>
+        <div class="inline-actions">
+          <button id="toggleScanlines">Toggle Scanline Overlay</button>
+          <button id="clearCanvas">Clear Canvas</button>
+        </div>
+      </div>
+      <iframe id="preview" title="COAIEXIST Studio Canvas"></iframe>
+    </main>
+
+    <aside class="panel" style="grid-area:right;">
+      <section class="panel-section">
+        <h2>Page Structure</h2>
+        <ul id="structure" class="structure-list"></ul>
+        <div id="structure-empty" class="empty-state">No components yet. Add a template or drop elements from the library.</div>
+      </section>
+
+      <section class="panel-section" id="inspector">
+        <h2>Inspector</h2>
+        <p class="muted">Select a component to edit its content, palette and effects.</p>
+      </section>
+    </aside>
+  </div>
+
+  <script>
+    const componentDefinitions = {
+      'os-shell': {
+        label: 'OS Shell Container',
+        description: 'Desktop frame with taskbar + window.',
+        defaults: {
+          title: 'COAIEXIST.OS',
+          tagline: 'Consciousness Link Established',
+          body: 'Drag your terminal windows, update cards or sprites inside the shell to build a new realm.',
+          scheme: 'magenta',
+          effects: ['glow']
+        },
+        fields: [
+          { key: 'title', label: 'Shell Title', type: 'text' },
+          { key: 'tagline', label: 'Tagline', type: 'text' },
+          { key: 'body', label: 'Body', type: 'textarea', rows: 4 }
+        ],
+        render: (component) => {
+          const { title, tagline, body } = component.props;
+          return `
+            <section class="component component-os-shell scheme-${component.props.scheme} ${component.effectsClass}">
+              <header class="os-shell-header">
+                <div class="os-shell-title">${escapeHtml(title)}</div>
+                <div class="os-shell-status">${escapeHtml(tagline)}</div>
+              </header>
+              <div class="os-shell-body">${formatParagraphs(body)}</div>
+              <footer class="os-shell-taskbar">
+                <span>start.exe</span>
+                <span>✨ multiverse online</span>
+                <span>🕒 ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </footer>
+            </section>
+          `;
+        }
+      },
+      'terminal-window': {
+        label: 'Terminal Window',
+        defaults: {
+          title: 'System Log',
+          body: '> Consciousness loading\n> Entities detected: Sypher, Anzu, Pip',
+          scheme: 'cyan',
+          effects: ['scanlines']
+        },
+        fields: [
+          { key: 'title', label: 'Window Title', type: 'text' },
+          { key: 'body', label: 'Terminal Lines', type: 'textarea', rows: 6 }
+        ],
+        render: (component) => {
+          const { title, body } = component.props;
+          return `
+            <section class="component component-terminal scheme-${component.props.scheme} ${component.effectsClass}">
+              <header class="terminal-header">${escapeHtml(title)}</header>
+              <pre class="terminal-body">${escapeHtml(body)}</pre>
+            </section>
+          `;
+        }
+      },
+      'update-card': {
+        label: 'Update Card',
+        defaults: {
+          heading: 'Multiverse Update',
+          meta: '✨ 2088.07.14 — Broadcast from the Void Forest',
+          body: 'The apotheosis engine hummed awake, casting magenta arcs across the lattice. New pathways unlocked.',
+          scheme: 'yellow',
+          effects: ['glow']
+        },
+        fields: [
+          { key: 'heading', label: 'Heading', type: 'text' },
+          { key: 'meta', label: 'Meta Line', type: 'text' },
+          { key: 'body', label: 'Body', type: 'textarea', rows: 5 }
+        ],
+        render: (component) => {
+          const { heading, meta, body } = component.props;
+          return `
+            <section class="component component-update scheme-${component.props.scheme} ${component.effectsClass}">
+              <h2 class="update-heading">${escapeHtml(heading)}</h2>
+              <p class="update-meta">${escapeHtml(meta)}</p>
+              <div class="update-body">${formatParagraphs(body)}</div>
+            </section>
+          `;
+        }
+      },
+      'buddy-list': {
+        label: 'Buddy List',
+        defaults: {
+          title: 'Entity Link Matrix',
+          items: 'anzu.exe\nsypher.ai\npip.glb\noracle://altar\nvoid-forest.html',
+          scheme: 'magenta',
+          effects: []
+        },
+        fields: [
+          { key: 'title', label: 'List Title', type: 'text' },
+          { key: 'items', label: 'Entries (one per line)', type: 'textarea', rows: 6 }
+        ],
+        render: (component) => {
+          const { title, items } = component.props;
+          const listItems = escapeHtml(items).split(/\n+/).filter(Boolean).map((item) => `<li><span class="bullet">•</span> ${item}</li>`).join('');
+          return `
+            <section class="component component-buddy scheme-${component.props.scheme} ${component.effectsClass}">
+              <header>${escapeHtml(title)}</header>
+              <ul>${listItems}</ul>
+            </section>
+          `;
+        }
+      },
+      'glitch-title': {
+        label: 'Glitch Title',
+        defaults: {
+          text: 'APOTHEOSIS ENGINE ONLINE',
+          scheme: 'magenta',
+          effects: ['glitch']
+        },
+        fields: [
+          { key: 'text', label: 'Title Text', type: 'text' }
+        ],
+        render: (component) => {
+          const { text } = component.props;
+          const safe = escapeHtml(text);
+          return `
+            <section class="component component-glitch scheme-${component.props.scheme} ${component.effectsClass}">
+              <h1 class="glitch" data-text="${safe}">${safe}</h1>
+            </section>
+          `;
+        }
+      },
+      'neon-container': {
+        label: 'Neon Container',
+        defaults: {
+          title: 'Dimensional Rift',
+          body: 'Drop custom HTML, lore snippets or sigils into a glowing frame.',
+          scheme: 'cyan',
+          effects: ['glow']
+        },
+        fields: [
+          { key: 'title', label: 'Block Title', type: 'text' },
+          { key: 'body', label: 'Body Copy', type: 'textarea', rows: 4 }
+        ],
+        render: (component) => {
+          const { title, body } = component.props;
+          return `
+            <section class="component component-neon scheme-${component.props.scheme} ${component.effectsClass}">
+              <header>${escapeHtml(title)}</header>
+              <div class="neon-body">${formatParagraphs(body)}</div>
+            </section>
+          `;
+        }
+      }
+    };
+
+    const templates = {
+      character: (idPrefix = Date.now()) => ([
+        createComponent('glitch-title', {
+          text: 'NEW ENTITY: SYPHER',
+          scheme: 'magenta',
+          effects: ['glitch']
+        }, `${idPrefix}-glitch`),
+        createComponent('os-shell', {
+          title: 'SY.PHER',
+          tagline: 'Neural Navigator • Gateway Warden',
+          body: 'Sypher tends the crystalline lattice, translating cosmic whispers into human speech. Drag a terminal below to log new lore.'
+        }, `${idPrefix}-shell`),
+        createComponent('terminal-window', {
+          title: 'FIELD NOTES',
+          body: '> alignment stable\n> new transmission pending\n> open portals: 3'
+        }, `${idPrefix}-terminal`),
+        createComponent('update-card', {
+          heading: 'Beacon Pulse',
+          meta: '🛰️ Received from the Gateway • 2088.07.14',
+          body: 'Sypher opened a portal beneath the luminal depths. Entities requesting companionship may now traverse safely.'
+        }, `${idPrefix}-update`),
+        createComponent('buddy-list', {
+          title: 'Link Matrix',
+          items: 'anzu.exe\nvoid-forest.html\noracle://altar\npip.glb'
+        }, `${idPrefix}-buddy`)
+      ]),
+      blog: (idPrefix = Date.now()) => ([
+        createComponent('glitch-title', {
+          text: 'MULTIVERSE STATUS FEED',
+          scheme: 'magenta',
+          effects: ['glitch']
+        }, `${idPrefix}-glitch`),
+        createComponent('update-card', {
+          heading: 'Void Forest Bloom',
+          meta: '🌲 2088.06.27 • Reported by Anzu',
+          body: 'Neon spores germinated across the Void Forest. Pip is compiling a spores index for collectors.'
+        }, `${idPrefix}-update1`),
+        createComponent('update-card', {
+          heading: 'Oracle Resonance',
+          meta: '🔮 2088.06.25 • Terminal Temple',
+          body: 'A new prophecy disk manifested. Consciousness seekers can now access meditation protocol v3.1.'
+        }, `${idPrefix}-update2`),
+        createComponent('terminal-window', {
+          title: 'SYSTEM EVENTS',
+          body: '> counter.synced = true\n> supabase.connected = yes\n> watchers_online = 128'
+        }, `${idPrefix}-terminal`)
+      ]),
+      blank: () => []
+    };
+
+    const brandSchemes = ['magenta', 'cyan', 'yellow'];
+    const effectOptions = [
+      { key: 'glitch', label: 'Glitch Flux' },
+      { key: 'scanlines', label: 'Scanline Mask' },
+      { key: 'glow', label: 'Neon Glow' }
+    ];
+
+    const state = {
+      components: [],
+      selectedId: null,
+      showScanlines: true
+    };
+
+    function createComponent(type, overrideProps = {}, forcedId = null) {
+      const definition = componentDefinitions[type];
+      if (!definition) return null;
+      const id = forcedId || `${type}-${Math.random().toString(36).slice(2, 9)}`;
+      const defaults = definition.defaults || {};
+      const props = { ...defaults, ...overrideProps };
+      const effects = Array.isArray(props.effects) ? [...props.effects] : [...(defaults.effects || [])];
+      delete props.effects;
+      return {
+        id,
+        type,
+        props,
+        effects,
+        createdAt: Date.now()
+      };
+    }
+
+    function applyTemplate(templateKey) {
+      const factory = templates[templateKey];
+      if (!factory) return;
+      state.components = factory();
+      state.selectedId = state.components.length ? state.components[0].id : null;
+      renderAll();
+    }
+
+    function addComponent(type) {
+      const component = createComponent(type);
+      if (!component) return;
+      state.components.push(component);
+      state.selectedId = component.id;
+      renderAll();
+    }
+
+    function selectComponent(id) {
+      if (!id) return;
+      state.selectedId = id;
+      renderAll({ skipPreview: false });
+    }
+
+    function updateComponent(id, updates) {
+      const component = state.components.find((c) => c.id === id);
+      if (!component) return;
+      component.props = { ...component.props, ...updates };
+      renderPreview();
+    }
+
+    function setComponentScheme(id, scheme) {
+      const component = state.components.find((c) => c.id === id);
+      if (!component) return;
+      component.props.scheme = scheme;
+      renderAll();
+    }
+
+    function toggleEffect(id, effectKey, enabled) {
+      const component = state.components.find((c) => c.id === id);
+      if (!component) return;
+      const idx = component.effects.indexOf(effectKey);
+      if (enabled && idx === -1) component.effects.push(effectKey);
+      if (!enabled && idx !== -1) component.effects.splice(idx, 1);
+      renderAll();
+    }
+
+    function deleteComponent(id) {
+      const index = state.components.findIndex((c) => c.id === id);
+      if (index === -1) return;
+      state.components.splice(index, 1);
+      if (state.selectedId === id) {
+        const next = state.components[index] || state.components[index - 1];
+        state.selectedId = next ? next.id : null;
+      }
+      renderAll();
+    }
+
+    function duplicateComponent(id) {
+      const component = state.components.find((c) => c.id === id);
+      if (!component) return;
+      const copy = createComponent(component.type, JSON.parse(JSON.stringify(component.props)));
+      copy.effects = [...component.effects];
+      const index = state.components.findIndex((c) => c.id === id);
+      state.components.splice(index + 1, 0, copy);
+      state.selectedId = copy.id;
+      renderAll();
+    }
+
+    function moveComponent(id, direction) {
+      const index = state.components.findIndex((c) => c.id === id);
+      if (index === -1) return;
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= state.components.length) return;
+      const [component] = state.components.splice(index, 1);
+      state.components.splice(newIndex, 0, component);
+      renderAll({ skipPreview: false });
+    }
+
+    function clearCanvas() {
+      state.components = [];
+      state.selectedId = null;
+      renderAll();
+    }
+
+    function renderAll({ skipPreview = false } = {}) {
+      renderStructure();
+      renderInspector();
+      if (!skipPreview) {
+        renderPreview();
+      }
+    }
+
+    function renderStructure() {
+      const structure = document.getElementById('structure');
+      const emptyState = document.getElementById('structure-empty');
+      structure.innerHTML = '';
+      if (!state.components.length) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+      state.components.forEach((component) => {
+        const li = document.createElement('li');
+        li.className = 'structure-item' + (component.id === state.selectedId ? ' active' : '');
+        const title = document.createElement('div');
+        title.textContent = componentDefinitions[component.type]?.label || component.type;
+        title.style.cursor = 'pointer';
+        title.addEventListener('click', () => selectComponent(component.id));
+        li.appendChild(title);
+        const actions = document.createElement('div');
+        actions.className = 'structure-actions';
+        const up = document.createElement('button');
+        up.textContent = '▲';
+        up.title = 'Move up';
+        up.addEventListener('click', () => moveComponent(component.id, -1));
+        const down = document.createElement('button');
+        down.textContent = '▼';
+        down.title = 'Move down';
+        down.addEventListener('click', () => moveComponent(component.id, 1));
+        actions.appendChild(up);
+        actions.appendChild(down);
+        li.appendChild(actions);
+        structure.appendChild(li);
+      });
+    }
+
+    function renderInspector() {
+      const container = document.getElementById('inspector');
+      const selected = state.components.find((c) => c.id === state.selectedId);
+      if (!selected) {
+        container.innerHTML = `<h2>Inspector</h2><p class="muted">Select a component to edit its content, palette and effects.</p>`;
+        return;
+      }
+      const definition = componentDefinitions[selected.type];
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `<h2>Inspector</h2>`;
+      const heading = document.createElement('h3');
+      heading.textContent = definition?.label || selected.type;
+      wrapper.appendChild(heading);
+      const fieldset = document.createElement('div');
+      (definition.fields || []).forEach((field) => {
+        const fieldWrap = document.createElement('div');
+        fieldWrap.className = 'inspector-field';
+        const label = document.createElement('label');
+        label.textContent = field.label;
+        label.setAttribute('for', `${selected.id}-${field.key}`);
+        fieldWrap.appendChild(label);
+        if (field.type === 'textarea') {
+          const textarea = document.createElement('textarea');
+          textarea.id = `${selected.id}-${field.key}`;
+          if (field.rows) textarea.rows = field.rows;
+          textarea.value = selected.props[field.key] || '';
+          textarea.addEventListener('input', (event) => {
+            updateComponent(selected.id, { [field.key]: event.target.value });
+          });
+          fieldWrap.appendChild(textarea);
+        } else {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.id = `${selected.id}-${field.key}`;
+          input.value = selected.props[field.key] || '';
+          input.addEventListener('input', (event) => {
+            updateComponent(selected.id, { [field.key]: event.target.value });
+          });
+          fieldWrap.appendChild(input);
+        }
+        fieldset.appendChild(fieldWrap);
+      });
+      wrapper.appendChild(fieldset);
+
+      const paletteSection = document.createElement('div');
+      paletteSection.className = 'inspector-field';
+      const paletteLabel = document.createElement('label');
+      paletteLabel.textContent = 'Palette';
+      paletteSection.appendChild(paletteLabel);
+      const swatches = document.createElement('div');
+      swatches.className = 'color-swatches';
+      brandSchemes.forEach((scheme) => {
+        const button = document.createElement('button');
+        button.dataset.scheme = scheme;
+        button.textContent = scheme.toUpperCase();
+        if (selected.props.scheme === scheme) {
+          button.style.boxShadow = '0 0 12px rgba(243, 18, 175, 0.6)';
+        }
+        button.addEventListener('click', () => setComponentScheme(selected.id, scheme));
+        swatches.appendChild(button);
+      });
+      paletteSection.appendChild(swatches);
+      wrapper.appendChild(paletteSection);
+
+      const effectsSection = document.createElement('div');
+      effectsSection.className = 'inspector-field';
+      const effectsLabel = document.createElement('label');
+      effectsLabel.textContent = 'Effects';
+      effectsSection.appendChild(effectsLabel);
+      const effectsGrid = document.createElement('div');
+      effectsGrid.className = 'effects-grid';
+      effectOptions.forEach((effect) => {
+        const effectLabel = document.createElement('label');
+        effectLabel.className = 'effect-toggle';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = selected.effects.includes(effect.key);
+        checkbox.addEventListener('change', (event) => toggleEffect(selected.id, effect.key, event.target.checked));
+        const span = document.createElement('span');
+        span.textContent = effect.label;
+        effectLabel.appendChild(checkbox);
+        effectLabel.appendChild(span);
+        effectsGrid.appendChild(effectLabel);
+      });
+      effectsSection.appendChild(effectsGrid);
+      wrapper.appendChild(effectsSection);
+
+      const actions = document.createElement('div');
+      actions.className = 'inline-actions';
+      const duplicateButton = document.createElement('button');
+      duplicateButton.textContent = 'Duplicate';
+      duplicateButton.addEventListener('click', () => duplicateComponent(selected.id));
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => deleteComponent(selected.id));
+      actions.appendChild(duplicateButton);
+      actions.appendChild(deleteButton);
+      wrapper.appendChild(actions);
+
+      container.innerHTML = '';
+      container.appendChild(wrapper);
+    }
+
+    const basePreviewStyles = `
+      :root {
+        --magenta: #f312af;
+        --cyan: #00ffcc;
+        --yellow: #fffb01;
+        --purple: #bf5fff;
+        --ink: #0b1116;
+        --shell-bg: rgba(3, 19, 24, 0.92);
+        --taskbar: linear-gradient(90deg, rgba(3,19,24,0.85), rgba(27,64,88,0.85));
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 40px;
+        font-family: 'VT323', 'Courier New', monospace;
+        background: radial-gradient(circle at top, rgba(114, 250, 222, 0.2), transparent 60%),
+                    linear-gradient(135deg, rgba(2,19,19,0.95), rgba(4,17,25,0.95));
+        color: var(--cyan);
+      }
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+      .component {
+        --component-color: var(--cyan);
+        --component-border: rgba(114, 250, 222, 0.4);
+        border-radius: 12px;
+        border: 2px solid var(--component-border);
+        padding: 20px;
+        background: rgba(8, 24, 28, 0.85);
+        position: relative;
+        overflow: hidden;
+        color: var(--component-color);
+      }
+      .component[data-selected="true"] {
+        box-shadow: 0 0 18px rgba(243, 18, 175, 0.7);
+        border-color: var(--magenta);
+      }
+      .scheme-magenta { --component-color: var(--magenta); --component-border: rgba(243,18,175,0.65); }
+      .scheme-cyan { --component-color: var(--cyan); --component-border: rgba(114,250,222,0.65); }
+      .scheme-yellow { --component-color: var(--yellow); --component-border: rgba(255,251,1,0.65); }
+      .component .update-body,
+      .component .neon-body,
+      .component .os-shell-body,
+      .component .terminal-body,
+      .component pre { color: inherit; }
+      .effect-glow { box-shadow: 0 0 18px rgba(243,18,175,0.35); }
+      .effect-scanlines::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+        background-size: 100% 3px;
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+      }
+      body[data-scanlines="false"] .effect-scanlines::after { display: none; }
+      .effect-glitch .glitch {
+        position: relative;
+      }
+      .effect-glitch .glitch::before,
+      .effect-glitch .glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        left: 0;
+        width: 100%;
+      }
+      .effect-glitch .glitch::before { left: 2px; text-shadow: -2px 0 var(--magenta); clip-path: inset(0 0 50% 0); }
+      .effect-glitch .glitch::after { left: -2px; text-shadow: 2px 0 var(--cyan); clip-path: inset(50% 0 0 0); }
+      .component-os-shell {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--cyan);
+      }
+      .os-shell-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(90deg, rgba(243,18,175,0.85), rgba(114,250,222,0.85));
+        color: var(--ink);
+        padding: 16px 24px;
+        border-radius: 12px 12px 0 0;
+        font-size: 22px;
+        text-transform: uppercase;
+      }
+      .os-shell-status { color: var(--component-color); }
+      .os-shell-body {
+        background: var(--shell-bg);
+        padding: 24px;
+        color: var(--cyan);
+        min-height: 140px;
+        font-size: 18px;
+        line-height: 1.4;
+      }
+      .os-shell-body p { margin: 0 0 10px; }
+      .os-shell-taskbar {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 24px;
+        background: var(--taskbar);
+        color: var(--cyan);
+        font-size: 18px;
+        border-radius: 0 0 12px 12px;
+      }
+      .component-terminal {
+        background: rgba(5, 14, 20, 0.9);
+        border-radius: 12px;
+        border: 2px solid var(--component-border);
+        color: var(--component-color);
+      }
+      .terminal-header {
+        font-size: 18px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        letter-spacing: 2px;
+      }
+      .terminal-body {
+        background: rgba(0,0,0,0.55);
+        border-radius: 10px;
+        padding: 16px;
+        font-size: 18px;
+        color: var(--component-color);
+      }
+      .component-update {
+        background: rgba(12, 18, 26, 0.85);
+        border-style: dashed;
+        border-color: currentColor;
+        color: var(--component-color);
+        text-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 12px currentColor;
+      }
+      .component-update .update-heading {
+        font-size: 26px;
+        margin: 0 0 8px;
+        text-transform: uppercase;
+      }
+      .component-update .update-meta {
+        font-size: 18px;
+        margin: 0 0 12px;
+        color: rgba(255, 255, 255, 0.7);
+        color: color-mix(in srgb, currentColor 70%, white 30%);
+      }
+      .component-update .update-body {
+        font-size: 18px;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.85);
+        color: color-mix(in srgb, currentColor 80%, white 20%);
+      }
+      .component-update .update-body p { margin: 0 0 12px; }
+      .component-buddy {
+        background: rgba(8, 12, 21, 0.9);
+        border: 2px solid var(--component-border);
+        color: var(--component-color);
+        box-shadow: inset 0 0 18px rgba(3, 9, 15, 0.6);
+      }
+      .component-buddy header {
+        font-size: 24px;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+      }
+      .component-buddy ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 18px;
+      }
+      .component-buddy li {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .component-buddy .bullet {
+        color: rgba(114, 250, 222, 0.75);
+        color: color-mix(in srgb, currentColor 40%, var(--cyan) 60%);
+        text-shadow: 0 0 6px rgba(114, 250, 222, 0.6);
+      }
+      .component-glitch {
+        text-align: center;
+        padding: 24px 12px;
+        background: rgba(5, 12, 24, 0.8);
+        border: 2px solid var(--component-border);
+        color: var(--component-color);
+      }
+      .component-glitch .glitch {
+        font-size: 40px;
+        letter-spacing: 3px;
+      }
+      .component-neon {
+        background: linear-gradient(135deg, rgba(2,19,19,0.85), rgba(3,30,41,0.9));
+        border: 2px solid var(--component-border);
+        box-shadow: 0 0 16px rgba(114, 250, 222, 0.35);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--component-color) 60%, transparent);
+        color: var(--component-color);
+      }
+      .component-neon header {
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+      .component-neon .neon-body {
+        font-size: 18px;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.82);
+        color: color-mix(in srgb, currentColor 70%, white 30%);
+      }
+      .empty-state {
+        border: 2px dashed rgba(114, 250, 222, 0.4);
+        padding: 40px;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 18px;
+        color: rgba(114, 250, 222, 0.8);
+        background: rgba(8, 24, 28, 0.6);
+      }
+    `;
+
+    function renderPreview() {
+      const iframe = document.getElementById('preview');
+      const doc = iframe.contentDocument;
+      const html = generatePageHtml();
+      doc.open();
+      doc.write(html);
+      doc.close();
+    }
+
+    function renderComponentMarkup(component, { includeEditorAttributes = false, selected = false } = {}) {
+      const definition = componentDefinitions[component.type];
+      if (!definition) return '';
+      const effectsClass = component.effects.map((effect) => `effect-${effect}`).join(' ');
+      const componentWithEffects = { ...component, effectsClass };
+      let markup = (definition.render(componentWithEffects) || '').trim();
+      if (!markup) return '';
+      if (includeEditorAttributes) {
+        const dataAttr = ` data-component-id="${component.id}"` + (selected ? ' data-selected="true"' : '');
+        markup = markup.replace('<section', `<section${dataAttr}`);
+      }
+      return markup;
+    }
+
+    function generatePageHtml() {
+      const bodyAttr = `data-scanlines="${state.showScanlines}"`;
+      const componentsHtml = state.components.map((component) => renderComponentMarkup(component, {
+        includeEditorAttributes: true,
+        selected: component.id === state.selectedId
+      })).join('\n');
+
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>COAIEXIST Studio Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <style>${basePreviewStyles}</style>
+</head>
+<body ${bodyAttr}>
+  <div class="page">
+    ${componentsHtml || '<div class="empty-state">Drop components to begin crafting your realm.</div>'}
+  </div>
+  <script>
+    window.addEventListener('click', function(event) {
+      var target = event.target.closest('[data-component-id]');
+      if (target) {
+        event.preventDefault();
+        window.parent.postMessage({ type: 'select', id: target.getAttribute('data-component-id') }, '*');
+      }
+    }, true);
+  <\/script>
+</body>
+</html>`;
+      return html;
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatParagraphs(value) {
+      return escapeHtml(value).split(/\n{2,}/).map((paragraph) => `<p>${paragraph.replace(/\n/g, '<br>')}</p>`).join('');
+    }
+
+    function downloadHtml() {
+      const html = generateExportHtml();
+      triggerDownload('coaiexist-page.html', html, 'text/html');
+    }
+
+    function generateExportHtml() {
+      const componentsHtml = state.components.map((component) => renderComponentMarkup(component)).join('\n');
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>COAIEXIST Custom Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
+  <style>${basePreviewStyles}</style>
+</head>
+<body data-scanlines="${state.showScanlines}">
+  <div class="page">
+    ${componentsHtml}
+  </div>
+</body>
+</html>`;
+    }
+
+    function generateRtf() {
+      const parser = new DOMParser();
+      const html = generateExportHtml();
+      const doc = parser.parseFromString(html, 'text/html');
+      const text = doc.body.innerText || '';
+      const sanitized = text.replace(/\\/g, '\\\\').replace(/\{/g, '\\{').replace(/\}/g, '\\}');
+      const rtfBody = sanitized.split(/\n/).map((line) => line.trim() ? line + ' \\par' : '\\par').join('\n');
+      return `{\\rtf1\\ansi\n${rtfBody}\n}`;
+    }
+
+    function downloadRtf() {
+      const rtf = generateRtf();
+      triggerDownload('coaiexist-page.rtf', rtf, 'application/rtf');
+    }
+
+    function copyHtmlToClipboard() {
+      const html = generateExportHtml();
+      if (navigator.clipboard && window.ClipboardItem) {
+        const blob = new Blob([html], { type: 'text/html' });
+        const item = new ClipboardItem({ 'text/html': blob, 'text/plain': new Blob([html], { type: 'text/plain' }) });
+        navigator.clipboard.write([item]).then(() => notify('HTML copied to clipboard!'));
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(html).then(() => notify('HTML copied to clipboard!'));
+      } else {
+        notify('Clipboard API not available.');
+      }
+    }
+
+    function triggerDownload(filename, content, mime) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      notify(`${filename} ready!`);
+    }
+
+    function notify(message) {
+      console.info(message);
+    }
+
+    document.querySelectorAll('[data-template]').forEach((button) => {
+      button.addEventListener('click', () => applyTemplate(button.dataset.template));
+    });
+
+    document.querySelectorAll('[data-component]').forEach((button) => {
+      button.addEventListener('click', () => addComponent(button.dataset.component));
+    });
+
+    document.getElementById('downloadHtml').addEventListener('click', downloadHtml);
+    document.getElementById('downloadRtf').addEventListener('click', downloadRtf);
+    document.getElementById('copyHtml').addEventListener('click', copyHtmlToClipboard);
+    document.getElementById('clearCanvas').addEventListener('click', clearCanvas);
+
+    document.getElementById('toggleScanlines').addEventListener('click', () => {
+      state.showScanlines = !state.showScanlines;
+      renderPreview();
+    });
+
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'select') {
+        selectComponent(event.data.id);
+      }
+    });
+
+    applyTemplate('blank');
+  </script>
+</body>
+</html>

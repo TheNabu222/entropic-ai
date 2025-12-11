@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ The Glitch Classroom - WYSIWYG Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Comic+Sans+MS&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+
+    <style>
+        /* ============================================
+           RESET & BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Neon Y2K Palette */
+            --magenta: #f312af;
+            --cyan: #00ffcc;
+            --yellow: #fffb01;
+            --purple: #bf5fff;
+            --green: #00ff00;
+            --pink: #ff69b4;
+
+            /* Elementary School Accents */
+            --red-crayon: #ff4444;
+            --blue-crayon: #4444ff;
+            --orange-crayon: #ff9944;
+
+            /* Backgrounds */
+            --dark-bg: #021313;
+            --darker-bg: #000000;
+            --panel-bg: #0a1a1a;
+            --card-bg: #0f2020;
+
+            /* UI Elements */
+            --border-color: var(--cyan);
+            --border-radius: 8px;
+            --glow-sm: 0 0 5px;
+            --glow-md: 0 0 10px;
+            --glow-lg: 0 0 20px;
+
+            /* Fonts */
+            --font-main: 'VT323', monospace;
+            --font-pixel: 'Press Start 2P', monospace;
+            --font-fun: 'Comic Sans MS', cursive;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--dark-bg);
+            color: var(--cyan);
+            overflow: hidden;
+            height: 100vh;
+            font-size: 18px;
+        }
+
+        /* ============================================
+           MAIN LAYOUT - Elementary School Stations
+           ============================================ */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            grid-template-rows: 60px 1fr 40px;
+            grid-template-areas:
+                "toolbar toolbar toolbar"
+                "library canvas properties"
+                "statusbar statusbar statusbar";
+            height: 100vh;
+            gap: 2px;
+            background: var(--darker-bg);
+        }
+
+        /* ============================================
+           TOP TOOLBAR - Color-Coded Action Zones
+           ============================================ */
+        .toolbar {
+            grid-area: toolbar;
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--cyan);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--spacing-md);
+            gap: var(--spacing-md);
+            box-shadow: var(--glow-sm) var(--cyan);
+        }
+
+        .toolbar-section {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius);
+            border: 2px solid;
+            position: relative;
+        }
+
+        .toolbar-section::before {
+            content: attr(data-label);
+            position: absolute;
+            top: -10px;
+            left: var(--spacing-sm);
+            background: var(--panel-bg);
+            padding: 0 var(--spacing-xs);
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .toolbar-section.file { border-color: var(--magenta); color: var(--magenta); }
+        .toolbar-section.edit { border-color: var(--cyan); color: var(--cyan); }
+        .toolbar-section.insert { border-color: var(--yellow); color: var(--yellow); }
+        .toolbar-section.style { border-color: var(--purple); color: var(--purple); }
+        .toolbar-section.export { border-color: var(--green); color: var(--green); }
+
+        .toolbar-btn {
+            background: transparent;
+            border: 2px solid currentColor;
+            color: inherit;
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 18px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .toolbar-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-sm) currentColor;
+        }
+
+        .toolbar-btn:active {
+            transform: translateY(0);
+        }
+
+        .toolbar-btn.active {
+            background: currentColor;
+            color: var(--dark-bg);
+            box-shadow: var(--glow-md) currentColor;
+        }
+
+        /* ============================================
+           LEFT SIDEBAR - Component Library "Toy Bins"
+           ============================================ */
+        .component-library {
+            grid-area: library;
+            background: var(--panel-bg);
+            border-right: 2px solid var(--magenta);
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            box-shadow: var(--glow-sm) var(--magenta);
+        }
+
+        .library-section {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .library-section-title {
+            font-size: 24px;
+            color: var(--magenta);
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background: var(--card-bg);
+            border: 2px solid var(--magenta);
+            border-radius: var(--border-radius);
+            text-align: center;
+            text-shadow: var(--glow-sm) var(--magenta);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .library-section-title:hover {
+            background: var(--magenta);
+            color: var(--dark-bg);
+        }
+
+        .library-items {
+            display: grid;
+            gap: var(--spacing-sm);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .library-section.expanded .library-items {
+            max-height: 2000px;
+        }
+
+        .library-item {
+            background: var(--card-bg);
+            border: 2px solid var(--cyan);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            cursor: grab;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .library-item:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: var(--glow-md) var(--cyan);
+            border-color: var(--magenta);
+        }
+
+        .library-item:active {
+            cursor: grabbing;
+        }
+
+        .library-item-name {
+            font-size: 16px;
+            color: var(--cyan);
+            margin-bottom: var(--spacing-xs);
+            font-weight: bold;
+        }
+
+        .library-item-preview {
+            font-size: 14px;
+            color: rgba(0, 255, 204, 0.6);
+            font-style: italic;
+        }
+
+        /* ============================================
+           CENTER CANVAS - The Work Table
+           ============================================ */
+        .canvas-container {
+            grid-area: canvas;
+            background: var(--darker-bg);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-toolbar {
+            background: var(--panel-bg);
+            border-bottom: 2px solid var(--purple);
+            padding: var(--spacing-sm) var(--spacing-md);
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        .canvas-workspace {
+            flex: 1;
+            overflow: auto;
+            padding: var(--spacing-lg);
+            position: relative;
+        }
+
+        #canvas {
+            min-height: 100%;
+            background: var(--dark-bg);
+            border: 2px dashed rgba(0, 255, 204, 0.3);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            position: relative;
+        }
+
+        #canvas.drag-over {
+            border-color: var(--yellow);
+            box-shadow: var(--glow-lg) var(--yellow);
+        }
+
+        #canvas:empty::before {
+            content: '✨ Drag components here to start building! ✨';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(0, 255, 204, 0.4);
+            font-size: 28px;
+            text-align: center;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Canvas Elements */
+        .canvas-element {
+            position: relative;
+            margin: var(--spacing-md) 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .canvas-element:hover {
+            outline: 2px solid var(--yellow);
+            outline-offset: 4px;
+        }
+
+        .canvas-element.selected {
+            outline: 3px solid var(--magenta);
+            outline-offset: 4px;
+            box-shadow: var(--glow-md) var(--magenta);
+        }
+
+        .element-controls {
+            position: absolute;
+            top: -30px;
+            right: 0;
+            display: none;
+            gap: var(--spacing-xs);
+            background: var(--panel-bg);
+            padding: var(--spacing-xs);
+            border: 2px solid var(--magenta);
+            border-radius: var(--border-radius);
+            z-index: 100;
+        }
+
+        .canvas-element.selected .element-controls {
+            display: flex;
+        }
+
+        .control-btn {
+            background: var(--dark-bg);
+            border: 1px solid currentColor;
+            color: var(--cyan);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 14px;
+        }
+
+        .control-btn:hover {
+            background: currentColor;
+            color: var(--dark-bg);
+        }
+
+        .control-btn.delete { color: var(--red-crayon); }
+        .control-btn.duplicate { color: var(--green); }
+        .control-btn.edit { color: var(--yellow); }
+
+        /* ============================================
+           RIGHT SIDEBAR - Properties "Teacher's Helper"
+           ============================================ */
+        .properties-panel {
+            grid-area: properties;
+            background: var(--panel-bg);
+            border-left: 2px solid var(--purple);
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            box-shadow: var(--glow-sm) var(--purple);
+        }
+
+        .properties-section {
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background: var(--card-bg);
+            border: 2px solid var(--purple);
+            border-radius: var(--border-radius);
+        }
+
+        .properties-section-title {
+            font-size: 20px;
+            color: var(--purple);
+            margin-bottom: var(--spacing-md);
+            text-shadow: var(--glow-sm) var(--purple);
+        }
+
+        .property-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .property-label {
+            display: block;
+            color: var(--cyan);
+            margin-bottom: var(--spacing-xs);
+            font-size: 16px;
+        }
+
+        .property-input {
+            width: 100%;
+            background: var(--dark-bg);
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            font-family: var(--font-main);
+            font-size: 16px;
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: var(--magenta);
+            box-shadow: var(--glow-sm) var(--magenta);
+        }
+
+        .color-swatches {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .color-swatch {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 2px solid var(--cyan);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: var(--glow-md) currentColor;
+        }
+
+        .color-swatch.active {
+            border-color: var(--yellow);
+            box-shadow: var(--glow-lg) var(--yellow);
+            transform: scale(1.15);
+        }
+
+        /* Effect Toggles */
+        .effect-toggles {
+            display: grid;
+            gap: var(--spacing-sm);
+        }
+
+        .effect-toggle {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--dark-bg);
+            border: 2px solid var(--cyan);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .effect-toggle:hover {
+            border-color: var(--magenta);
+        }
+
+        .effect-toggle.active {
+            background: var(--cyan);
+            color: var(--dark-bg);
+            box-shadow: var(--glow-md) var(--cyan);
+        }
+
+        .toggle-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--magenta);
+        }
+
+        /* ============================================
+           BOTTOM STATUS BAR
+           ============================================ */
+        .status-bar {
+            grid-area: statusbar;
+            background: var(--panel-bg);
+            border-top: 2px solid var(--green);
+            padding: var(--spacing-sm) var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--glow-sm) var(--green);
+        }
+
+        .status-message {
+            color: var(--green);
+            font-size: 16px;
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: var(--spacing-md);
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            color: var(--cyan);
+        }
+
+        /* ============================================
+           CODE VIEW MODAL
+           ============================================ */
+        .code-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .code-modal.active {
+            display: flex;
+        }
+
+        .code-modal-content {
+            background: var(--panel-bg);
+            border: 3px solid var(--cyan);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            box-shadow: var(--glow-lg) var(--cyan);
+        }
+
+        .code-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 2px solid var(--cyan);
+        }
+
+        .code-modal-title {
+            font-size: 28px;
+            color: var(--cyan);
+            text-shadow: var(--glow-sm) var(--cyan);
+        }
+
+        .code-textarea {
+            width: 100%;
+            min-height: 400px;
+            background: var(--darker-bg);
+            border: 2px solid var(--purple);
+            color: var(--green);
+            padding: var(--spacing-md);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-radius: var(--border-radius);
+            resize: vertical;
+        }
+
+        .code-actions {
+            margin-top: var(--spacing-md);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        /* ============================================
+           SAVE/LOAD MODAL
+           ============================================ */
+        .save-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .save-modal.active {
+            display: flex;
+        }
+
+        .save-modal-content {
+            background: var(--panel-bg);
+            border: 3px solid var(--magenta);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            min-width: 400px;
+            box-shadow: var(--glow-lg) var(--magenta);
+        }
+
+        .project-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: var(--spacing-md) 0;
+        }
+
+        .project-item {
+            background: var(--card-bg);
+            border: 2px solid var(--cyan);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-item:hover {
+            border-color: var(--magenta);
+            transform: translateX(5px);
+        }
+
+        .project-item-delete {
+            background: var(--red-crayon);
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 14px;
+        }
+
+        /* ============================================
+           COMPONENT STYLES (from coaiexist.wtf)
+           ============================================ */
+
+        /* Update Card */
+        .update-card {
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.1) 0%, rgba(243, 18, 175, 0.1) 100%);
+            border: 2px solid var(--cyan);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md) 0;
+            transition: all 0.3s;
+        }
+
+        .update-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--glow-lg) var(--cyan);
+        }
+
+        .update-header {
+            color: var(--magenta);
+            font-size: 24px;
+            margin-bottom: var(--spacing-md);
+            text-shadow: var(--glow-sm) var(--magenta);
+        }
+
+        .update-body {
+            color: var(--cyan);
+            line-height: 1.6;
+        }
+
+        .update-meta {
+            margin-top: var(--spacing-md);
+            color: rgba(0, 255, 204, 0.6);
+            font-size: 14px;
+        }
+
+        /* Button Styles */
+        .btn-neon {
+            background: transparent;
+            border: 2px solid var(--cyan);
+            color: var(--cyan);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 18px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-neon:hover {
+            background: var(--cyan);
+            color: var(--dark-bg);
+            box-shadow: var(--glow-md) var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        /* Glitch Text */
+        .glitch-text {
+            color: var(--magenta);
+            font-size: 32px;
+            text-shadow:
+                -2px 0 var(--cyan),
+                2px 2px var(--magenta);
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% { transform: translate(0); }
+            91% { transform: translate(-2px, 0); }
+            93% { transform: translate(2px, 0); }
+            95% { transform: translate(-2px, 2px); }
+        }
+
+        /* Glow Box */
+        .glow-box {
+            background: var(--card-bg);
+            border: 2px solid var(--purple);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            box-shadow: var(--glow-md) var(--purple);
+        }
+
+        /* Text Styles */
+        .text-neon {
+            color: var(--cyan);
+            text-shadow: var(--glow-sm) var(--cyan);
+        }
+
+        .text-magenta {
+            color: var(--magenta);
+            text-shadow: var(--glow-sm) var(--magenta);
+        }
+
+        .text-yellow {
+            color: var(--yellow);
+            text-shadow: var(--glow-sm) var(--yellow);
+        }
+
+        /* Divider */
+        .neon-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            margin: var(--spacing-lg) 0;
+            box-shadow: var(--glow-sm) var(--cyan);
+        }
+
+        /* Scanline Effect */
+        .scanline-effect {
+            position: relative;
+        }
+
+        .scanline-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            animation: scanlines 15s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        /* ============================================
+           SCROLLBAR STYLING
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker-bg);
+            border: 1px solid var(--cyan);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--cyan);
+            border-radius: var(--border-radius);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--magenta);
+            box-shadow: var(--glow-sm) var(--magenta);
+        }
+
+        /* ============================================
+           UTILITY CLASSES
+           ============================================ */
+        .cute-star {
+            display: inline-block;
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .feedback-sparkle {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            animation: sparkle-float 1s ease-out forwards;
+            z-index: 9999;
+        }
+
+        @keyframes sparkle-float {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(1.5);
+            }
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1200px) {
+            .editor-container {
+                grid-template-columns: 240px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px auto auto 1fr 40px;
+                grid-template-areas:
+                    "toolbar"
+                    "library"
+                    "properties"
+                    "canvas"
+                    "statusbar";
+            }
+
+            .component-library,
+            .properties-panel {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- TOP TOOLBAR -->
+        <div class="toolbar">
+            <div class="toolbar-section file" data-label="📁 File">
+                <button class="toolbar-btn" id="btn-new" title="Start fresh">New</button>
+                <button class="toolbar-btn" id="btn-save" title="Save project">Save</button>
+                <button class="toolbar-btn" id="btn-load" title="Load project">Load</button>
+            </div>
+
+            <div class="toolbar-section edit" data-label="✏️ Edit">
+                <button class="toolbar-btn" id="btn-undo" title="Undo last action">Undo</button>
+                <button class="toolbar-btn" id="btn-redo" title="Redo">Redo</button>
+                <button class="toolbar-btn" id="btn-clear" title="Clear canvas">Clear</button>
+            </div>
+
+            <div class="toolbar-section style" data-label="🎨 View">
+                <button class="toolbar-btn" id="btn-code" title="View/edit code">Code</button>
+                <button class="toolbar-btn" id="btn-preview" title="Toggle preview">Preview</button>
+            </div>
+
+            <div class="toolbar-section export" data-label="📤 Export">
+                <button class="toolbar-btn" id="btn-copy-html" title="Copy HTML">Copy HTML</button>
+                <button class="toolbar-btn" id="btn-copy-css" title="Copy CSS">Copy CSS</button>
+            </div>
+        </div>
+
+        <!-- LEFT SIDEBAR - Component Library -->
+        <div class="component-library">
+            <h2 style="color: var(--magenta); text-align: center; margin-bottom: var(--spacing-lg); text-shadow: var(--glow-md) var(--magenta);">
+                <span class="cute-star">⭐</span> Component Library <span class="cute-star">⭐</span>
+            </h2>
+
+            <!-- Containers -->
+            <div class="library-section expanded">
+                <div class="library-section-title">📦 Containers</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="update-card">
+                        <div class="library-item-name">Update Card</div>
+                        <div class="library-item-preview">Neon card with hover effect</div>
+                    </div>
+                    <div class="library-item" draggable="true" data-component="glow-box">
+                        <div class="library-item-name">Glow Box</div>
+                        <div class="library-item-preview">Container with glow</div>
+                    </div>
+                    <div class="library-item" draggable="true" data-component="container">
+                        <div class="library-item-name">Basic Container</div>
+                        <div class="library-item-preview">Simple div container</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text -->
+            <div class="library-section expanded">
+                <div class="library-section-title">✍️ Text</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="heading">
+                        <div class="library-item-name">Heading</div>
+                        <div class="library-item-preview">Large title text</div>
+                    </div>
+                    <div class="library-item" draggable="true" data-component="paragraph">
+                        <div class="library-item-name">Paragraph</div>
+                        <div class="library-item-preview">Body text</div>
+                    </div>
+                    <div class="library-item" draggable="true" data-component="glitch-text">
+                        <div class="library-item-name">Glitch Text</div>
+                        <div class="library-item-preview">Animated glitch effect</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="library-section expanded">
+                <div class="library-section-title">🔘 Buttons</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="btn-neon">
+                        <div class="library-item-name">Neon Button</div>
+                        <div class="library-item-preview">Glowing button</div>
+                    </div>
+                    <div class="library-item" draggable="true" data-component="link">
+                        <div class="library-item-name">Link</div>
+                        <div class="library-item-preview">Text hyperlink</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Effects -->
+            <div class="library-section expanded">
+                <div class="library-section-title">✨ Effects</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="divider">
+                        <div class="library-item-name">Neon Divider</div>
+                        <div class="library-item-preview">Glowing line break</div>
+                    </div>
+                    <div class="library-item" draggable="true" data-component="scanline">
+                        <div class="library-item-name">Scanline Box</div>
+                        <div class="library-item-preview">CRT effect container</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media -->
+            <div class="library-section expanded">
+                <div class="library-section-title">🖼️ Media</div>
+                <div class="library-items">
+                    <div class="library-item" draggable="true" data-component="image">
+                        <div class="library-item-name">Image</div>
+                        <div class="library-item-preview">Picture element</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER CANVAS -->
+        <div class="canvas-container">
+            <div class="canvas-toolbar">
+                <span style="color: var(--purple); font-size: 20px;">
+                    🎨 <strong>Your Canvas</strong> - Drag components here!
+                </span>
+            </div>
+            <div class="canvas-workspace">
+                <div id="canvas"></div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR - Properties -->
+        <div class="properties-panel">
+            <h2 style="color: var(--purple); text-align: center; margin-bottom: var(--spacing-lg); text-shadow: var(--glow-md) var(--purple);">
+                <span class="cute-star">🌟</span> Properties <span class="cute-star">🌟</span>
+            </h2>
+
+            <div id="properties-content">
+                <div style="text-align: center; color: rgba(191, 95, 255, 0.6); margin-top: 40px;">
+                    Select an element to edit its properties!
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM STATUS BAR -->
+        <div class="status-bar">
+            <div class="status-message" id="status-message">
+                ✨ Ready to create! Welcome to The Glitch Classroom! ✨
+            </div>
+            <div class="status-indicators">
+                <span class="status-indicator" id="element-count">Elements: 0</span>
+                <span class="status-indicator" id="last-action">Last: None</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- CODE VIEW MODAL -->
+    <div class="code-modal" id="code-modal">
+        <div class="code-modal-content">
+            <div class="code-modal-header">
+                <h2 class="code-modal-title">📝 Code View</h2>
+                <button class="toolbar-btn" id="close-code-modal" style="color: var(--red-crayon);">Close</button>
+            </div>
+            <textarea class="code-textarea" id="code-textarea"></textarea>
+            <div class="code-actions">
+                <button class="toolbar-btn" id="apply-code" style="color: var(--green);">Apply Changes</button>
+                <button class="toolbar-btn" id="copy-code" style="color: var(--cyan);">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAVE/LOAD MODAL -->
+    <div class="save-modal" id="save-modal">
+        <div class="save-modal-content">
+            <div class="code-modal-header">
+                <h2 class="code-modal-title" id="save-modal-title">💾 Save Project</h2>
+                <button class="toolbar-btn" id="close-save-modal" style="color: var(--red-crayon);">Close</button>
+            </div>
+
+            <div id="save-section">
+                <label class="property-label">Project Name:</label>
+                <input type="text" class="property-input" id="project-name" placeholder="My Awesome Project">
+                <button class="toolbar-btn" id="save-project-btn" style="color: var(--green); margin-top: var(--spacing-md); width: 100%;">
+                    Save Project
+                </button>
+            </div>
+
+            <div id="load-section" style="display: none;">
+                <div class="project-list" id="project-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SOUND SYSTEM
+        // ============================================
+        const sounds = {
+            boop: new Tone.Synth({
+                oscillator: { type: 'sine' },
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 }
+            }).toDestination(),
+
+            pop: new Tone.Synth({
+                oscillator: { type: 'triangle' },
+                envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
+            }).toDestination(),
+
+            success: new Tone.Synth({
+                oscillator: { type: 'square' },
+                envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 }
+            }).toDestination()
+        };
+
+        function playSound(type, note = 'C5') {
+            if (sounds[type]) {
+                sounds[type].triggerAttackRelease(note, '16n');
+            }
+        }
+
+        function showSparkle(x, y, emoji = '✨') {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'feedback-sparkle';
+            sparkle.textContent = emoji;
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            document.body.appendChild(sparkle);
+            setTimeout(() => sparkle.remove(), 1000);
+        }
+
+        // ============================================
+        // STATE MANAGEMENT
+        // ============================================
+        let canvasState = {
+            elements: [],
+            selectedElement: null,
+            history: [],
+            historyIndex: -1
+        };
+
+        let elementIdCounter = 0;
+
+        function generateId() {
+            return 'element-' + (++elementIdCounter);
+        }
+
+        // ============================================
+        // COMPONENT TEMPLATES
+        // ============================================
+        const componentTemplates = {
+            'update-card': {
+                html: `<div class="update-card">
+    <div class="update-header">✨ New Update!</div>
+    <div class="update-body">
+        <p>This is an update card. Click to edit the content!</p>
+    </div>
+    <div class="update-meta">Posted just now</div>
+</div>`,
+                editable: true
+            },
+            'glow-box': {
+                html: `<div class="glow-box">
+    <p>This is a glowing box container. Add your content here!</p>
+</div>`,
+                editable: true
+            },
+            'container': {
+                html: `<div style="padding: var(--spacing-md); border: 1px solid var(--cyan);">
+    <p>Basic container - customize me!</p>
+</div>`,
+                editable: true
+            },
+            'heading': {
+                html: `<h2 class="text-neon" style="font-size: 32px;">Your Heading Here</h2>`,
+                editable: true
+            },
+            'paragraph': {
+                html: `<p class="text-neon">Your paragraph text goes here. Click to edit!</p>`,
+                editable: true
+            },
+            'glitch-text': {
+                html: `<div class="glitch-text">GLITCH EFFECT!</div>`,
+                editable: true
+            },
+            'btn-neon': {
+                html: `<button class="btn-neon">Click Me!</button>`,
+                editable: true
+            },
+            'link': {
+                html: `<a href="#" class="text-cyan" style="text-decoration: underline;">Link Text</a>`,
+                editable: true
+            },
+            'divider': {
+                html: `<div class="neon-divider"></div>`,
+                editable: false
+            },
+            'scanline': {
+                html: `<div class="scanline-effect glow-box">
+    <p>CRT scanline effect container!</p>
+</div>`,
+                editable: true
+            },
+            'image': {
+                html: `<img src="https://via.placeholder.com/400x200/f312af/00ffcc?text=Your+Image" alt="Placeholder" style="max-width: 100%; border: 2px solid var(--cyan); border-radius: var(--border-radius);">`,
+                editable: false
+            }
+        };
+
+        // ============================================
+        // DRAG AND DROP
+        // ============================================
+        const canvas = document.getElementById('canvas');
+        let draggedComponent = null;
+
+        document.querySelectorAll('.library-item').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                draggedComponent = e.target.getAttribute('data-component');
+                e.dataTransfer.effectAllowed = 'copy';
+                playSound('boop', 'E5');
+            });
+
+            item.addEventListener('dragend', () => {
+                draggedComponent = null;
+            });
+        });
+
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            canvas.classList.add('drag-over');
+        });
+
+        canvas.addEventListener('dragleave', () => {
+            canvas.classList.remove('drag-over');
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvas.classList.remove('drag-over');
+
+            if (draggedComponent && componentTemplates[draggedComponent]) {
+                addElement(draggedComponent);
+                playSound('success', 'C6');
+                showSparkle(e.clientX, e.clientY, '⭐');
+                updateStatus('Component added!');
+            }
+        });
+
+        // ============================================
+        // ELEMENT MANAGEMENT
+        // ============================================
+        function addElement(componentType) {
+            const template = componentTemplates[componentType];
+            const elementId = generateId();
+
+            const element = {
+                id: elementId,
+                type: componentType,
+                html: template.html,
+                editable: template.editable
+            };
+
+            canvasState.elements.push(element);
+            saveHistory();
+            renderCanvas();
+            updateElementCount();
+        }
+
+        function renderCanvas() {
+            canvas.innerHTML = '';
+
+            canvasState.elements.forEach(element => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'canvas-element';
+                wrapper.setAttribute('data-id', element.id);
+                wrapper.innerHTML = `
+                    <div class="element-controls">
+                        <button class="control-btn edit" data-action="edit">✏️ Edit</button>
+                        <button class="control-btn duplicate" data-action="duplicate">📋 Duplicate</button>
+                        <button class="control-btn delete" data-action="delete">🗑️ Delete</button>
+                    </div>
+                    ${element.html}
+                `;
+
+                wrapper.addEventListener('click', (e) => {
+                    if (!e.target.closest('.element-controls')) {
+                        selectElement(element.id);
+                        playSound('pop', 'G5');
+                    }
+                });
+
+                // Control buttons
+                wrapper.querySelectorAll('.control-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const action = btn.getAttribute('data-action');
+                        handleElementAction(element.id, action);
+                    });
+                });
+
+                canvas.appendChild(wrapper);
+            });
+        }
+
+        function selectElement(elementId) {
+            // Deselect all
+            document.querySelectorAll('.canvas-element').forEach(el => {
+                el.classList.remove('selected');
+            });
+
+            // Select target
+            const wrapper = document.querySelector(`[data-id="${elementId}"]`);
+            if (wrapper) {
+                wrapper.classList.add('selected');
+                canvasState.selectedElement = elementId;
+                renderProperties(elementId);
+            }
+        }
+
+        function handleElementAction(elementId, action) {
+            const element = canvasState.elements.find(el => el.id === elementId);
+            if (!element) return;
+
+            switch (action) {
+                case 'edit':
+                    if (element.editable) {
+                        const newHtml = prompt('Edit HTML:', element.html);
+                        if (newHtml !== null) {
+                            element.html = newHtml;
+                            saveHistory();
+                            renderCanvas();
+                            playSound('success', 'A5');
+                            updateStatus('Element updated!');
+                        }
+                    }
+                    break;
+
+                case 'duplicate':
+                    const duplicate = {
+                        id: generateId(),
+                        type: element.type,
+                        html: element.html,
+                        editable: element.editable
+                    };
+                    canvasState.elements.push(duplicate);
+                    saveHistory();
+                    renderCanvas();
+                    playSound('pop', 'C6');
+                    updateStatus('Element duplicated!');
+                    updateElementCount();
+                    break;
+
+                case 'delete':
+                    canvasState.elements = canvasState.elements.filter(el => el.id !== elementId);
+                    saveHistory();
+                    renderCanvas();
+                    playSound('boop', 'C4');
+                    updateStatus('Element deleted!');
+                    updateElementCount();
+                    clearProperties();
+                    break;
+            }
+        }
+
+        // ============================================
+        // PROPERTIES PANEL
+        // ============================================
+        function renderProperties(elementId) {
+            const element = canvasState.elements.find(el => el.id === elementId);
+            if (!element) return;
+
+            const propertiesContent = document.getElementById('properties-content');
+            propertiesContent.innerHTML = `
+                <div class="properties-section">
+                    <div class="properties-section-title">Element Info</div>
+                    <div class="property-group">
+                        <label class="property-label">Type:</label>
+                        <div style="color: var(--magenta);">${element.type}</div>
+                    </div>
+                    <div class="property-group">
+                        <label class="property-label">ID:</label>
+                        <div style="color: var(--cyan); font-size: 14px;">${element.id}</div>
+                    </div>
+                </div>
+
+                <div class="properties-section">
+                    <div class="properties-section-title">Quick Colors</div>
+                    <div class="color-swatches">
+                        <div class="color-swatch" style="background: #f312af;" data-color="#f312af" title="Magenta"></div>
+                        <div class="color-swatch" style="background: #00ffcc;" data-color="#00ffcc" title="Cyan"></div>
+                        <div class="color-swatch" style="background: #fffb01;" data-color="#fffb01" title="Yellow"></div>
+                        <div class="color-swatch" style="background: #bf5fff;" data-color="#bf5fff" title="Purple"></div>
+                        <div class="color-swatch" style="background: #00ff00;" data-color="#00ff00" title="Green"></div>
+                        <div class="color-swatch" style="background: #ff69b4;" data-color="#ff69b4" title="Pink"></div>
+                        <div class="color-swatch" style="background: #ff4444;" data-color="#ff4444" title="Red"></div>
+                        <div class="color-swatch" style="background: #4444ff;" data-color="#4444ff" title="Blue"></div>
+                    </div>
+                </div>
+
+                <div class="properties-section">
+                    <div class="properties-section-title">✨ Effects</div>
+                    <div class="effect-toggles">
+                        <div class="effect-toggle" data-effect="glow">
+                            <input type="checkbox" class="toggle-checkbox" id="effect-glow">
+                            <label for="effect-glow">Glow Effect</label>
+                        </div>
+                        <div class="effect-toggle" data-effect="pulse">
+                            <input type="checkbox" class="toggle-checkbox" id="effect-pulse">
+                            <label for="effect-pulse">Pulse Animation</label>
+                        </div>
+                    </div>
+                </div>
+
+                ${element.editable ? `
+                <div class="properties-section">
+                    <div class="properties-section-title">Edit Content</div>
+                    <button class="toolbar-btn" id="edit-content-btn" style="color: var(--yellow); width: 100%;">
+                        ✏️ Edit HTML
+                    </button>
+                </div>
+                ` : ''}
+            `;
+
+            // Color swatch click handlers
+            propertiesContent.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    const color = swatch.getAttribute('data-color');
+                    applyColorToElement(elementId, color);
+                    playSound('pop', 'E5');
+
+                    // Visual feedback
+                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                    swatch.classList.add('active');
+                });
+            });
+
+            // Effect toggles
+            propertiesContent.querySelectorAll('.effect-toggle').forEach(toggle => {
+                const checkbox = toggle.querySelector('.toggle-checkbox');
+                checkbox.addEventListener('change', () => {
+                    const effect = toggle.getAttribute('data-effect');
+                    applyEffectToElement(elementId, effect, checkbox.checked);
+                    playSound('boop', checkbox.checked ? 'G5' : 'C5');
+                    toggle.classList.toggle('active', checkbox.checked);
+                });
+            });
+
+            // Edit content button
+            if (element.editable) {
+                const editBtn = propertiesContent.querySelector('#edit-content-btn');
+                editBtn.addEventListener('click', () => {
+                    const newHtml = prompt('Edit HTML:', element.html);
+                    if (newHtml !== null) {
+                        element.html = newHtml;
+                        saveHistory();
+                        renderCanvas();
+                        playSound('success', 'A5');
+                        updateStatus('Content updated!');
+                    }
+                });
+            }
+        }
+
+        function clearProperties() {
+            document.getElementById('properties-content').innerHTML = `
+                <div style="text-align: center; color: rgba(191, 95, 255, 0.6); margin-top: 40px;">
+                    Select an element to edit its properties!
+                </div>
+            `;
+        }
+
+        function applyColorToElement(elementId, color) {
+            const element = canvasState.elements.find(el => el.id === elementId);
+            if (!element) return;
+
+            // Simple color application - adds inline style
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = element.html;
+            const firstChild = tempDiv.firstElementChild;
+            if (firstChild) {
+                firstChild.style.color = color;
+                element.html = tempDiv.innerHTML;
+                saveHistory();
+                renderCanvas();
+                selectElement(elementId);
+                updateStatus(`Color applied: ${color}`);
+            }
+        }
+
+        function applyEffectToElement(elementId, effect, enabled) {
+            const element = canvasState.elements.find(el => el.id === elementId);
+            if (!element) return;
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = element.html;
+            const firstChild = tempDiv.firstElementChild;
+
+            if (firstChild) {
+                if (effect === 'glow') {
+                    if (enabled) {
+                        firstChild.style.boxShadow = '0 0 20px currentColor';
+                    } else {
+                        firstChild.style.boxShadow = '';
+                    }
+                } else if (effect === 'pulse') {
+                    if (enabled) {
+                        firstChild.style.animation = 'pulse 2s infinite';
+                    } else {
+                        firstChild.style.animation = '';
+                    }
+                }
+
+                element.html = tempDiv.innerHTML;
+                saveHistory();
+                renderCanvas();
+                selectElement(elementId);
+                updateStatus(`Effect ${enabled ? 'enabled' : 'disabled'}: ${effect}`);
+            }
+        }
+
+        // ============================================
+        // HISTORY (Undo/Redo)
+        // ============================================
+        function saveHistory() {
+            // Remove any future history if we're not at the end
+            canvasState.history = canvasState.history.slice(0, canvasState.historyIndex + 1);
+
+            // Save current state
+            canvasState.history.push(JSON.stringify(canvasState.elements));
+            canvasState.historyIndex++;
+
+            // Limit history to 50 states
+            if (canvasState.history.length > 50) {
+                canvasState.history.shift();
+                canvasState.historyIndex--;
+            }
+
+            updateStatus('Changes saved to history');
+        }
+
+        function undo() {
+            if (canvasState.historyIndex > 0) {
+                canvasState.historyIndex--;
+                canvasState.elements = JSON.parse(canvasState.history[canvasState.historyIndex]);
+                renderCanvas();
+                playSound('boop', 'D5');
+                updateStatus('Undone!');
+                updateElementCount();
+            } else {
+                updateStatus('Nothing to undo!');
+            }
+        }
+
+        function redo() {
+            if (canvasState.historyIndex < canvasState.history.length - 1) {
+                canvasState.historyIndex++;
+                canvasState.elements = JSON.parse(canvasState.history[canvasState.historyIndex]);
+                renderCanvas();
+                playSound('boop', 'F5');
+                updateStatus('Redone!');
+                updateElementCount();
+            } else {
+                updateStatus('Nothing to redo!');
+            }
+        }
+
+        // ============================================
+        // TOOLBAR ACTIONS
+        // ============================================
+        document.getElementById('btn-new').addEventListener('click', () => {
+            if (confirm('Start a new project? Current work will be lost unless saved.')) {
+                canvasState.elements = [];
+                canvasState.history = [];
+                canvasState.historyIndex = -1;
+                saveHistory();
+                renderCanvas();
+                clearProperties();
+                playSound('success', 'C5');
+                updateStatus('New project started!');
+                updateElementCount();
+            }
+        });
+
+        document.getElementById('btn-undo').addEventListener('click', undo);
+        document.getElementById('btn-redo').addEventListener('click', redo);
+
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            if (confirm('Clear the entire canvas?')) {
+                canvasState.elements = [];
+                saveHistory();
+                renderCanvas();
+                clearProperties();
+                playSound('boop', 'C4');
+                updateStatus('Canvas cleared!');
+                updateElementCount();
+            }
+        });
+
+        // Code View
+        document.getElementById('btn-code').addEventListener('click', () => {
+            const html = exportHTML();
+            document.getElementById('code-textarea').value = html;
+            document.getElementById('code-modal').classList.add('active');
+            playSound('pop', 'A5');
+        });
+
+        document.getElementById('close-code-modal').addEventListener('click', () => {
+            document.getElementById('code-modal').classList.remove('active');
+        });
+
+        document.getElementById('apply-code').addEventListener('click', () => {
+            // This would parse and apply the HTML - simplified for now
+            alert('Apply code feature - coming soon! For now, use Copy to Clipboard.');
+        });
+
+        document.getElementById('copy-code').addEventListener('click', () => {
+            const textarea = document.getElementById('code-textarea');
+            textarea.select();
+            document.execCommand('copy');
+            playSound('success', 'C6');
+            updateStatus('Code copied to clipboard!');
+            showSparkle(window.innerWidth / 2, window.innerHeight / 2, '📋');
+        });
+
+        // Export
+        document.getElementById('btn-copy-html').addEventListener('click', () => {
+            const html = exportHTML();
+            navigator.clipboard.writeText(html).then(() => {
+                playSound('success', 'E6');
+                updateStatus('HTML copied to clipboard!');
+                showSparkle(window.innerWidth / 2, 100, '📝');
+            });
+        });
+
+        document.getElementById('btn-copy-css').addEventListener('click', () => {
+            const css = exportCSS();
+            navigator.clipboard.writeText(css).then(() => {
+                playSound('success', 'G6');
+                updateStatus('CSS copied to clipboard!');
+                showSparkle(window.innerWidth / 2, 100, '🎨');
+            });
+        });
+
+        // Save/Load
+        document.getElementById('btn-save').addEventListener('click', () => {
+            document.getElementById('save-modal-title').textContent = '💾 Save Project';
+            document.getElementById('save-section').style.display = 'block';
+            document.getElementById('load-section').style.display = 'none';
+            document.getElementById('save-modal').classList.add('active');
+            playSound('pop', 'C5');
+        });
+
+        document.getElementById('btn-load').addEventListener('click', () => {
+            document.getElementById('save-modal-title').textContent = '📂 Load Project';
+            document.getElementById('save-section').style.display = 'none';
+            document.getElementById('load-section').style.display = 'block';
+            renderProjectList();
+            document.getElementById('save-modal').classList.add('active');
+            playSound('pop', 'E5');
+        });
+
+        document.getElementById('close-save-modal').addEventListener('click', () => {
+            document.getElementById('save-modal').classList.remove('active');
+        });
+
+        document.getElementById('save-project-btn').addEventListener('click', () => {
+            const name = document.getElementById('project-name').value || 'Untitled Project';
+            saveProject(name);
+        });
+
+        // ============================================
+        // PROJECT SAVE/LOAD (localStorage)
+        // ============================================
+        function saveProject(name) {
+            const projects = JSON.parse(localStorage.getItem('glitch-classroom-projects') || '{}');
+            const projectData = {
+                name: name,
+                elements: canvasState.elements,
+                timestamp: new Date().toISOString()
+            };
+
+            projects[name] = projectData;
+            localStorage.setItem('glitch-classroom-projects', JSON.stringify(projects));
+
+            playSound('success', 'C6');
+            updateStatus(`Project "${name}" saved!`);
+            document.getElementById('save-modal').classList.remove('active');
+            showSparkle(window.innerWidth / 2, window.innerHeight / 2, '💾');
+        }
+
+        function loadProject(name) {
+            const projects = JSON.parse(localStorage.getItem('glitch-classroom-projects') || '{}');
+            const project = projects[name];
+
+            if (project) {
+                canvasState.elements = project.elements;
+                canvasState.history = [];
+                canvasState.historyIndex = -1;
+                saveHistory();
+                renderCanvas();
+                clearProperties();
+                playSound('success', 'E6');
+                updateStatus(`Project "${name}" loaded!`);
+                updateElementCount();
+                document.getElementById('save-modal').classList.remove('active');
+            }
+        }
+
+        function deleteProject(name) {
+            if (confirm(`Delete project "${name}"?`)) {
+                const projects = JSON.parse(localStorage.getItem('glitch-classroom-projects') || '{}');
+                delete projects[name];
+                localStorage.setItem('glitch-classroom-projects', JSON.stringify(projects));
+                renderProjectList();
+                playSound('boop', 'C4');
+                updateStatus(`Project "${name}" deleted!`);
+            }
+        }
+
+        function renderProjectList() {
+            const projects = JSON.parse(localStorage.getItem('glitch-classroom-projects') || '{}');
+            const projectList = document.getElementById('project-list');
+
+            if (Object.keys(projects).length === 0) {
+                projectList.innerHTML = '<div style="text-align: center; color: rgba(0, 255, 204, 0.6);">No saved projects yet!</div>';
+                return;
+            }
+
+            projectList.innerHTML = Object.entries(projects).map(([name, data]) => `
+                <div class="project-item" data-project="${name}">
+                    <div>
+                        <div style="color: var(--cyan); font-weight: bold;">${name}</div>
+                        <div style="color: rgba(0, 255, 204, 0.6); font-size: 14px;">
+                            ${new Date(data.timestamp).toLocaleString()}
+                        </div>
+                    </div>
+                    <button class="project-item-delete" data-project="${name}">Delete</button>
+                </div>
+            `).join('');
+
+            // Load project click handlers
+            projectList.querySelectorAll('.project-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('project-item-delete')) {
+                        const projectName = item.getAttribute('data-project');
+                        loadProject(projectName);
+                    }
+                });
+            });
+
+            // Delete project click handlers
+            projectList.querySelectorAll('.project-item-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const projectName = btn.getAttribute('data-project');
+                    deleteProject(projectName);
+                });
+            });
+        }
+
+        // ============================================
+        // EXPORT FUNCTIONS
+        // ============================================
+        function exportHTML() {
+            return canvasState.elements.map(el => el.html).join('\n\n');
+        }
+
+        function exportCSS() {
+            // Extract the CSS from the style tag
+            const styleContent = document.querySelector('style').textContent;
+            // Filter to only include component styles
+            const relevantCSS = styleContent.split('/* ============================================')[0];
+            return relevantCSS + '\n\n/* Add your custom styles here */';
+        }
+
+        // ============================================
+        // UI HELPERS
+        // ============================================
+        function updateStatus(message) {
+            document.getElementById('status-message').textContent = '✨ ' + message;
+            document.getElementById('last-action').textContent = 'Last: ' + message;
+        }
+
+        function updateElementCount() {
+            document.getElementById('element-count').textContent = 'Elements: ' + canvasState.elements.length;
+        }
+
+        // ============================================
+        // LIBRARY SECTION TOGGLE
+        // ============================================
+        document.querySelectorAll('.library-section-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const section = title.parentElement;
+                section.classList.toggle('expanded');
+                playSound('pop', 'D5');
+            });
+        });
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+        document.addEventListener('keydown', (e) => {
+            // Ctrl+Z / Cmd+Z - Undo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undo();
+            }
+
+            // Ctrl+Shift+Z / Cmd+Shift+Z - Redo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) {
+                e.preventDefault();
+                redo();
+            }
+
+            // Ctrl+S / Cmd+S - Save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                document.getElementById('btn-save').click();
+            }
+
+            // Delete - Remove selected element
+            if (e.key === 'Delete' && canvasState.selectedElement) {
+                handleElementAction(canvasState.selectedElement, 'delete');
+            }
+
+            // Escape - Close modals
+            if (e.key === 'Escape') {
+                document.getElementById('code-modal').classList.remove('active');
+                document.getElementById('save-modal').classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            saveHistory(); // Initialize history
+            updateElementCount();
+            updateStatus('Ready to create! Welcome to The Glitch Classroom!');
+
+            // Play welcome sound
+            setTimeout(() => {
+                playSound('success', 'C5');
+            }, 500);
+        }
+
+        init();
+    </script>
+</body>
+</html>
