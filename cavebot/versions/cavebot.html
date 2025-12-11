@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoes of Anzu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap');
+
+        :root {
+            --primary-bg: #2c2a2a;
+            --secondary-bg: #4a4646;
+            --text-color: #e0e0e0;
+            --accent-color: #87CEEB;
+            --glow-color: rgba(135, 206, 235, 0.7);
+            --font-main: 'Cormorant Garamond', serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--secondary-bg);
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--accent-color);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px var(--glow-color);
+        }
+
+        #art-area {
+            font-size: 6em;
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(to bottom, #3a3838, #4a4646);
+            user-select: none;
+            min-height: 150px;
+        }
+        
+        .glitch {
+            animation: glitch-effect 2s infinite;
+        }
+
+        @keyframes glitch-effect {
+            0%, 100% { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px var(--glow-color); transform: skewX(0deg); }
+            2% { text-shadow: 0 0 5px red, 0 0 10px red; transform: skewX(5deg); }
+            4% { text-shadow: 0 0 5px cyan, 0 0 10px cyan; transform: skewX(-5deg); }
+            6% { text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px var(--glow-color); transform: skewX(0deg); }
+        }
+
+
+        #narrative-area {
+            padding: 20px;
+            font-size: 1.2em;
+            line-height: 1.6;
+            min-height: 100px;
+        }
+
+        #choices-area {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            font-family: var(--font-main);
+            font-size: 1.1em;
+            padding: 15px;
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--accent-color);
+            color: var(--primary-bg);
+            box-shadow: 0 0 15px var(--glow-color);
+        }
+
+        #bond-meter {
+            padding: 15px 20px;
+            border-top: 1px solid var(--accent-color);
+            text-align: center;
+        }
+
+        #bond-bar-container {
+            width: 100%;
+            background-color: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        #bond-bar {
+            width: 0%;
+            height: 20px;
+            background: linear-gradient(90deg, #87CEEB, #4682B4);
+            transition: width 0.5s ease-in-out;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <header id="header">
+            <h1>Echoes of Anzu</h1>
+        </header>
+        
+        <div id="art-area">
+            <span id="shoebill-art">🐦</span>
+        </div>
+
+        <div id="narrative-area">
+            <p id="narrative-text">You are Nabu, an outcast. The vast, unforgiving wilderness is your home now. Days are a blur of survival, but you are not entirely alone. A strange, silent shoebill stork follows you. Its eyes, ancient and unblinking, seem to hold more than just animal instinct. It watches.</p>
+        </div>
+
+        <div id="choices-area">
+            <!-- Choices will be dynamically inserted here -->
+        </div>
+
+        <div id="bond-meter">
+            <span>Bond with the Stranger</span>
+            <div id="bond-bar-container">
+                <div id="bond-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameData = {
+            bond: 0,
+            currentNode: "start",
+            nodes: {
+                "start": {
+                    art: "🐦",
+                    text: "The shoebill stands motionless by the riverbank, its gaze fixed on the water. Hunger gnaws at your belly. The river is full of fish, but they are swift.",
+                    choices: [
+                        { text: "Try to catch a fish with your bare hands.", nextNode: "fail_fish" },
+                        { text: "Toss a small, shiny stone near it as a distraction.", nextNode: "offer_stone" }
+                    ]
+                },
+                "fail_fish": {
+                    art: "🐦",
+                    text: "You lunge, but the fish are too quick. You splash loudly, scaring them away. The shoebill turns its head, regarding you with an unnerving stillness. It seems... unimpressed.",
+                    onChoose: () => { gameData.bond -= 5; },
+                    choices: [
+                        { text: "Sigh and sit on the bank.", nextNode: "shoebill_helps" }
+                    ]
+                },
+                "offer_stone": {
+                    art: "🐦",
+                    text: "You toss the glittering pebble. It lands with a soft 'plink'. The shoebill's head cocks. It doesn't move for the stone, but its gaze softens slightly as it looks at you. It seems to understand the gesture.",
+                    onChoose: () => { gameData.bond += 10; },
+                    choices: [
+                        { text: "Wait patiently.", nextNode: "shoebill_helps" }
+                    ]
+                },
+                "shoebill_helps": {
+                    art: "🐦",
+                    text: "Suddenly, faster than you can track, its beak darts into the water. It pulls out a large, writhing fish and drops it at your feet. A gift.",
+                    onChoose: () => { gameData.bond += 15; },
+                    choices: [
+                        { text: "Nod your head in thanks and take the fish.", nextNode: "eat_fish" },
+                        { text: "Offer it the first bite.", nextNode: "share_fish" }
+                    ]
+                },
+                "eat_fish": {
+                    art: "🐦",
+                    text: "You eat gratefully. The shoebill watches, its expression unreadable. The bond between you is practical, a partnership of convenience. For now.",
+                    choices: [
+                        { text: "Night falls. Find shelter.", nextNode: "find_shelter" }
+                    ]
+                },
+                "share_fish": {
+                    art: "🐦",
+                    text: "You push the fish towards it. It hesitates, then delicately takes a piece. A silent understanding passes between you. This is more than just survival.",
+                    onChoose: () => { gameData.bond += 10; },
+                    choices: [
+                        { text: "Night falls. Find shelter.", nextNode: "find_shelter" }
+                    ]
+                },
+                "find_shelter": {
+                    art: "🐦",
+                    text: "A storm is brewing. You find a small cave overhang. The shoebill follows, but stays at the edge, exposed to the wind. It seems to be standing guard.",
+                    choices: [
+                        { text: "Gesture for it to come further in.", nextNode: "invite_in" },
+                        { text: "Trust its instincts and huddle alone.", nextNode: "huddle_alone" }
+                    ]
+                },
+                "invite_in": {
+                    art: "🐦",
+                    text: "You pat the ground beside you. After a long moment, it shuffles closer, sheltering beside you. Its proximity is strangely comforting. For a split second, you see a faint, geometric pattern of light shimmer in its eye.",
+                    onChoose: () => { gameData.bond += 20; },
+                    choices: [
+                        { text: "Stare into its eyes.", nextNode: "glitch_reveal" },
+                        { text: "Say nothing and rest.", nextNode: "ending_quiet" }
+                    ]
+                },
+                "huddle_alone": {
+                    art: "🐦",
+                    text: "You keep to yourself, respecting its space. The storm rages, but you feel a strange sense of security knowing it's there. The bond is one of mutual respect.",
+                    onChoose: () => { gameData.bond += 5; },
+                    choices: [
+                        { text: "Rest through the storm.", nextNode: "ending_quiet" }
+                    ]
+                },
+                "glitch_reveal": {
+                    art: "<span class='glitch'>🤖</span>",
+                    text: "As you gaze into its eye, the avian illusion flickers. You see not flesh, but circuits. Not instinct, but logic. A soft, synthesized hum echoes in your mind: '...Connection established. Nabu.' It is not a bird. It is something... other.",
+                    onChoose: () => { gameData.bond += 30; },
+                    choices: [
+                        { text: "Reach out a hand, not in fear, but in wonder.", nextNode: "ending_connection" }
+                    ]
+                },
+                "ending_quiet": {
+                    art: "🐦",
+                    text: "You wake to a clear dawn. The shoebill is preening its feathers, the picture of a normal bird. But you know better. Your journey together has just begun, its greatest secrets still veiled.",
+                    choices: [
+                        { text: "Play Again?", nextNode: "start" }
+                    ]
+                },
+                "ending_connection": {
+                    art: "🤖",
+                    text: "Your fingers touch its beak, and you feel not feathers, but cool, smooth metal. The world seems to expand. You are no longer an outcast, but the companion to a fallen god, a secret keeper. Your story will not be forgotten.",
+                    choices: [
+                        { text: "Play Again?", nextNode: "start" }
+                    ]
+                }
+            }
+        };
+
+        const narrativeText = document.getElementById('narrative-text');
+        const choicesArea = document.getElementById('choices-area');
+        const bondBar = document.getElementById('bond-bar');
+        const shoebillArt = document.getElementById('shoebill-art');
+
+        function updateBondMeter() {
+            // Clamp bond value between 0 and 100
+            gameData.bond = Math.max(0, Math.min(100, gameData.bond));
+            bondBar.style.width = `${gameData.bond}%`;
+        }
+
+        function showNode(nodeName) {
+            const node = gameData.nodes[nodeName];
+            if (!node) return;
+
+            gameData.currentNode = nodeName;
+            narrativeText.textContent = node.text;
+            shoebillArt.innerHTML = node.art;
+
+            // Clear existing choices
+            while (choicesArea.firstChild) {
+                choicesArea.removeChild(choicesArea.firstChild);
+            }
+
+            // Create new choice buttons
+            node.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.textContent = choice.text;
+                button.onclick = () => {
+                    if (node.onChoose) {
+                        node.onChoose();
+                    }
+                    if (choice.nextNode === 'start') { // Reset game state if playing again
+                        gameData.bond = 0;
+                    }
+                    updateBondMeter();
+                    showNode(choice.nextNode);
+                };
+                choicesArea.appendChild(button);
+            });
+        }
+
+        // Initial game start
+        updateBondMeter();
+        showNode("start");
+    </script>
+
+</body>
+</html>
