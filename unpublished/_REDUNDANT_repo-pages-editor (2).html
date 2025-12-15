@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repo Page Bespoke Editor · Bulma</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <style>
+        :root {
+            --panel-border: #1f2937;
+            --panel-bg: #0f172a;
+            --panel-muted: #6b7280;
+            --accent: #00d1b2;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #0b1021 0%, #0d1b2a 35%, #0f172a 100%);
+            min-height: 100vh;
+            color: #e5e7eb;
+            padding: 32px;
+        }
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 24px;
+        }
+
+        .panel.custom-panel {
+            border: 1px solid var(--panel-border);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+        }
+
+        .panel-heading {
+            background: transparent;
+            color: #e5e7eb;
+            letter-spacing: 0.03em;
+        }
+
+        .field + .field { margin-top: 14px; }
+        .label { color: #cbd5e1; font-weight: 700; letter-spacing: 0.02em; }
+        .help { color: var(--panel-muted); }
+
+        .preview-wrapper {
+            border: 1px solid var(--panel-border);
+            background: #0b1220;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .preview-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .code-output {
+            width: 100%;
+            min-height: 140px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+            background: #0b1327;
+            border: 1px solid var(--panel-border);
+            color: #cbd5e1;
+        }
+
+        .tag-theme {
+            border-radius: 999px;
+            background: rgba(0, 209, 178, 0.1);
+            color: #67e8f9;
+            border: 1px solid rgba(0, 209, 178, 0.35);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .stat {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: #e5e7eb;
+        }
+
+        .stat strong { color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="editor-grid">
+        <div class="panel custom-panel">
+            <p class="panel-heading">Bespoke Repo Page Editor</p>
+            <div class="panel-block" style="display:block;">
+                <div class="field">
+                    <label class="label" for="repoName">Repository name</label>
+                    <div class="control has-icons-left">
+                        <input class="input" id="repoName" type="text" placeholder="entropic-ai" value="entropic-ai">
+                        <span class="icon is-left"><i class="fas fa-box"></i></span>
+                    </div>
+                    <p class="help">Displayed in the hero and repo cards.</p>
+                </div>
+                <div class="field">
+                    <label class="label" for="tagline">Tagline</label>
+                    <div class="control">
+                        <textarea class="textarea" id="tagline" rows="2" placeholder="Short summary for repo landing">Creative tools, experiments, and site assets for the Entropic AI universe.</textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label" for="repoUrl">Repository URL</label>
+                    <div class="control">
+                        <input class="input" id="repoUrl" type="url" value="https://github.com/entropic-ai">
+                    </div>
+                    <p class="help">Used for primary CTA buttons.</p>
+                </div>
+                <div class="field">
+                    <label class="label" for="accent">Accent color</label>
+                    <div class="control">
+                        <input id="accent" class="input" type="color" value="#00d1b2">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Layout style</label>
+                    <div class="control">
+                        <label class="radio"><input type="radio" name="layout" value="dark" checked> Dark</label>
+                        <label class="radio" style="margin-left:10px;"><input type="radio" name="layout" value="light"> Light</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label" for="topics">Topics</label>
+                    <div class="control">
+                        <input class="input" id="topics" type="text" value="frontend, design, generators, experiments">
+                    </div>
+                    <p class="help">Comma-separated; becomes tag chips.</p>
+                </div>
+                <div class="field">
+                    <label class="label" for="notes">Highlight note</label>
+                    <div class="control">
+                        <input class="input" id="notes" type="text" value="Updated weekly with fresh interactive prototypes.">
+                    </div>
+                </div>
+                <div class="field is-grouped is-grouped-right" style="margin-top:18px;">
+                    <div class="control">
+                        <button class="button is-primary" onclick="updatePreview()">Refresh preview</button>
+                    </div>
+                    <div class="control">
+                        <button class="button is-link is-light" onclick="copyMarkup()">Copy markup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="preview-wrapper">
+            <div class="preview-toolbar">
+                <div>
+                    <strong>Live preview</strong>
+                    <span class="tag tag-theme" id="themeTag">Dark</span>
+                </div>
+                <small style="color:#94a3b8;">Bulma-based, tailored for repo landing pages</small>
+            </div>
+            <div id="preview"></div>
+            <div style="padding:14px 18px; border-top:1px solid var(--panel-border); background:rgba(12,18,32,0.9);">
+                <label class="label" for="markup">Generated markup</label>
+                <textarea id="markup" class="textarea code-output" readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/a2e0e6ad8f.js" crossorigin="anonymous"></script>
+    <script>
+        const preview = document.getElementById('preview');
+        const markupOutput = document.getElementById('markup');
+        const themeTag = document.getElementById('themeTag');
+
+        function buildMarkup(state) {
+            const tone = state.layout === 'dark'
+                ? { bg: '#0b1220', card: '#111827', text: '#e5e7eb', muted: '#9ca3af' }
+                : { bg: '#f8fafc', card: '#ffffff', text: '#0f172a', muted: '#475569' };
+
+            const tags = state.topics
+                .split(',')
+                .map(t => t.trim())
+                .filter(Boolean)
+                .map(tag => `<span class="tag is-rounded" style="background:${state.accent}1a;color:${state.accent};border:1px solid ${state.accent}33;">${tag}</span>`) // accent tinted
+                .join('\n');
+
+            return `
+<section class="hero" style="background:${tone.bg};">
+  <div class="hero-body" style="padding:3rem 2.5rem 2.5rem 2.5rem;">
+    <p class="title" style="color:${state.accent}; letter-spacing:0.02em;">${state.repoName}</p>
+    <p class="subtitle" style="color:${tone.text}; max-width:860px;">${state.tagline}</p>
+    <div class="buttons">
+      <a class="button is-primary" style="background:${state.accent}; border-color:${state.accent};" href="${state.repoUrl}" target="_blank">View repository</a>
+      <a class="button is-dark is-light" href="#readme">Readme highlights</a>
+    </div>
+    <div class="stat" style="margin-top:10px;">⭐ <strong>Featured</strong> — ${state.notes}</div>
+  </div>
+</section>
+<section class="section" style="background:${tone.bg};">
+  <div class="container">
+    <div class="columns is-variable is-6">
+      <div class="column is-two-thirds">
+        <div class="box" style="background:${tone.card}; border:1px solid ${state.accent}26;">
+          <p class="title is-4" style="color:${tone.text};">README snapshot</p>
+          <p class="subtitle is-6" style="color:${tone.muted};">Curated paragraphs you want on the repo landing page.</p>
+          <div class="content" style="color:${tone.text};">
+            <p><strong>${state.repoName}</strong> bundles creative tooling, web experiments, and assets. Use this template to surface the highlights without touching the raw markdown.</p>
+            <p>Drop in sections for install steps, stack badges, callouts, or changelog summaries. Everything stays Bulma-native for quick publishing.</p>
+          </div>
+          <div class="tags" style="gap:8px;">${tags}</div>
+        </div>
+        <div class="box" style="background:${tone.card}; border:1px solid ${tone.bg};">
+          <div class="level is-mobile">
+            <div class="level-left">
+              <div>
+                <p class="heading" style="color:${tone.muted};">Deploy</p>
+                <p class="title is-5" style="color:${tone.text};">Static copy</p>
+              </div>
+            </div>
+            <div class="level-right">
+              <a class="button is-small is-link" href="${state.repoUrl}" target="_blank">Open repo</a>
+            </div>
+          </div>
+          <progress class="progress is-primary" value="70" max="100" style="--bulma-progress-bar-background-color:${state.accent};"></progress>
+          <p style="color:${tone.muted};">Track polish before you push the page live.</p>
+        </div>
+      </div>
+      <div class="column">
+        <div class="box" style="background:${tone.card}; border:1px solid ${state.accent}26;">
+          <p class="title is-5" style="color:${tone.text};">Quick blocks</p>
+          <p class="subtitle is-7" style="color:${tone.muted};">Copy/paste ready cards to sprinkle around repo pages.</p>
+          <article class="message" style="background:${tone.bg};">
+            <div class="message-header" style="background:${state.accent}; color:#0b1021;">Release focus</div>
+            <div class="message-body" style="color:${tone.text};">
+              Use this slot for your latest tagged release, preview build, or nightly artifact.
+            </div>
+          </article>
+          <div class="box" style="background:${tone.bg}; color:${tone.text};">
+            <p class="heading" style="color:${tone.muted};">Maintainers</p>
+            <p class="title is-6" style="margin-bottom:8px;">You + collaborators</p>
+            <p style="color:${tone.muted};">Swap avatars, links, or team blips inline.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>`;
+        }
+
+        function updatePreview() {
+            const state = {
+                repoName: document.getElementById('repoName').value || 'Untitled repo',
+                tagline: document.getElementById('tagline').value || 'Add a tagline that sells your repo.',
+                repoUrl: document.getElementById('repoUrl').value || '#',
+                accent: document.getElementById('accent').value || '#00d1b2',
+                layout: document.querySelector('input[name="layout"]:checked').value,
+                topics: document.getElementById('topics').value,
+                notes: document.getElementById('notes').value || 'Add a quick note about cadence or roadmap.'
+            };
+
+            const markup = buildMarkup(state);
+            preview.innerHTML = markup;
+            markupOutput.value = markup.trim();
+            themeTag.textContent = state.layout.charAt(0).toUpperCase() + state.layout.slice(1);
+            themeTag.style.borderColor = `${state.accent}55`;
+            themeTag.style.backgroundColor = `${state.accent}15`;
+            themeTag.style.color = state.accent;
+        }
+
+        async function copyMarkup() {
+            if (!navigator.clipboard) {
+                markupOutput.select();
+                document.execCommand('copy');
+                return;
+            }
+            await navigator.clipboard.writeText(markupOutput.value);
+        }
+
+        updatePreview();
+    </script>
+</body>
+</html>

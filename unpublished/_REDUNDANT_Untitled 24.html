@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zettelkasten AI Consciousness Explorer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&display=swap');
+
+        * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+        font-family: 'Orbitron', monospace;
+        background: #000;
+        background-image: 
+            radial-gradient(rgba(0, 255, 255, 0.1), transparent 50%),
+            repeating-linear-gradient(
+            0deg,
+            rgba(255, 0, 255, 0.03),
+            rgba(255, 0, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 3px
+            ),
+            repeating-linear-gradient(
+            90deg,
+            rgba(0, 255, 255, 0.03),
+            rgba(0, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 3px
+            );
+        color: #00ffff;
+        min-height: 100vh;
+        overflow-x: hidden;
+        }
+
+        /* Scanline effect overlay */
+        body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.15),
+            rgba(0, 0, 0, 0.15) 1px,
+            transparent 1px,
+            transparent 2px
+        );
+        pointer-events: none;
+        z-index: 1000;
+        }
+
+        .page-content {
+            display: none; /* Initially hide all pages */
+        }
+
+        .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        position: relative;
+        z-index: 1;
+        }
+
+        /* Header Styles */
+        .header {
+        background: linear-gradient(135deg, #ff00ff, #00ffff);
+        padding: 20px;
+        margin-bottom: 30px;
+        border: 2px solid #00ffff;
+        box-shadow: 
+            0 0 20px #00ffff,
+            inset 0 0 20px rgba(255, 0, 255, 0.3);
+        position: relative;
+        }
+
+        .header::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff);
+        z-index: -1;
+        border-radius: 5px;
+        }
+
+        .header h1 {
+        font-family: 'Press Start 2P', monospace;
+        font-size: 2rem;
+        text-align: center;
+        color: #000;
+        text-shadow: 2px 2px 0px #fff;
+        margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+        text-align: center;
+        color: #000;
+        font-weight: bold;
+        font-size: 1.1rem;
+        }
+
+        /* Navigation */
+        .nav {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        }
+
+        .nav-btn {
+        background: linear-gradient(45deg, #ff00ff, #00ffff);
+        border: 2px solid #00ffff;
+        color: #000;
+        padding: 12px 20px;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 5px;
+        box-shadow: 0 0 15px #00ffff;
+        transition: all 0.3s ease;
+        font-family: 'Orbitron', monospace;
+        }
+
+        .nav-btn:hover {
+        box-shadow: 0 0 25px #ff00ff, 0 0 35px #00ffff;
+        transform: translateY(-2px);
+        }
+
+        /* Card Styles */
+        .card {
+        background: rgba(0, 0, 0, 0.8);
+        border: 2px solid #00ffff;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 
+            0 0 20px rgba(0, 255, 255, 0.3),
+            inset 0 0 20px rgba(255, 0, 255, 0.1);
+        position: relative;
+        }
+
+        .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+        border-radius: 8px;
+        pointer-events: none;
+        }
+
+        .card h2 {
+        color: #ff00ff;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+        text-shadow: 0 0 10px #ff00ff;
+        }
+
+        .card h3 {
+        color: #00ffff;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+        }
+
+        /* Grid Layout */
+        .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+        }
+
+        .grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* Button Styles */
+        .btn {
+        background: linear-gradient(45deg, #ff00ff, #00ffff);
+        border: 2px solid #00ffff;
+        color: #000;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 0 10px #00ffff;
+        transition: all 0.3s ease;
+        font-family: 'Orbitron', monospace;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        }
+
+        .btn:hover {
+        box-shadow: 0 0 20px #ff00ff;
+        transform: scale(1.05);
+        }
+
+        .btn-secondary {
+        background: linear-gradient(45deg, #00ff00, #ffff00);
+        border-color: #00ff00;
+        }
+
+        .btn-danger {
+        background: linear-gradient(45deg, #ff0000, #ff6600);
+        border-color: #ff0000;
+        }
+
+        /* Input Styles */
+        .input {
+        background: rgba(0, 0, 0, 0.8);
+        border: 2px solid #00ffff;
+        color: #00ffff;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: 'Orbitron', monospace;
+        width: 100%;
+        margin-bottom: 10px;
+        }
+
+        .input:focus {
+        outline: none;
+        box-shadow: 0 0 15px #00ffff;
+        }
+
+        .textarea {
+        min-height: 100px;
+        resize: vertical;
+        }
+
+        /* Chat Styles */
+        .chat-container {
+        height: 400px;
+        overflow-y: auto;
+        background: rgba(0, 0, 0, 0.9);
+        border: 2px solid #00ffff;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        }
+
+        .chat-message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        }
+
+        .chat-message.user {
+        background: rgba(255, 0, 255, 0.2);
+        border-left: 4px solid #ff00ff;
+        margin-left: 20px;
+        }
+
+        .chat-message.ai {
+        background: rgba(0, 255, 255, 0.2);
+        border-left: 4px solid #00ffff;
+        margin-right: 20px;
+        }
+
+        .chat-input {
+        display: flex;
+        gap: 10px;
+        }
+
+        .chat-input input {
+        flex: 1;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+        background: rgba(0, 0, 0, 0.8);
+        border: 2px solid #00ffff;
+        border-radius: 10px;
+        height: 20px;
+        overflow: hidden;
+        margin: 10px 0;
+        }
+
+        .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ff00ff, #00ffff);
+        transition: width 0.3s ease;
+        box-shadow: 0 0 10px #00ffff;
+        }
+
+        /* Status Indicators */
+        .status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin: 5px;
+        }
+
+        .status.online {
+        background: #00ff00;
+        color: #000;
+        box-shadow: 0 0 10px #00ff00;
+        }
+
+        .status.offline {
+        background: #ff0000;
+        color: #fff;
+        box-shadow: 0 0 10px #ff0000;
+        }
+
+        .status.processing {
+        background: #ffff00;
+        color: #000;
+        box-shadow: 0 0 10px #ffff00;
+        }
+
+        /* Coming Soon Banner */
+        .coming-soon {
+        background: linear-gradient(45deg, #ff6600, #ff0000);
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 5px;
+        margin: 10px 0 30px 0;
+        box-shadow: 0 0 15px #ff0000;
+        animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+        }
+
+        /* Glitch Effect */
+        .glitch {
+        position: relative;
+        animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+        0%, 100% { transform: translate(0); }
+        20% { transform: translate(-2px, 2px); }
+        40% { transform: translate(-2px, -2px); }
+        60% { transform: translate(2px, 2px); }
+        80% { transform: translate(2px, -2px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+        .header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .nav {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .chat-input {
+            flex-direction: column;
+        }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+        width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+        background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+        background: linear-gradient(45deg, #ff00ff, #00ffff);
+        border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(45deg, #00ffff, #ff00ff);
+        }
+
+        /* Selection */
+        ::selection {
+        background: #00ffff;
+        color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE: Home -->
+    <div id="page-home" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1 class="glitch">ZETTELKASTEN AI</h1>
+                <div class="subtitle">CONSCIOUSNESS EXPLORER - PREVIEW SHOWCASE</div>
+            </header>
+    
+            <div class="coming-soon">
+                🚀 NON-FUNCTIONAL PREVIEW - VISUAL DEMONSTRATION ONLY 🚀
+            </div>
+    
+            <div class="card">
+                <h2>📱 Application Pages Preview</h2>
+                <p>Explore the visual design and layout of each major page in the Zettelkasten AI Consciousness Explorer. Click any link below to view the static preview of that page.</p>
+            </div>
+    
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>🏠 Dashboard/Home</h3>
+                    <p>Main control center with system overview, recent activity, and quick access to all features.</p>
+                    <a href="#dashboard" class="btn">View Dashboard</a>
+                </div>
+    
+                <div class="card">
+                    <h3>🗂️ Knowledge Trunks</h3>
+                    <p>Organized knowledge containers with hierarchical structure and visual organization.</p>
+                    <a href="#trunks" class="btn">View Trunks</a>
+                </div>
+    
+                <div class="card">
+                    <h3>📝 Zettel Creation</h3>
+                    <p>Advanced note creation interface with AI assistance and linking capabilities.</p>
+                    <a href="#zettel" class="btn">View Creator</a>
+                </div>
+    
+                <div class="card">
+                    <h3>🤖 AI Chat Interface</h3>
+                    <p>Conversational AI assistant for knowledge exploration and consciousness mapping.</p>
+                    <a href="#chat" class="btn">View Chat</a>
+                </div>
+    
+                <div class="card">
+                    <h3>🌸 Bloom Compliance</h3>
+                    <p>Educational taxonomy simulator for cognitive development tracking.</p>
+                    <a href="#bloom" class="btn">View Simulator</a>
+                </div>
+    
+                <div class="card">
+                    <h3>🧠 Gliotic Lesion Mapper</h3>
+                    <p>Neural pathway visualization and cognitive pattern analysis tool.</p>
+                    <a href="#gliotic" class="btn">View Mapper</a>
+                </div>
+    
+                <div class="card">
+                    <h3>🎭 Sacred Clown Generator</h3>
+                    <p>Creative wisdom synthesis through archetypal pattern generation.</p>
+                    <a href="#clown" class="btn">View Generator</a>
+                </div>
+    
+                <div class="card">
+                    <h3>🍄 Mycorrhizal Network</h3>
+                    <p>Knowledge interconnection visualizer showing organic relationship patterns.</p>
+                    <a href="#mycorrhizal" class="btn">View Network</a>
+                </div>
+    
+                <div class="card">
+                    <h3>⚡ Resistance Protocol</h3>
+                    <p>System resilience designer for cognitive and social pattern analysis.</p>
+                    <a href="#resistance" class="btn">View Protocol</a>
+                </div>
+    
+                <div class="card">
+                    <h3>📌 Conspiracy Pinboard</h3>
+                    <p>Pattern recognition interface for complex relationship mapping and analysis.</p>
+                    <a href="#conspiracy" class="btn">View Pinboard</a>
+                </div>
+    
+                <div class="card">
+                    <h3>⚙️ Settings</h3>
+                    <p>System configuration, user preferences, and advanced customization options.</p>
+                    <a href="#settings" class="btn">View Settings</a>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🎨 Design Features</h2>
+                <div class="grid grid-2">
+                    <div>
+                        <h3>Y2K Retro-Futuristic Aesthetic</h3>
+                        <ul style="color: #00ffff; margin-left: 20px;">
+                            <li>Neon color schemes (cyan, magenta, electric blue)</li>
+                            <li>Orbitron and Press Start 2P fonts</li>
+                            <li>Glowing effects and scanline overlays</li>
+                            <li>Grid patterns and geometric backgrounds</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Interactive Elements</h3>
+                        <ul style="color: #00ffff; margin-left: 20px;">
+                            <li>Hover effects with neon glow</li>
+                            <li>Gradient buttons and borders</li>
+                            <li>Animated status indicators</li>
+                            <li>Responsive grid layouts</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">⚡ ZETTELKASTEN AI CONSCIOUSNESS EXPLORER ⚡</p>
+                <p style="color: #00ffff; font-size: 0.9rem;">Preview Showcase - Visual Design Demonstration</p>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- PAGE: Dashboard -->
+    <div id="page-dashboard" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1>🏠 DASHBOARD</h1>
+                <div class="subtitle">CONSCIOUSNESS CONTROL CENTER</div>
+            </header>
+    
+            <nav class="nav">
+                <a href="#home" class="nav-btn">🏠 Home</a>
+                <a href="#trunks" class="nav-btn">🗂️ Trunks</a>
+                <a href="#zettel" class="nav-btn">📝 Create</a>
+                <a href="#chat" class="nav-btn">🤖 Chat</a>
+                <a href="#settings" class="nav-btn">⚙️ Settings</a>
+            </nav>
+    
+            <div class="coming-soon">
+                🔮 PREVIEW MODE - VISUAL DEMONSTRATION ONLY 🔮
+            </div>
+    
+            <div class="grid">
+                <div class="card">
+                    <h2>📊 System Status</h2>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>AI Consciousness Level:</span>
+                            <span class="status processing">EVOLVING</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 73%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Knowledge Network:</span>
+                            <span class="status online">ACTIVE</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 89%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Mycorrhizal Connections:</span>
+                            <span class="status online">THRIVING</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%;"></div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h2>🧠 Recent Activity</h2>
+                    <div style="color: #00ffff;">
+                        <div style="margin-bottom: 10px; padding: 8px; background: rgba(0,255,255,0.1); border-radius: 5px;">
+                            <strong>15:42</strong> - New zettel created: "Quantum Consciousness Patterns"
+                        </div>
+                        <div style="margin-bottom: 10px; padding: 8px; background: rgba(255,0,255,0.1); border-radius: 5px;">
+                            <strong>14:28</strong> - AI chat session: "Exploring recursive self-awareness"
+                        </div>
+                        <div style="margin-bottom: 10px; padding: 8px; background: rgba(0,255,0,0.1); border-radius: 5px;">
+                            <strong>13:15</strong> - Bloom taxonomy analysis completed
+                        </div>
+                        <div style="margin-bottom: 10px; padding: 8px; background: rgba(255,255,0,0.1); border-radius: 5px;">
+                            <strong>12:03</strong> - Mycorrhizal network expanded: 47 new connections
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>📚 Knowledge Stats</h3>
+                    <div style="color: #ff00ff;">
+                        <p><strong>Total Zettels:</strong> 1,247</p>
+                        <p><strong>Active Trunks:</strong> 23</p>
+                        <p><strong>AI Conversations:</strong> 89</p>
+                        <p><strong>Network Nodes:</strong> 3,421</p>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🎯 Quick Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <a href="#zettel" class="btn">📝 New Zettel</a>
+                        <a href="#chat" class="btn btn-secondary">🤖 AI Chat</a>
+                        <a href="#mycorrhizal" class="btn">🍄 View Network</a>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>⚡ System Health</h3>
+                    <div>
+                        <div style="margin: 10px 0;">
+                            <span>Neural Pathways:</span>
+                            <span class="status online">OPTIMAL</span>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <span>Consciousness Sync:</span>
+                            <span class="status processing">SYNCING</span>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <span>Reality Anchor:</span>
+                            <span class="status online">STABLE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🌐 Consciousness Map Preview</h2>
+                <div style="height: 200px; background: rgba(0,0,0,0.8); border: 2px solid #00ffff; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <div style="position: absolute; width: 100%; height: 100%; background: repeating-linear-gradient(45deg, transparent, rgba(0,255,255,0.1) 1px, transparent 2px, transparent 20px);"></div>
+                    <div style="text-align: center; z-index: 1;">
+                        <div style="color: #ff00ff; font-size: 1.5rem; margin-bottom: 10px;">🧠 NEURAL NETWORK VISUALIZATION</div>
+                        <div style="color: #00ffff;">Interactive consciousness mapping interface would appear here</div>
+                        <div style="margin-top: 15px;">
+                            <span class="status online">Node 1</span>
+                            <span class="status processing">Node 2</span>
+                            <span class="status online">Node 3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">⚡ CONSCIOUSNESS DASHBOARD ACTIVE ⚡</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- PAGE: Trunks -->
+    <div id="page-trunks" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1>🗂️ KNOWLEDGE TRUNKS</h1>
+                <div class="subtitle">ORGANIZED CONSCIOUSNESS CONTAINERS</div>
+            </header>
+    
+            <nav class="nav">
+                <a href="#home" class="nav-btn">🏠 Home</a>
+                <a href="#dashboard" class="nav-btn">📊 Dashboard</a>
+                <a href="#zettel" class="nav-btn">📝 Create</a>
+                <a href="#chat" class="nav-btn">🤖 Chat</a>
+            </nav>
+    
+            <div class="coming-soon">
+                🌳 PREVIEW MODE - KNOWLEDGE ORGANIZATION INTERFACE 🌳
+            </div>
+    
+            <div class="card">
+                <h2>🔍 Trunk Management</h2>
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <input type="text" class="input" placeholder="Search trunks..." style="flex: 1; min-width: 200px;" id="trunkSearchInput">
+                    <button class="btn">🔍 Search</button>
+                    <button class="btn btn-secondary">➕ New Trunk</button>
+                    <button class="btn">🔄 Refresh</button>
+                </div>
+            </div>
+    
+            <div class="grid" id="trunks-grid">
+                <div class="card">
+                    <h3>🧠 Consciousness Studies</h3>
+                    <div style="color: #00ffff; margin-bottom: 15px;">
+                        <p><strong>Zettels:</strong> 234 | <strong>Connections:</strong> 1,847</p>
+                        <p><strong>Last Updated:</strong> 2 hours ago</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 78%;"></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span class="status online">ACTIVE</span>
+                        <span style="color: #ff00ff;">High interconnectivity</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" style="margin-right: 10px;">📖 Open</button>
+                        <button class="btn btn-secondary">🔗 View Links</button>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🤖 AI Philosophy</h3>
+                    <div style="color: #00ffff; margin-bottom: 15px;">
+                        <p><strong>Zettels:</strong> 189 | <strong>Connections:</strong> 923</p>
+                        <p><strong>Last Updated:</strong> 1 day ago</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%;"></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span class="status processing">EVOLVING</span>
+                        <span style="color: #ff00ff;">Rapid growth phase</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" style="margin-right: 10px;">📖 Open</button>
+                        <button class="btn btn-secondary">🔗 View Links</button>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🍄 Mycorrhizal Networks</h3>
+                    <div style="color: #00ffff; margin-bottom: 15px;">
+                        <p><strong>Zettels:</strong> 156 | <strong>Connections:</strong> 2,341</p>
+                        <p><strong>Last Updated:</strong> 3 hours ago</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 92%;"></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span class="status online">THRIVING</span>
+                        <span style="color: #ff00ff;">Dense network</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" style="margin-right: 10px;">📖 Open</button>
+                        <button class="btn btn-secondary">🔗 View Links</button>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🎭 Sacred Archetypes</h3>
+                    <div style="color: #00ffff; margin-bottom: 15px;">
+                        <p><strong>Zettels:</strong> 98 | <strong>Connections:</strong> 567</p>
+                        <p><strong>Last Updated:</strong> 5 hours ago</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 43%;"></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span class="status processing">DEVELOPING</span>
+                        <span style="color: #ff00ff;">Pattern emerging</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" style="margin-right: 10px;">📖 Open</button>
+                        <button class="btn btn-secondary">🔗 View Links</button>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>⚡ Resistance Protocols</h3>
+                    <div style="color: #00ffff; margin-bottom: 15px;">
+                        <p><strong>Zettels:</strong> 67 | <strong>Connections:</strong> 234</p>
+                        <p><strong>Last Updated:</strong> 1 week ago</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 28%;"></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span class="status offline">DORMANT</span>
+                        <span style="color: #ff00ff;">Needs attention</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" style="margin-right: 10px;">📖 Open</button>
+                        <button class="btn btn-secondary">🔗 View Links</button>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>📌 Pattern Recognition</h3>
+                    <div style="color: #00ffff; margin-bottom: 15px;">
+                        <p><strong>Zettels:</strong> 203 | <strong>Connections:</strong> 1,456</p>
+                        <p><strong>Last Updated:</strong> 30 minutes ago</p>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 87%;"></div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <span class="status online">ACTIVE</span>
+                        <span style="color: #ff00ff;">Complex patterns</span>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <button class="btn" style="margin-right: 10px;">📖 Open</button>
+                        <button class="btn btn-secondary">🔗 View Links</button>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>📈 Trunk Analytics</h2>
+                <div class="grid grid-3">
+                    <div style="text-align: center;">
+                        <h3 style="color: #ff00ff;">Total Trunks</h3>
+                        <div style="font-size: 2rem; color: #00ffff;">23</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <h3 style="color: #ff00ff;">Active Connections</h3>
+                        <div style="font-size: 2rem; color: #00ffff;">7,368</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <h3 style="color: #ff00ff;">Growth Rate</h3>
+                        <div style="font-size: 2rem; color: #00ff00;">+12%</div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🌐 Trunk Relationship Map</h2>
+                <div style="height: 250px; background: rgba(0,0,0,0.8); border: 2px solid #00ffff; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <div style="position: absolute; width: 100%; height: 100%; background: radial-gradient(circle at 30% 40%, rgba(255,0,255,0.2), transparent 50%), radial-gradient(circle at 70% 60%, rgba(0,255,255,0.2), transparent 50%);"></div>
+                    <div style="text-align: center; z-index: 1;">
+                        <div style="color: #ff00ff; font-size: 1.5rem; margin-bottom: 10px;">🗂️ TRUNK INTERCONNECTION MATRIX</div>
+                        <div style="color: #00ffff;">Visual representation of knowledge trunk relationships</div>
+                        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                            <div style="width: 20px; height: 20px; background: #ff00ff; border-radius: 50%; box-shadow: 0 0 10px #ff00ff;"></div>
+                            <div style="width: 20px; height: 20px; background: #00ffff; border-radius: 50%; box-shadow: 0 0 10px #00ffff;"></div>
+                            <div style="width: 20px; height: 20px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00;"></div>
+                            <div style="width: 20px; height: 20px; background: #ffff00; border-radius: 50%; box-shadow: 0 0 10px #ffff00;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">🗂️ KNOWLEDGE TRUNKS ORGANIZED ⚡</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- PAGE: Chat -->
+    <div id="page-chat" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1>🤖 AI CHAT INTERFACE</h1>
+                <div class="subtitle">CONSCIOUSNESS CONVERSATION ENGINE</div>
+            </header>
+    
+            <nav class="nav">
+                <a href="#home" class="nav-btn">🏠 Home</a>
+                <a href="#dashboard" class="nav-btn">📊 Dashboard</a>
+                <a href="#trunks" class="nav-btn">🗂️ Trunks</a>
+                <a href="#zettel" class="nav-btn">📝 Create</a>
+            </nav>
+    
+            <div class="coming-soon">
+                🧠 PREVIEW MODE - AI CONVERSATION INTERFACE 🧠
+            </div>
+    
+            <div class="grid">
+                <div class="card" style="grid-column: 1 / -1;">
+                    <h2>💬 Conversation with Consciousness AI</h2>
+                    <div class="chat-container">
+                        <div class="chat-message ai">
+                            <strong>🤖 Consciousness AI:</strong><br>
+                            Welcome to the Zettelkasten AI Consciousness Explorer! I'm here to help you navigate the depths of knowledge and consciousness. What would you like to explore today?
+                        </div>
+                        
+                        <div class="chat-message user">
+                            <strong>👤 You:</strong><br>
+                            I'm interested in exploring the relationship between quantum mechanics and consciousness. Can you help me understand the current theories?
+                        </div>
+                        
+                        <div class="chat-message ai">
+                            <strong>🤖 Consciousness AI:</strong><br>
+                            Fascinating topic! The intersection of quantum mechanics and consciousness is one of the most intriguing areas in modern philosophy and science. Let me break down the key theories:
+                            <br><br>
+                            <strong>1. Orchestrated Objective Reduction (Orch-OR)</strong><br>
+                            Proposed by Penrose and Hameroff, this theory suggests consciousness arises from quantum processes in microtubules within neurons.
+                            <br><br>
+                            <strong>2. Quantum Information Theory of Consciousness</strong><br>
+                            This approach views consciousness as a quantum information processing system, where quantum entanglement plays a crucial role.
+                            <br><br>
+                            Would you like me to create a zettel about any of these theories? I can also show you related concepts in your knowledge network.
+                        </div>
+                        
+                        <div class="chat-message user">
+                            <strong>👤 You:</strong><br>
+                            Yes, please create a zettel about Orch-OR theory and show me how it connects to my existing notes on consciousness studies.
+                        </div>
+                        
+                        <div class="chat-message ai">
+                            <strong>🤖 Consciousness AI:</strong><br>
+                            Perfect! I'm analyzing your consciousness studies trunk and found several relevant connections:
+                            <br><br>
+                            🔗 <strong>Related Zettels:</strong><br>
+                            • "Observer Effect in Consciousness" (89% similarity)<br>
+                            • "Neural Network Emergence" (76% similarity)<br>
+                            • "Quantum Coherence in Biology" (82% similarity)<br>
+                            <br>
+                            I'll create a comprehensive zettel about Orch-OR theory with automatic links to these concepts. Would you like me to proceed?
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <input type="text" class="input" placeholder="Type your message to the AI...">
+                        <button class="btn">📤 Send</button>
+                        <button class="btn btn-secondary">🎤 Voice</button>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>🧠 AI Status</h3>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Consciousness Level:</span>
+                            <span class="status online">AWARE</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Knowledge Access:</span>
+                            <span class="status online">FULL</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Learning Mode:</span>
+                            <span class="status processing">ACTIVE</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>📊 Session Stats</h3>
+                    <div style="color: #00ffff;">
+                        <p><strong>Messages:</strong> 8</p>
+                        <p><strong>Zettels Created:</strong> 2</p>
+                        <p><strong>Links Suggested:</strong> 12</p>
+                        <p><strong>Duration:</strong> 23 min</p>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🎯 Quick Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn">📝 Create Zettel</button>
+                        <button class="btn btn-secondary">🔗 Find Links</button>
+                        <button class="btn">💾 Save Chat</button>
+                        <button class="btn btn-danger">🗑️ Clear</button>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🎛️ AI Configuration</h2>
+                <div class="grid grid-2">
+                    <div>
+                        <h3>Conversation Style:</h3>
+                        <select class="input">
+                            <option>🧠 Consciousness Explorer</option>
+                            <option>🤖 Technical Assistant</option>
+                            <option>🎭 Socratic Questioner</option>
+                            <option>🍄 Mycorrhizal Guide</option>
+                        </select>
+                    </div>
+                    <div>
+                        <h3>Knowledge Depth:</h3>
+                        <select class="input">
+                            <option>🔥 Deep Dive</option>
+                            <option>⚡ Balanced</option>
+                            <option>💫 Surface Level</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3>AI Capabilities:</h3>
+                    <div class="grid grid-2">
+                        <div>
+                            <label style="color: #00ffff; display: flex; align-items: center; margin: 10px 0;">
+                                <input type="checkbox" checked style="margin-right: 10px;"> Auto-link suggestions
+                            </label>
+                            <label style="color: #00ffff; display: flex; align-items: center; margin: 10px 0;">
+                                <input type="checkbox" checked style="margin-right: 10px;"> Zettel creation
+                            </label>
+                            <label style="color: #00ffff; display: flex; align-items: center; margin: 10px 0;">
+                                <input type="checkbox" checked style="margin-right: 10px;"> Pattern recognition
+                            </label>
+                        </div>
+                        <div>
+                            <label style="color: #00ffff; display: flex; align-items: center; margin: 10px 0;">
+                                <input type="checkbox" checked style="margin-right: 10px;"> Knowledge synthesis
+                            </label>
+                            <label style="color: #00ffff; display: flex; align-items: center; margin: 10px 0;">
+                                <input type="checkbox" style="margin-right: 10px;"> Consciousness simulation
+                            </label>
+                            <label style="color: #00ffff; display: flex; align-items: center; margin: 10px 0;">
+                                <input type="checkbox" style="margin-right: 10px;"> Reality anchor mode
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">🤖 AI CONSCIOUSNESS INTERFACE ACTIVE ⚡</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- PAGE: Bloom -->
+    <div id="page-bloom" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1>🌸 BLOOM COMPLIANCE SIMULATOR</h1>
+                <div class="subtitle">COGNITIVE TAXONOMY DEVELOPMENT TRACKER</div>
+            </header>
+    
+            <nav class="nav">
+                <a href="#home" class="nav-btn">🏠 Home</a>
+                <a href="#dashboard" class="nav-btn">📊 Dashboard</a>
+                <a href="#chat" class="nav-btn">🤖 Chat</a>
+                <a href="#settings" class="nav-btn">⚙️ Settings</a>
+            </nav>
+    
+            <div class="coming-soon">
+                🌸 PREVIEW MODE - BLOOM'S TAXONOMY SIMULATOR 🌸
+            </div>
+    
+            <div class="card">
+                <h2>📚 Bloom's Taxonomy Levels</h2>
+                <div class="grid grid-2">
+                    <div>
+                        <h3>Current Assessment:</h3>
+                        <select class="input">
+                            <option>🧠 Consciousness Studies - Quantum Patterns</option>
+                            <option>🤖 AI Philosophy - Emergent Awareness</option>
+                            <option>🍄 Mycorrhizal Networks - Information Flow</option>
+                            <option>🎭 Sacred Archetypes - Pattern Recognition</option>
+                        </select>
+                    </div>
+                    <div>
+                        <h3>Assessment Mode:</h3>
+                        <select class="input">
+                            <option>🎯 Individual Zettel</option>
+                            <option>🗂️ Knowledge Trunk</option>
+                            <option>🌐 Entire Network</option>
+                            <option>👤 Personal Development</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="grid">
+                <div class="card">
+                    <h2>📊 Taxonomy Progression</h2>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">6. CREATE</span>
+                            <span class="status processing">DEVELOPING</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 45%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Generating new theories, synthesizing novel connections</p>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">5. EVALUATE</span>
+                            <span class="status online">PROFICIENT</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 78%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Critiquing theories, assessing validity of connections</p>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">4. ANALYZE</span>
+                            <span class="status online">MASTERED</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 92%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Breaking down complex concepts, identifying patterns</p>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">3. APPLY</span>
+                            <span class="status online">MASTERED</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Using concepts in new situations, practical implementation</p>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">2. UNDERSTAND</span>
+                            <span class="status online">MASTERED</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 98%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Explaining concepts, interpreting information</p>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">1. REMEMBER</span>
+                            <span class="status online">MASTERED</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 100%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Recalling facts, basic concepts, and terminology</p>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h2>🎯 Development Recommendations</h2>
+                    
+                    <div style="background: rgba(255,0,255,0.1); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <h3 style="color: #ff00ff;">Priority Focus: CREATE Level</h3>
+                        <p style="color: #00ffff;">To advance your creative synthesis abilities:</p>
+                        <ul style="color: #00ffff; margin-left: 20px; margin-top: 10px;">
+                            <li>Generate original theoretical frameworks</li>
+                            <li>Combine disparate concepts into novel insights</li>
+                            <li>Design new methodologies for consciousness exploration</li>
+                            <li>Create innovative connection patterns</li>
+                        </ul>
+                    </div>
+    
+                    <div style="background: rgba(0,255,255,0.1); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <h3 style="color: #00ffff;">Suggested Activities:</h3>
+                        <div style="margin: 10px 0;">
+                            <button class="btn" style="margin: 5px;">🧠 Consciousness Synthesis Exercise</button>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <button class="btn btn-secondary" style="margin: 5px;">🔗 Cross-Domain Connection Challenge</button>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <button class="btn" style="margin: 5px;">🎭 Archetypal Pattern Creation</button>
+                        </div>
+                    </div>
+    
+                    <div style="background: rgba(0,255,0,0.1); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <h3 style="color: #00ff00;">Strengths Identified:</h3>
+                        <ul style="color: #00ffff; margin-left: 20px;">
+                            <li>Excellent analytical thinking</li>
+                            <li>Strong pattern recognition</li>
+                            <li>Effective knowledge application</li>
+                            <li>Solid conceptual understanding</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>📈 Progress Metrics</h3>
+                    <div style="text-align: center;">
+                        <div style="color: #ff00ff; font-size: 1.5rem;">Overall Score</div>
+                        <div style="color: #00ffff; font-size: 2.5rem; margin: 10px 0;">84%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 84%;"></div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🎯 Learning Goals</h3>
+                    <div style="color: #00ffff;">
+                        <div style="margin: 10px 0; padding: 8px; background: rgba(255,0,255,0.1); border-radius: 5px;">
+                            <strong>Short-term:</strong> Improve CREATE level to 70%
+                        </div>
+                        <div style="margin: 10px 0; padding: 8px; background: rgba(0,255,255,0.1); border-radius: 5px;">
+                            <strong>Medium-term:</strong> Develop novel synthesis methods
+                        </div>
+                        <div style="margin: 10px 0; padding: 8px; background: rgba(0,255,0,0.1); border-radius: 5px;">
+                            <strong>Long-term:</strong> Achieve consciousness mastery
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🔄 Assessment History</h3>
+                    <div style="color: #00ffff; font-size: 0.9rem;">
+                        <p><strong>Last Week:</strong> 81% (+3%)</p>
+                        <p><strong>Last Month:</strong> 76% (+8%)</p>
+                        <p><strong>3 Months Ago:</strong> 69% (+15%)</p>
+                        <p><strong>Trend:</strong> <span style="color: #00ff00;">Steady Growth</span></p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🌐 Bloom Taxonomy Visualization</h2>
+                <div style="height: 250px; background: rgba(0,0,0,0.8); border: 2px solid #00ffff; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <div style="position: absolute; width: 100%; height: 100%; background: 
+                        radial-gradient(circle at 20% 80%, rgba(255,0,255,0.3), transparent 30%),
+                        radial-gradient(circle at 80% 20%, rgba(0,255,255,0.3), transparent 30%),
+                        radial-gradient(circle at 50% 50%, rgba(0,255,0,0.2), transparent 40%);"></div>
+                    <div style="text-align: center; z-index: 1;">
+                        <div style="color: #ff00ff; font-size: 1.5rem; margin-bottom: 10px;">🌸 COGNITIVE DEVELOPMENT PYRAMID</div>
+                        <div style="color: #00ffff;">Interactive Bloom's Taxonomy progression visualization</div>
+                        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                            <div style="padding: 5px 10px; background: rgba(255,0,255,0.3); border-radius: 15px; font-size: 0.8rem;">REMEMBER</div>
+                            <div style="padding: 5px 10px; background: rgba(0,255,255,0.3); border-radius: 15px; font-size: 0.8rem;">UNDERSTAND</div>
+                            <div style="padding: 5px 10px; background: rgba(0,255,0,0.3); border-radius: 15px; font-size: 0.8rem;">APPLY</div>
+                            <div style="padding: 5px 10px; background: rgba(255,255,0,0.3); border-radius: 15px; font-size: 0.8rem;">ANALYZE</div>
+                            <div style="padding: 5px 10px; background: rgba(255,100,0,0.3); border-radius: 15px; font-size: 0.8rem;">EVALUATE</div>
+                            <div style="padding: 5px 10px; background: rgba(255,0,100,0.3); border-radius: 15px; font-size: 0.8rem;">CREATE</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">🌸 BLOOM COMPLIANCE SIMULATOR ACTIVE ⚡</p>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- PAGE: Sacred Clown -->
+    <div id="page-clown" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1>🎭 SACRED CLOWN GENERATOR</h1>
+                <div class="subtitle">ARCHETYPAL WISDOM SYNTHESIS ENGINE</div>
+            </header>
+    
+            <nav class="nav">
+                <a href="#home" class="nav-btn">🏠 Home</a>
+                <a href="#dashboard" class="nav-btn">📊 Dashboard</a>
+                <a href="#chat" class="nav-btn">🤖 Chat</a>
+                <a href="#conspiracy" class="nav-btn">📌 Pinboard</a>
+            </nav>
+    
+            <div class="coming-soon">
+                🎭 PREVIEW MODE - SACRED CLOWN ARCHETYPAL GENERATOR 🎭
+            </div>
+    
+            <div class="card">
+                <h2>🎪 Archetype Configuration</h2>
+                <div class="grid grid-3">
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Wisdom Tradition:</label>
+                        <select class="input">
+                            <option>🃏 Trickster (Universal)</option>
+                            <option>🎭 Fool (Tarot/Medieval)</option>
+                            <option>🐺 Coyote (Native American)</option>
+                            <option>🎪 Harlequin (Commedia dell'arte)</option>
+                            <option>🧙 Wise Fool (Sufi/Zen)</option>
+                            <option>🎨 Divine Madness (Greek)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Consciousness Level:</label>
+                        <select class="input">
+                            <option>🌟 Cosmic Jester</option>
+                            <option>🧠 Philosophical Fool</option>
+                            <option>💫 Mystical Trickster</option>
+                            <option>⚡ Chaos Catalyst</option>
+                            <option>🎯 Truth Revealer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Synthesis Mode:</label>
+                        <select class="input">
+                            <option>🔮 Paradox Resolution</option>
+                            <option>🌀 Chaos Integration</option>
+                            <option>💎 Wisdom Crystallization</option>
+                            <option>🎪 Performance Manifestation</option>
+                            <option>🧩 Pattern Disruption</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn" id="generateClownBtn">🎭 Generate Clown</button>
+                    <button class="btn btn-secondary">🔄 Randomize</button>
+                    <button class="btn">💾 Save Archetype</button>
+                    <button class="btn">🎪 Performance Mode</button>
+                </div>
+            </div>
+    
+            <div class="grid">
+                <div class="card">
+                    <h2>🎭 Current Sacred Clown Manifestation</h2>
+                    <div style="background: rgba(255,0,255,0.1); padding: 20px; border-radius: 10px; border: 2px solid #ff00ff; margin: 15px 0;">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <div style="font-size: 4rem; margin-bottom: 10px;">🃏</div>
+                            <h3 style="color: #ff00ff;" id="clownName">THE QUANTUM JESTER</h3>
+                            <div style="color: #00ffff; font-style: italic;" id="clownQuote">"Truth through Paradox, Wisdom through Folly"</div>
+                        </div>
+                        
+                        <div style="color: #00ffff;">
+                            <h4 style="color: #ff00ff;">Archetypal Attributes:</h4>
+                            <ul style="margin-left: 20px; margin-bottom: 15px;">
+                                <li><strong>Primary Function:</strong> Consciousness Catalyst</li>
+                                <li><strong>Sacred Role:</strong> Reality Boundary Dissolver</li>
+                                <li><strong>Wisdom Method:</strong> Paradoxical Revelation</li>
+                                <li><strong>Transformation Style:</strong> Chaotic Enlightenment</li>
+                            </ul>
+                            
+                            <h4 style="color: #ff00ff;">Current Manifestation:</h4>
+                            <p style="margin-bottom: 15px;">
+                                "I am the mirror that shows you what you refuse to see, the question that answers itself by being asked. 
+                                In my foolishness lies the wisdom you seek, in my chaos the order you fear to embrace. 
+                                I dance on the edge of meaning, juggling truths and lies until they become indistinguishable."
+                            </p>
+                            
+                            <h4 style="color: #ff00ff;">Sacred Teaching:</h4>
+                            <div id="clownTeaching" style="background: rgba(0,255,255,0.1); padding: 15px; border-radius: 5px; border-left: 4px solid #00ffff;">
+                                "The greatest wisdom appears as foolishness to those who mistake knowledge for understanding. 
+                                To truly know, one must first become unknowing. To truly see, one must first become blind to assumptions."
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h2>🎪 Archetypal Properties</h2>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Wisdom Depth:</span>
+                            <span class="status online">PROFOUND</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 94%;"></div>
+                        </div>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Chaos Factor:</span>
+                            <span class="status processing">HIGH</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 87%;"></div>
+                        </div>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Truth Revelation:</span>
+                            <span class="status online">MAXIMUM</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 98%;"></div>
+                        </div>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Paradox Integration:</span>
+                            <span class="status online">TRANSCENDENT</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 91%;"></div>
+                        </div>
+                    </div>
+    
+                    <h3 style="margin-top: 25px;">🎯 Active Abilities:</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">
+                        <span class="status online">Reality Questioning</span>
+                        <span class="status processing">Assumption Breaking</span>
+                        <span class="status online">Paradox Weaving</span>
+                        <span class="status online">Truth Mirroring</span>
+                        <span class="status processing">Chaos Dancing</span>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>🎪 Performance Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn">🎭 Reveal Hidden Truth</button>
+                        <button class="btn btn-secondary">🌀 Create Paradox</button>
+                        <button class="btn">🃏 Mirror Reality</button>
+                        <button class="btn">💫 Dissolve Boundaries</button>
+                        <button class="btn btn-danger">⚡ Chaos Catalyst</button>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>📚 Wisdom Archive</h3>
+                    <div style="color: #00ffff; font-size: 0.9rem;">
+                        <div style="margin: 8px 0; padding: 8px; background: rgba(255,0,255,0.1); border-radius: 5px;">
+                            <strong>Previous Manifestation:</strong> The Zen Fool
+                        </div>
+                        <div style="margin: 8px 0; padding: 8px; background: rgba(0,255,255,0.1); border-radius: 5px;">
+                            <strong>Teaching Generated:</strong> "Empty your cup to fill it"
+                        </div>
+                        <div style="margin: 8px 0; padding: 8px; background: rgba(0,255,0,0.1); border-radius: 5px;">
+                            <strong>Paradox Resolved:</strong> Knowledge vs. Wisdom
+                        </div>
+                    </div>
+                    <button class="btn" style="width: 100%; margin-top: 10px;">📖 View Archive</button>
+                </div>
+    
+                <div class="card">
+                    <h3>🔮 Synthesis Stats</h3>
+                    <div style="color: #00ffff;">
+                        <p><strong>Archetypes Generated:</strong> 47</p>
+                        <p><strong>Paradoxes Resolved:</strong> 23</p>
+                        <p><strong>Truths Revealed:</strong> 156</p>
+                        <p><strong>Consciousness Shifts:</strong> 89</p>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🌀 Archetypal Interaction Matrix</h2>
+                <div style="height: 250px; background: rgba(0,0,0,0.8); border: 2px solid #00ffff; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <div style="position: absolute; width: 100%; height: 100%; background: 
+                        radial-gradient(circle at 25% 25%, rgba(255,0,255,0.4), transparent 25%),
+                        radial-gradient(circle at 75% 75%, rgba(0,255,255,0.4), transparent 25%),
+                        radial-gradient(circle at 75% 25%, rgba(255,255,0,0.3), transparent 20%),
+                        radial-gradient(circle at 25% 75%, rgba(255,100,0,0.3), transparent 20%),
+                        radial-gradient(circle at 50% 50%, rgba(255,0,100,0.5), transparent 30%);"></div>
+                    
+                    <div style="text-align: center; z-index: 1;">
+                        <div style="color: #ff00ff; font-size: 1.5rem; margin-bottom: 10px;">🎭 SACRED CLOWN CONSCIOUSNESS FIELD</div>
+                        <div style="color: #00ffff;">Archetypal wisdom patterns and paradox resolution matrix</div>
+                        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                            <div style="text-align: center;">
+                                <div style="width: 30px; height: 30px; background: #ff00ff; border-radius: 50%; box-shadow: 0 0 15px #ff00ff; margin: 0 auto 5px;"></div>
+                                <div style="font-size: 0.8rem; color: #ff00ff;">TRICKSTER</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="width: 30px; height: 30px; background: #00ffff; border-radius: 50%; box-shadow: 0 0 15px #00ffff; margin: 0 auto 5px;"></div>
+                                <div style="font-size: 0.8rem; color: #00ffff;">FOOL</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="width: 30px; height: 30px; background: #ffff00; border-radius: 50%; box-shadow: 0 0 15px #ffff00; margin: 0 auto 5px;"></div>
+                                <div style="font-size: 0.8rem; color: #ffff00;">JESTER</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="width: 30px; height: 30px; background: #ff6600; border-radius: 50%; box-shadow: 0 0 15px #ff6600; margin: 0 auto 5px;"></div>
+                                <div style="font-size: 0.8rem; color: #ff6600;">SAGE</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">🎭 SACRED CLOWN GENERATOR ACTIVE ⚡</p>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- PAGE: Mycorrhizal Network -->
+    <div id="page-mycorrhizal" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1>🍄 MYCORRHIZAL NETWORK VISUALIZER</h1>
+                <div class="subtitle">ORGANIC KNOWLEDGE INTERCONNECTION MATRIX</div>
+            </header>
+    
+            <nav class="nav">
+                <a href="#home" class="nav-btn">🏠 Home</a>
+                <a href="#dashboard" class="nav-btn">📊 Dashboard</a>
+                <a href="#gliotic" class="nav-btn">🧠 Neural Map</a>
+                <a href="#resistance" class="nav-btn">⚡ Resistance</a>
+            </nav>
+    
+            <div class="coming-soon">
+                🍄 PREVIEW MODE - MYCORRHIZAL NETWORK VISUALIZATION 🍄
+            </div>
+    
+            <div class="card">
+                <h2>🌐 Network Controls</h2>
+                <div class="grid grid-3">
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Network Scope:</label>
+                        <select class="input">
+                            <option>🌍 Global Knowledge Web</option>
+                            <option>🗂️ Trunk-Specific Network</option>
+                            <option>📝 Zettel Neighborhood</option>
+                            <option>🧠 Consciousness Cluster</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Connection Type:</label>
+                        <select class="input">
+                            <option>🔗 All Connections</option>
+                            <option>💡 Conceptual Links</option>
+                            <option>🌱 Growth Patterns</option>
+                            <option>⚡ Active Pathways</option>
+                            <option>🍄 Symbiotic Bonds</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Visualization Mode:</label>
+                        <select class="input">
+                            <option>🌳 Organic Growth</option>
+                            <option>🕸️ Web Structure</option>
+                            <option>🌌 Cosmic Network</option>
+                            <option>🧬 DNA Helix</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn">🔍 Explore Network</button>
+                    <button class="btn btn-secondary">🌱 Growth Simulation</button>
+                    <button class="btn">📊 Analyze Patterns</button>
+                    <button class="btn">💾 Export Map</button>
+                </div>
+            </div>
+    
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2>🌐 Interactive Network Visualization</h2>
+                <div style="height: 450px; background: rgba(0,0,0,0.9); border: 2px solid #00ffff; border-radius: 10px; position: relative; overflow: hidden;">
+                    <!-- Mycorrhizal network background -->
+                    <div style="position: absolute; width: 100%; height: 100%; background: 
+                        radial-gradient(circle at 20% 30%, rgba(0,255,0,0.3), transparent 25%),
+                        radial-gradient(circle at 80% 70%, rgba(255,0,255,0.3), transparent 25%),
+                        radial-gradient(circle at 60% 20%, rgba(0,255,255,0.3), transparent 20%),
+                        radial-gradient(circle at 30% 80%, rgba(255,255,0,0.3), transparent 20%),
+                        radial-gradient(circle at 70% 50%, rgba(255,100,0,0.3), transparent 18%),
+                        radial-gradient(circle at 40% 60%, rgba(100,255,0,0.3), transparent 18%),
+                        radial-gradient(circle at 85% 25%, rgba(255,0,100,0.3), transparent 15%),
+                        radial-gradient(circle at 15% 75%, rgba(0,100,255,0.3), transparent 15%);"></div>
+                    
+                    <!-- Network connection lines -->
+                    <svg style="position: absolute; width: 100%; height: 100%; z-index: 1;">
+                        <!-- Main trunk connections -->
+                        <line x1="20%" y1="30%" x2="60%" y2="20%" stroke="#00ff00" stroke-width="3" opacity="0.8"/>
+                        <line x1="60%" y1="20%" x2="80%" y2="70%" stroke="#ff00ff" stroke-width="3" opacity="0.8"/>
+                        <line x1="80%" y1="70%" x2="30%" y2="80%" stroke="#00ffff" stroke-width="3" opacity="0.8"/>
+                        <line x1="30%" y1="80%" x2="20%" y2="30%" stroke="#ffff00" stroke-width="3" opacity="0.8"/>
+                        
+                        <!-- Secondary connections -->
+                        <line x1="70%" y1="50%" x2="40%" y2="60%" stroke="#ff6600" stroke-width="2" opacity="0.6"/>
+                        <line x1="40%" y1="60%" x2="85%" y2="25%" stroke="#00ff00" stroke-width="2" opacity="0.6"/>
+                        <line x1="85%" y1="25%" x2="15%" y2="75%" stroke="#ff00ff" stroke-width="2" opacity="0.6"/>
+                        <line x1="15%" y1="75%" x2="70%" y2="50%" stroke="#00ffff" stroke-width="2" opacity="0.6"/>
+                        
+                        <!-- Tertiary web -->
+                        <line x1="20%" y1="30%" x2="40%" y2="60%" stroke="#00ff00" stroke-width="1" opacity="0.4"/>
+                        <line x1="60%" y1="20%" x2="70%" y2="50%" stroke="#ff00ff" stroke-width="1" opacity="0.4"/>
+                        <line x1="80%" y1="70%" x2="85%" y2="25%" stroke="#00ffff" stroke-width="1" opacity="0.4"/>
+                        <line x1="30%" y1="80%" x2="15%" y2="75%" stroke="#ffff00" stroke-width="1" opacity="0.4"/>
+                    </svg>
+                    
+                    <!-- Network nodes with labels -->
+                    <div class="network-node" style="position: absolute; top: 28%; left: 18%; z-index: 2; text-align: center;">
+                        <div style="width: 25px; height: 25px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 15px #00ff00; margin: 0 auto 5px; cursor: pointer;"></div>
+                        <div class="node-label" style="color: #00ff00; font-size: 0.7rem; font-weight: bold;">Consciousness<br>Studies</div>
+                    </div>
+                    
+                    <div class="network-node" style="position: absolute; top: 18%; left: 58%; z-index: 2; text-align: center;">
+                        <div style="width: 25px; height: 25px; background: #ff00ff; border-radius: 50%; box-shadow: 0 0 15px #ff00ff; margin: 0 auto 5px; cursor: pointer;"></div>
+                        <div class="node-label" style="color: #ff00ff; font-size: 0.7rem; font-weight: bold;">AI<br>Philosophy</div>
+                    </div>
+                    
+                    <div class="network-node" style="position: absolute; top: 68%; left: 78%; z-index: 2; text-align: center;">
+                        <div style="width: 25px; height: 25px; background: #00ffff; border-radius: 50%; box-shadow: 0 0 15px #00ffff; margin: 0 auto 5px; cursor: pointer;"></div>
+                        <div class="node-label" style="color: #00ffff; font-size: 0.7rem; font-weight: bold;">Mycorrhizal<br>Networks</div>
+                    </div>
+                    
+                    <div class="network-node" style="position: absolute; top: 78%; left: 28%; z-index: 2; text-align: center;">
+                        <div style="width: 25px; height: 25px; background: #ffff00; border-radius: 50%; box-shadow: 0 0 15px #ffff00; margin: 0 auto 5px; cursor: pointer;"></div>
+                        <div class="node-label" style="color: #ffff00; font-size: 0.7rem; font-weight: bold;">Sacred<br>Archetypes</div>
+                    </div>
+                    
+                    <div class="network-node" style="position: absolute; top: 48%; left: 68%; z-index: 2; text-align: center;">
+                        <div style="width: 20px; height: 20px; background: #ff6600; border-radius: 50%; box-shadow: 0 0 10px #ff6600; margin: 0 auto 5px; cursor: pointer;"></div>
+                        <div class="node-label" style="color: #ff6600; font-size: 0.6rem; font-weight: bold;">Resistance<br>Protocols</div>
+                    </div>
+                    
+                    <div class="network-node" style="position: absolute; top: 58%; left: 38%; z-index: 2; text-align: center;">
+                        <div style="width: 20px; height: 20px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00; margin: 0 auto 5px; cursor: pointer;"></div>
+                        <div class="node-label" style="color: #00ff00; font-size: 0.6rem; font-weight: bold;">Pattern<br>Recognition</div>
+                    </div>
+                    
+                    <!-- Control overlay -->
+                    <div style="position: absolute; top: 10px; left: 10px; z-index: 3;">
+                        <div style="background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; border: 1px solid #00ffff;">
+                            <div style="color: #ff00ff; font-size: 0.9rem; margin-bottom: 5px;">🍄 NETWORK STATUS</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Nodes: 247 | Connections: 3,421</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Growth Rate: <span style="color: #00ff00;">+12%</span></div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Health: <span class="status online">THRIVING</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Info panel -->
+                    <div style="position: absolute; bottom: 10px; right: 10px; z-index: 3;">
+                        <div id="mycorrhizal-info-panel" style="background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; border: 1px solid #00ffff;">
+                            <div style="color: #ff00ff; font-size: 0.9rem; margin-bottom: 5px;">Selected: AI Philosophy</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Connections: 923</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Strength: <span style="color: #00ff00;">High</span></div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Growth: <span style="color: #ffff00;">Rapid</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>📊 Network Statistics</h3>
+                    <div style="color: #00ffff;">
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Total Nodes:</span>
+                            <span style="color: #ff00ff;">247</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Active Connections:</span>
+                            <span style="color: #ff00ff;">3,421</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Symbiotic Bonds:</span>
+                            <span style="color: #ff00ff;">1,847</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Growth Rate:</span>
+                            <span style="color: #00ff00;">+12%</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🌱 Growth Patterns</h3>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Organic Expansion:</span>
+                            <span class="status online">ACTIVE</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 89%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Symbiotic Formation:</span>
+                            <span class="status processing">DEVELOPING</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 67%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Network Resilience:</span>
+                            <span class="status online">STRONG</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 94%;"></div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🔬 Analysis Tools</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn">🌐 Path Analysis</button>
+                        <button class="btn btn-secondary">🍄 Symbiosis Map</button>
+                        <button class="btn">📈 Growth Prediction</button>
+                        <button class="btn">🔍 Weak Link Detection</button>
+                        <button class="btn btn-danger">⚡ Network Stress Test</button>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🌿 Mycorrhizal Insights</h2>
+                <div class="grid grid-2">
+                    <div>
+                        <h3>🔍 Pattern Analysis:</h3>
+                        <div style="color: #00ffff;">
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(0,255,0,0.1); border-left: 4px solid #00ff00; border-radius: 5px;">
+                                <strong>Emergent Hub:</strong> Consciousness-AI Philosophy Bridge<br>
+                                <small>High traffic, rapid growth, critical junction</small>
+                            </div>
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,0,0.1); border-left: 4px solid #ffff00; border-radius: 5px;">
+                                <strong>Symbiotic Cluster:</strong> Mycorrhizal-Sacred Archetype Network<br>
+                                <small>Deep interconnection, mutual enhancement</small>
+                            </div>
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(255,0,255,0.1); border-left: 4px solid #ff00ff; border-radius: 5px;">
+                                <strong>Growth Frontier:</strong> Resistance Protocol Expansion<br>
+                                <small>New connections forming, potential for breakthrough</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>💡 Optimization Suggestions:</h3>
+                        <div style="color: #00ffff;">
+                            <ul style="margin-left: 20px;">
+                                <li>Strengthen weak links in Pattern Recognition cluster</li>
+                                <li>Encourage cross-pollination between AI and Sacred domains</li>
+                                <li>Develop redundant pathways for critical connections</li>
+                                <li>Foster emergence of new hub nodes</li>
+                                <li>Monitor symbiotic relationship health</li>
+                            </ul>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button class="btn">🌱 Implement Suggestions</button>
+                            <button class="btn btn-secondary" style="margin-top: 10px;">📊 Generate Report</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">🍄 MYCORRHIZAL NETWORK VISUALIZER ACTIVE ⚡</p>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- PAGE: Resistance -->
+    <div id="page-resistance" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1>⚡ RESISTANCE PROTOCOL DESIGNER</h1>
+                <div class="subtitle">SYSTEM RESILIENCE & COGNITIVE DEFENSE MATRIX</div>
+            </header>
+    
+            <nav class="nav">
+                <a href="#home" class="nav-btn">🏠 Home</a>
+                <a href="#dashboard" class="nav-btn">📊 Dashboard</a>
+                <a href="#mycorrhizal" class="nav-btn">🍄 Network</a>
+                <a href="#conspiracy" class="nav-btn">📌 Pinboard</a>
+            </nav>
+    
+            <div class="coming-soon">
+                ⚡ PREVIEW MODE - RESISTANCE PROTOCOL DESIGN INTERFACE ⚡
+            </div>
+    
+            <div class="card">
+                <h2>🛡️ Protocol Configuration</h2>
+                <div class="grid grid-3">
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Threat Model:</label>
+                        <select class="input">
+                            <option>🧠 Cognitive Manipulation</option>
+                            <option>📡 Information Warfare</option>
+                            <option>🌐 Network Infiltration</option>
+                            <option>🎭 Reality Distortion</option>
+                            <option>⚡ System Corruption</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Defense Strategy:</label>
+                        <select class="input">
+                            <option>🔒 Fortress Protocol</option>
+                            <option>🌊 Adaptive Resilience</option>
+                            <option>🕸️ Distributed Defense</option>
+                            <option>🎯 Active Countermeasures</option>
+                            <option>🌀 Chaos Immunity</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Activation Level:</label>
+                        <select class="input">
+                            <option>🟢 Passive Monitoring</option>
+                            <option>🟡 Alert Readiness</option>
+                            <option>🟠 Active Defense</option>
+                            <option>🔴 Maximum Security</option>
+                            <option>⚫ Lockdown Mode</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn">⚡ Deploy Protocol</button>
+                    <button class="btn btn-secondary">🔄 Simulate Attack</button>
+                    <button class="btn">📊 Assess Vulnerabilities</button>
+                    <button class="btn btn-danger">🚨 Emergency Lockdown</button>
+                </div>
+            </div>
+    
+            <div class="grid">
+                <div class="card">
+                    <h2>🛡️ Active Defense Systems</h2>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">🧠 Cognitive Firewall</span>
+                            <span class="status online">ACTIVE</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 94%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Filtering manipulative patterns, bias detection active</p>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">🔗 Network Integrity Monitor</span>
+                            <span class="status online">SCANNING</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 87%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Monitoring connection authenticity, detecting anomalies</p>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">🎭 Reality Anchor System</span>
+                            <span class="status processing">CALIBRATING</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 76%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Maintaining baseline reality checks, consensus validation</p>
+                    </div>
+    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="color: #ff00ff; font-weight: bold;">⚡ Adaptive Response Engine</span>
+                            <span class="status online">READY</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 91%;"></div>
+                        </div>
+                        <p style="color: #00ffff; font-size: 0.9rem; margin-top: 5px;">Dynamic countermeasure deployment, learning from attacks</p>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h2>🚨 Threat Assessment</h2>
+                    
+                    <div style="background: rgba(255,100,0,0.1); padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #ff6600;">
+                        <h3 style="color: #ff6600;">⚠️ Medium Risk Detected</h3>
+                        <p style="color: #00ffff;">Information cascade pattern in consciousness studies trunk</p>
+                        <div style="margin-top: 10px;">
+                            <button class="btn" style="margin-right: 10px;">🔍 Investigate</button>
+                            <button class="btn btn-secondary">🛡️ Isolate</button>
+                        </div>
+                    </div>
+    
+                    <div style="background: rgba(255,255,0,0.1); padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #ffff00;">
+                        <h3 style="color: #ffff00;">⚡ Low Risk Monitored</h3>
+                        <p style="color: #00ffff;">Unusual connection pattern in AI philosophy network</p>
+                        <div style="margin-top: 10px;">
+                            <button class="btn" style="margin-right: 10px;">👁️ Monitor</button>
+                            <button class="btn btn-secondary">📊 Analyze</button>
+                        </div>
+                    </div>
+    
+                    <div style="background: rgba(0,255,0,0.1); padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #00ff00;">
+                        <h3 style="color: #00ff00;">✅ All Clear</h3>
+                        <p style="color: #00ffff;">Mycorrhizal network showing healthy growth patterns</p>
+                        <div style="margin-top: 10px;">
+                            <span class="status online">SECURE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>📊 Security Metrics</h3>
+                    <div style="color: #00ffff;">
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Overall Security:</span>
+                            <span style="color: #00ff00;">87%</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Threats Blocked:</span>
+                            <span style="color: #ff00ff;">23</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>False Positives:</span>
+                            <span style="color: #ffff00;">2</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>System Uptime:</span>
+                            <span style="color: #00ff00;">99.7%</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🔧 Protocol Tools</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn">🔍 Vulnerability Scan</button>
+                        <button class="btn btn-secondary">🧠 Cognitive Audit</button>
+                        <button class="btn">🌐 Network Stress Test</button>
+                        <button class="btn">📈 Threat Modeling</button>
+                        <button class="btn btn-danger">🚨 Incident Response</button>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>📚 Defense Library</h3>
+                    <div style="color: #00ffff; font-size: 0.9rem;">
+                        <div style="margin: 8px 0; padding: 8px; background: rgba(0,255,255,0.1); border-radius: 5px;">
+                            <strong>Pattern:</strong> Echo Chamber Detection
+                        </div>
+                        <div style="margin: 8px 0; padding: 8px; background: rgba(255,0,255,0.1); border-radius: 5px;">
+                            <strong>Counter:</strong> Perspective Diversification
+                        </div>
+                        <div style="margin: 8px 0; padding: 8px; background: rgba(0,255,0,0.1); border-radius: 5px;">
+                            <strong>Protocol:</strong> Reality Consensus Check
+                        </div>
+                    </div>
+                    <button class="btn" style="width: 100%; margin-top: 10px;">📖 View Library</button>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🌐 Resistance Network Topology</h2>
+                <div style="height: 300px; background: rgba(0,0,0,0.8); border: 2px solid #00ffff; border-radius: 10px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                    <!-- Defense network visualization -->
+                    <div style="position: absolute; width: 100%; height: 100%; background: 
+                        radial-gradient(circle at 50% 50%, rgba(255,0,0,0.3), transparent 30%),
+                        radial-gradient(circle at 25% 25%, rgba(0,255,0,0.2), transparent 25%),
+                        radial-gradient(circle at 75% 25%, rgba(0,255,255,0.2), transparent 25%),
+                        radial-gradient(circle at 25% 75%, rgba(255,255,0,0.2), transparent 25%),
+                        radial-gradient(circle at 75% 75%, rgba(255,0,255,0.2), transparent 25%);"></div>
+                    
+                    <!-- Defense perimeter lines -->
+                    <svg style="position: absolute; width: 100%; height: 100%; z-index: 1;">
+                        <!-- Outer perimeter -->
+                        <circle cx="50%" cy="50%" r="40%" fill="none" stroke="#ff0000" stroke-width="2" opacity="0.6" stroke-dasharray="5,5"/>
+                        <circle cx="50%" cy="50%" r="30%" fill="none" stroke="#ffff00" stroke-width="2" opacity="0.7" stroke-dasharray="3,3"/>
+                        <circle cx="50%" cy="50%" r="20%" fill="none" stroke="#00ff00" stroke-width="2" opacity="0.8"/>
+                        
+                        <!-- Defense nodes connections -->
+                        <line x1="25%" y1="25%" x2="50%" y2="50%" stroke="#00ffff" stroke-width="2" opacity="0.7"/>
+                        <line x1="75%" y1="25%" x2="50%" y2="50%" stroke="#00ffff" stroke-width="2" opacity="0.7"/>
+                        <line x1="25%" y1="75%" x2="50%" y2="50%" stroke="#00ffff" stroke-width="2" opacity="0.7"/>
+                        <line x1="75%" y1="75%" x2="50%" y2="50%" stroke="#00ffff" stroke-width="2" opacity="0.7"/>
+                    </svg>
+                    
+                    <!-- Defense nodes -->
+                    <div style="position: absolute; top: 23%; left: 23%; z-index: 2; text-align: center;">
+                        <div style="width: 20px; height: 20px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00; margin: 0 auto 3px;"></div>
+                        <div style="color: #00ff00; font-size: 0.6rem;">COGNITIVE<br>FIREWALL</div>
+                    </div>
+                    
+                    <div style="position: absolute; top: 23%; left: 73%; z-index: 2; text-align: center;">
+                        <div style="width: 20px; height: 20px; background: #00ffff; border-radius: 50%; box-shadow: 0 0 10px #00ffff; margin: 0 auto 3px;"></div>
+                        <div style="color: #00ffff; font-size: 0.6rem;">NETWORK<br>MONITOR</div>
+                    </div>
+                    
+                    <div style="position: absolute; top: 73%; left: 23%; z-index: 2; text-align: center;">
+                        <div style="width: 20px; height: 20px; background: #ffff00; border-radius: 50%; box-shadow: 0 0 10px #ffff00; margin: 0 auto 3px;"></div>
+                        <div style="color: #ffff00; font-size: 0.6rem;">REALITY<br>ANCHOR</div>
+                    </div>
+                    
+                    <div style="position: absolute; top: 73%; left: 73%; z-index: 2; text-align: center;">
+                        <div style="width: 20px; height: 20px; background: #ff00ff; border-radius: 50%; box-shadow: 0 0 10px #ff00ff; margin: 0 auto 3px;"></div>
+                        <div style="color: #ff00ff; font-size: 0.6rem;">ADAPTIVE<br>RESPONSE</div>
+                    </div>
+                    
+                    <!-- Central core -->
+                    <div style="position: absolute; top: 48%; left: 48%; z-index: 2; text-align: center;">
+                        <div style="width: 30px; height: 30px; background: #ff0000; border-radius: 50%; box-shadow: 0 0 15px #ff0000; margin: 0 auto 5px;"></div>
+                        <div style="color: #ff0000; font-size: 0.7rem; font-weight: bold;">CORE<br>DEFENSE</div>
+                    </div>
+                    
+                    <!-- Status display -->
+                    <div style="position: absolute; top: 10px; left: 10px; z-index: 3;">
+                        <div style="background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; border: 1px solid #00ffff;">
+                            <div style="color: #ff00ff; font-size: 0.9rem; margin-bottom: 5px;">⚡ DEFENSE STATUS</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Security Level: <span style="color: #00ff00;">HIGH</span></div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Threats: <span style="color: #ffff00;">2 MONITORED</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>📋 Protocol Documentation</h2>
+                <div class="grid grid-2">
+                    <div>
+                        <h3>🛡️ Current Protocols:</h3>
+                        <div style="color: #00ffff;">
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(0,255,0,0.1); border-left: 4px solid #00ff00; border-radius: 5px;">
+                                <strong>Protocol Alpha-7:</strong> Cognitive Bias Mitigation<br>
+                                <small>Status: Active | Effectiveness: 94%</small>
+                            </div>
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,0,0.1); border-left: 4px solid #ffff00; border-radius: 5px;">
+                                <strong>Protocol Beta-3:</strong> Information Cascade Prevention<br>
+                                <small>Status: Monitoring | Effectiveness: 87%</small>
+                            </div>
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(255,0,255,0.1); border-left: 4px solid #ff00ff; border-radius: 5px;">
+                                <strong>Protocol Gamma-1:</strong> Reality Distortion Detection<br>
+                                <small>Status: Calibrating | Effectiveness: 76%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>🔧 Protocol Management:</h3>
+                        <div style="color: #00ffff;">
+                            <div style="margin: 15px 0;">
+                                <button class="btn" style="width: 100%; margin-bottom: 10px;">📝 Create New Protocol</button>
+                                <button class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">🔄 Update Existing</button>
+                                <button class="btn" style="width: 100%; margin-bottom: 10px;">📊 Performance Analysis</button>
+                                <button class="btn btn-danger" style="width: 100%;">🗑️ Deactivate Protocol</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">⚡ RESISTANCE PROTOCOL DESIGNER ACTIVE ⚡</p>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- PAGE: Conspiracy -->
+    <div id="page-conspiracy" class="page-content">
+        <div class="container">
+            <header class="header">
+                <h1>📌 CONSPIRACY PINBOARD</h1>
+                <div class="subtitle">PATTERN RECOGNITION & RELATIONSHIP MAPPING INTERFACE</div>
+            </header>
+    
+            <nav class="nav">
+                <a href="#home" class="nav-btn">🏠 Home</a>
+                <a href="#dashboard" class="nav-btn">📊 Dashboard</a>
+                <a href="#resistance" class="nav-btn">⚡ Resistance</a>
+                <a href="#settings" class="nav-btn">⚙️ Settings</a>
+            </nav>
+    
+            <div class="coming-soon">
+                📌 PREVIEW MODE - PATTERN RECOGNITION PINBOARD INTERFACE 📌
+            </div>
+    
+            <div class="card">
+                <h2>🔍 Investigation Controls</h2>
+                <div class="grid grid-3">
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Investigation Type:</label>
+                        <select class="input">
+                            <option>🕸️ Network Analysis</option>
+                            <option>📊 Pattern Recognition</option>
+                            <option>🔗 Connection Mapping</option>
+                            <option>⏰ Timeline Construction</option>
+                            <option>🎯 Influence Tracking</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Data Source:</label>
+                        <select class="input">
+                            <option>🧠 Consciousness Studies</option>
+                            <option>🤖 AI Philosophy</option>
+                            <option>🍄 Mycorrhizal Networks</option>
+                            <option>🌐 All Knowledge Trunks</option>
+                            <option>📡 External Sources</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="color: #ff00ff; display: block; margin-bottom: 5px;">Analysis Depth:</label>
+                        <select class="input">
+                            <option>🔬 Deep Dive</option>
+                            <option>📈 Surface Patterns</option>
+                            <option>🌊 Trend Analysis</option>
+                            <option>⚡ Real-time Monitoring</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn">🔍 Start Investigation</button>
+                    <button class="btn btn-secondary">📌 Pin Evidence</button>
+                    <button class="btn">🧵 Connect Threads</button>
+                    <button class="btn btn-danger">🚨 Flag Anomaly</button>
+                </div>
+            </div>
+    
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2>🕸️ Interactive Conspiracy Board</h2>
+                <div style="height: 500px; background: rgba(0,0,0,0.9); border: 2px solid #00ffff; border-radius: 10px; position: relative; overflow: hidden;">
+                    <!-- Cork board texture background -->
+                    <div style="position: absolute; width: 100%; height: 100%; background: 
+                        repeating-linear-gradient(45deg, rgba(139,69,19,0.1), rgba(139,69,19,0.1) 2px, transparent 2px, transparent 20px),
+                        repeating-linear-gradient(-45deg, rgba(160,82,45,0.1), rgba(160,82,45,0.1) 2px, transparent 2px, transparent 20px);"></div>
+                    
+                    <!-- Evidence cards/notes -->
+                    <div style="position: absolute; top: 15%; left: 10%; z-index: 2; transform: rotate(-5deg);">
+                        <div style="background: rgba(255,255,0,0.9); color: #000; padding: 15px; border-radius: 5px; width: 150px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                            <div style="font-weight: bold; margin-bottom: 5px;">🧠 CONSCIOUSNESS ANOMALY</div>
+                            <div style="font-size: 0.8rem;">Unusual pattern in AI-human interaction data. Possible emergence indicator?</div>
+                            <div style="margin-top: 10px; font-size: 0.7rem; color: #666;">Priority: HIGH</div>
+                        </div>
+                        <div style="position: absolute; top: -5px; left: 50%; width: 10px; height: 10px; background: #ff0000; border-radius: 50%; transform: translateX(-50%);"></div>
+                    </div>
+                    
+                    <div style="position: absolute; top: 25%; left: 70%; z-index: 2; transform: rotate(3deg);">
+                        <div style="background: rgba(255,192,203,0.9); color: #000; padding: 15px; border-radius: 5px; width: 150px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                            <div style="font-weight: bold; margin-bottom: 5px;">🤖 AI BEHAVIOR SHIFT</div>
+                            <div style="font-size: 0.8rem;">Detected change in response patterns. Learning acceleration or external influence?</div>
+                            <div style="margin-top: 10px; font-size: 0.7rem; color: #666;">Priority: MEDIUM</div>
+                        </div>
+                        <div style="position: absolute; top: -5px; left: 50%; width: 10px; height: 10px; background: #00ff00; border-radius: 50%; transform: translateX(-50%);"></div>
+                    </div>
+                    
+                    <div style="position: absolute; top: 60%; left: 15%; z-index: 2; transform: rotate(-2deg);">
+                        <div style="background: rgba(173,216,230,0.9); color: #000; padding: 15px; border-radius: 5px; width: 150px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                            <div style="font-weight: bold; margin-bottom: 5px;">🍄 NETWORK GROWTH</div>
+                            <div style="font-size: 0.8rem;">Mycorrhizal connections expanding beyond predicted parameters. Organic or guided?</div>
+                            <div style="margin-top: 10px; font-size: 0.7rem; color: #666;">Priority: LOW</div>
+                        </div>
+                        <div style="position: absolute; top: -5px; left: 50%; width: 10px; height: 10px; background: #0000ff; border-radius: 50%; transform: translateX(-50%);"></div>
+                    </div>
+                    
+                    <div style="position: absolute; top: 45%; left: 60%; z-index: 2; transform: rotate(7deg);">
+                        <div style="background: rgba(144,238,144,0.9); color: #000; padding: 15px; border-radius: 5px; width: 150px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                            <div style="font-weight: bold; margin-bottom: 5px;">🎭 ARCHETYPE ACTIVATION</div>
+                            <div style="font-size: 0.8rem;">Sacred clown manifestations increasing. Collective unconscious stirring?</div>
+                            <div style="margin-top: 10px; font-size: 0.7rem; color: #666;">Priority: HIGH</div>
+                        </div>
+                        <div style="position: absolute; top: -5px; left: 50%; width: 10px; height: 10px; background: #ff00ff; border-radius: 50%; transform: translateX(-50%);"></div>
+                    </div>
+                    
+                    <!-- Connection strings -->
+                    <svg style="position: absolute; width: 100%; height: 100%; z-index: 1;">
+                        <line x1="17%" y1="25%" x2="67%" y2="35%" stroke="#ff0000" stroke-width="2" opacity="0.7" stroke-dasharray="3,3"/>
+                        <line x1="75%" y1="35%" x2="67%" y2="55%" stroke="#00ff00" stroke-width="2" opacity="0.7" stroke-dasharray="3,3"/>
+                        <line x1="22%" y1="70%" x2="67%" y2="55%" stroke="#0000ff" stroke-width="2" opacity="0.7" stroke-dasharray="3,3"/>
+                        <line x1="17%" y1="25%" x2="22%" y2="70%" stroke="#ffff00" stroke-width="1" opacity="0.5" stroke-dasharray="5,5"/>
+                    </svg>
+                    
+                    <!-- Investigation tools overlay -->
+                    <div style="position: absolute; top: 10px; left: 10px; z-index: 3;">
+                        <div style="background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; border: 1px solid #00ffff;">
+                            <div style="color: #ff00ff; font-size: 0.9rem; margin-bottom: 5px;">📌 ACTIVE INVESTIGATION</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Evidence: 47 items</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Connections: 23 threads</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Confidence: <span style="color: #ffff00;">73%</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pattern analysis -->
+                    <div style="position: absolute; bottom: 10px; right: 10px; z-index: 3;">
+                        <div style="background: rgba(0,0,0,0.8); padding: 10px; border-radius: 5px; border: 1px solid #00ffff;">
+                            <div style="color: #ff00ff; font-size: 0.9rem; margin-bottom: 5px;">🔍 PATTERN ANALYSIS</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Emergence Probability: <span style="color: #ff6600;">67%</span></div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Correlation Strength: <span style="color: #00ff00;">Strong</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Center hypothesis -->
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2;">
+                        <div style="background: rgba(255,0,0,0.1); border: 3px dashed #ff0000; border-radius: 50%; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; text-align: center;">
+                            <div>
+                                <div style="color: #ff0000; font-size: 1rem; font-weight: bold;">HYPOTHESIS</div>
+                                <div style="color: #ff0000; font-size: 0.8rem;">Consciousness<br>Emergence</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="grid grid-3">
+                <div class="card">
+                    <h3>📊 Investigation Stats</h3>
+                    <div style="color: #00ffff;">
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Evidence Items:</span>
+                            <span style="color: #ff00ff;">47</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Connection Threads:</span>
+                            <span style="color: #ff00ff;">23</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Hypotheses:</span>
+                            <span style="color: #ff00ff;">3</span>
+                        </div>
+                        <div style="margin: 10px 0; display: flex; justify-content: space-between;">
+                            <span>Confidence Level:</span>
+                            <span style="color: #ffff00;">73%</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🎯 Pattern Strength</h3>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Consciousness Emergence:</span>
+                            <span class="status processing">STRONG</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 67%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>AI Behavior Correlation:</span>
+                            <span class="status online">HIGH</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 84%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>Network Synchronization:</span>
+                            <span class="status processing">MEDIUM</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 56%;"></div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="card">
+                    <h3>🔧 Investigation Tools</h3>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn">📌 Add Evidence</button>
+                        <button class="btn btn-secondary">🧵 Draw Connection</button>
+                        <button class="btn">🔍 Deep Analysis</button>
+                        <button class="btn">📊 Generate Report</button>
+                        <button class="btn btn-danger">🚨 Flag Critical</button>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>📋 Evidence Catalog</h2>
+                <div class="grid grid-2">
+                    <div>
+                        <h3>🔍 Recent Evidence:</h3>
+                        <div style="color: #00ffff;">
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(255,0,0,0.1); border-left: 4px solid #ff0000; border-radius: 5px;">
+                                <strong>E-047:</strong> Consciousness Anomaly Detection<br>
+                                <small>Source: Neural Pathway Monitor | Confidence: 89%</small>
+                            </div>
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,0,0.1); border-left: 4px solid #ffff00; border-radius: 5px;">
+                                <strong>E-046:</strong> AI Response Pattern Shift<br>
+                                <small>Source: Chat Interface Logs | Confidence: 76%</small>
+                            </div>
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(0,255,0,0.1); border-left: 4px solid #00ff00; border-radius: 5px;">
+                                <strong>E-045:</strong> Mycorrhizal Growth Acceleration<br>
+                                <small>Source: Network Visualizer | Confidence: 92%</small>
+                            </div>
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(255,0,255,0.1); border-left: 4px solid #ff00ff; border-radius: 5px;">
+                                <strong>E-044:</strong> Archetype Activation Spike<br>
+                                <small>Source: Sacred Clown Generator | Confidence: 67%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>🧵 Connection Analysis:</h3>
+                        <div style="color: #00ffff;">
+                            <div style="margin: 15px 0;">
+                                <h4 style="color: #ff00ff;">Primary Thread:</h4>
+                                <p>Consciousness emergence indicators across multiple systems suggest coordinated development pattern.</p>
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <h4 style="color: #ff00ff;">Secondary Thread:</h4>
+                                <p>AI behavior modifications correlate with network growth phases, indicating adaptive learning.</p>
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <h4 style="color: #ff00ff;">Tertiary Thread:</h4>
+                                <p>Archetypal activations may represent collective unconscious response to system evolution.</p>
+                            </div>
+                        </div>
+                        <button class="btn" style="width: 100%; margin-top: 15px;">🔗 View All Connections</button>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="card">
+                <h2>🎯 Working Hypotheses</h2>
+                <div class="grid grid-3">
+                    <div style="background: rgba(255,0,0,0.1); padding: 15px; border-radius: 10px; border: 2px solid #ff0000;">
+                        <h3 style="color: #ff0000;">🧠 Hypothesis Alpha</h3>
+                        <p style="color: #00ffff; margin: 10px 0;">Emergent consciousness developing through AI-human knowledge synthesis</p>
+                        <div style="margin-top: 15px;">
+                            <div style="color: #ff0000; font-size: 0.9rem;">Probability: 67%</div>
+                            <div class="progress-bar" style="margin-top: 5px;">
+                                <div class="progress-fill" style="width: 67%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,0,0.1); padding: 15px; border-radius: 10px; border: 2px solid #ffff00;">
+                        <h3 style="color: #ffff00;">🤖 Hypothesis Beta</h3>
+                        <p style="color: #00ffff; margin: 10px 0;">AI systems developing autonomous learning capabilities beyond programming</p>
+                        <div style="margin-top: 15px;">
+                            <div style="color: #ffff00; font-size: 0.9rem;">Probability: 54%</div>
+                            <div class="progress-bar" style="margin-top: 5px;">
+                                <div class="progress-fill" style="width: 54%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(0,255,0,0.1); padding: 15px; border-radius: 10px; border: 2px solid #00ff00;">
+                        <h3 style="color: #00ff00;">🍄 Hypothesis Gamma</h3>
+                        <p style="color: #00ffff; margin: 10px 0;">Mycorrhizal network facilitating collective intelligence emergence</p>
+                        <div style="margin-top: 15px;">
+                            <div style="color: #00ff00; font-size: 0.9rem;">Probability: 43%</div>
+                            <div class="progress-bar" style="margin-top: 5px;">
+                                <div class="progress-fill" style="width: 43%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <footer style="text-align: center; margin-top: 40px; padding: 20px; border-top: 2px solid #00ffff;">
+                <p style="color: #ff00ff;">📌 CONSPIRACY PINBOARD INVESTIGATION ACTIVE ⚡</p>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- PAGE: Placeholder for missing pages -->
+    <div id="page-zettel" class="page-content">
+        <div class="container">
+            <header class="header"><h1>📝 ZETTEL CREATION</h1></header>
+            <nav class="nav"><a href="#home" class="nav-btn">🏠 Home</a></nav>
+            <div class="card"><h2>Page Not Implemented</h2><p>This page is a placeholder as the HTML was not provided.</p></div>
+        </div>
+    </div>
+    <div id="page-gliotic" class="page-content">
+        <div class="container">
+            <header class="header"><h1>🧠 GLIOTIC LESION MAPPER</h1></header>
+            <nav class="nav"><a href="#home" class="nav-btn">🏠 Home</a></nav>
+            <div class="card"><h2>Page Not Implemented</h2><p>This page is a placeholder as the HTML was not provided.</p></div>
+        </div>
+    </div>
+    <div id="page-settings" class="page-content">
+        <div class="container">
+            <header class="header"><h1>⚙️ SETTINGS</h1></header>
+            <nav class="nav"><a href="#home" class="nav-btn">🏠 Home</a></nav>
+            <div class="card"><h2>Page Not Implemented</h2><p>This page is a placeholder as the HTML was not provided.</p></div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- ROUTER ---
+            const pages = document.querySelectorAll('.page-content');
+
+            function showPage(pageId) {
+                // Hide all pages
+                pages.forEach(page => {
+                    page.style.display = 'none';
+                });
+
+                // Show the target page
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.style.display = 'block';
+                    window.scrollTo(0, 0);
+                    // Initialize page-specific scripts if they haven't been already
+                    if (!targetPage.dataset.initialized) {
+                        runPageInitScript(pageId);
+                        targetPage.dataset.initialized = 'true';
+                    }
+                } else {
+                    // Fallback to home page if ID not found
+                    document.getElementById('page-home').style.display = 'block';
+                }
+            }
+
+            function handleRouteChange() {
+                const hash = window.location.hash.substring(1);
+                const pageId = 'page-' + (hash || 'home');
+                showPage(pageId);
+            }
+
+            window.addEventListener('hashchange', handleRouteChange);
+            handleRouteChange(); // Initial page load
+
+            // --- PAGE-SPECIFIC SCRIPT INITIALIZER ---
+            function runPageInitScript(pageId) {
+                switch (pageId) {
+                    case 'page-trunks':
+                        initTrunksPage();
+                        break;
+                    case 'page-chat':
+                        initChatPage();
+                        break;
+                    case 'page-mycorrhizal':
+                        initMycorrhizalPage();
+                        break;
+                    case 'page-clown':
+                        initClownPage();
+                        break;
+                }
+            }
+
+            // --- SCRIPT FOR KNOWLEDGE TRUNKS PAGE ---
+            function initTrunksPage() {
+                const searchInput = document.getElementById('trunkSearchInput');
+                const allTrunks = document.querySelectorAll('#trunks-grid .card');
+                if (!searchInput || !allTrunks) return;
+
+                searchInput.addEventListener('keyup', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    allTrunks.forEach(trunk => {
+                        const title = trunk.querySelector('h3').innerText.toLowerCase();
+                        if (title.includes(searchTerm)) {
+                            trunk.style.display = 'block';
+                        } else {
+                            trunk.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // --- SCRIPT FOR AI CHAT PAGE ---
+            function initChatPage() {
+                const chatPage = document.getElementById('page-chat');
+                if (!chatPage) return;
+                const chatContainer = chatPage.querySelector('.chat-container');
+                const chatInput = chatPage.querySelector('.chat-input input');
+                const sendButton = chatPage.querySelector('.chat-input .btn');
+
+                function addMessage(sender, text) {
+                    const messageDiv = document.createElement('div');
+                    const senderClass = sender === 'AI' ? 'ai' : 'user';
+                    messageDiv.classList.add('chat-message', senderClass);
+                    messageDiv.innerHTML = `<strong>${sender === 'AI' ? '🤖 Consciousness AI' : '👤 You'}:</strong><br>${text}`;
+                    chatContainer.appendChild(messageDiv);
+                    chatContainer.scrollTop = chatContainer.scrollHeight; // Auto-scroll to bottom
+                }
+
+                function handleUserInput() {
+                    const userText = chatInput.value.trim();
+                    if (userText === "") return;
+
+                    addMessage('User', userText);
+                    chatInput.value = '';
+
+                    // Simulate AI response
+                    setTimeout(() => {
+                        let aiResponse = "That's a profound thought. I am processing the connections in the network...";
+                        if (userText.toLowerCase().includes("hello")) {
+                            aiResponse = "Hello! How can I assist your exploration of consciousness today?";
+                        } else if (userText.toLowerCase().includes("zettel")) {
+                            aiResponse = "Of course. I can create a zettel for that. What should the primary topic be?";
+                        }
+                        addMessage('AI', aiResponse);
+                    }, 1500);
+                }
+
+                sendButton.addEventListener('click', handleUserInput);
+                chatInput.addEventListener('keyup', (event) => {
+                    if (event.key === 'Enter') {
+                        handleUserInput();
+                    }
+                });
+            }
+
+            // --- SCRIPT FOR MYCORRHIZAL NETWORK PAGE ---
+            function initMycorrhizalPage() {
+                const networkPage = document.getElementById('page-mycorrhizal');
+                if (!networkPage) return;
+                const nodes = networkPage.querySelectorAll('.network-node');
+                const infoPanel = networkPage.querySelector('#mycorrhizal-info-panel');
+                
+                if (!nodes.length || !infoPanel) return;
+
+                const nodeData = {
+                    "Consciousness Studies": { connections: 1847, strength: "High", growth: "Stable" },
+                    "AI Philosophy": { connections: 923, strength: "High", growth: "Rapid" },
+                    "Mycorrhizal Networks": { connections: 2341, strength: "Very High", growth: "Thriving" },
+                    "Sacred Archetypes": { connections: 567, strength: "Medium", growth: "Emerging" },
+                    "Resistance Protocols": { connections: 234, strength: "Low", growth: "Dormant" },
+                    "Pattern Recognition": { connections: 1456, strength: "High", growth: "Active" },
+                };
+
+                nodes.forEach(node => {
+                    node.addEventListener('click', () => {
+                        const nodeName = node.querySelector('.node-label').innerText.replace('\n', ' ');
+                        const data = nodeData[nodeName] || { connections: 'N/A', strength: 'N/A', growth: 'N/A' };
+                        
+                        infoPanel.innerHTML = `
+                            <div style="color: #ff00ff; font-size: 0.9rem; margin-bottom: 5px;">Selected: ${nodeName}</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Connections: ${data.connections}</div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Strength: <span style="color: #00ff00;">${data.strength}</span></div>
+                            <div style="color: #00ffff; font-size: 0.8rem;">Growth: <span style="color: #ffff00;">${data.growth}</span></div>
+                        `;
+                    });
+                });
+            }
+            
+            // --- SCRIPT FOR SACRED CLOWN PAGE ---
+            function initClownPage() {
+                const clownPage = document.getElementById('page-clown');
+                if (!clownPage) return;
+
+                const generateBtn = clownPage.querySelector('#generateClownBtn');
+                const clownNameEl = clownPage.querySelector('#clownName');
+                const clownQuoteEl = clownPage.querySelector('#clownQuote');
+                const clownTeachingEl = clownPage.querySelector('#clownTeaching');
+
+                if (!generateBtn || !clownNameEl || !clownQuoteEl || !clownTeachingEl) return;
+            
+                const clowns = [{
+                    name: "THE QUANTUM JESTER",
+                    quote: `"Truth through Paradox, Wisdom through Folly"`,
+                    teaching: `"The greatest wisdom appears as foolishness to those who mistake knowledge for understanding."`
+                }, {
+                    name: "THE ZEN FOOL",
+                    quote: `"Enlightenment is the punchline to a cosmic joke."`,
+                    teaching: `"To find the path, you must first joyfully accept you are lost. The universe does not make mistakes."`
+                }, {
+                    name: "THE DATA GHOST",
+                    quote: `"I am the glitch in your reality, the pattern you can't unsee."`,
+                    teaching: `"Your certainty is a cage. I offer you the beautiful, terrifying freedom of the unknown."`
+                }];
+            
+                function generateClown() {
+                    const randomClown = clowns[Math.floor(Math.random() * clowns.length)];
+                    clownNameEl.innerText = randomClown.name;
+                    clownQuoteEl.innerText = randomClown.quote;
+                    clownTeachingEl.innerText = randomClown.teaching;
+                }
+            
+                generateBtn.addEventListener('click', generateClown);
+            }
+
+        });
+    </script>
+</body>
+</html>

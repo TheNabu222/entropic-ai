@@ -1,7 +1,17 @@
 # Quick Reference: Unpublished Directory Analysis
 
 **Generated:** 2025-11-23  
-**Status:** ✅ Complete comprehensive analysis
+**Last Updated:** 2025-11-30  
+**Status:** ✅ Comprehensive analysis complete, redundant files marked
+
+---
+
+## 🆕 Recent Changes (2025-11-30)
+
+- **218 redundant files** have been renamed with `_REDUNDANT_` prefix
+- These files are exact content duplicates and can be safely deleted
+- Run `find . -name "_REDUNDANT_*" | wc -l` to count them
+- Run `find . -name "_REDUNDANT_*" -delete` to remove them (after backup)
 
 ---
 
@@ -29,16 +39,29 @@ How to run the analysis scripts and interpret results.
 
 | Metric | Value |
 |--------|-------|
-| **Total Files** | 861 |
-| **Total Size** | 12.85 MB |
-| **Duplicates** | 88 files (~1.4 MB) |
+| **Total Files** | 1352 |
+| **Total Size** | 37.39 MB |
+| **Duplicate Groups** | 152 groups |
+| **Redundant Files Marked** | 218 files |
 | **Ready to Publish** | 26 files |
 | **Needs Review** | 31+ files |
-| **Version Groups** | 9 groups |
+| **Version Groups** | 12 groups |
 
 ---
 
 ## ⚡ Quick Actions
+
+### List Redundant Files
+```bash
+# Count redundant files
+find . -name "_REDUNDANT_*" | wc -l
+
+# List all redundant files
+find . -name "_REDUNDANT_*"
+
+# Delete redundant files (BE CAREFUL - back up first!)
+find . -name "_REDUNDANT_*" -delete
+```
 
 ### Find Duplicates
 ```bash
@@ -62,7 +85,7 @@ python3 content_analyzer.py
 
 ## 🎯 Top Priorities
 
-1. **Remove duplicates** - 88 files, saves 1.4 MB
+1. **Delete redundant files** - 218 files marked with `_REDUNDANT_` prefix
 2. **Consolidate ACKC versions** - 10 versions → 1-2
 3. **Publish ready files** - 26 files identified
 4. **Archive old versions** - Clean up index, ai_studio_code, etc.
@@ -92,4 +115,5 @@ python3 content_analyzer.py
 
 ---
 
+**Last Updated:** 2025-11-30  
 **Next Review:** 2026-02-23 (Quarterly)
