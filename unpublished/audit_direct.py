@@ -9,7 +9,7 @@ ROOT_DIR = "unpublished"
 EXCLUDE_DIRS = {'.git', 'node_modules', '__pycache__', '_duplicates', 'ttrpg'}
 EXCLUDE_EXTS = {'.py', '.pyc', '.json', '.map', '.png', '.jpg', '.jpeg', '.gif', '.mp3', '.wav', '.ogg'}
 DUPE_DIR = os.path.join(ROOT_DIR, "_duplicates")
-BATCH_SIZE = 25
+BATCH_SIZE = 10
 
 class ContentExtractor(HTMLParser):
     def __init__(self):
