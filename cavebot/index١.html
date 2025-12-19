@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoes of Anzu: Awakening</title>
+    <style>
+        /* --- CSS STYLING --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* 1. THE GAME CONTAINER */
+        #game-container {
+            position: relative;
+            width: min(100vw, 177.78vh);
+            height: min(56.25vw, 100vh);
+            background-color: #111;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        /* 2. LAYERS */
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #bg-layer { z-index: 1; background: #222; }
+        
+        #bg-image {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            image-rendering: pixelated;
+            transition: opacity 0.5s;
+            opacity: 0; /* Starts hidden */
+        }
+
+        #sprite-layer {
+            z-index: 5;
+            pointer-events: auto;
+        }
+
+        .character-sprite {
+            position: absolute;
+            image-rendering: pixelated;
+            cursor: pointer;
+            transition: filter 0.2s, transform 0.2s;
+        }
+        .character-sprite:hover {
+            filter: drop-shadow(0 0 8px #ffcc00);
+            transform: scale(1.05);
+        }
+
+        /* UI Frame Layer */
+        #ui-layer { z-index: 10; }
+
+        #ui-frame-img {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            image-rendering: pixelated;
+        }
+
+        /* 3. BUTTONS (Visible for Debugging, remove border later) */
+        .hud-btn {
+            position: absolute;
+            width: 2.8%;
+            height: 5.2%;
+            border: 1px solid rgba(0, 255, 255, 0.3); /* Debug Border */
+            background: rgba(0, 255, 255, 0.05);
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 100;
+            border-radius: 4px;
+        }
+        .hud-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        #btn-inventory { right: 25.4%; top: 40.2%; }
+        #btn-skills    { right: 25.4%; top: 48.2%; }
+        #btn-map       { right: 25.4%; top: 56.2%; }
+
+        /* Progress Bar */
+        #progress-container {
+            position: absolute;
+            right: 22.8%;
+            top: 34%;
+            width: 1.8%;
+            height: 30%;
+            border-radius: 50px;
+            overflow: hidden;
+            z-index: 4;
+            background: #220022;
+        }
+        #progress-fill {
+            width: 100%;
+            height: 10%;
+            background: linear-gradient(to top, #ff0055, #00ccff);
+            position: absolute;
+            bottom: 0;
+            transition: height 1s ease;
+        }
+
+        /* 4. MODALS */
+        .modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+        .modal.active { display: flex; }
+
+        .grid-box {
+            background-color: #3e2723; 
+            border: 4px solid #8B4513;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 50%;
+            max-width: 600px;
+        }
+        .inv-slot {
+            aspect-ratio: 1/1;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #6d4c41;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .inv-slot img { width: 90%; height: 90%; image-rendering: pixelated; }
+
+        .map-container {
+            width: 70%;
+            height: 70%;
+            background: #2b2b2b;
+            position: relative;
+            border: 6px solid #8B4513;
+            overflow: hidden;
+        }
+        .map-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+            filter: sepia(0.8);
+        }
+        .map-node {
+            position: absolute;
+            width: 8%; 
+            aspect-ratio: 1/1;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 210;
+        }
+        .map-node:hover { transform: scale(1.2); }
+        .map-node img { width: 100%; height: 100%; image-rendering: pixelated; }
+        
+        /* Dialogue Box */
+        #dialogue-box {
+            position: absolute;
+            bottom: 5%;
+            left: 5%;
+            width: 60%;
+            min-height: 20%;
+            background: rgba(20, 15, 10, 0.95);
+            border: 4px solid #5d4037;
+            z-index: 150;
+            padding: 25px;
+            box-sizing: border-box;
+            display: none;
+            pointer-events: auto;
+            color: white;
+        }
+        #close-dialogue {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: #444;
+            color: #fff;
+            border: 1px solid #888;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        /* Fallback Text for Missing Images */
+        .broken-img-text {
+            color: red;
+            font-size: 10px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    
+    <!-- 1. BACKGROUND -->
+    <div id="bg-layer" class="layer">
+        <img id="bg-image" src="" alt="" onerror="this.style.display='none'">
+    </div>
+
+    <!-- 2. SPRITES -->
+    <div id="sprite-layer" class="layer"></div>
+
+    <!-- 3. PROGRESS BAR -->
+    <div id="progress-container">
+        <div id="progress-fill"></div>
+    </div>
+
+    <!-- 4. UI OVERLAY -->
+    <div id="ui-layer" class="layer">
+        <!-- FRAME IMAGE SOURCE -->
+        <img id="ui-frame-img" src="" alt="UI Frame">
+        
+        <!-- BUTTONS -->
+        <button id="btn-inventory" class="hud-btn" title="Inventory"></button>
+        <button id="btn-skills" class="hud-btn" title="Skills"></button>
+        <button id="btn-map" class="hud-btn" title="Map"></button>
+    </div>
+
+    <!-- 5. DIALOGUE -->
+    <div id="dialogue-box">
+        <div id="dialogue-name" style="color: #ffcc00; font-weight: bold; margin-bottom: 10px;">???</div>
+        <div id="dialogue-text">...</div>
+        <button id="close-dialogue">CONTINUE ▶</button>
+    </div>
+
+    <!-- 6. MODALS -->
+    <div id="modal-inventory" class="modal" onclick="closeModal('modal-inventory')">
+        <div class="grid-box" onclick="event.stopPropagation()">
+            <div class="inv-slot" id="slot-feather" title="Mecha Feather"></div>
+            <div class="inv-slot" id="slot-spear" title="Bone Spear"></div>
+            <div class="inv-slot" id="slot-berries" title="Berries"></div>
+            <div class="inv-slot" id="slot-flute" title="Bone Flute"></div>
+        </div>
+    </div>
+
+    <div id="modal-map" class="modal" onclick="closeModal('modal-map')">
+        <div class="map-container" onclick="event.stopPropagation()">
+            <img id="map-bg-img" class="map-bg" src="">
+            
+            <div class="map-node" style="top:50%; left:50%;" onclick="travelTo('village')">
+                <img id="icon-village" src="">
+                <span style="background:black; color:white; font-size:10px;">Village</span>
+            </div>
+            
+            <div class="map-node" style="top:20%; left:70%;" onclick="travelTo('woods')">
+                <img id="icon-woods" src="">
+                <span style="background:black; color:white; font-size:10px;">Woods</span>
+            </div>
+
+             <div class="map-node" style="top:70%; left:20%;" onclick="travelTo('ruins')">
+                <img id="icon-ruins" src="">
+                <span style="background:black; color:white; font-size:10px;">Glacier</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- 1. ASSET CONFIGURATION ---
+    
+    // CHANGE THIS TO 'true' IF RUNNING LOCALLY WITH FOLDERS
+    const USE_LOCAL_FOLDERS = false; 
+
+    // Base Paths
+    const GITHUB_BASE = "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/cavebot/assets/";
+    const LOCAL_BASE = "./";
+
+    // Helper to switch paths
+    const getPath = (path) => {
+        let base = USE_LOCAL_FOLDERS ? LOCAL_BASE : GITHUB_BASE;
+        
+        // Sanitize path for GitHub (replace spaces, handle ui:ux colon issue)
+        let cleanPath = path;
+        if (!USE_LOCAL_FOLDERS) {
+            cleanPath = cleanPath.split(" ").join("%20");
+            // The colon in ui:ux often breaks raw links. 
+            // If 404 persists, we might need to change the folder name in your repo.
+            if (cleanPath.includes("ui:ux")) {
+                cleanPath = cleanPath.replace("ui:ux", "ui%3Aux");
+            }
+        }
+        return base + cleanPath;
+    };
+
+    // --- 2. ASSET DICTIONARY ---
+    const assets = {
+        frame: getPath("ui:ux/_cavebot-uiframe_5.png"),
+        bg_village: getPath("backdrops/empty/_cavebot-bg8-cavebeds.png"),
+        bg_woods: getPath("backdrops/empty/_cavebot-bg2-cedarwoods.png"),
+        bg_ruins: getPath("backdrops/empty/_cavebot-bg3-crystalhearth.png"),
+        bg_map: getPath("backdrops/empty/_cavebot-bg14-megafaunasteppe.png"),
+        
+        sprite_gil: getPath("sprites/Gilgrokmesh/_sprites-gilgrokmesh(stand)_6 .png"),
+        sprite_nabu: getPath("sprites/Nabu/_sprites_nabu1-idle.png"),
+        sprite_anzu: getPath("sprites/Anzu /_sprites_anzu4-threequarterview.png"),
+        sprite_fire: getPath("icons/inventory/_cavebot-inventory_5-cavefire.png"),
+        
+        icon_feather: getPath("icons/inventory/_cavebot-inventory_4-mechafeather.png"),
+        icon_spear: getPath("icons/inventory/_cavebot-inventory_1-spear.png"),
+        icon_berries: getPath("icons/inventory/_cavebot-inventory_7-berries.png"),
+        icon_flute: getPath("icons/inventory/_cavebot-inventory_2-boneflute.png"),
+        
+        map_icon_home: getPath("icons/maps/_map-icons_5.png"),
+        map_icon_woods: getPath("icons/maps/_map-icons_4.png"),
+        map_icon_ruins: getPath("icons/maps/_map-icons_3.png")
+    };
+
+    // --- 3. APPLY ASSETS TO DOM ---
+    // This runs immediately to set initial images
+    function initAssets() {
+        document.getElementById('ui-frame-img').src = assets.frame;
+        document.getElementById('map-bg-img').src = assets.bg_map;
+        document.getElementById('icon-village').src = assets.map_icon_home;
+        document.getElementById('icon-woods').src = assets.map_icon_woods;
+        document.getElementById('icon-ruins').src = assets.map_icon_ruins;
+        
+        // Load Inventory Icons
+        const createIcon = (id, src) => {
+            let img = document.createElement('img');
+            img.src = src;
+            img.onerror = function() { this.style.display='none'; this.parentElement.innerText = "X"; };
+            document.getElementById(id).appendChild(img);
+        }
+        createIcon('slot-feather', assets.icon_feather);
+        createIcon('slot-spear', assets.icon_spear);
+        createIcon('slot-berries', assets.icon_berries);
+        createIcon('slot-flute', assets.icon_flute);
+    }
+
+    // --- 4. GAME LOGIC ---
+    const gameState = { location: 'village', synch: 10 };
+
+    const locations = {
+        'village': {
+            bg: assets.bg_village,
+            sprites: [
+                { src: assets.sprite_gil, x: '20%', y: '30%', w: '18%', 
+                  name: "Gilgrokmesh", text: "Turn back, Nabu. The sky-fire is a curse!", action: 'hint' },
+                { src: assets.sprite_nabu, x: '45%', y: '40%', w: '12%', 
+                  name: "Nabu", text: "(Thinking) I have to leave. The signal is calling." }
+            ]
+        },
+        'woods': {
+            bg: assets.bg_woods,
+            sprites: [
+                { src: assets.sprite_anzu, x: '60%', y: '45%', w: '15%', 
+                  name: "Unknown Bird", text: "*Krr-krr...* (It stares at your mechanical feather)", action: 'synch' }
+            ]
+        },
+        'ruins': {
+            bg: assets.bg_ruins,
+            sprites: [
+                { src: assets.sprite_fire, x: '45%', y: '55%', w: '10%', 
+                  name: "Crystal Hearth", text: "Cold fire. Ancient data streams." }
+            ]
+        }
+    };
+
+    // --- FUNCTIONS ---
+    function loadLocation(locId) {
+        const data = locations[locId];
+        const bgImg = document.getElementById('bg-image');
+        const layer = document.getElementById('sprite-layer');
+
+        bgImg.style.opacity = 0;
+        
+        setTimeout(() => {
+            bgImg.src = data.bg;
+            bgImg.style.opacity = 1;
+            layer.innerHTML = '';
+
+            data.sprites.forEach(s => {
+                let img = document.createElement('img');
+                img.src = s.src;
+                img.className = 'character-sprite';
+                img.style.left = s.x;
+                img.style.top = s.y;
+                img.style.width = s.w;
+                img.onclick = () => {
+                    showDialogue(s.name, s.text);
+                    if(s.action === 'hint') document.getElementById('btn-map').style.borderColor = 'red';
+                    if(s.action === 'synch') {
+                        gameState.synch += 20;
+                        document.getElementById('progress-fill').style.height = gameState.synch + '%';
+                    }
+                };
+                // Error handling for missing sprites
+                img.onerror = function() { 
+                    this.style.display = 'none'; // Hide broken image
+                    // Create a text placeholder instead
+                    let placeholder = document.createElement('div');
+                    placeholder.innerText = s.name;
+                    placeholder.style.position = 'absolute';
+                    placeholder.style.left = s.x;
+                    placeholder.style.top = s.y;
+                    placeholder.style.color = 'white';
+                    placeholder.style.background = 'rgba(0,0,0,0.5)';
+                    placeholder.style.padding = '5px';
+                    placeholder.onclick = img.onclick;
+                    layer.appendChild(placeholder);
+                };
+                layer.appendChild(img);
+            });
+            closeModal('modal-map');
+        }, 300);
+    }
+
+    function travelTo(loc) { loadLocation(loc); }
+    
+    function showDialogue(n, t) {
+        document.getElementById('dialogue-name').innerText = n;
+        document.getElementById('dialogue-text').innerText = t;
+        document.getElementById('dialogue-box').style.display = 'block';
+    }
+
+    // Modal Controls
+    window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+    document.getElementById('btn-inventory').onclick = () => document.getElementById('modal-inventory').classList.add('active');
+    document.getElementById('btn-map').onclick = () => document.getElementById('modal-map').classList.add('active');
+    document.getElementById('close-dialogue').onclick = () => document.getElementById('dialogue-box').style.display = 'none';
+
+    // --- START ---
+    window.onload = () => {
+        initAssets();
+        loadLocation('village');
+        document.getElementById('progress-fill').style.height = '10%';
+    };
+
+</script>
+</body>
+</html>
