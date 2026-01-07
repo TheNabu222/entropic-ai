@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoes of Anzu: Canvas Edition</title>
+    <style>
+        body {
+            background-color: #1a1818;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        #gameCanvas {
+            border: 4px solid #3a3838;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            /* Sharp pixel scaling */
+            image-rendering: pixelated; 
+            width: 800px;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // --- Configuration & State ---
+    const BASE_URL = "https://coaiexist.wtf/assets/other-game-assets/cavebot/";
+    const gameState = {
+        bond: 10,
+        currentNode: null,
+        textToBeDrawn: [],
+        activeButtons: [],
+        audioUnlocked: false,
+        isLoading: true
+    };
+
+    // --- Asset Definition & Loading System ---
+    const assets = { images: {}, audio: {} };
+    const assetsToLoad = {
+        // Mapping assumptions based on narrative needs:
+        'bg_river': 'cavebot-scenes00001.png',
+        'bg_cave': 'cavebot-scenes00002.png',
+        'ui_frame': 'cavebot-sprites00001.png',
+        'nabu_neutral': 'cavebot-sprites00002.png',
+        'nabu_scared': 'cavebot-sprites00003.png',
+        'shoebill_organic': 'cavebot-sprites00004.png',
+        'shoebill_mech': 'cavebot-sprites00005.png',
+        'btn_texture': 'cavebot-sprites00006.png',
+        'shoebill_full': 'cavebot-sprites00008.png'
+    };
+    const audioToLoad = {
+        'sfx_clatter': 'cavebot.mp3',
+        'sfx_mech': 'mechanzu.mp3',
+        'sfx_gasp_shock': 'nabugasp4.mp3',
+        'sfx_gasp_panic': 'nabugasp5.mp3'
+    };
+
+    let assetsLoadedCount = 0;
+    const totalAssets = Object.keys(assetsToLoad).length + Object.keys(audioToLoad).length;
+
+    function assetLoaded() {
+        assetsLoadedCount++;
+        if (assetsLoadedCount === totalAssets) {
+            gameState.isLoading = false;
+            startGame();
+        }
+    }
+
+    // Start loading processes
+    for (let key in assetsToLoad) {
+        const img = new Image();
+        img.onload = assetLoaded;
+        img.src = BASE_URL + assetsToLoad[key];
+        assets.images[key] = img;
+    }
+    for (let key in audioToLoad) {
+        const audio = new Audio();
+        audio.oncanplaythrough = assetLoaded; // Wait for enough data to play
+        audio.src = BASE_URL + audioToLoad[key];
+        assets.audio[key] = audio;
+    }
+
+    // --- Audio Helper ---
+    function playSound(key) {
+        if (!gameState.audioUnlocked || !assets.audio[key]) return;
+        // Clone node to allow overlapping sounds of same type
+        const sound = assets.audio[key].cloneNode();
+        sound.play().catch(e => console.log("Audio play failed (interaction needed):", e));
+    }
+
+    // --- Narrative Data (The Plot) ---
+    const gameNodes = {
+        "start": {
+            bg: "bg_river",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_organic",
+            text: "The shoebill stands motionless by the riverbank. Hunger gnaws at your belly. The river is full of fish, but they are swift.",
+            choices: [
+                { text: "Try to catch a fish with bare hands.", nextNode: "fail_fish" },
+                { text: "Toss a shiny stone as distraction.", nextNode: "offer_stone" }
+            ]
+        },
+        "fail_fish": {
+            bg: "bg_river",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_organic",
+            sfx: "sfx_clatter", // The angry wooden machine gun sound
+            text: "You splash loudly, scaring them away. The shoebill clatters its bill irritably. It seems unimpressed with your incompetence.",
+            onEnter: () => { gameState.bond -= 10; },
+            choices: [
+                { text: "Sigh in defeat.", nextNode: "shoebill_helps" }
+            ]
+        },
+        "offer_stone": {
+            bg: "bg_river",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_organic",
+            text: "You toss the pebble. The shoebill's head cocks. It doesn't move for the stone, but its gaze softens slightly. It understands the gesture.",
+            onEnter: () => { gameState.bond += 10; },
+            choices: [
+                { text: "Wait patiently.", nextNode: "shoebill_helps" }
+            ]
+        },
+        "shoebill_helps": {
+            bg: "bg_river",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_full", // Use the full body sprite here for impact
+            text: "Suddenly, its beak darts into the water. It pulls out a large fish and drops it at your feet. A gift.",
+            onEnter: () => { gameState.bond += 5; },
+            choices: [
+                { text: "Eat gratefully.", nextNode: "eat_fish" },
+                { text: "Offer it the first bite.", nextNode: "share_fish" }
+            ]
+        },
+        "eat_fish": {
+            bg: "bg_river",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_organic",
+            text: "You eat. The bond is practical, a partnership of convenience. For now. Night approaches.",
+            choices: [ { text: "Find shelter.", nextNode: "find_shelter" } ]
+        },
+        "share_fish": {
+            bg: "bg_river",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_organic",
+            text: "It hesitates, then takes a piece. A silent understanding passes between you. Night approaches.",
+            onEnter: () => { gameState.bond += 15; },
+            choices: [ { text: "Find shelter.", nextNode: "find_shelter" } ]
+        },
+        "find_shelter": {
+            bg: "bg_cave",
+            leftPortrait: "nabu_scared", // Nabu is nervous about the storm
+            rightPortrait: "shoebill_organic",
+            text: "You find a cave overhang as a storm breaks. The shoebill stays outside in the rain, standing guard.",
+            choices: [
+                { text: "Gesture for it to come in.", nextNode: "invite_in" },
+                { text: "Respect its space.", nextNode: "huddle_alone" }
+            ]
+        },
+        "invite_in": {
+            bg: "bg_cave",
+            leftPortrait: "nabu_scared",
+            rightPortrait: "shoebill_organic",
+            sfx: "sfx_gasp_panic", // The shaky breath as it gets close
+            text: "It shuffles closer, sheltering beside you. Its proximity is terrifying yet comforting. For a split second, geometric light shimmers in its eye.",
+            onEnter: () => { gameState.bond += 20; },
+            choices: [
+                { text: "Stare into its eyes.", nextNode: "glitch_reveal" },
+                { text: "Look away and rest.", nextNode: "ending_quiet" }
+            ]
+        },
+        "huddle_alone": {
+            bg: "bg_cave",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_organic",
+            text: "You keep to yourself. The storm rages, but you feel secure knowing it's there.",
+            onEnter: () => { gameState.bond += 5; },
+            choices: [ { text: "Rest.", nextNode: "ending_quiet" } ]
+        },
+        "glitch_reveal": {
+            bg: "bg_cave",
+            leftPortrait: "nabu_scared",
+            rightPortrait: "shoebill_mech", // THE REVEAL PORTRAIT
+            // DRAMAMAMMA COMBO: Shock gasp + metal grinding sound
+            sfx: ["sfx_gasp_shock", "sfx_mech"], 
+            text: "The avian illusion tears apart. Not flesh, but chrome and circuits. A synthesized hum echoes in your mind: '...CONNECTION ESTABLISHED. NABU.'",
+            onEnter: () => { gameState.bond = 100; },
+            choices: [ { text: "Reach out in wonder.", nextNode: "ending_connection" } ]
+        },
+         "ending_quiet": {
+            bg: "bg_river",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_organic",
+            text: "Dawn breaks. It acts like a normal bird. But you know better. Your journey has just begun.",
+            choices: [ { text: "Replay", nextNode: "start" } ]
+        },
+        "ending_connection": {
+            bg: "bg_cave",
+            leftPortrait: "nabu_neutral",
+            rightPortrait: "shoebill_mech",
+            text: "You touch cool metal. You are no longer an outcast, but the companion to a fallen god.",
+            choices: [ { text: "Replay", nextNode: "start" } ]
+        }
+    };
+
+    // --- Engine Functions ---
+
+    function loadNode(nodeName) {
+        const node = gameNodes[nodeName];
+        gameState.currentNode = node;
+
+        // Handle SFX (single string or array of strings)
+        if (node.sfx) {
+            if (Array.isArray(node.sfx)) {
+                 node.sfx.forEach(sound => playSound(sound));
+            } else {
+                playSound(node.sfx);
+            }
+        }
+
+        // Run logic
+        if (node.onEnter) node.onEnter();
+        // Clamp bond
+        gameState.bond = Math.max(0, Math.min(100, gameState.bond));
+
+        // Prepare text wrapping
+        ctx.font = "20px serif";
+        gameState.textToBeDrawn = wrapText(ctx, node.text, 740); // 740 maxWidth
+
+        // Setup buttons bounding boxes for input handling
+        gameState.activeButtons = [];
+        const startY = 450;
+        node.choices.forEach((choice, index) => {
+             gameState.activeButtons.push({
+                 x: 50,
+                 y: startY + (index * 60),
+                 width: 700,
+                 height: 50,
+                 nextNode: choice.nextNode,
+                 text: choice.text
+             });
+        });
+
+        draw();
+    }
+
+    // Helper to wrap text on canvas
+    function wrapText(context, text, maxWidth) {
+        let words = text.split(' ');
+        let lines = [];
+        let line = '';
+        for(let n = 0; n < words.length; n++) {
+          let testLine = line + words[n] + ' ';
+          let metrics = context.measureText(testLine);
+          let testWidth = metrics.width;
+          if (testWidth > maxWidth && n > 0) {
+            lines.push(line);
+            line = words[n] + ' ';
+          } else {
+            line = testLine;
+          }
+        }
+        lines.push(line);
+        return lines;
+    }
+
+    // --- The Renderer (Drawing everything frame by frame) ---
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (gameState.isLoading) {
+            ctx.fillStyle = "#e0e0e0";
+            ctx.font = "30px serif";
+            ctx.fillText(`Loading Primal Assets... ${Math.floor((assetsLoadedCount/totalAssets)*100)}%`, 250, 300);
+            return;
+        }
+        
+        if (!gameState.audioUnlocked) {
+             ctx.fillStyle = "#e0e0e0";
+             ctx.font = "30px serif";
+             ctx.fillText("CLICK TO START", 300, 300);
+             ctx.font = "20px serif";
+             ctx.fillText("(Enables Audio)", 340, 330);
+             return;
+        }
+
+        const node = gameState.currentNode;
+
+        // 1. Draw Background
+        ctx.drawImage(assets.images[node.bg], 0, 0, 800, 600);
+
+        // 2. Draw Portraits (Left and Right locations)
+        //Simple shadowing for portraits
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillRect(50, 100, 200, 250);
+        ctx.fillRect(550, 100, 200, 250);
+        
+        if(node.leftPortrait) ctx.drawImage(assets.images[node.leftPortrait], 50, 100, 200, 250);
+        if(node.rightPortrait) ctx.drawImage(assets.images[node.rightPortrait], 550, 100, 200, 250);
+
+        // 3. Draw UI Frame (The Stone/Cyber Border)
+        // Stretching it to fit the canvas for now
+        ctx.drawImage(assets.images['ui_frame'], 0, 0, 800, 600);
+
+        // 4. Draw Narrative Text Area Background
+        ctx.fillStyle = "rgba(44, 42, 42, 0.9)";
+        ctx.fillRect(30, 350, 740, 230);
+
+        // 5. Draw Text
+        ctx.fillStyle = "#e0e0e0";
+        ctx.font = "22px serif";
+        gameState.textToBeDrawn.forEach((line, index) => {
+            ctx.fillText(line, 50, 390 + (index * 28));
+        });
+
+        // 6. Draw Buttons
+        gameState.activeButtons.forEach(btn => {
+            // Draw button texture
+            ctx.drawImage(assets.images['btn_texture'], btn.x, btn.y, btn.width, btn.height);
+            // Draw button text centered
+            ctx.fillStyle = "#87CEEB"; // Accent color
+            ctx.font = "bold 20px serif";
+            ctx.textAlign = "center";
+            ctx.fillText(btn.text, btn.x + btn.width/2, btn.y + btn.height/2 + 7);
+            ctx.textAlign = "left"; // Reset
+        });
+
+        // 7. Draw Bond Meter (Simple implementation for now)
+        ctx.fillStyle = "#333";
+        ctx.fillRect(250, 30, 300, 30); // Container
+        // Fill based on bond percentage
+        let bondGradient = ctx.createLinearGradient(250, 0, 550, 0);
+        bondGradient.addColorStop(0, "#4682B4");
+        bondGradient.addColorStop(1, "#87CEEB");
+        ctx.fillStyle = bondGradient;
+        ctx.fillRect(255, 35, (290 * (gameState.bond / 100)), 20);
+        
+        // Meter Label
+        ctx.fillStyle = "#e0e0e0";
+        ctx.font = "16px serif";
+        ctx.fillText("BOND", 380, 25);
+    }
+
+
+    // --- Input Handling ---
+    canvas.addEventListener('click', (e) => {
+        if (gameState.isLoading) return;
+
+        // First click unlocks audio context browser restriction
+        if (!gameState.audioUnlocked) {
+            gameState.audioUnlocked = true;
+            loadNode("start");
+            return;
+        }
+
+        // Get click coordinates relative to canvas
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // Check if a button was clicked
+        for (let btn of gameState.activeButtons) {
+            if (x >= btn.x && x <= btn.x + btn.width &&
+                y >= btn.y && y <= btn.y + btn.height) {
+                // Button clicked!
+                loadNode(btn.nextNode);
+                break;
+            }
+        }
+    });
+
+    // --- Init ---
+    function startGame() {
+        // Initial draw loop call, though we mostly redraw on interaction for a VN
+        draw();
+    }
+
+</script>
+</body>
+</html>

@@ -17,6 +17,7 @@ file_mapping = {
     '_cavebot-bg_river-ikibala(night)_2.png': 'bg_river_night.png',
     '_cavebot-bg_steppe-megafauna(day)_1.png': 'bg_steppe.png',
 
+    
     # Sprites - Nabu
     '_cavebot-sprites_nabu-neutral-standing_1.png': 'nabu_stand.png',
     '_sprites_nabu(boneflute)_1.png': 'nabu_flute.png',
@@ -26,12 +27,13 @@ file_mapping = {
     '_sprites_nabu(stargaze)_2.png': 'nabu_stargaze.png',
     'sprites_nabu(thoughtful)_1.png': 'nabu_think.png',
 
+    
     # Sprites - Anzu/Bird/Mecha
     '_cavebot-sprites_anzu(shoebill)_1.png': 'anzu_shoebill.png',
     '_sprite-scenes_nabu-anzu(mechanzu)_1.png': 'anzu_mecha_1.png',
     '_sprite-scenes_nabu-anzu(mechanzu)_2.png': 'anzu_mecha_2.png',
     '_sprite-scenes_nabu-anzu(mechanzu)_3.png': 'anzu_mecha_3.png',
-
+    
     # Sprites - Others
     '_cavebot-sprites_gilgrokmesh-spear_1.png': 'gilgrok_spear.png',
     '_sprites-gilgrokmesh(flex)_2.png': 'gilgrok_flex.png',
@@ -46,7 +48,7 @@ file_mapping = {
     '_sprites-villagers_2.png': 'villagers_2.png',
     '_sprites-villagers_4.png': 'villagers_3.png',
     '_sprites-villagers_5.png': 'villagers_4.png',
-
+    
     # Scenes (Composite images)
     '_cavebot-scenes_gilgrokmesh(scheming).png': 'scene_scheme.png',
     '_cavebot-scenes_nabu-anzu(nightmarsh).png': 'scene_nightmarsh.png',
@@ -61,12 +63,12 @@ file_mapping = {
     '_cavebot_inventory_boneflute_1.png': 'item_flute.png',
     'cavebot_inventory_fire_1.png': 'item_fire.png',
     'cavebot_inventory_spear_1.png': 'item_spear.png',
-
+    
     # UI
     '_cavebot-title_1.png': 'ui_title.png',
     '_cavebot-uiframe_1.png': 'ui_frame_1.png',
     '_cavebot-uiframe_2 .png': 'ui_frame_2.png',
-
+    
     # Audio
     '_Shoe bill clacking.m4a': 'sfx_clack.m4a',
     '_cavebot.mp3': 'music_theme.mp3',
@@ -82,7 +84,7 @@ def migrate_assets():
     for original_name, new_name in file_mapping.items():
         src_path = os.path.join(src_dir, original_name)
         dest_path = os.path.join(dest_dir, new_name)
-
+        
         if os.path.exists(src_path):
             try:
                 shutil.copy2(src_path, dest_path)

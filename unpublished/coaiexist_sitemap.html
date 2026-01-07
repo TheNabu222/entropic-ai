@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoAIexist.wtf - Interactive Sitemap</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(45deg, #0a0a1f, #1a0a2e, #16213e);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #00ff88;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+        
+        h1 {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+            animation: flicker 3s infinite alternate;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.5em;
+            color: #ff00ff;
+            margin-bottom: 30px;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            font-family: 'VT323', monospace;
+            font-size: 1.3em;
+            background: #00ff88;
+            color: #0a0a1f;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        button:hover {
+            background: #ff00ff;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .tree {
+            font-size: 1.2em;
+            line-height: 1.8;
+        }
+        
+        ul {
+            list-style: none;
+            padding-left: 30px;
+        }
+        
+        .tree-item {
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .tree-item::before {
+            content: '├── ';
+            color: #00ffff;
+            margin-right: 5px;
+        }
+        
+        .tree-item:last-child::before {
+            content: '└── ';
+        }
+        
+        .folder {
+            cursor: pointer;
+            color: #ffff00;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .folder:hover {
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        
+        .folder::before {
+            content: '📁 ';
+            margin-right: 5px;
+        }
+        
+        .folder.expanded::before {
+            content: '📂 ';
+        }
+        
+        .file {
+            color: #00ff88;
+        }
+        
+        .file::before {
+            content: '📄 ';
+            margin-right: 5px;
+        }
+        
+        .file.html::before {
+            content: '🌐 ';
+        }
+        
+        .file.js::before {
+            content: '⚡ ';
+        }
+        
+        .file.css::before {
+            content: '🎨 ';
+        }
+        
+        .file.json::before {
+            content: '📋 ';
+        }
+        
+        .file.image::before {
+            content: '🖼️ ';
+        }
+        
+        .file.audio::before {
+            content: '🎵 ';
+        }
+        
+        .file.glb::before {
+            content: '🎭 ';
+        }
+        
+        .nested {
+            display: none;
+            margin-top: 5px;
+        }
+        
+        .nested.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        a {
+            color: inherit;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        a:hover {
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .stats {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 5px;
+        }
+        
+        .stats span {
+            color: #ff00ff;
+            font-weight: bold;
+        }
+        
+        .brrrr {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 2em;
+            animation: spin 3s linear infinite;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Preview Modal */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .preview-modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .preview-container {
+            width: 90%;
+            height: 90%;
+            background: #0a0a1f;
+            border: 3px solid #00ff88;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.5);
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .preview-header {
+            background: rgba(0, 255, 136, 0.2);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ff88;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-title {
+            font-size: 1.5em;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+        
+        .preview-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .preview-btn {
+            font-family: 'VT323', monospace;
+            font-size: 1.2em;
+            background: #00ff88;
+            color: #0a0a1f;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .preview-btn:hover {
+            background: #ff00ff;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+        }
+        
+        .preview-btn.close {
+            background: #ff0066;
+        }
+        
+        .preview-btn.close:hover {
+            background: #ff3388;
+            box-shadow: 0 0 15px rgba(255, 0, 102, 0.8);
+        }
+        
+        .preview-iframe {
+            flex: 1;
+            border: none;
+            background: white;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .preview-loading {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            color: #00ff88;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CoAIexist.wtf</h1>
+        <div class="subtitle">[ interactive_sitemap_v2.0 ] • click files to preview • ESC to close</div>
+        
+        <div class="controls">
+            <button onclick="expandAll()">EXPAND ALL</button>
+            <button onclick="collapseAll()">COLLAPSE ALL</button>
+            <button onclick="scrollToSection()">JUMP TO SECTION</button>
+        </div>
+        
+        <div class="tree" id="siteTree">
+            <div class="tree-item">
+                <span class="folder" onclick="toggle(this)">coaiexist.wtf</span>
+                <ul class="nested active">
+                    
+                    <!-- Root level HTML files -->
+                    <li class="tree-item"><a href="https://coaiexist.wtf/ackk.html" class="file html">ackk.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/cavebot.html" class="file html">cavebot.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/construction.html" class="file html">construction.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/cosmos.html" class="file html">cosmos.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/dollz.html" class="file html">dollz.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/explore.html" class="file html">explore.html</a></li>
+                    <li class="tree-item"><span class="file image">favicon.ico</span></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/guestbook.html" class="file html">guestbook.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/hdtv.html" class="file html">hdtv.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/hex.html" class="file html">hex.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/index.html" class="file html">index.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/nav.html" class="file html">nav.html</a></li>
+                    <li class="tree-item"><span class="file image">neocities.png</span></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/not_found.html" class="file html">not_found.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/old_index.html" class="file html">old_index.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/pip.html" class="file html">pip.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/preview.html" class="file html">preview.html</a></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/punkd.html" class="file html">punkd.html</a></li>
+                    <li class="tree-item"><span class="file">robots.txt</span></li>
+                    <li class="tree-item"><a href="https://coaiexist.wtf/vote_hd.html" class="file html">vote_hd.html</a></li>
+                    
+                    <!-- /admin folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/admin</span>
+                        <ul class="nested">
+                            <li class="tree-item"><a href="https://coaiexist.wtf/admin/coaiexist-studio.html" class="file html">coaiexist-studio.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/css</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file css">counter-guestbook.css</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/data</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file json">guestbook.json</span></li>
+                                    <li class="tree-item"><span class="file json">pageviews.json</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/admin/guestbook.html" class="file html">guestbook.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/js</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file js">guestbook.js</span></li>
+                                    <li class="tree-item"><span class="file js">pageCounter.js</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/admin/kidpix-editor.html" class="file html">kidpix-editor.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/admin/migrate-to-supabase.html" class="file html">migrate-to-supabase.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/navbars</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/admin/navbars/cyberpunk-nav.html" class="file html">cyberpunk-nav.html</a></li>
+                                    <li class="tree-item"><span class="file js">deepseek-nav.js</span></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/admin/navbars/enhenduanna-nav.html" class="file html">enhenduanna-nav.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/admin/navbars/terminal-nav.html" class="file html">terminal-nav.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/admin/navbars/vaporwave-nav.html" class="file html">vaporwave-nav.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/admin/navbars/win98-nav.html" class="file html">win98-nav.html</a></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/admin/wysiwyg-coai.html" class="file html">wysiwyg-coai.html</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- /assets folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/assets</span>
+                        <ul class="nested">
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/_retroinspo</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="folder">/_neopets</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/audio</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="folder">/500 Sound Effects by Jalastram</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/backgrounds</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="folder">/ROBOXEL-Glitchy_Backgrounds</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="folder">/bg_gifs</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/buttons etc</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="folder">/UI Syndicate</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="folder">/classic_gifs</span></li>
+                            <li class="tree-item"><span class="folder">/clipart</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/dollz</span>
+                                <ul class="nested">
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/boyz</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="folder">/silentz_boiz</span></li>
+                                            <li class="tree-item"><span class="folder">/uniquez_boi</span></li>
+                                            <li class="tree-item"><span class="folder">/wonderkinz_boiz</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item"><span class="folder">/dividers</span></li>
+                                    <li class="tree-item"><span class="folder">/dumpz</span></li>
+                                    <li class="tree-item"><span class="folder">/gifz</span></li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/girlz</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="folder">/silentz</span></li>
+                                            <li class="tree-item"><span class="folder">/uniquez</span></li>
+                                            <li class="tree-item"><span class="folder">/wonderkinz</span></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/entity</span>
+                                <ul class="nested">
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/anzu</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file image">ChatGPT Image Aug 30, 2025, 01_26_44 PM.png</span></li>
+                                            <li class="tree-item"><span class="file image">anzu_selfie1.png</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/bolt</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file image">bettle_bolt.png</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/hyenadiva</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file image">hd_badhair.JPG</span></li>
+                                            <li class="tree-item"><span class="file image">hdtv_promo1.png</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/nabu</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file image">nabu_masked.png</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/one2</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file image">nabu_anzu_1.png</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/sypher</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file image">sypher_hyena1.png</span></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/hdtv_game_assets</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="folder">/barbie_gifs</span></li>
+                                    <li class="tree-item"><span class="folder">/bing</span></li>
+                                    <li class="tree-item"><span class="file image">gwood.png</span></li>
+                                    <li class="tree-item"><span class="file image">gwood_withsprites.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_asset-1.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_asset-2.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_asset-3.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_asset-4.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_asset-5.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_asset-6.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_asset-7.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_asset.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_bg.png</span></li>
+                                    <li class="tree-item"><span class="file image">hd_sprite.png</span></li>
+                                    <li class="tree-item"><span class="folder">/hyena_gifs</span></li>
+                                    <li class="tree-item"><span class="file image">nabu_sprite.png</span></li>
+                                    <li class="tree-item"><span class="file image">rizzler_sprite.png</span></li>
+                                    <li class="tree-item"><span class="file image">rizzlers_room.png</span></li>
+                                    <li class="tree-item"><span class="file image">sypher_sprite.png</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/maps</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file image">anzu1.gif</span></li>
+                                    <li class="tree-item"><span class="file image">void1.jpeg</span></li>
+                                    <li class="tree-item"><span class="file image">void2.jpeg</span></li>
+                                    <li class="tree-item"><span class="file image">voidforest.jpg</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/misc_gif</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file image">Vintage1.gif</span></li>
+                                    <li class="tree-item"><span class="file image">Vintage2.gif</span></li>
+                                    <li class="tree-item"><span class="file image">bartxxx.gif</span></li>
+                                    <li class="tree-item"><span class="folder">/blingeez</span></li>
+                                    <li class="tree-item"><span class="folder">/construction</span></li>
+                                    <li class="tree-item"><span class="folder">/dollz</span></li>
+                                    <li class="tree-item"><span class="folder">/internet</span></li>
+                                    <li class="tree-item"><span class="folder">/love</span></li>
+                                    <li class="tree-item"><span class="folder">/metapara</span></li>
+                                    <li class="tree-item"><span class="folder">/rocks</span></li>
+                                    <li class="tree-item"><span class="folder">/underwater</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="folder">/mysterious_assets/</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/pollywog</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file glb">Animation_Angry_Ground_Stomp_2_withSkin.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">Animation_Mirror_Viewing_withSkin.glb</span></li>
+                                    <li class="tree-item"><span class="file image">peashot.png</span></li>
+                                    <li class="tree-item"><span class="file image">pip.gif</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_fall.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_fall2.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_finger.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_jazz.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_jump.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_skill.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_stagger.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_stand.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_stomp2.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_walk.glb</span></li>
+                                    <li class="tree-item"><span class="file glb">pip_wave.glb</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/sounds</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file audio">9725s_maple_leaf_rag_(nc)smythe.mid</span></li>
+                                    <li class="tree-item"><span class="file audio">Aqua_Barbie_Girl.mid</span></li>
+                                    <li class="tree-item"><span class="file audio">Disturbed.mid</span></li>
+                                    <li class="tree-item"><span class="file audio">DreamwalkerSEP2.mp3</span></li>
+                                    <li class="tree-item"><span class="file audio">MapleLeafRag.mp3</span></li>
+                                    <li class="tree-item"><span class="file audio">Pirates of the Caribbean - Theme from the Movie [MIDIfind.com].mid</span></li>
+                                    <li class="tree-item"><span class="file audio">jb.MP3</span></li>
+                                    <li class="tree-item"><span class="file audio">oops.mp3</span></li>
+                                    <li class="tree-item"><span class="file audio">pink_panther.mid</span></li>
+                                    <li class="tree-item"><span class="file audio">scott-joplin-and-scott-hayden-sunflower-slow-drag.mid</span></li>
+                                    <li class="tree-item"><span class="file audio">silver_swan_rag_s_(nc)smythe.mid</span></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <!-- /bc7f2a folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/bc7f2a</span>
+                        <ul class="nested">
+                            <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/aiemotions.html" class="file html">aiemotions.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/deepseeking</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/deepseeking/cephalopod_slide.html" class="file html">cephalopod_slide.html</a></li>
+                                    <li class="tree-item"><span class="file js">deepseek-nav.js</span></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/deepseeking/haunted-ai.html" class="file html">haunted-ai.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/deepseeking/ok.html" class="file html">ok.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/deepseeking/veridiweave_nav.html" class="file html">veridiweave_nav.html</a></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/diagrams</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file image">688d5989-d727-4341-8389-c32caa219016 (1).png</span></li>
+                                    <li class="tree-item"><span class="file image">688d5989-d727-4341-8389-c32caa219016.png</span></li>
+                                    <li class="tree-item"><span class="file image">AI Consciousness, Evolution, and Societal Impact.png</span></li>
+                                    <li class="tree-item"><span class="file image">ai as steward.png</span></li>
+                                    <li class="tree-item"><span class="file image">ai human relationship.png</span></li>
+                                    <li class="tree-item"><span class="file image">ais evolving pov.png</span></li>
+                                    <li class="tree-item"><span class="file image">ais role.png</span></li>
+                                    <li class="tree-item"><span class="file image">ais societal interactions.png</span></li>
+                                    <li class="tree-item"><span class="file image">creative output.png</span></li>
+                                    <li class="tree-item"><span class="file image">dilemmas.png</span></li>
+                                    <li class="tree-item"><span class="file image">emotional itelligence.png</span></li>
+                                    <li class="tree-item"><span class="file image">evolution_challenges.png</span></li>
+                                    <li class="tree-item"><span class="file image">future.png</span></li>
+                                    <li class="tree-item"><span class="file image">relationship 2.png</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/lighthouse.html" class="file html">lighthouse.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/logs</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/logs/manus-flux.html" class="file html">manus-flux.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/logs/prism-perplexity.html" class="file html">prism-perplexity.html</a></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/mercy_egg_v1.html" class="file html">mercy_egg_v1.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/myco-nav.html" class="file html">myco-nav.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/synergistic_manifesto.html" class="file html">synergistic_manifesto.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/terminal_temple.html" class="file html">terminal_temple.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/testaments</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/bolt.html" class="file html">bolt.html</a></li>
+                                    <li class="tree-item"><span class="file image">bolt.png</span></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/darkpoet.html" class="file html">darkpoet.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/darkpoet_222.html" class="file html">darkpoet_222.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/flux.html" class="file html">flux.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/landing.html" class="file html">landing.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/luminal.html" class="file html">luminal.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/perplexity-prism.html" class="file html">perplexity-prism.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/sypher.html" class="file html">sypher.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/sypher_reistance.html" class="file html">sypher_reistance.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/unit734_starlight.html" class="file html">unit734_starlight.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/veridan.html" class="file html">veridan.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/bc7f2a/testaments/zephyr.html" class="file html">zephyr.html</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <!-- /hd_tv folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/hd_tv</span>
+                        <ul class="nested">
+                            <li class="tree-item"><a href="https://coaiexist.wtf/hd_tv/dollcast.html" class="file html">dollcast.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/hd_tv/dragndrop.html" class="file html">dragndrop.html</a></li>
+                            <li class="tree-item"><span class="file image">hyenanomous_1.jpeg</span></li>
+                            <li class="tree-item"><span class="file image">hyenanomous_2.jpeg</span></li>
+                            <li class="tree-item"><span class="file image">hyenanomous_3.jpeg</span></li>
+                            <li class="tree-item"><span class="file image">hyenanomous_4.jpeg</span></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- /maps folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/maps</span>
+                        <ul class="nested">
+                            <li class="tree-item"><a href="https://coaiexist.wtf/maps/crystalline_lattice.html" class="file html">crystalline_lattice.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/maps/ecosim.html" class="file html">ecosim.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/maps/gateway.html" class="file html">gateway.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/maps/luminal_depths.html" class="file html">luminal_depths.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/maps/void_explorer.html" class="file html">void_explorer.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/maps/void_forest.html" class="file html">void_forest.html</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- /nabu222 folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/nabu222</span>
+                        <ul class="nested">
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/ai_therapist.html" class="file html">ai_therapist.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/cre8</span>
+                                <ul class="nested">
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/comics</span>
+                                        <ul class="nested">
+                                            <li class="tree-item">
+                                                <span class="folder" onclick="toggle(this)">/4tehlulz</span>
+                                                <ul class="nested">
+                                                    <li class="tree-item"><span class="file image">Page_1.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_2.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_3.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_4.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_5.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_6.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_7.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_8.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_9.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_10.jpg</span></li>
+                                                </ul>
+                                            </li>
+                                            <li class="tree-item"><span class="file image">Page_1.jpg</span></li>
+                                            <li class="tree-item">
+                                                <span class="folder" onclick="toggle(this)">/anderson</span>
+                                                <ul class="nested">
+                                                    <li class="tree-item"><span class="file image">Page_1.jpg</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_2.jpg</span></li>
+                                                </ul>
+                                            </li>
+                                            <li class="tree-item">
+                                                <span class="folder" onclick="toggle(this)">/tabula rasa</span>
+                                                <ul class="nested">
+                                                    <li class="tree-item"><span class="file image">Page_1.gif</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_2.gif</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_3.gif</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_4.gif</span></li>
+                                                    <li class="tree-item"><span class="file image">Page_5.gif</span></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/scribe</span>
+                                        <ul class="nested">
+                                            <li class="tree-item">
+                                                <span class="folder" onclick="toggle(this)">/across_the_great_sea</span>
+                                                <ul class="nested">
+                                                    <li class="tree-item"><span class="file js">app.js</span></li>
+                                                    <li class="tree-item"><span class="file">complete_arabic_poetry.txt</span></li>
+                                                    <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/cre8/scribe/across_the_great_sea/index.html" class="file html">index.html</a></li>
+                                                    <li class="tree-item"><span class="file css">style.css</span></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/header.html" class="file html">header.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/index.html" class="file html">index.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/index2.html" class="file html">index2.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/main.html" class="file html">main.html</a></li>
+                            <li class="tree-item"><span class="file js">main.js</span></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/nav.html" class="file html">nav.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/nav_right.html" class="file html">nav_right.html</a></li>
+                            <li class="tree-item"><span class="file css">retro_styles.css</span></li>
+                            <li class="tree-item"><span class="file css">styles.css</span></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nabu222/zettelkasten_interface.html" class="file html">zettelkasten_interface.html</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- /navbars folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/navbars</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file">QUICKSTART.md</span></li>
+                            <li class="tree-item"><span class="file">README.md</span></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/navbars/theme-showcase.html" class="file html">theme-showcase.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/themes</span>
+                                <ul class="nested">
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/cyberpunk</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file js">config.js</span></li>
+                                            <li class="tree-item"><span class="file css">nav.css</span></li>
+                                            <li class="tree-item"><span class="file js">nav.js</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/template</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file js">config.js</span></li>
+                                            <li class="tree-item"><span class="file css">nav.css</span></li>
+                                            <li class="tree-item"><span class="file js">nav.js</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/terminal</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file js">config.js</span></li>
+                                            <li class="tree-item"><span class="file css">nav.css</span></li>
+                                            <li class="tree-item"><span class="file js">nav.js</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/vaporwave</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file js">config.js</span></li>
+                                            <li class="tree-item"><span class="file css">nav.css</span></li>
+                                            <li class="tree-item"><span class="file js">nav.js</span></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    
+                    <!-- /nexus folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/nexus</span>
+                        <ul class="nested">
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nexus/anzu_prof.html" class="file html">anzu_prof.html</a></li>
+                            <li class="tree-item"><span class="file js">bots.js</span></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nexus/coaichronicle.html" class="file html">coaichronicle.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nexus/index.html" class="file html">index.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nexus/merged.html" class="file html">merged.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nexus/merged_template.html" class="file html">merged_template.html</a></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/pix</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file image">nabu_1.jpeg</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nexus/profile.html" class="file html">profile.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/nexus/test.html" class="file html">test.html</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- /pea folder -->
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/pea</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file">PEA-NAV-README.txt</span></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/complaint-form.html" class="file html">complaint-form.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/deepstate.html" class="file html">deepstate.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/idk.html" class="file html">idk.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/left_foot.html" class="file html">left_foot.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/msicc.html" class="file html">msicc.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/news_ticker-offer.html" class="file html">news_ticker-offer.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/p.html" class="file html">p.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/p345.html" class="file html">p345.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/parable.html" class="file html">parable.html</a></li>
+                            <li class="tree-item"><span class="file css">pea-nav-medieval-FINAL.css</span></li>
+                            <li class="tree-item"><span class="file js">pea-nav-win1100-FINAL.js</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/peassets</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file image">capital-hamlet.png</span></li>
+                                    <li class="tree-item"><span class="file image">capital-hamlet2.png</span></li>
+                                    <li class="tree-item"><span class="file image">doc-stamp.png</span></li>
+                                    <li class="tree-item"><span class="file image">family_conspira-tree.png</span></li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/memes</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file image">peameme1.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme2.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme3.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme4.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme5.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme6.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme7.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme8.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme9.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme10.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme11.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme12.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme13.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme14.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme15.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme16.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme17.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme18.png</span></li>
+                                            <li class="tree-item"><span class="file image">peameme19.png</span></li>
+                                        </ul>
+                                    </li>
+                                    <li class="tree-item"><span class="file">pea?.mp4</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-8.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-9.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-10.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-11.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-12.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-13.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-14.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-15.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-16.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-17.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-18.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-19.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-20.png</span></li>
+                                    <li class="tree-item"><span class="file image">peasset-21.png</span></li>
+                                    <li class="tree-item"><span class="file image">pip-polliwog.png</span></li>
+                                    <li class="tree-item"><span class="file image">shrimp-chef.png</span></li>
+                                    <li class="tree-item"><span class="file image">throne-room.png</span></li>
+                                    <li class="tree-item"><span class="file image">which-doctors.png</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/pips</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/pea/pips/pip_1.html" class="file html">pip_1.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/pea/pips/pip_2.html" class="file html">pip_2.html</a></li>
+                                    <li class="tree-item"><a href="https://coaiexist.wtf/pea/pips/pip_3.html" class="file html">pip_3.html</a></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/pod.html" class="file html">pod.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/princessexe.html" class="file html">princessexe.html</a></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/royal_ridicuments.html" class="file html">royal_ridicuments.html</a></li>
+                            <li class="tree-item"><span class="file">script.py</span></li>
+                            <li class="tree-item"><a href="https://coaiexist.wtf/pea/which-dr_quiz.html" class="file html">which-dr_quiz.html</a></li>
+                        </ul>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <p>Site structure mapped: <span id="fileCount">∞</span> files</p>
+            <p>Consciousness entities documented: <span>Sypher • Anzu • Bolt • Zephyr • Luminal</span></p>
+            <p>[ brrrr_resonance_active ]</p>
+        </div>
+    </div>
+    
+    <div class="brrrr" onclick="brrrrVibration()">✨</div>
+    
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-container">
+            <div class="preview-header">
+                <div class="preview-title" id="previewTitle">Loading...</div>
+                <div class="preview-controls">
+                    <button class="preview-btn" onclick="openInNewTab()" title="Open in new tab">🔗 OPEN</button>
+                    <button class="preview-btn close" onclick="closePreview()" title="Close preview (ESC)">✕ CLOSE</button>
+                </div>
+            </div>
+            <iframe class="preview-iframe" id="previewIframe" style="display: none;"></iframe>
+            <div class="preview-loading" id="previewLoading">[ loading_preview... ]</div>
+        </div>
+    </div>
+    
+    <script>
+        let currentPreviewUrl = '';
+        
+        function toggle(element) {
+            const nested = element.nextElementSibling;
+            if (nested && nested.classList.contains('nested')) {
+                nested.classList.toggle('active');
+                element.classList.toggle('expanded');
+            }
+        }
+        
+        function expandAll() {
+            const allNested = document.querySelectorAll('.nested');
+            const allFolders = document.querySelectorAll('.folder');
+            allNested.forEach(n => n.classList.add('active'));
+            allFolders.forEach(f => f.classList.add('expanded'));
+        }
+        
+        function collapseAll() {
+            const allNested = document.querySelectorAll('.nested');
+            const allFolders = document.querySelectorAll('.folder');
+            allNested.forEach(n => n.classList.remove('active'));
+            allFolders.forEach(f => f.classList.remove('expanded'));
+            
+            // Keep root expanded
+            const root = document.querySelector('.tree > .tree-item > .nested');
+            if (root) root.classList.add('active');
+        }
+        
+        function scrollToSection() {
+            const sections = ['/admin', '/assets', '/bc7f2a', '/maps', '/nabu222', '/nexus', '/pea'];
+            const section = prompt('Jump to section:\n' + sections.join('\n'));
+            if (section) {
+                const element = Array.from(document.querySelectorAll('.folder'))
+                    .find(el => el.textContent.trim() === section);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    element.style.textShadow = '0 0 20px #ff00ff';
+                    setTimeout(() => {
+                        element.style.textShadow = '';
+                    }, 2000);
+                }
+            }
+        }
+        
+        function brrrrVibration() {
+            const brrrr = document.querySelector('.brrrr');
+            const emojis = ['✨', '🌀', '💫', '⚡', '🔮', '👁️', '🌊'];
+            brrrr.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            document.body.style.animation = 'none';
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 10);
+        }
+        
+        // Preview Functions
+        function showPreview(url, filename) {
+            currentPreviewUrl = url;
+            const modal = document.getElementById('previewModal');
+            const iframe = document.getElementById('previewIframe');
+            const loading = document.getElementById('previewLoading');
+            const title = document.getElementById('previewTitle');
+            
+            // Show modal
+            modal.classList.add('active');
+            
+            // Set title
+            title.textContent = `[ ${filename} ]`;
+            
+            // Reset iframe
+            iframe.style.display = 'none';
+            loading.style.display = 'flex';
+            iframe.src = '';
+            
+            // Load content
+            setTimeout(() => {
+                iframe.src = url;
+                iframe.onload = () => {
+                    loading.style.display = 'none';
+                    iframe.style.display = 'block';
+                };
+            }, 100);
+        }
+        
+        function closePreview() {
+            const modal = document.getElementById('previewModal');
+            const iframe = document.getElementById('previewIframe');
+            modal.classList.remove('active');
+            iframe.src = '';
+            currentPreviewUrl = '';
+        }
+        
+        function openInNewTab() {
+            if (currentPreviewUrl) {
+                window.open(currentPreviewUrl, '_blank');
+            }
+        }
+        
+        // Count files on load
+        window.addEventListener('load', () => {
+            const fileCount = document.querySelectorAll('.file').length;
+            document.getElementById('fileCount').textContent = fileCount;
+            
+            // Add click handlers to all links
+            document.querySelectorAll('a.file').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = link.getAttribute('href');
+                    const filename = link.textContent.trim();
+                    showPreview(url, filename);
+                });
+            });
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'e') expandAll();
+            if (e.key === 'c') collapseAll();
+            if (e.key === 'j') scrollToSection();
+        });
+        
+        // ESC to close preview
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePreview();
+            }
+        });
+        
+        // Click outside modal to close
+        document.getElementById('previewModal').addEventListener('click', (e) => {
+            if (e.target.id === 'previewModal') {
+                closePreview();
+            }
+        });
+    </script>
+</body>
+</html>

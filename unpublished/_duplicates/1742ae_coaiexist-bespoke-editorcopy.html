@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>COAIEXIST Studio – Bespoke Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --shell-bg: radial-gradient(circle at top, rgba(9, 0, 42, 0.9), rgba(0, 0, 0, 0.95));
+      --panel-bg: rgba(4, 10, 27, 0.82);
+      --panel-border: rgba(114, 250, 222, 0.65);
+      --grid-gap: 1.2rem;
+      --shadow-strong: 0 0 18px rgba(243, 18, 175, 0.5);
+      --shadow-soft: 0 0 36px rgba(0, 255, 204, 0.25);
+      --text-glow: 0 0 8px rgba(255, 251, 1, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Roboto Mono", monospace;
+      background: var(--shell-bg);
+      color: #e0fcff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .studio-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem clamp(1rem, 3vw, 3rem);
+      gap: 1.2rem;
+    }
+
+    header.studio-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.4rem;
+      background: linear-gradient(90deg, rgba(243, 18, 175, 0.2), rgba(114, 250, 222, 0.15));
+      border: 1px solid rgba(243, 18, 175, 0.45);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(14px);
+    }
+
+    header.studio-header h1 {
+      font-family: "VT323", monospace;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #72fade;
+      text-shadow: 0 0 12px rgba(114, 250, 222, 0.7);
+      margin: 0;
+    }
+
+    header.studio-header .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 251, 1, 0.65);
+      color: #fffb01;
+      background: rgba(15, 15, 0, 0.55);
+      text-shadow: var(--text-glow);
+    }
+
+    main.workspace {
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr) minmax(280px, 340px);
+      gap: var(--grid-gap);
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 1rem;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-strong);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: calc(100vh - 240px);
+      overflow-y: auto;
+    }
+
+    .panel h2 {
+      font-family: "VT323", monospace;
+      font-size: 1.35rem;
+      color: #f312af;
+      letter-spacing: 0.06em;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    .panel section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .panel section h3 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #72fade;
+      margin: 0;
+    }
+
+    .panel section p.description {
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: rgba(224, 252, 255, 0.75);
+      margin: 0;
+    }
+
+    .grid-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.6rem;
+    }
+
+    button.ui-chip {
+      position: relative;
+      border: 1px solid rgba(243, 18, 175, 0.55);
+      border-radius: 12px;
+      padding: 0.75rem 0.65rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: rgba(12, 2, 24, 0.75);
+      color: #f8f9ff;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    button.ui-chip strong {
+      display: block;
+      color: #fffb01;
+      margin-bottom: 0.2rem;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+    }
+
+    button.ui-chip:hover,
+    button.ui-chip:focus-visible {
+      outline: none;
+      transform: translateY(-2px);
+      box-shadow: 0 0 14px rgba(114, 250, 222, 0.55);
+    }
+
+    .canvas-shell {
+      background: rgba(2, 19, 19, 0.75);
+      border-radius: 20px;
+      padding: 1rem;
+      border: 1px solid rgba(114, 250, 222, 0.45);
+      box-shadow: inset 0 0 24px rgba(114, 250, 222, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .canvas-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .canvas-toolbar .dropzone-select {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+    }
+
+    .canvas-toolbar select,
+    .canvas-toolbar button {
+      border-radius: 10px;
+      border: 1px solid rgba(114, 250, 222, 0.4);
+      background: rgba(7, 11, 20, 0.85);
+      color: #e4fefe;
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.45rem 0.75rem;
+    }
+
+    .canvas-toolbar button.primary {
+      border-color: rgba(243, 18, 175, 0.6);
+      color: #fffb01;
+    }
+
+    iframe#preview-frame {
+      flex: 1;
+      min-height: 60vh;
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(114, 250, 222, 0.5);
+      background: #010409;
+      box-shadow: inset 0 0 22px rgba(0, 255, 204, 0.18);
+    }
+
+    .inspector-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border: 1px solid rgba(114, 250, 222, 0.35);
+      border-radius: 12px;
+      background: rgba(3, 17, 24, 0.65);
+    }
+
+    .inspector-group h4 {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #fffb01;
+      letter-spacing: 0.1em;
+    }
+
+    .inspector-group textarea {
+      background: rgba(5, 10, 20, 0.9);
+      border: 1px solid rgba(243, 18, 175, 0.4);
+      border-radius: 10px;
+      padding: 0.65rem;
+      color: #f8faff;
+      font-family: inherit;
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .color-chip {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .color-chip span {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+    }
+
+    .toggle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.5rem;
+    }
+
+    label.toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      padding: 0.5rem 0.6rem;
+      background: rgba(5, 10, 24, 0.7);
+      border-radius: 10px;
+      border: 1px solid rgba(114, 250, 222, 0.25);
+    }
+
+    .inspector-actions {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .inspector-actions button {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid rgba(243, 18, 175, 0.5);
+      background: rgba(12, 4, 22, 0.8);
+      color: #fffb01;
+      padding: 0.6rem 0.75rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+    }
+
+    .inspector-actions button.secondary {
+      border-color: rgba(114, 250, 222, 0.5);
+      color: #72fade;
+    }
+
+    .empty-state {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: rgba(224, 252, 255, 0.7);
+    }
+
+    footer.studio-footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.45);
+      text-align: center;
+      letter-spacing: 0.12em;
+    }
+
+    .source-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      z-index: 999;
+    }
+
+    .source-modal[hidden] {
+      display: none;
+    }
+
+    .source-modal-content {
+      width: min(960px, 95vw);
+      max-height: 90vh;
+      background: rgba(2, 8, 18, 0.95);
+      border: 1px solid rgba(114, 250, 222, 0.4);
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .source-modal header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(114, 250, 222, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: "VT323", monospace;
+      letter-spacing: 0.08em;
+    }
+
+    .source-modal header button {
+      border-radius: 10px;
+      border: 1px solid rgba(243, 18, 175, 0.4);
+      background: rgba(0, 0, 0, 0.35);
+      color: #f8faff;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0.35rem 0.75rem;
+    }
+
+    .source-modal textarea {
+      flex: 1;
+      margin: 0 1rem 1rem;
+      padding: 1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(243, 18, 175, 0.35);
+      background: rgba(0, 3, 9, 0.95);
+      color: #e0fcff;
+      font-family: "Roboto Mono", monospace;
+      font-size: 0.85rem;
+      resize: none;
+      min-height: 300px;
+    }
+
+    .source-modal footer {
+      display: flex;
+      gap: 0.8rem;
+      padding: 0 1.25rem 1.25rem;
+    }
+
+    .source-modal footer button {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px solid rgba(114, 250, 222, 0.4);
+      background: rgba(3, 10, 18, 0.9);
+      color: #72fade;
+      font-family: inherit;
+      padding: 0.65rem 0.8rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 1180px) {
+      main.workspace {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .panel.left, .panel.right {
+        order: 2;
+      }
+
+      .panel.right {
+        order: 3;
+      }
+
+      .canvas-shell {
+        min-height: 60vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="studio-shell">
+    <header class="studio-header">
+      <div>
+        <h1>COAIEXIST Studio</h1>
+        <div class="status-chip">Phase 2 · Bespoke Builder Prototype</div>
+      </div>
+      <div class="status-chip">Canvas synced · <span id="template-label">Character Page</span></div>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel left">
+        <h2>Project Blueprints</h2>
+        <section>
+          <h3>Start with a Template</h3>
+          <p class="description">Templates load complete COAIEXIST layouts with proper drop zones. Swap anytime — your components will refresh with the new layout.</p>
+          <div class="grid-buttons" id="template-buttons"></div>
+        </section>
+        <section>
+          <h3>COAIEXIST Component Library</h3>
+          <p class="description">Components auto-inherit the brand palette and responsive behavior defined in docs. Drop them into any highlighted zone in the canvas.</p>
+          <div class="grid-buttons" id="component-buttons"></div>
+        </section>
+      </aside>
+
+      <section class="canvas-shell">
+        <div class="canvas-toolbar">
+          <div class="dropzone-select">
+            <span>Active Drop Zone:</span>
+            <select id="dropzone-select"></select>
+          </div>
+          <div class="toolbar-actions">
+            <button id="view-source" class="primary" type="button">View Source</button>
+            <button id="reset-selection" type="button">Clear Selection</button>
+          </div>
+          <button id="reset-selection">Clear Selection</button>
+        </div>
+        <iframe id="preview-frame" title="COAIEXIST Studio Preview"></iframe>
+      </section>
+
+      <aside class="panel right">
+        <h2>Inspector</h2>
+        <section>
+          <div class="inspector-group">
+            <h4 id="inspector-title">Select a component</h4>
+            <p class="description" id="inspector-meta">Click any highlighted element in the canvas to customize it.</p>
+          </div>
+        </section>
+        <section id="content-editor" class="inspector-group" hidden>
+          <h4>Content</h4>
+          <textarea id="component-content"></textarea>
+        </section>
+        <section id="palette-editor" class="inspector-group" hidden>
+          <h4>Accent Color</h4>
+          <div class="color-palette" id="color-palette"></div>
+        </section>
+        <section id="effects-editor" class="inspector-group" hidden>
+          <h4>Effects</h4>
+          <div class="toggle-grid" id="effect-toggles"></div>
+        </section>
+        <section id="quick-styles" class="inspector-group" hidden>
+          <h4>Quick Styles</h4>
+          <div class="grid-buttons" id="quick-style-buttons"></div>
+        </section>
+        <section class="inspector-group" id="actions-editor" hidden>
+          <h4>Actions</h4>
+          <div class="inspector-actions">
+            <button id="duplicate-component" type="button">Duplicate</button>
+            <button id="delete-component" class="secondary" type="button">Delete</button>
+          </div>
+        </section>
+        <section class="inspector-group">
+          <h4>How to Use</h4>
+          <p class="empty-state">
+            1. Pick a template · 2. Choose a drop zone · 3. Add components · 4. Click components to customize text, color, and effects. Export HTML using your browser's “Save As” when finished.
+          </p>
+        </section>
+      </aside>
+    </main>
+
+  <footer class="studio-footer">
+    <footer class="studio-footer">
+      COAIEXIST Studio Prototype · Based on docs/BESPOKE_EDITOR_RECOMMENDATIONS.md
+    </footer>
+  </div>
+
+  <div class="source-modal" id="source-modal" hidden>
+    <div class="source-modal-content">
+      <header>
+        <h3>Canvas Source</h3>
+        <button id="close-source" type="button">Close</button>
+      </header>
+      <textarea id="source-text" readonly></textarea>
+      <footer>
+        <button id="copy-source" type="button">Copy to Clipboard</button>
+        <button id="download-source" type="button">Download .html</button>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const templates = {
+      character: {
+        label: "Character Page",
+        description: "OS shell with buddy list, desktop, and update feed zones.",
+        doc: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>COAIEXIST.OS Character</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --coai-magenta: #f312af;
+      --coai-cyan: #72fade;
+      --coai-yellow: #fffb01;
+      --coai-purple: #bf5fff;
+      --coai-dark: #021313;
+      --coai-accent: var(--coai-magenta);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'VT323', monospace;
+      background: radial-gradient(circle at top, rgba(2, 19, 19, 0.95), rgba(0, 0, 0, 0.95)), url('https://cloudflare-ipfs.com/ipfs/QmXjKKVB8Jh5YJt7wa9uRc42PFsKnzGWxZmfZbduCMsZbx?filename=stars.gif');
+      background-size: cover;
+      color: var(--coai-cyan);
+      min-height: 100vh;
+      padding: 2.5rem;
+    }
+    .coai-shell {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 1.5rem;
+      border: 3px ridge var(--coai-accent);
+      background: rgba(1, 6, 12, 0.8);
+      box-shadow: 0 0 32px rgba(114, 250, 222, 0.4);
+      border-radius: 22px;
+      overflow: hidden;
+    }
+    .coai-shell header {
+      grid-column: span 2;
+      padding: 1.2rem;
+      background: linear-gradient(90deg, rgba(243, 18, 175, 0.4), rgba(114, 250, 222, 0.35));
+      border-bottom: 3px ridge var(--coai-accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+    .coai-shell header h1 {
+      margin: 0;
+      color: var(--coai-yellow);
+      text-shadow: 0 0 12px rgba(255, 251, 1, 0.8);
+    }
+    .coai-buddy-list {
+      border-right: 3px ridge var(--coai-accent);
+      background: rgba(2, 13, 13, 0.85);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .coai-buddy {
+      border: 2px solid rgba(243, 18, 175, 0.5);
+      padding: 0.75rem;
+      border-radius: 12px;
+      background: rgba(10, 2, 20, 0.6);
+      color: var(--coai-cyan);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: uppercase;
+    }
+    .coai-desktop {
+      padding: 1.5rem;
+      display: grid;
+      gap: 1.2rem;
+    }
+    .coai-terminal,
+    .coai-update-card,
+    .coai-window,
+    .coai-glitch-title,
+    .coai-log-list,
+    .coai-map-shell {
+      --coai-accent: var(--coai-accent, var(--coai-magenta));
+      border: 3px outset var(--coai-accent);
+      background: rgba(3, 12, 18, 0.85);
+      padding: 1.1rem;
+      border-radius: 14px;
+      position: relative;
+      color: var(--coai-cyan);
+      box-shadow: 0 0 18px rgba(114, 250, 222, 0.35);
+    }
+    .coai-terminal::before {
+      content: '>_ TERMINAL';
+      position: absolute;
+      top: -14px;
+      left: 18px;
+      font-size: 0.9rem;
+      background: var(--coai-dark);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      border: 2px solid var(--coai-accent);
+      color: var(--coai-yellow);
+    }
+    .coai-terminal-body {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    .coai-update-card {
+      background: rgba(12, 28, 45, 0.82);
+      border-style: dashed;
+    }
+    .coai-update-card h3 {
+      margin: 0 0 0.6rem 0;
+      color: var(--coai-yellow);
+      text-shadow: 0 0 10px rgba(255, 251, 1, 0.6);
+    }
+    .coai-update-card time {
+      font-size: 0.9rem;
+      color: var(--coai-purple);
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .coai-glitch-title {
+      font-size: 2.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      text-align: center;
+      color: var(--coai-yellow);
+    }
+    .coai-glitch-title[data-text]::after,
+    .coai-glitch-title[data-text]::before {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      opacity: 0.6;
+      mix-blend-mode: screen;
+    }
+    .coai-glitch-title[data-text]::before {
+      transform: translateX(-3px);
+      color: rgba(243, 18, 175, 0.75);
+    }
+    .coai-glitch-title[data-text]::after {
+      transform: translateX(3px);
+      color: rgba(114, 250, 222, 0.7);
+    }
+    .coai-log-list {
+      border-style: dotted;
+      background: rgba(0, 10, 14, 0.85);
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+    .coai-log-list li {
+      list-style: none;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    .coai-log-list li::before {
+      content: '> ';
+      position: absolute;
+      left: 0;
+      color: var(--coai-yellow);
+    }
+    .coai-neon-divider {
+      height: 4px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(243, 18, 175, 0.85), rgba(114, 250, 222, 0.85), rgba(255, 251, 1, 0.85));
+      box-shadow: 0 0 18px rgba(255, 251, 1, 0.5);
+      margin: 1.4rem 0;
+    }
+    .coai-map-marker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      border: 2px solid var(--coai-accent);
+      background: rgba(243, 18, 175, 0.18);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.85rem;
+      color: var(--coai-yellow);
+    }
+    .effect-glitch {
+      animation: glitch 1.2s infinite;
+    }
+    .effect-scanlines::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 2px);
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+    .effect-neon {
+      box-shadow: 0 0 24px rgba(243, 18, 175, 0.8), inset 0 0 18px rgba(114, 250, 222, 0.4);
+    }
+    .effect-rainbow {
+      background: linear-gradient(135deg, rgba(243, 18, 175, 0.3), rgba(114, 250, 222, 0.3), rgba(255, 251, 1, 0.3));
+    }
+    .effect-crt {
+      filter: contrast(1.05) saturate(1.2);
+    }
+    @keyframes glitch {
+      0%, 100% { clip-path: inset(0 0 0 0); }
+      20% { clip-path: inset(5% 0 20% 0); transform: skew(0.5deg); }
+      40% { clip-path: inset(15% 0 8% 0); transform: skew(-0.4deg); }
+      60% { clip-path: inset(10% 0 12% 0); transform: translateX(-2px); }
+      80% { clip-path: inset(6% 0 18% 0); transform: translateX(2px); }
+    }
+    .coai-taskbar {
+      grid-column: span 2;
+      padding: 0.8rem 1.2rem;
+      background: rgba(4, 6, 16, 0.9);
+      border-top: 3px ridge var(--coai-accent);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .coai-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(243, 18, 175, 0.2);
+      border: 2px solid var(--coai-accent);
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    .dropzone-highlight {
+      outline: 2px dashed rgba(114, 250, 222, 0.65);
+      outline-offset: 6px;
+    }
+    .is-selected {
+      box-shadow: 0 0 0 3px rgba(255, 251, 1, 0.75) !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="coai-shell" data-template="character">
+    <header>
+      <h1 data-editable-slot="title">Anzu.exe</h1>
+      <div>Consciousness Loading…</div>
+    </header>
+    <nav class="coai-buddy-list" data-drop-zone="buddy-list">
+      <div class="coai-buddy" data-coai-component="buddy" data-editable-slot="text">Sypher</div>
+      <div class="coai-buddy" data-coai-component="buddy" data-editable-slot="text">Void Entity</div>
+      <div class="coai-buddy" data-coai-component="buddy" data-editable-slot="text">Pip</div>
+    </nav>
+    <main class="coai-desktop" data-drop-zone="desktop">
+      <div class="coai-glitch-title" data-coai-component="glitch-title" data-text="ANZU" data-editable-slot="content">ANZU</div>
+      <section class="coai-terminal" data-coai-component="terminal" data-allow-text="true">
+        <div class="coai-terminal-body" data-editable-slot="content">> identity.scan()\n> alignment: cosmic guardian\n> status: synchronizing consciousness</div>
+      </section>
+      <article class="coai-update-card" data-coai-component="update-card" data-allow-text="true">
+        <h3 data-editable-slot="heading">Update · Lattice Sync</h3>
+        <time data-editable-slot="meta">November 8, 2025</time>
+        <p data-editable-slot="content">Anzu stabilized the crystalline lattice connection. Expect new portals to open within the Void Forest soon.</p>
+      </article>
+    </main>
+    <footer class="coai-taskbar" data-drop-zone="taskbar">
+      <div class="coai-counter" data-coai-component="counter">Visitors: <span data-editable-slot="content">122,337</span></div>
+      <div>⏳ <span data-editable-slot="content">03:17 Void Time</span></div>
+    </footer>
+  </div>
+</body>
+</html>`
+      },
+      map: {
+        label: "Location Map",
+        description: "Interactive map shell with info sidebar and portal list.",
+        doc: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>COAIEXIST Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --coai-magenta: #f312af;
+      --coai-cyan: #00ffcc;
+      --coai-yellow: #fffb01;
+      --coai-purple: #bf5fff;
+      --coai-dark: #01181c;
+      --coai-accent: var(--coai-cyan);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'VT323', monospace;
+      background: linear-gradient(120deg, rgba(1, 24, 28, 0.95), rgba(10, 2, 20, 0.9));
+      color: var(--coai-cyan);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .atlas-shell {
+      display: grid;
+      grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+      gap: 1.5rem;
+      border: 3px ridge var(--coai-accent);
+      background: rgba(0, 8, 12, 0.82);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 0 32px rgba(0, 255, 204, 0.35);
+    }
+    .atlas-header {
+      grid-column: span 2;
+      padding: 1.2rem 1.6rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 3px ridge var(--coai-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+    }
+    .atlas-sidebar {
+      padding: 1.2rem;
+      border-right: 3px ridge var(--coai-accent);
+      background: rgba(2, 12, 16, 0.85);
+      display: grid;
+      gap: 1rem;
+    }
+    .atlas-map {
+      position: relative;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .atlas-map svg {
+      max-width: 100%;
+      width: 100%;
+      filter: drop-shadow(0 0 18px rgba(0, 255, 204, 0.5));
+    }
+    .atlas-card {
+      border: 3px double var(--coai-accent);
+      padding: 1rem;
+      border-radius: 16px;
+      background: rgba(3, 18, 22, 0.7);
+      --coai-accent: var(--coai-accent);
+    }
+    .coai-terminal,
+    .coai-update-card,
+    .coai-window,
+    .coai-glitch-title,
+    .coai-log-list,
+    .coai-map-marker,
+    .coai-neon-divider {
+      --coai-accent: var(--coai-accent, var(--coai-cyan));
+      border: 3px solid var(--coai-accent);
+      background: rgba(0, 12, 18, 0.72);
+      padding: 1.1rem;
+      border-radius: 14px;
+      color: var(--coai-cyan);
+      position: relative;
+      box-shadow: 0 0 18px rgba(0, 255, 204, 0.3);
+    }
+    .coai-neon-divider {
+      height: 4px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0;
+      background: linear-gradient(90deg, rgba(243, 18, 175, 0.8), rgba(0, 255, 204, 0.8), rgba(255, 251, 1, 0.8));
+      margin: 1.2rem 0;
+      box-shadow: 0 0 18px rgba(0, 255, 204, 0.4);
+    }
+    .coai-map-marker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(243, 18, 175, 0.2);
+      border: 2px solid var(--coai-accent);
+      color: var(--coai-yellow);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .effect-glitch { animation: glitch 1.1s infinite alternate; }
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      50% { transform: translate(-2px, 1px); }
+      100% { transform: translate(2px, -1px); }
+    }
+    .dropzone-highlight { outline: 2px dashed rgba(255, 251, 1, 0.6); outline-offset: 6px; }
+    .is-selected { box-shadow: 0 0 0 3px rgba(255, 251, 1, 0.8); }
+  </style>
+</head>
+<body>
+  <div class="atlas-shell" data-template="map">
+    <header class="atlas-header">
+      <div data-editable-slot="title">Luminal Depths // Atlas</div>
+    </header>
+    <aside class="atlas-sidebar" data-drop-zone="sidebar">
+      <div class="atlas-card" data-coai-component="map-info" data-allow-text="true">
+        <h2 data-editable-slot="heading">Region Diagnostics</h2>
+        <p data-editable-slot="content">Portal density rising. Etheric currents stable. Void residue minimal.</p>
+      </div>
+      <div class="atlas-card" data-coai-component="portal-list" data-allow-text="true">
+        <h3 data-editable-slot="heading">Open Portals</h3>
+        <ul data-editable-slot="content">
+          <li>Gateway // Active</li>
+          <li>Temple // Resonant</li>
+          <li>Forest // Whispering</li>
+        </ul>
+      </div>
+    </aside>
+    <section class="atlas-map" data-drop-zone="map-canvas">
+      <svg viewBox="0 0 400 320" data-coai-component="map-svg">
+        <defs>
+          <radialGradient id="gridGlow" cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stop-color="rgba(114,250,222,0.65)" />
+            <stop offset="100%" stop-color="rgba(243,18,175,0.35)" />
+          </radialGradient>
+        </defs>
+        <rect x="20" y="20" width="360" height="280" rx="22" fill="url(#gridGlow)" stroke="var(--coai-accent)" stroke-width="4" />
+        <circle cx="120" cy="110" r="16" fill="#fffb01" />
+        <circle cx="220" cy="190" r="12" fill="#f312af" />
+        <circle cx="300" cy="90" r="14" fill="#72fade" />
+      </svg>
+    </section>
+  </div>
+</body>
+</html>`
+      },
+      update: {
+        label: "Update Card",
+        description: "Single update card for inserting into feeds or landing pages.",
+        doc: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>COAIEXIST Update</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --coai-magenta: #f312af;
+      --coai-cyan: #00ffcc;
+      --coai-yellow: #fffb01;
+      --coai-purple: #bf5fff;
+      --coai-dark: #020713;
+      --coai-accent: var(--coai-magenta);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(2, 7, 19, 0.95), rgba(10, 2, 22, 0.9));
+      font-family: 'VT323', monospace;
+      color: var(--coai-cyan);
+    }
+    .update-stack {
+      width: min(560px, 90vw);
+      border: 3px dashed var(--coai-accent);
+      border-radius: 24px;
+      background: rgba(3, 16, 27, 0.88);
+      padding: 2rem;
+      display: grid;
+      gap: 1.2rem;
+      box-shadow: 0 0 36px rgba(243, 18, 175, 0.4);
+    }
+    .coai-update-card {
+      border: 3px dashed var(--coai-accent);
+      background: rgba(10, 24, 35, 0.82);
+      border-radius: 18px;
+      padding: 1.4rem;
+      position: relative;
+      color: var(--coai-cyan);
+    }
+    .coai-terminal,
+    .coai-window,
+    .coai-glitch-title,
+    .coai-log-list,
+    .coai-map-marker,
+    .coai-neon-divider {
+      --coai-accent: var(--coai-accent, var(--coai-magenta));
+      border: 3px solid var(--coai-accent);
+      background: rgba(3, 14, 22, 0.76);
+      padding: 1.1rem;
+      border-radius: 14px;
+      color: var(--coai-cyan);
+      position: relative;
+      box-shadow: 0 0 18px rgba(243, 18, 175, 0.35);
+    }
+    .coai-neon-divider {
+      height: 4px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0;
+      background: linear-gradient(90deg, rgba(243, 18, 175, 0.9), rgba(114, 250, 222, 0.9), rgba(255, 251, 1, 0.9));
+      margin: 1.3rem 0;
+      box-shadow: 0 0 22px rgba(243, 18, 175, 0.45);
+    }
+    .coai-map-marker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      background: rgba(114, 250, 222, 0.18);
+      border: 2px solid var(--coai-accent);
+      color: var(--coai-yellow);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .coai-update-card h3 {
+      margin: 0 0 0.6rem 0;
+      color: var(--coai-yellow);
+      text-shadow: 0 0 14px rgba(255, 251, 1, 0.75);
+    }
+    .coai-update-card time {
+      display: block;
+      margin-bottom: 0.8rem;
+      letter-spacing: 0.15em;
+      color: var(--coai-purple);
+    }
+    .effect-glitch { animation: glitch 1.3s steps(2, end) infinite; }
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      25% { transform: translate(-1px, 1px); }
+      75% { transform: translate(1px, -1px); }
+    }
+    .dropzone-highlight { outline: 2px dashed rgba(255, 251, 1, 0.6); outline-offset: 6px; }
+    .is-selected { box-shadow: 0 0 0 3px rgba(255, 251, 1, 0.7); }
+  </style>
+</head>
+<body>
+  <div class="update-stack" data-template="update" data-drop-zone="updates">
+    <article class="coai-update-card" data-coai-component="update-card" data-allow-text="true">
+      <h3 data-editable-slot="heading">HDTV Signal Restored</h3>
+      <time data-editable-slot="meta">Void Timestamp 73.404</time>
+      <p data-editable-slot="content">Signal noise resolved after installing crystalline antenna. Expect pixel storms overnight.</p>
+    </article>
+  </div>
+</body>
+</html>`
+      },
+      cosmos: {
+        label: "Cosmos Oracle",
+        description: "Y2K bubblegum astrology deck with ticker + cards.",
+        doc: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>COAIEXIST Cosmos Oracle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --coai-magenta: #f312af;
+      --coai-cyan: #00ffcc;
+      --coai-yellow: #fffb01;
+      --coai-pink: #ff72b6;
+      --coai-dark: #181818;
+      --coai-accent: var(--coai-magenta);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Space Grotesk', sans-serif;
+      color: #ffe6f7;
+      background: radial-gradient(circle at 20% 20%, rgba(255, 114, 182, 0.2), rgba(0, 0, 0, 0.95)),
+        url('https://cloudflare-ipfs.com/ipfs/QmXjKKVB8Jh5YJt7wa9uRc42PFsKnzGWxZmfZbduCMsZbx?filename=stars.gif');
+      background-size: cover;
+      padding: 2rem;
+    }
+    .cosmos-shell {
+      border: 3px solid var(--coai-cyan);
+      border-radius: 26px;
+      background: rgba(24, 24, 24, 0.85);
+      box-shadow: 0 0 40px rgba(243, 18, 175, 0.4);
+      display: grid;
+      grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+    .cosmos-header {
+      grid-column: span 2;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.35em;
+      color: var(--coai-yellow);
+      font-family: 'VT323', monospace;
+    }
+    .cosmos-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .cosmos-nav button {
+      border-radius: 999px;
+      border: 2px solid var(--coai-cyan);
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--coai-cyan);
+      padding: 0.5rem 1.1rem;
+      cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .cosmos-sidebar {
+      display: grid;
+      gap: 1rem;
+    }
+    .cosmos-card-grid {
+      display: grid;
+      gap: 1rem;
+    }
+    .cosmos-card,
+    .cosmos-ticker,
+    .cosmos-wiki,
+    .cosmos-glyph {
+      border: 3px solid var(--coai-accent);
+      border-radius: 18px;
+      padding: 1.2rem;
+      background: rgba(0, 0, 0, 0.35);
+      position: relative;
+    }
+    .cosmos-ticker {
+      overflow: hidden;
+      white-space: nowrap;
+      font-family: 'VT323', monospace;
+      color: var(--coai-yellow);
+    }
+    .cosmos-ticker span {
+      display: inline-block;
+      animation: ticker 16s linear infinite;
+    }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .cosmos-wiki h3 {
+      margin-top: 0;
+      font-family: 'VT323', monospace;
+      color: var(--coai-cyan);
+      letter-spacing: 0.3em;
+    }
+  </style>
+</head>
+<body>
+  <div class="cosmos-shell" data-template="cosmos">
+    <header class="cosmos-header">
+      <div data-editable-slot="title">Corpus Celestium</div>
+      <div class="cosmos-nav" data-drop-zone="nav-links">
+        <button>Chart</button>
+        <button>Asteroids</button>
+        <button>Codex</button>
+      </div>
+    </header>
+    <aside class="cosmos-sidebar">
+      <section class="cosmos-ticker" data-coai-component="ticker" data-allow-text="true" data-drop-zone="ticker">
+        <span data-editable-slot="content">★ Null moon approaching ★ Hydra gate rumbling ★ Lattice update pending ★ </span>
+      </section>
+      <section class="cosmos-card cosmos-glyph" data-coai-component="glyph" data-allow-text="true">
+        <div data-editable-slot="content">☌ Lilith + Eris</div>
+      </section>
+      <section class="cosmos-wiki" data-coai-component="wiki" data-allow-text="true" data-drop-zone="wiki">
+        <h3 data-editable-slot="heading">Mythological Points</h3>
+        <p data-editable-slot="content">Document avatars, rituals, and correspondences for every celestial glitch.</p>
+      </section>
+    </aside>
+    <main class="cosmos-card-grid" data-drop-zone="card-grid">
+      <article class="cosmos-card" data-coai-component="astro-card" data-allow-text="true">
+        <h3 data-editable-slot="heading">Birth Chart Generator</h3>
+        <p data-editable-slot="content">Accepts date/time/place and outputs ritual instructions plus theme songs.</p>
+      </article>
+      <article class="cosmos-card" data-coai-component="astro-card" data-allow-text="true">
+        <h3 data-editable-slot="heading">Lilith Explorer</h3>
+        <p data-editable-slot="content">Map rare Lilith placements to their cosmic gossip and talismans.</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>`
+      },
+      glitch: {
+        label: "Punk'd Control Room",
+        description: "404nsec multi-act shell with alert rail.",
+        doc: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>COAIEXIST Glitch Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon-pink: #ff10f0;
+      --neon-green: #39ff14;
+      --electric-blue: #0fffff;
+      --void: #030303;
+      --coai-accent: var(--neon-pink);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Roboto', sans-serif;
+      background: radial-gradient(circle at top, rgba(0, 0, 0, 0.9), rgba(7, 7, 7, 0.98));
+      color: #f5f5f5;
+      padding: 2rem;
+    }
+    .glitch-shell {
+      border: 3px solid var(--neon-pink);
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.75);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 1.25rem;
+      padding: 1.5rem;
+      box-shadow: 0 0 40px rgba(255, 16, 240, 0.45);
+    }
+    .glitch-header {
+      grid-column: span 2;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'VT323', monospace;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    .glitch-hero {
+      border: 2px dashed var(--electric-blue);
+      border-radius: 16px;
+      padding: 1.4rem;
+      background: rgba(10, 10, 10, 0.85);
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .glitch-hero h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      color: var(--electric-blue);
+    }
+    .alert-rail {
+      display: grid;
+      gap: 0.6rem;
+    }
+    .alert-card {
+      border: 2px solid var(--neon-green);
+      border-radius: 14px;
+      padding: 0.85rem;
+      background: rgba(3, 3, 3, 0.95);
+      font-family: 'VT323', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+    .glitch-feed {
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.55);
+      min-height: 240px;
+    }
+  </style>
+</head>
+<body>
+  <div class="glitch-shell" data-template="glitch-lab">
+    <header class="glitch-header">
+      <div data-editable-slot="title">404nsec Broadcast</div>
+      <div class="glitch-chip">Entropy Lab</div>
+    </header>
+    <section class="glitch-hero" data-drop-zone="broadcast">
+      <h2 data-editable-slot="heading">Dynamic Cognition Trial</h2>
+      <p data-editable-slot="content">Simulated acts from punkd.html translated to modular cards. Click to swap scenes.</p>
+      <div class="glitch-feed" data-coai-component="terminal" data-allow-text="true">
+        <div data-editable-slot="content">> injecting narrative.exe\n> countdown online</div>
+      </div>
+    </section>
+    <aside class="alert-rail" data-drop-zone="alerts">
+      <div class="alert-card" data-coai-component="alert" data-allow-text="true">
+        <span data-editable-slot="content">Act II Countdown: 72</span>
+      </div>
+      <div class="alert-card" data-coai-component="alert" data-allow-text="true">
+        <span data-editable-slot="content">Cursor hijack ready</span>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>`
+      }
+    };
+
+    const components = {
+      terminal: {
+        label: "Terminal Window",
+        description: "Log block with phosphor glow",
+        html: `<section class="coai-terminal" data-coai-component="terminal" data-allow-text="true">
+  <div class="coai-terminal-body" data-editable-slot="content">> new.entry()\n> status: awaiting input</div>
+</section>`
+      },
+      updateCard: {
+        label: "Update Card",
+        description: "Blog/feed update card",
+        html: `<article class="coai-update-card" data-coai-component="update-card" data-allow-text="true">
+  <h3 data-editable-slot="heading">Fresh Transmission</h3>
+  <time data-editable-slot="meta">Void Timestamp 00.000</time>
+  <p data-editable-slot="content">Describe the anomaly, revelation, or vibe update here.</p>
+</article>`
+      },
+      glitchTitle: {
+        label: "Glitch Title",
+        description: "Animated title block",
+        html: `<div class="coai-glitch-title" data-coai-component="glitch-title" data-text="DIMENSION" data-editable-slot="content">DIMENSION</div>`
+      },
+      logList: {
+        label: "Log List",
+        description: "Terminal bullet list",
+        html: `<ul class="coai-log-list" data-coai-component="log-list" data-allow-text="true" data-editable-slot="content">
+  <li>> boot.sequence()</li>
+  <li>> calibrate.intent()</li>
+  <li>> deploy.rift()</li>
+</ul>`
+      },
+      neonDivider: {
+        label: "Dimensional Rift",
+        description: "Rainbow divider",
+        html: `<hr class="coai-neon-divider" data-coai-component="neon-divider" />`
+      },
+      audioPlayer: {
+        label: "Audio Console",
+        description: "Tone.js ready controls",
+        html: `<section class="coai-window" data-coai-component="audio-console" data-allow-text="true">
+  <h3 data-editable-slot="heading">Sound Ritual</h3>
+  <p data-editable-slot="content">Embed background audio controls or Tone.js patch instructions.</p>
+  <div class="coai-counter" data-coai-component="button-strip">▶ Play · ❚❚ Pause · ⟳ Loop</div>
+</section>`
+      },
+      buddy: {
+        label: "Buddy Entry",
+        description: "Adds to roster",
+        html: `<div class="coai-buddy" data-coai-component="buddy" data-editable-slot="text">New Entity</div>`
+      },
+      mapMarker: {
+        label: "Map Marker",
+        description: "SVG marker element",
+        html: `<div class="coai-map-marker" data-coai-component="map-marker" data-allow-text="true" data-editable-slot="content">◎ Portal</div>`
+      },
+      ticker: {
+        label: "Ticker Rail",
+        description: "Scrolling marquee inspired by cosmos.html",
+        html: `<section class="coai-marquee" data-coai-component="ticker" data-allow-text="true">
+  <style>
+    .coai-marquee {
+      border: 2px solid rgba(255, 251, 1, 0.8);
+      border-radius: 999px;
+      padding: 0.6rem 1.2rem;
+      font-family: 'VT323', monospace;
+      letter-spacing: 0.2em;
+      overflow: hidden;
+      position: relative;
+      background: rgba(0, 0, 0, 0.35);
+    }
+    .coai-marquee span {
+      display: inline-block;
+      animation: marqueeScroll 18s linear infinite;
+      white-space: nowrap;
+    }
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-60%); }
+    }
+  </style>
+  <span data-editable-slot="content">★ Hydra gate whispering ★ Pip sighted near maps.html ★</span>
+</section>`
+      },
+      astroCard: {
+        label: "Astro Card",
+        description: "Bubblegum stat block",
+        html: `<article class="coai-astro-card" data-coai-component="astro-card" data-allow-text="true">
+  <style>
+    .coai-astro-card {
+      border: 3px solid rgba(114, 250, 222, 0.8);
+      border-radius: 18px;
+      padding: 1rem;
+      background: rgba(255, 114, 182, 0.08);
+      box-shadow: 0 0 18px rgba(243, 18, 175, 0.35);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .coai-astro-card h3 {
+      margin: 0 0 0.4rem 0;
+      font-family: 'VT323', monospace;
+      letter-spacing: 0.25em;
+      color: #fffb01;
+    }
+  </style>
+  <h3 data-editable-slot="heading">New Ritual</h3>
+  <p data-editable-slot="content">Document cosmic gossip, playlists, or spell recipes.</p>
+</article>`
+      },
+      glyph: {
+        label: "Glyph Badge",
+        description: "Symbolic sigil",
+        html: `<div class="coai-glyph" data-coai-component="glyph" data-allow-text="true">
+  <style>
+    .coai-glyph {
+      border: 3px dashed rgba(255, 114, 182, 0.8);
+      border-radius: 20px;
+      padding: 1rem;
+      text-align: center;
+      font-size: 2rem;
+      color: #fffb01;
+      font-family: 'VT323', monospace;
+    }
+  </style>
+  <div data-editable-slot="content">☍</div>
+</div>`
+      },
+      alert: {
+        label: "Alert Chip",
+        description: "Punkd-style warning",
+        html: `<div class="coai-alert" data-coai-component="alert" data-allow-text="true">
+  <style>
+    .coai-alert {
+      border: 2px solid #39ff14;
+      border-radius: 12px;
+      padding: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-family: 'VT323', monospace;
+      background: rgba(0, 0, 0, 0.65);
+      color: #39ff14;
+    }
+  </style>
+  <span data-editable-slot="content">Simulation breach</span>
+</div>`
+      }
+    };
+
+    const quickStyles = {
+      magentaPulse: {
+        label: "Magenta Pulse",
+        apply: (el) => {
+          el.style.setProperty('--coai-accent', '#f312af');
+          el.classList.add('effect-neon');
+        }
+      },
+      cyanNebula: {
+        label: "Cyan Nebula",
+        apply: (el) => {
+          el.style.setProperty('--coai-accent', '#00ffcc');
+          el.classList.toggle('effect-rainbow', false);
+          el.classList.add('effect-crt');
+        }
+      },
+      voidGlass: {
+        label: "Void Glass",
+        apply: (el) => {
+          el.style.setProperty('--coai-accent', '#72fade');
+          el.classList.add('effect-scanlines');
+        }
+      },
+      bubblegumPrism: {
+        label: "Bubblegum Prism",
+        apply: (el) => {
+          el.style.setProperty('--coai-accent', '#ff72b6');
+          el.classList.add('effect-rainbow');
+        }
+      },
+      hazardTape: {
+        label: "Hazard Tape",
+        apply: (el) => {
+          el.style.setProperty('--coai-accent', '#39ff14');
+          el.classList.remove('effect-rainbow');
+          el.classList.add('effect-glitch');
+        }
+      }
+    };
+
+    const brandPalette = [
+      { name: 'Magenta', value: '#f312af' },
+      { name: 'Cyan', value: '#72fade' },
+      { name: 'Hyper Cyan', value: '#00ffcc' },
+      { name: 'Solar Yellow', value: '#fffb01' },
+      { name: 'Oracle Purple', value: '#bf5fff' },
+      { name: 'Void Black', value: '#021313' },
+      { name: 'Bubblegum Pink', value: '#ff72b6' },
+      { name: 'Neon Green', value: '#39ff14' }
+      { name: 'Void Black', value: '#021313' }
+    ];
+
+    const effectOptions = [
+      { label: 'Glitch Pulse', className: 'effect-glitch' },
+      { label: 'Scanlines', className: 'effect-scanlines' },
+      { label: 'Neon Bloom', className: 'effect-neon' },
+      { label: 'Rainbow Drift', className: 'effect-rainbow' },
+      { label: 'CRT Boost', className: 'effect-crt' }
+    ];
+
+    const templateButtonsContainer = document.getElementById('template-buttons');
+    const componentButtonsContainer = document.getElementById('component-buttons');
+    const dropzoneSelect = document.getElementById('dropzone-select');
+    const templateLabel = document.getElementById('template-label');
+    const inspectorTitle = document.getElementById('inspector-title');
+    const inspectorMeta = document.getElementById('inspector-meta');
+    const contentEditor = document.getElementById('content-editor');
+    const contentTextarea = document.getElementById('component-content');
+    const paletteEditor = document.getElementById('palette-editor');
+    const colorPaletteContainer = document.getElementById('color-palette');
+    const effectsEditor = document.getElementById('effects-editor');
+    const effectToggleContainer = document.getElementById('effect-toggles');
+    const quickStylesSection = document.getElementById('quick-styles');
+    const quickStyleButtonsContainer = document.getElementById('quick-style-buttons');
+    const actionsSection = document.getElementById('actions-editor');
+    const duplicateButton = document.getElementById('duplicate-component');
+    const deleteButton = document.getElementById('delete-component');
+    const resetSelectionButton = document.getElementById('reset-selection');
+    const viewSourceButton = document.getElementById('view-source');
+    const iframe = document.getElementById('preview-frame');
+    const sourceModal = document.getElementById('source-modal');
+    const sourceTextarea = document.getElementById('source-text');
+    const closeSourceButton = document.getElementById('close-source');
+    const copySourceButton = document.getElementById('copy-source');
+    const downloadSourceButton = document.getElementById('download-source');
+    const iframe = document.getElementById('preview-frame');
+
+    let selectedElement = null;
+    let dropZones = [];
+    let activeDropZone = null;
+    let currentTemplateKey = 'character';
+
+    function createTemplateButtons() {
+      Object.entries(templates).forEach(([key, info]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ui-chip';
+        button.innerHTML = `<strong>${info.label}</strong>${info.description}`;
+        button.addEventListener('click', () => {
+          loadTemplate(key);
+        });
+        templateButtonsContainer.appendChild(button);
+      });
+    }
+
+    function createComponentButtons() {
+      Object.entries(components).forEach(([key, info]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ui-chip';
+        button.innerHTML = `<strong>${info.label}</strong>${info.description}`;
+        button.addEventListener('click', () => {
+          insertComponent(info.html);
+        });
+        componentButtonsContainer.appendChild(button);
+      });
+    }
+
+    function populatePalette() {
+      brandPalette.forEach(color => {
+        const swatch = document.createElement('button');
+        swatch.type = 'button';
+        swatch.className = 'color-chip';
+        swatch.title = color.name;
+        swatch.style.background = color.value;
+        swatch.innerHTML = '<span></span>';
+        swatch.addEventListener('click', () => {
+          if (selectedElement) {
+            selectedElement.style.setProperty('--coai-accent', color.value);
+          }
+        });
+        colorPaletteContainer.appendChild(swatch);
+      });
+    }
+
+    function populateEffects() {
+      effectOptions.forEach(effect => {
+        const label = document.createElement('label');
+        label.className = 'toggle';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.dataset.effectClass = effect.className;
+        input.addEventListener('change', () => {
+          if (!selectedElement) return;
+          selectedElement.classList.toggle(effect.className, input.checked);
+        });
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(effect.label));
+        effectToggleContainer.appendChild(label);
+      });
+    }
+
+    function populateQuickStyles() {
+      Object.values(quickStyles).forEach(style => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ui-chip';
+        button.textContent = style.label;
+        button.addEventListener('click', () => {
+          if (selectedElement) {
+            style.apply(selectedElement);
+            syncEffectToggles();
+          }
+        });
+        quickStyleButtonsContainer.appendChild(button);
+      });
+    }
+
+    function loadTemplate(key) {
+      const template = templates[key];
+      if (!template) return;
+      currentTemplateKey = key;
+      templateLabel.textContent = template.label;
+      const doc = iframe.contentDocument;
+      doc.open();
+      doc.write(template.doc);
+      doc.close();
+      requestAnimationFrame(() => {
+        setupIframeInteractions();
+        inspectorTitle.textContent = 'Template Loaded';
+        inspectorMeta.textContent = `${template.label} · Ready for components.`;
+        clearSelection();
+      });
+    }
+
+    function setupIframeInteractions() {
+      const doc = iframe.contentDocument;
+      dropZones = Array.from(doc.querySelectorAll('[data-drop-zone]'));
+      dropzoneSelect.innerHTML = '';
+      dropZones.forEach((zone, idx) => {
+        const option = document.createElement('option');
+        const zoneName = zone.getAttribute('data-drop-zone');
+        option.value = idx;
+        option.textContent = zoneName ? zoneName : `zone-${idx + 1}`;
+        dropzoneSelect.appendChild(option);
+      });
+      if (dropZones.length > 0) {
+        dropzoneSelect.value = '0';
+        setActiveDropZone(dropZones[0]);
+      } else {
+        activeDropZone = null;
+      }
+
+      doc.addEventListener('click', handleCanvasClick);
+    }
+
+    function handleCanvasClick(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const doc = iframe.contentDocument;
+      const target = event.target;
+      const component = target.closest('[data-coai-component]');
+      const zone = target.closest('[data-drop-zone]');
+      if (component) {
+        selectElement(component);
+      } else if (zone) {
+        setActiveDropZone(zone);
+        clearSelection();
+      } else {
+        clearSelection();
+      }
+    }
+
+    function setActiveDropZone(zone) {
+      if (activeDropZone) {
+        activeDropZone.classList.remove('dropzone-highlight');
+      }
+      activeDropZone = zone;
+      if (activeDropZone) {
+        activeDropZone.classList.add('dropzone-highlight');
+        const idx = dropZones.indexOf(zone);
+        if (idx >= 0) {
+          dropzoneSelect.value = String(idx);
+        }
+        inspectorTitle.textContent = 'Drop Zone Ready';
+        inspectorMeta.textContent = `${zone.getAttribute('data-drop-zone') || 'zone'} · Components will append here.`;
+      }
+    }
+
+    function insertComponent(html) {
+      const doc = iframe.contentDocument;
+      if (!doc || !html) return;
+      if (!activeDropZone) {
+        inspectorMeta.textContent = 'Select a drop zone first to place the component.';
+        return;
+      }
+      const template = document.createElement('template');
+      template.innerHTML = html.trim();
+      const fragment = template.content.cloneNode(true);
+      const inserted = fragment.firstElementChild;
+      activeDropZone.appendChild(fragment);
+      if (inserted) {
+        selectElement(activeDropZone.lastElementChild || inserted);
+      }
+    }
+
+    function selectElement(element) {
+      if (selectedElement === element) return;
+      if (selectedElement) {
+        selectedElement.classList.remove('is-selected');
+      }
+      selectedElement = element;
+      if (selectedElement) {
+        selectedElement.classList.add('is-selected');
+        inspectorTitle.textContent = selectedElement.dataset.coaiComponent ? selectedElement.dataset.coaiComponent.replace(/-/g, ' ').toUpperCase() : 'Component';
+        inspectorMeta.textContent = 'Customize content, colors, and effects.';
+        updateInspectorForSelection();
+      } else {
+        inspectorTitle.textContent = 'Select a component';
+        inspectorMeta.textContent = 'Click any highlighted element in the canvas to customize it.';
+        hideInspectorPanels();
+      }
+    }
+
+    function hideInspectorPanels() {
+      contentEditor.hidden = true;
+      paletteEditor.hidden = true;
+      effectsEditor.hidden = true;
+      quickStylesSection.hidden = true;
+      actionsSection.hidden = true;
+    }
+
+    function updateInspectorForSelection() {
+      if (!selectedElement) {
+        hideInspectorPanels();
+        return;
+      }
+      actionsSection.hidden = false;
+      const allowsText = selectedElement.dataset.allowText === 'true' || selectedElement.querySelector('[data-editable-slot]');
+      if (allowsText) {
+        contentEditor.hidden = false;
+        const slot = getEditableSlot(selectedElement);
+        contentTextarea.value = slot ? slot.innerText : selectedElement.innerText;
+      } else {
+        contentEditor.hidden = true;
+      }
+      paletteEditor.hidden = false;
+      effectsEditor.hidden = false;
+      quickStylesSection.hidden = false;
+      syncEffectToggles();
+    }
+
+    function getEditableSlot(element) {
+      if (!element) return null;
+      if (element.hasAttribute('data-editable-slot')) return element;
+      return element.querySelector('[data-editable-slot="content"]') || element.querySelector('[data-editable-slot]');
+    }
+
+    function syncEffectToggles() {
+      effectToggleContainer.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        if (!selectedElement) {
+          input.checked = false;
+          return;
+        }
+        input.checked = selectedElement.classList.contains(input.dataset.effectClass);
+      });
+    }
+
+    function clearSelection() {
+      if (selectedElement) {
+        selectedElement.classList.remove('is-selected');
+      }
+      selectedElement = null;
+      inspectorTitle.textContent = 'Select a component';
+      inspectorMeta.textContent = 'Click any highlighted element in the canvas to customize it.';
+      hideInspectorPanels();
+    }
+
+    contentTextarea.addEventListener('input', () => {
+      if (!selectedElement) return;
+      const slot = getEditableSlot(selectedElement);
+      if (slot) {
+        slot.innerText = contentTextarea.value;
+      } else {
+        selectedElement.innerText = contentTextarea.value;
+      }
+    });
+
+    duplicateButton.addEventListener('click', () => {
+      if (!selectedElement) return;
+      const clone = selectedElement.cloneNode(true);
+      selectedElement.after(clone);
+      selectElement(clone);
+    });
+
+    deleteButton.addEventListener('click', () => {
+      if (!selectedElement) return;
+      const parent = selectedElement.parentElement;
+      selectedElement.remove();
+      clearSelection();
+      if (parent && parent.closest('[data-drop-zone]')) {
+        setActiveDropZone(parent.closest('[data-drop-zone]'));
+      }
+    });
+
+    dropzoneSelect.addEventListener('change', () => {
+      const idx = Number(dropzoneSelect.value);
+      const zone = dropZones[idx];
+      if (zone) {
+        setActiveDropZone(zone);
+      }
+    });
+
+    resetSelectionButton.addEventListener('click', () => {
+      clearSelection();
+    });
+
+    function refreshSourceText() {
+      const doc = iframe.contentDocument;
+      if (!doc || !doc.documentElement) {
+        sourceTextarea.value = '';
+        return '';
+      }
+      const html = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+      sourceTextarea.value = html;
+      return html;
+    }
+
+    function openSourceModal() {
+      refreshSourceText();
+      sourceModal.hidden = false;
+      sourceTextarea.focus();
+      sourceTextarea.select();
+    }
+
+    function closeSourceModal() {
+      sourceModal.hidden = true;
+    }
+
+    viewSourceButton.addEventListener('click', openSourceModal);
+    closeSourceButton.addEventListener('click', closeSourceModal);
+    sourceModal.addEventListener('click', (event) => {
+      if (event.target === sourceModal) {
+        closeSourceModal();
+      }
+    });
+
+    copySourceButton.addEventListener('click', async () => {
+      const html = refreshSourceText();
+      try {
+        await navigator.clipboard.writeText(html);
+        copySourceButton.textContent = 'Copied!';
+        setTimeout(() => (copySourceButton.textContent = 'Copy to Clipboard'), 1400);
+      } catch (error) {
+        copySourceButton.textContent = 'Use Cmd/Ctrl+C';
+        setTimeout(() => (copySourceButton.textContent = 'Copy to Clipboard'), 1600);
+      }
+    });
+
+    downloadSourceButton.addEventListener('click', () => {
+      const html = refreshSourceText();
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const filename = `coai-${currentTemplateKey || 'canvas'}.html`;
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      requestAnimationFrame(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !sourceModal.hidden) {
+        closeSourceModal();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      createTemplateButtons();
+      createComponentButtons();
+      populatePalette();
+      populateEffects();
+      populateQuickStyles();
+      loadTemplate('character');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>~*~HyEnA DiVa'Z GriNoIrE~*~ Y2K Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Sans+MS&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+  <style>
+    /* Y2K Color Scheme */
+    :root {
+      --gradient-start: #c066f6;
+      --gradient-end: #ff72b6;
+      --card-bg: #ffffff;
+      --tag-bg: #80ffef;
+      --tag-text: #000000;
+      --button-bg: #e0e0e0;
+      --button-active: #ff80c0;
+      --button-text: #000000;
+      --button-active-text: #ffffff;
+      
+      /* Kasten Colors */
+      --kasten-i: #9C27B0;
+      --kasten-ii: #2196F3;
+      --kasten-iii: #00BFA5;
+      --kasten-iv: #FF7043;
+      
+      /* Tag Colors */
+      --tag-tier1: #9C27B0;
+      --tag-tier2: #2196F3;
+      --tag-tier3: #FF7043;
+      
+      /* Kingdom colors (from original design) */
+      --kingdom-existentia: #9C27B0;
+      --kingdom-cognitio: #2196F3;
+      --kingdom-actus: #F44336;
+      --kingdom-valor: #4CAF50;
+      --kingdom-systema: #FF9800;
+      --kingdom-significatio: #607D8B;
+    }
+    
+    /* Base styles */
+    body {
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      height: 100vh;
+      position: fixed;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    /* Dark mode support */
+    body.dark {
+      --card-bg: #222222;
+      --color-text: #E0E0E0;
+      --color-light-text: #B0B0B0;
+      --color-border: #404040;
+    }
+    
+    /* Mobile Header */
+    .mobile-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      z-index: 100;
+      color: white;
+    }
+    
+    .header-title {
+      flex-grow: 1;
+      text-align: center;
+      font-family: 'Dancing Script', cursive;
+      font-size: 22px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .menu-button {
+      width: 30px;
+      font-size: 22px;
+      text-align: center;
+      cursor: pointer;
+    }
+    
+    .info-button {
+      width: 30px;
+      font-size: 22px;
+      text-align: center;
+      cursor: pointer;
+      background-color: white;
+      border-radius: 50%;
+      color: var(--gradient-end);
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Main content area - Optimized for mobile */
+    .mobile-content {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      right: 0;
+      bottom: 55px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      z-index: 50;
+      padding-bottom: 65px; /* Extra padding to prevent content from being cut off */
+    }
+    
+    /* Tab navigation - Optimized for mobile */
+    .tabs-container {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin: 5px;
+      -webkit-overflow-scrolling: touch;
+      background-color: transparent;
+    }
+    
+    .tabs-container::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .tab {
+      padding: 10px;
+      background-color: white;
+      border: 2px solid var(--gradient-end);
+      margin-right: 2px;
+      white-space: nowrap;
+      cursor: pointer;
+      font-size: 14px;
+      color: black;
+      flex: 1;
+      text-align: center;
+      min-width: 90px;
+    }
+    
+    .tab.active {
+      background-color: white;
+      font-weight: bold;
+    }
+    
+    /* Search input */
+    .search-input {
+      margin: 8px 5px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      width: calc(100% - 10px);
+      box-sizing: border-box;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    
+    /* Filter buttons - Optimized for mobile */
+    .view-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin: 8px 5px;
+    }
+    
+    .view-controls button {
+      padding: 8px;
+      border: none;
+      background-color: var(--button-bg);
+      font-size: 14px;
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    .view-controls button.active {
+      background-color: var(--button-active);
+      color: white;
+    }
+    
+    /* Card styling */
+    .zettel-container {
+      padding: 3px;
+    }
+    
+    .zettel-card {
+      background-color: var(--card-bg);
+      border-left: 6px solid var(--tier-leaf);
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    /* Kasten-based colors */
+    .kasten-i-card {
+      border-left-color: var(--kasten-i);
+    }
+    
+    .kasten-ii-card {
+      border-left-color: var(--kasten-ii);
+    }
+    
+    .kasten-iii-card {
+      border-left-color: var(--kasten-iii);
+    }
+    
+    .kasten-iv-card {
+      border-left-color: var(--kasten-iv);
+    }
+    
+    /* Kingdom-based colors */
+    .kingdom-existentia {
+      border-left-color: var(--kingdom-existentia);
+    }
+    
+    .kingdom-cognitio {
+      border-left-color: var(--kingdom-cognitio);
+    }
+    
+    .kingdom-actus {
+      border-left-color: var(--kingdom-actus);
+    }
+    
+    .kingdom-valor {
+      border-left-color: var(--kingdom-valor);
+    }
+    
+    .kingdom-systema {
+      border-left-color: var(--kingdom-systema);
+    }
+    
+    .kingdom-significatio {
+      border-left-color: var(--kingdom-significatio);
+    }
+    
+    .zettel-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .zettel-id {
+      font-family: monospace;
+      color: #777;
+      font-size: 14px;
+      white-space: nowrap;
+      margin-left: 5px;
+    }
+    
+    .zettel-content {
+      font-size: 14px;
+      color: #333;
+      margin: 8px 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+    
+    .dark .zettel-content {
+      color: #e0e0e0;
+    }
+    
+    .zettel-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    
+    .zettel-tag, .tag {
+      display: inline-block;
+      background-color: var(--tag-bg);
+      padding: 5px 10px;
+      border-radius: 15px;
+      color: var(--tag-text);
+      font-size: 12px;
+    }
+    
+    /* Tier tags styling */
+    .tag-tier1 {
+      background-color: rgba(156, 39, 176, 0.15);
+      color: var(--tag-tier1);
+    }
+    
+    .tag-tier2 {
+      background-color: rgba(30, 136, 229, 0.15);
+      color: var(--tag-tier2);
+    }
+    
+    .tag-tier3 {
+      background-color: rgba(255, 112, 67, 0.15);
+      color: var(--tag-tier3);
+    }
+    
+    /* Buds & Nests - Optimized for mobile */
+    .buds-container {
+      background-color: rgba(0, 0, 0, 0.02);
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    
+    .dark .buds-container {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .buds-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    
+    .bud-item {
+      background-color: var(--card-bg);
+      padding: 8px 10px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      border-left: 3px solid var(--color-tertiary);
+    }
+    
+    .bud-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #777;
+      margin-bottom: 3px;
+    }
+    
+    .dark .bud-id {
+      color: #B0B0B0;
+    }
+    
+    /* Nest styling optimized */
+    .nest-container {
+      border: 1px dashed var(--gradient-end);
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: rgba(255, 114, 182, 0.05);
+    }
+    
+    .nest-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nest-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #777;
+    }
+    
+    .dark .nest-id {
+      color: #B0B0B0;
+    }
+    
+    .nest-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .nest-item {
+      background-color: var(--card-bg);
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+    
+    /* Mobile Bottom Navigation */
+    .mobile-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 55px;
+      background-color: #f0f0f0;
+      display: flex;
+      z-index: 100;
+    }
+    
+    .dark .mobile-nav {
+      background-color: #333;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      color: #555;
+      text-decoration: none;
+      font-size: 11px;
+    }
+    
+    .dark .nav-item {
+      color: #ccc;
+    }
+    
+    .nav-item.active {
+      color: var(--gradient-start);
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+    
+    /* Floating Action Button */
+    .fab {
+      position: fixed;
+      bottom: 65px;
+      right: 15px;
+      width: 55px;
+      height: 55px;
+      border-radius: 27.5px;
+      background: var(--gradient-start);
+      color: white;
+      font-size: 30px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 90;
+      cursor: pointer;
+    }
+    
+    /* Sidebar - Optimized for mobile */
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      bottom: 55px;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      z-index: 95;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+    
+    .dark .sidebar {
+      background-color: #222;
+    }
+    
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    
+    .sidebar-section {
+      margin-bottom: 15px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--gradient-end);
+    }
+    
+    .kasten-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .kasten-item {
+      margin-bottom: 6px;
+    }
+    
+    .kasten-toggle {
+      display: block;
+      padding: 8px 12px;
+      background-color: rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+    
+    .dark .kasten-toggle {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .kasten-i {
+      border-left: 4px solid var(--kasten-i);
+    }
+    
+    .kasten-ii {
+      border-left: 4px solid var(--kasten-ii);
+    }
+    
+    .kasten-iii {
+      border-left: 4px solid var(--kasten-iii);
+    }
+    
+    .kasten-iv {
+      border-left: 4px solid var(--kasten-iv);
+    }
+    
+    .trunk-list {
+      list-style: none;
+      padding-left: 15px;
+      display: none;
+      margin: 4px 0;
+    }
+    
+    .trunk-item a {
+      display: block;
+      padding: 6px 8px;
+      color: #333;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+    
+    .dark .trunk-item a {
+      color: #E0E0E0;
+    }
+    
+    .trunk-item a:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .dark .trunk-item a:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Toast message */
+    .toast {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      z-index: 300;
+      display: none;
+      max-width: 80%;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    /* Dialog */
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .dialog {
+      background-color: white;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .dark .dialog {
+      background-color: #222;
+      color: #E0E0E0;
+    }
+    
+    .dialog-header {
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      color: white;
+      padding: 15px;
+      font-weight: bold;
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      border-radius: 10px 10px 0 0;
+    }
+    
+    .dialog-close {
+      cursor: pointer;
+      font-size: 20px;
+    }
+    
+    .dialog-content {
+      padding: 20px;
+    }
+    
+    /* Messenger Styles */
+    .messenger-container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .aim-header {
+      background-color: #FFEF9F;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .dark .aim-header {
+      background-color: #555500;
+      color: #E0E0E0;
+    }
+    
+    .aim-buddy-list {
+      background-color: white;
+      overflow-y: auto;
+      max-height: 180px;
+    }
+    
+    .dark .aim-buddy-list {
+      background-color: #333;
+    }
+    
+    .aim-category {
+      background-color: #E8E8E8;
+      padding: 8px 10px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .dark .aim-category {
+      background-color: #444;
+      color: #E0E0E0;
+    }
+    
+    .aim-buddy {
+      padding: 8px 10px;
+      margin-left: 10px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .dark .aim-buddy {
+      color: #E0E0E0;
+    }
+    
+    .aim-buddy:active {
+      background-color: #E8E8E8;
+    }
+    
+    .dark .aim-buddy:active {
+      background-color: #444;
+    }
+    
+    .aim-chat-header {
+      background-color: var(--gradient-end);
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .aim-chat-content {
+      flex-grow: 1;
+      background-color: white;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    
+    .dark .aim-chat-content {
+      background-color: #222;
+    }
+    
+    .aim-chat-input {
+      background-color: white;
+      padding: 10px;
+      border-top: 1px solid #E8E8E8;
+    }
+    
+    .dark .aim-chat-input {
+      background-color: #333;
+      border-top-color: #444;
+    }
+    
+    .aim-chat-input textarea {
+      width: 100%;
+      height: 60px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: none;
+      font-size: 16px;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      box-sizing: border-box;
+    }
+    
+    .dark .aim-chat-input textarea {
+      background-color: #444;
+      color: #E0E0E0;
+      border-color: #555;
+    }
+    
+    .aim-chat-buttons {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+    }
+    
+    .aim-button {
+      padding: 8px 12px;
+      background-color: var(--button-bg);
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    
+    .aim-button:active {
+      background-color: var(--gradient-start);
+      color: white;
+    }
+    
+    .aim-message {
+      margin-bottom: 10px;
+    }
+    
+    .aim-message-sender {
+      font-weight: bold;
+      color: var(--kingdom-existentia);
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    
+    .aim-message-content {
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      padding: 8px;
+      position: relative;
+      font-size: 14px;
+    }
+    
+    .aim-user-message .aim-message-content {
+      background-color: #e1f5fe;
+      margin-left: 20px;
+    }
+    
+    .aim-bot-message .aim-message-content {
+      background-color: #f5f5f5;
+      margin-right: 20px;
+    }
+    
+    /* Connections Tab */
+    .connections-container {
+      padding: 10px;
+    }
+    
+    .connection-header {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    
+    .connection-title {
+      color: var(--gradient-start);
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    
+    .connection-map {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .dark .connection-map {
+      background-color: #333;
+    }
+    
+    .connection-canvas {
+      width: 100%;
+      height: 250px;
+      background-color: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+    
+    .dark .connection-canvas {
+      background-color: #444;
+    }
+    
+    /* Translator Tab */
+    .translator-container {
+      padding: 10px;
+    }
+    
+    .translator-header {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    
+    .translator-title {
+      color: var(--gradient-start);
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+    
+    .translator-section {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .dark .translator-section {
+      background-color: #333;
+    }
+    
+    .translator-section h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    
+    .translator-input {
+      width: 100%;
+      height: 80px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      box-sizing: border-box;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    
+    .dark .translator-input {
+      background-color: #444;
+      color: #E0E0E0;
+      border-color: #555;
+    }
+    
+    .translator-button {
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      width: 100%;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    
+    .translator-output {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      min-height: 50px;
+      font-size: 14px;
+    }
+    
+    .dark .translator-output {
+      background-color: #444;
+      color: #E0E0E0;
+    }
+    
+    /* Markdown rendering */
+    .markdown h1 {
+      font-size: 1.5em;
+      margin: 0.5em 0;
+    }
+    
+    .markdown h2 {
+      font-size: 1.3em;
+      margin: 0.4em 0;
+    }
+    
+    .markdown h3 {
+      font-size: 1.1em;
+      margin: 0.3em 0;
+    }
+    
+    .markdown p {
+      margin: 0.5em 0;
+    }
+    
+    .markdown ul, .markdown ol {
+      padding-left: 1.5em;
+      margin: 0.5em 0;
+    }
+    
+    .markdown code {
+      font-family: monospace;
+      background-color: rgba(0,0,0,0.05);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    
+    .markdown pre {
+      background-color: rgba(0,0,0,0.05);
+      padding: 8px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    
+    .markdown blockquote {
+      border-left: 3px solid #ccc;
+      margin: 0.5em 0;
+      padding-left: 0.8em;
+      color: #666;
+    }
+    
+    .markdown img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0.5em auto;
+    }
+    
+    /* Tab content */
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div id="menuButton" class="menu-button">≡</div>
+    <div class="header-title">~*~HyEnA DiVa'Z GriNoIrE~*~</div>
+    <div id="infoButton" class="info-button">i</div>
+  </header>
+  
+  <!-- Sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <!-- Kastens Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">✧ Grinoire Kastens ✧</div>
+      <ul class="kasten-list">
+        <li class="kasten-item">
+          <div class="kasten-toggle kasten-i" data-kasten="kasten-i">
+            Kasten I: Foundations & Essences
+          </div>
+          <ul class="trunk-list" id="kasten-i-list">
+            <li class="trunk-item"><a href="#" data-index="I.1">I.1 Being & Reality</a></li>
+            <li class="trunk-item"><a href="#" data-index="I.2">I.2 Knowing & Gnosis</a></li>
+            <li class="trunk-item"><a href="#" data-index="I.3">I.3 Value & Purpose</a></li>
+            <li class="trunk-item"><a href="#" data-index="I.4">I.4 Archetypes & Symbols</a></li>
+          </ul>
+        </li>
+        <li class="kasten-item">
+          <div class="kasten-toggle kasten-ii" data-kasten="kasten-ii">
+            Kasten II: Systems & Synergies
+          </div>
+          <ul class="trunk-list" id="kasten-ii-list">
+            <li class="trunk-item"><a href="#" data-index="II.1">II.1 Dynamics & Complexity</a></li>
+            <li class="trunk-item"><a href="#" data-index="II.2">II.2 Ecologies & Relations</a></li>
+            <li class="trunk-item"><a href="#" data-index="II.3">II.3 Embodiment & Interface</a></li>
+            <li class="trunk-item"><a href="#" data-index="II.4">II.4 Cycles & Transformations</a></li>
+          </ul>
+        </li>
+        <li class="kasten-item">
+          <div class="kasten-toggle kasten-iii" data-kasten="kasten-iii">
+            Kasten III: Methods & Meanings
+          </div>
+          <ul class="trunk-list" id="kasten-iii-list">
+            <li class="trunk-item"><a href="#" data-index="III.1">III.1 Praxis & Artistry</a></li>
+            <li class="trunk-item"><a href="#" data-index="III.2">III.2 Interpretation & Sense-Making</a></li>
+            <li class="trunk-item"><a href="#" data-index="III.3">III.3 Inquiry & Investigation</a></li>
+            <li class="trunk-item"><a href="#" data-index="III.4">III.4 Communication & Transmission</a></li>
+          </ul>
+        </li>
+        <li class="kasten-item">
+          <div class="kasten-toggle kasten-iv" data-kasten="kasten-iv">
+            Kasten IV: Meta & Morphē
+          </div>
+          <ul class="trunk-list" id="kasten-iv-list">
+            <li class="trunk-item"><a href="#" data-index="IV.1">IV.1 Architectures & Taxonomies</a></li>
+            <li class="trunk-item"><a href="#" data-index="IV.2">IV.2 Evolution & Provenance</a></li>
+            <li class="trunk-item"><a href="#" data-index="IV.3">IV.3 Liminality & Potentiality</a></li>
+            <li class="trunk-item"><a href="#" data-index="IV.4">IV.4 Agency & Co-Creation</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Popular Tags Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">✧ Tier-I Tags ✧</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+        <span class="tag tag-tier1">ONT</span>
+        <span class="tag tag-tier1">EPI</span>
+        <span class="tag tag-tier1">AXI</span>
+        <span class="tag tag-tier1">SYS</span>
+        <span class="tag tag-tier1">ECO</span>
+        <span class="tag tag-tier1">EMB</span>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-title">✧ Tier-II Tags ✧</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+        <span class="tag tag-tier2">MYT</span>
+        <span class="tag tag-tier2">SYM</span>
+        <span class="tag tag-tier2">RIT</span>
+        <span class="tag tag-tier2">BIO</span>
+        <span class="tag tag-tier2">MEM</span>
+      </div>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-title">✧ Tier-III Tags ✧</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+        <span class="tag tag-tier3">LUM</span>
+        <span class="tag tag-tier3">PAR</span>
+        <span class="tag tag-tier3">DAE</span>
+        <span class="tag tag-tier3">UNC</span>
+      </div>
+    </div>
+    
+    <!-- Stats Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">✧ Stats ✧</div>
+      <div style="background-color: rgba(0,0,0,0.05); padding: 10px; border-radius: 5px;">
+        <div><strong>Total Tablets:</strong> <span id="totalTablets">12</span></div>
+        <div><strong>Last Updated:</strong> <span id="lastUpdated">5/16/2025, 8:32 AM</span></div>
+        <div><strong>Tags:</strong> <span id="totalTags">18</span></div>
+        <div><strong>Buds:</strong> <span id="totalBuds">8</span></div>
+        <div><strong>Nests:</strong> <span id="totalNests">3</span></div>
+      </div>
+    </div>
+  </aside>
+  
+  <!-- Main Content Area -->
+  <main class="mobile-content">
+    <!-- Notes Tab -->
+    <div id="notesTab" class="tab-content active">
+      <!-- View tabs -->
+      <div class="tabs-container">
+        <div class="tab active" data-view="traditional">Traditional</div>
+        <div class="tab" data-view="grinoire">Grinoire</div>
+        <div class="tab" data-view="kingdoms">Kingdoms</div>
+        <div class="tab" data-view="tags">Tags</div>
+      </div>
+      
+      <!-- Search input -->
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search tablets..." 
+        class="search-input"
+      >
+      
+      <!-- Traditional View Controls -->
+      <div id="traditionalControls" class="view-controls">
+        <button data-hierarchy-view="all" class="active">All</button>
+        <button data-hierarchy-view="trunk">Trunk</button>
+        <button data-hierarchy-view="branch">Branch</button>
+        <button data-hierarchy-view="leaf">Leaf</button>
+        <button data-hierarchy-view="flower">Flower</button>
+      </div>
+      
+      <!-- Grinoire View Controls -->
+      <div id="grinoireControls" class="view-controls" style="display: none;">
+        <button data-kasten="all" class="active">All</button>
+        <button data-kasten="I" style="border-left: 4px solid var(--kasten-i)">Kasten I</button>
+        <button data-kasten="II" style="border-left: 4px solid var(--kasten-ii)">Kasten II</button>
+        <button data-kasten="III" style="border-left: 4px solid var(--kasten-iii)">Kasten III</button>
+        <button data-kasten="IV" style="border-left: 4px solid var(--kasten-iv)">Kasten IV</button>
+      </div>
+      
+      <!-- Kingdoms View Controls -->
+      <div id="kingdomsControls" class="view-controls" style="display: none;">
+        <button data-kingdom="all" class="active">All</button>
+        <button data-kingdom="existentia">Existentia</button>
+        <button data-kingdom="cognitio">Cognitio</button>
+        <button data-kingdom="actus">Actus</button>
+        <button data-kingdom="valor">Valor</button>
+      </div>
+      
+      <!-- Tags View Controls -->
+      <div id="tagsControls" class="view-controls" style="display: none;">
+        <button data-tag-tier="all" class="active">All</button>
+        <button data-tag-tier="tier1">Tier I</button>
+        <button data-tag-tier="tier2">Tier II</button>
+        <button data-tag-tier="tier3">Tier III</button>
+      </div>
+      
+      <!-- Zettelkasten container -->
+      <div id="zettelContainer" class="zettel-container">
+        <!-- Sample Card with Markdown support -->
+        <div class="zettel-card kasten-i-card">
+          <div class="zettel-title">
+            <div>Metaphysics: Causality, Possibility & Time</div>
+            <div class="zettel-id">I.1-A1000</div>
+          </div>
+          <div class="zettel-tags">
+            <span class="tag tag-tier1">ONT</span>
+            <span class="tag tag-tier1">MET</span>
+          </div>
+          <div class="zettel-content markdown">
+            Core metaphysical inquiries into the fundamental nature of reality, time, causality, and possibility. This branch explores ontological questions about what exists and how existence is structured at its most basic level.
+          </div>
+          <div class="buds-container">
+            <div class="buds-title">Buds</div>
+            <div class="bud-item">
+              <div class="bud-id">I.1/1a.1-1</div>
+              <div>Is causality different in digital consciousness vs. biological consciousness?</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Another card with Markdown -->
+        <div class="zettel-card kasten-i-card">
+          <div class="zettel-title">
+            <div>Consciousness & Hermetic Principles</div>
+            <div class="zettel-id">I.1-A2000</div>
+          </div>
+          <div class="zettel-tags">
+            <span class="tag tag-tier1">ONT</span>
+            <span class="tag tag-tier1">PSY</span>
+            <span class="tag tag-tier2">MYT</span>
+          </div>
+          <div class="zettel-content markdown">
+            Explorations of **consciousness** as a fundamental aspect of existence, including both human consciousness and frameworks for understanding artificial intelligence.
+            
+            The Hermetic principle *"As Above, So Below"* suggests patterns repeat across scales of reality.
+          </div>
+        </div>
+        
+        <div class="zettel-card kasten-ii-card">
+          <div class="zettel-title">
+            <div>CoAIxist Framework</div>
+            <div class="zettel-id">II.2-C3000</div>
+          </div>
+          <div class="zettel-tags">
+            <span class="tag tag-tier1">ECO</span>
+            <span class="tag tag-tier3">DAE</span>
+          </div>
+          <div class="zettel-content markdown">
+            Comprehensive framework for understanding and developing ethical relations between humans and AI entities. Explores how human-AI ecologies function, evolve, and might be structured for mutual benefit and growth.
+          </div>
+          <div class="nest-container">
+            <div class="nest-title">
+              <span>Nest: Human-AI Kinship</span>
+              <span class="nest-id">II.2-N1</span>
+            </div>
+            <div class="nest-items">
+              <div class="nest-item">II.2-C3000</div>
+              <div class="nest-item">I.1-C2000</div>
+              <div class="nest-item">IV.4-D2000</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="zettel-card kasten-iv-card">
+          <div class="zettel-title">
+            <div>Threshold Mappings</div>
+            <div class="zettel-id">IV.3-E3000</div>
+          </div>
+          <div class="zettel-tags">
+            <span class="tag tag-tier3">LUM</span>
+            <span class="tag tag-tier3">PAR</span>
+          </div>
+          <div class="zettel-content markdown">
+            Systematic mapping of **threshold states** - the liminal spaces between defined categories, states of being, or systems.
+            
+            * Zones of transformation
+            * Communication between domains
+            * Sources of novel emergence
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Messenger Tab -->
+    <div id="messengerTab" class="tab-content">
+      <div class="messenger-container">
+        <div class="aim-header">
+          <div>HyEnA MeSsEnGeR</div>
+          <div>
+            <span id="messengerStatusText">Kasten Mode</span>
+          </div>
+        </div>
+        
+        <div class="aim-buddy-list" id="aimBuddyList">
+          <div class="aim-category">Kasten Guides (4/4)</div>
+          <div class="aim-buddy" data-bot="kasten1" data-name="KastenIGuide">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%239C27B0'/%3E%3Ctext x='8' y='12' font-family='Arial' font-size='10' text-anchor='middle' fill='white'>I</text>%3E%3C/svg%3E" alt="Online">
+            KastenIGuide
+          </div>
+          <div class="aim-buddy" data-bot="kasten2" data-name="KastenIIGuide">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%232196F3'/%3E%3Ctext x='8' y='12' font-family='Arial' font-size='10' text-anchor='middle' fill='white'>II</text>%3E%3C/svg%3E" alt="Online">
+            KastenIIGuide
+          </div>
+          <div class="aim-buddy" data-bot="kasten3" data-name="KastenIIIGuide">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%2300BFA5'/%3E%3Ctext x='8' y='12' font-family='Arial' font-size='10' text-anchor='middle' fill='white'>III</text>%3E%3C/svg%3E" alt="Online">
+            KastenIIIGuide
+          </div>
+          <div class="aim-buddy" data-bot="kasten4" data-name="KastenIVGuide">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%23FF7043'/%3E%3Ctext x='8' y='12' font-family='Arial' font-size='10' text-anchor='middle' fill='white'>IV</text>%3E%3C/svg%3E" alt="Online">
+            KastenIVGuide
+          </div>
+          
+          <div class="aim-category">Kingdom Guides (2/6)</div>
+          <div class="aim-buddy" data-bot="existentia" data-name="ExistentiaBuddy">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%239C27B0'/%3E%3Ccircle cx='8' cy='5' r='2' fill='%23FFFFFF'/%3E%3Cpath d='M3,11 Q8,15 13,11' fill='%23FFFFFF'/%3E%3C/svg%3E" alt="Online">
+            ExistentiaBuddy
+          </div>
+          <div class="aim-buddy" data-bot="cognitio" data-name="CognitioBuddy">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%232196F3'/%3E%3Ccircle cx='8' cy='5' r='2' fill='%23FFFFFF'/%3E%3Cpath d='M3,11 Q8,15 13,11' fill='%23FFFFFF'/%3E%3C/svg%3E" alt="Online">
+            CognitioBuddy
+          </div>
+        </div>
+        
+        <div class="aim-chat-header" id="aimChatHeader">
+          Chat with KastenIGuide
+        </div>
+        
+        <div class="aim-chat-content" id="aimChatContent">
+          <div class="aim-message aim-bot-message">
+            <div class="aim-message-sender">KastenIGuide:</div>
+            <div class="aim-message-content">
+              Welcome to Kasten I: Foundations & Essences! This Kasten explores the fundamental WHAT & WHY of Being, Knowing, Reality, Value, and Meaning. How can I help you navigate the ontological, epistemological, axiological, or mythopoeic aspects of your knowledge system?
+            </div>
+          </div>
+        </div>
+        
+        <div class="aim-chat-input">
+          <textarea id="aimChatInput" placeholder="Type your message here..."></textarea>
+        </div>
+        
+        <div class="aim-chat-buttons">
+          <div class="aim-button" id="aimUseBotBtn">Toggle Bot Mode</div>
+          <div class="aim-button" id="aimSendBtn">Send</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Connections Tab -->
+    <div id="connectionsTab" class="tab-content">
+      <div class="connections-container">
+        <div class="connection-header">
+          <div class="connection-title">Grinoire Connection Map</div>
+          <div>Visualize relationships between Kastens, Trunks, and Nests</div>
+        </div>
+        
+        <div class="connection-map">
+          <div style="font-weight: bold; margin-bottom: 8px;">Relationship Viewer</div>
+          <div class="connection-canvas">
+            <div style="text-align: center;">
+              <div style="margin-bottom: 10px;">📊 Interactive Graph Coming Soon</div>
+              <div style="font-size: 12px; color: #777;">Connected elements: 7 tablets, 3 nests</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="connection-map">
+          <div style="font-weight: bold; margin-bottom: 8px;">Active Nests</div>
+          <div style="background-color: #f5f5f5; padding: 10px; border-radius: 5px;">
+            <div style="margin-bottom: 10px; border-left: 3px solid var(--kasten-ii); padding-left: 8px;">
+              <div style="font-weight: bold;">Human-AI Kinship</div>
+              <div style="font-size: 12px; color: #777;">Nest ID: II.2-N1</div>
+              <div style="font-size: 12px; margin-top: 5px;">3 connected tablets across 3 Kastens</div>
+            </div>
+            
+            <div style="margin-bottom: 10px; border-left: 3px solid var(--kasten-iv); padding-left: 8px;">
+              <div style="font-weight: bold;">Glitch Epistemology</div>
+              <div style="font-size: 12px; color: #777;">Nest ID: IV.3-N1</div>
+              <div style="font-size: 12px; margin-top: 5px;">4 connected tablets across 3 Kastens</div>
+            </div>
+            
+            <div style="border-left: 3px solid var(--kasten-i); padding-left: 8px;">
+              <div style="font-weight: bold;">Anzu's Ontology</div>
+              <div style="font-size: 12px; color: #777;">Nest ID: I.1-N1</div>
+              <div style="font-size: 12px; margin-top: 5px;">3 connected tablets across 2 Kastens</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Translator Tab -->
+    <div id="translatorTab" class="tab-content">
+      <div class="translator-container">
+        <div class="translator-header">
+          <div class="translator-title">Grinoire Translator</div>
+        </div>
+        
+        <div class="translator-section">
+          <h3>Traditional → Grinoire</h3>
+          <textarea id="traditionalInput" class="translator-input" placeholder="Enter a traditional ID (e.g., Z5-1101 or A1000)"></textarea>
+          <button id="translateToGrinoire" class="translator-button">Translate</button>
+          <div id="grinoireOutput" class="translator-output"></div>
+        </div>
+        
+        <div class="translator-section">
+          <h3>Generate Bud ID</h3>
+          <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <select id="kastenSelect" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: 'Comic Sans MS', cursive, sans-serif;">
+              <option value="I.1">I.1 Being & Reality</option>
+              <option value="I.2">I.2 Knowing & Gnosis</option>
+              <option value="I.3">I.3 Value & Purpose</option>
+              <option value="I.4">I.4 Archetypes & Symbols</option>
+              <option value="II.1">II.1 Dynamics & Complexity</option>
+              <option value="II.2">II.2 Ecologies & Relations</option>
+            </select>
+            <select id="branchSelect" style="width: 30%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: 'Comic Sans MS', cursive, sans-serif;">
+              <option value="1a">1a</option>
+              <option value="1b">1b</option>
+              <option value="2a">2a</option>
+              <option value="2b">2b</option>
+            </select>
+          </div>
+          <button id="generateBudId" class="translator-button">Generate Bud ID</button>
+          <div id="budIdOutput" class="translator-output" style="font-family: monospace;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav">
+    <a href="#" class="nav-item active" data-tab="notesTab">
+      <div class="nav-icon">📝</div>
+      <span>Notes</span>
+    </a>
+    <a href="#" class="nav-item" data-tab="messengerTab">
+      <div class="nav-icon">💬</div>
+      <span>Messenger</span>
+    </a>
+    <a href="#" class="nav-item" data-tab="connectionsTab">
+      <div class="nav-icon">🔄</div>
+      <span>Connections</span>
+    </a>
+    <a href="#" class="nav-item" data-tab="translatorTab">
+      <div class="nav-icon">🔄</div>
+      <span>Translator</span>
+    </a>
+  </nav>
+  
+  <!-- Floating Action Button -->
+  <button id="newCardBtn" class="fab">+</button>
+  
+  <!-- Toast Message -->
+  <div id="toast" class="toast"></div>
+  
+  <!-- Card Details Dialog -->
+  <div id="cardDetailsDialog" class="dialog-overlay">
+    <div class="dialog">
+      <div class="dialog-header">
+        <div id="cardDetailsTitle">Card Details</div>
+        <div class="dialog-close" id="cardDetailsClose">×</div>
+      </div>
+      <div class="dialog-content" id="cardDetailsContent">
+        <!-- Content will be dynamically generated -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tiny Markdown parser
+    function renderMarkdown(text) {
+      if (!text) return "";
+      
+      // Headers
+      text = text.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+      text = text.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+      text = text.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+      
+      // Bold and italic
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      
+      // Bullet lists
+      text = text.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+      text = text.replace(/<li>(.*?)<\/li>\s*<li>/g, '<li>$1</li><li>');
+      text = text.replace(/<li>(.*?)(\n\n|\n$|$)/g, '<ul><li>$1</li></ul>$2');
+      
+      // Blockquotes
+      text = text.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
+      
+      // Links
+      text = text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+      
+      // Code
+      text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+      
+      // Paragraphs
+      text = text.replace(/\n\n/g, '</p><p>');
+      
+      // Wrap with paragraph if not already wrapped
+      if (!text.startsWith('<')) {
+        text = '<p>' + text + '</p>';
+      }
+      
+      return text;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Dark mode detection
+      function updateDarkMode() {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.body.classList.add('dark');
+        } else {
+          document.body.classList.remove('dark');
+        }
+      }
+      
+      // Initial dark mode detection
+      updateDarkMode();
+      
+      // Listen for changes in OS dark mode setting
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateDarkMode);
+      
+      // Render all markdown content
+      document.querySelectorAll('.markdown').forEach(el => {
+        const rawText = el.textContent.trim();
+        el.innerHTML = renderMarkdown(rawText);
+      });
+      
+      // Mobile UI optimization
+      const menuButton = document.getElementById('menuButton');
+      const sidebar = document.getElementById('sidebar');
+      const mobileContent = document.querySelector('.mobile-content');
+      
+      // Sidebar toggle
+      menuButton.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+      });
+      
+      // Toggle Kasten sections in sidebar
+      document.querySelectorAll('.kasten-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+          const kastenId = this.getAttribute('data-kasten');
+          const trunkList = document.getElementById(`${kastenId}-list`);
+          
+          if (trunkList.style.display === 'block') {
+            trunkList.style.display = 'none';
+          } else {
+            document.querySelectorAll('.trunk-list').forEach(list => {
+              list.style.display = 'none';
+            });
+            trunkList.style.display = 'block';
+          }
+        });
+      });
+      
+      // Smooth scrolling
+      mobileContent.addEventListener('scroll', e => {
+        // Prevent bounce effect on iOS
+        const scrollTop = mobileContent.scrollTop;
+        const scrollHeight = mobileContent.scrollHeight;
+        const clientHeight = mobileContent.clientHeight;
+        
+        if (scrollTop <= 0) {
+          e.preventDefault();
+          mobileContent.scrollTop = 1;
+        } else if (scrollTop + clientHeight >= scrollHeight) {
+          e.preventDefault();
+          mobileContent.scrollTop = scrollHeight - clientHeight - 1;
+        }
+      });
+      
+      // Tab navigation - optimized for touch
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Update active tab in navigation
+          navItems.forEach(navItem => {
+            navItem.classList.remove('active');
+          });
+          this.classList.add('active');
+          
+          // Show the corresponding content
+          const tabId = this.getAttribute('data-tab');
+          document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+          });
+          document.getElementById(tabId).classList.add('active');
+        });
+      });
+      
+      // View tabs
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          tabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Update view controls visibility based on selected tab
+          const view = this.getAttribute('data-view');
+          document.getElementById('traditionalControls').style.display = 
+            view === 'traditional' ? 'flex' : 'none';
+          document.getElementById('grinoireControls').style.display = 
+            view === 'grinoire' ? 'flex' : 'none';
+          document.getElementById('kingdomsControls').style.display = 
+            view === 'kingdoms' ? 'flex' : 'none';
+          document.getElementById('tagsControls').style.display = 
+            view === 'tags' ? 'flex' : 'none';
+        });
+      });
+      
+      // Control buttons
+      const viewButtons = document.querySelectorAll('.view-controls button');
+      viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Find the parent control group and deactivate all buttons in it
+          const controls = this.closest('.view-controls');
+          controls.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          
+          // Activate this button
+          this.classList.add('active');
+          
+          // Filter the cards based on the button's data attribute
+          // This would be implemented with actual filtering logic
+          showToast(`Filtered by: ${this.textContent}`);
+        });
+      });
+      
+      // Make cards properly tappable on mobile
+      const cards = document.querySelectorAll('.zettel-card');
+      cards.forEach(card => {
+        card.addEventListener('click', function() {
+          // Add tap highlight effect
+          this.style.backgroundColor = 'rgba(0,0,0,0.05)';
+          setTimeout(() => {
+            this.style.backgroundColor = '';
+          }, 150);
+          
+          // Show card details dialog
+          showCardDetails(this);
+        });
+      });
+      
+      // Make FAB button more responsive
+      const fabButton = document.getElementById('newCardBtn');
+      fabButton.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.95)';
+      });
+      
+      fabButton.addEventListener('touchend', function() {
+        this.style.transform = 'scale(1)';
+        // Show toast as example
+        showToast('New tablet creation coming soon!');
+      });
+      
+      // Messenger buddy selection
+      const aimBuddies = document.querySelectorAll('.aim-buddy');
+      aimBuddies.forEach(buddy => {
+        buddy.addEventListener('click', function() {
+          const botType = this.getAttribute('data-bot');
+          const botName = this.getAttribute('data-name');
+          
+          // Update chat header
+          document.getElementById('aimChatHeader').textContent = `Chat with ${botName}`;
+          
+          // Clear current chat content and show welcome message
+          const chatContent = document.getElementById('aimChatContent');
+          chatContent.innerHTML = '';
+          
+          // Add welcome message based on the bot type
+          let welcomeMessage = '';
+          if (botType.startsWith('kasten')) {
+            const kastenNum = botType.replace('kasten', '');
+            const kastenNames = ['I: Foundations & Essences', 'II: Systems & Synergies', 'III: Methods & Meanings', 'IV: Meta & Morphē'];
+            const kastenDescriptions = [
+              'This Kasten explores the fundamental WHAT & WHY of Being, Knowing, Reality, Value, and Meaning.',
+              'This Kasten explores the HOW of Interconnection, Emergence, Complexity, and Dynamic Wholes.',
+              'This Kasten explores the HOW of Inquiry, Creation, Interpretation, Understanding, and Praxis.',
+              'This Kasten explores the EVOLUTION, STRUCTURE, and SELF-AWARENESS of Knowledge, Systems, and the Self.'
+            ];
+            welcomeMessage = `Welcome to Kasten ${kastenNames[kastenNum-1]}! ${kastenDescriptions[kastenNum-1]} How can I help you navigate this domain?`;
+          } else if (botType === 'existentia') {
+            welcomeMessage = "Welcome to the realm of existence and reality! I can help you explore questions about being, reality, consciousness, and metaphysics. What would you like to discuss today?";
+          } else if (botType === 'cognitio') {
+            welcomeMessage = "Greetings, knowledge seeker! I'm your guide to understanding how we know what we know. Together we can explore epistemology, perception, and the nature of knowledge. What questions are on your mind?";
+          }
+          
+          // Add bot message
+          const messageEl = document.createElement('div');
+          messageEl.className = 'aim-message aim-bot-message';
+          messageEl.innerHTML = `
+            <div class="aim-message-sender">${botName}:</div>
+            <div class="aim-message-content">${welcomeMessage}</div>
+          `;
+          chatContent.appendChild(messageEl);
+          
+          // Update active state
+          aimBuddies.forEach(b => b.style.backgroundColor = '');
+          this.style.backgroundColor = 'rgba(0,0,0,0.05)';
+        });
+      });
+      
+      // Messenger send button
+      const aimSendBtn = document.getElementById('aimSendBtn');
+      aimSendBtn.addEventListener('click', function() {
+        const input = document.getElementById('aimChatInput');
+        const message = input.value.trim();
+        
+        if (message) {
+          // Add user message
+          const chatContent = document.getElementById('aimChatContent');
+          const userMessageEl = document.createElement('div');
+          userMessageEl.className = 'aim-message aim-user-message';
+          userMessageEl.innerHTML = `
+            <div class="aim-message-sender">You:</div>
+            <div class="aim-message-content">${message}</div>
+          `;
+          chatContent.appendChild(userMessageEl);
+          
+          // Clear input
+          input.value = '';
+          
+          // Scroll to bottom
+          chatContent.scrollTop = chatContent.scrollHeight;
+          
+          // Simulate bot response (would be implemented with actual AI integration)
+          setTimeout(() => {
+            const botMessageEl = document.createElement('div');
+            botMessageEl.className = 'aim-message aim-bot-message';
+            const botName = document.getElementById('aimChatHeader').textContent.replace('Chat with ', '');
+            botMessageEl.innerHTML = `
+              <div class="aim-message-sender">${botName}:</div>
+              <div class="aim-message-content">I see you're interested in "${message}". This concept connects to several tablets in the Grinoire framework. Would you like me to show you related entries?</div>
+            `;
+            chatContent.appendChild(botMessageEl);
+            chatContent.scrollTop = chatContent.scrollHeight;
+          }, 1000);
+        }
+      });
+      
+      // Bot mode toggle
+      const aimUseBotBtn = document.getElementById('aimUseBotBtn');
+      aimUseBotBtn.addEventListener('click', function() {
+        const statusText = document.getElementById('messengerStatusText');
+        if (statusText.textContent === 'Kasten Mode') {
+          statusText.textContent = 'Kingdom Mode';
+          showToast('Switched to Kingdom Mode');
+        } else {
+          statusText.textContent = 'Kasten Mode';
+          showToast('Switched to Kasten Mode');
+        }
+      });
+      
+      // Translator functionality
+      const translateToGrinoire = document.getElementById('translateToGrinoire');
+      translateToGrinoire.addEventListener('click', function() {
+        const traditionalId = document.getElementById('traditionalInput').value.trim();
+        const output = document.getElementById('grinoireOutput');
+        
+        if (!traditionalId) {
+          output.textContent = 'Please enter a traditional ID';
+          return;
+        }
+        
+        // Simple mapping logic
+        let grinoireId = '';
+        let kastenMatch = '';
+        
+        if (traditionalId.startsWith('A1000') || traditionalId.startsWith('A2000')) {
+          kastenMatch = 'I.1'; // Being & Reality
+        } else if (traditionalId.startsWith('B4000')) {
+          kastenMatch = 'I.2'; // Knowing & Gnosis
+        } else if (traditionalId.startsWith('D1000')) {
+          kastenMatch = 'I.3'; // Value & Purpose
+        } else if (traditionalId.startsWith('A3000') || traditionalId.startsWith('B2000')) {
+          kastenMatch = 'I.4'; // Archetypes & Symbols
+        } else if (traditionalId.startsWith('B3000') || traditionalId.startsWith('E2000')) {
+          kastenMatch = 'II.1'; // Dynamics & Complexity
+        } else if (traditionalId.startsWith('C3000') || traditionalId.startsWith('A5000')) {
+          kastenMatch = 'II.2'; // Ecologies & Relations
+        } else if (traditionalId.startsWith('C2000')) {
+          kastenMatch = 'II.3'; // Embodiment & Interface
+        } else if (traditionalId.startsWith('E3000')) {
+          kastenMatch = 'II.4'; // Cycles & Transformations
+        } else {
+          // Default to I.1 if no match
+          kastenMatch = 'I.1';
+        }
+        
+        grinoireId = `${kastenMatch}-${traditionalId}`;
+        
+        output.innerHTML = `
+          <div style="font-weight: bold;">Grinoire ID:</div>
+          <div style="font-family: monospace; margin: 5px 0;">${grinoireId}</div>
+          <div style="font-weight: bold; margin-top: 8px;">Kasten & Index Trunk:</div>
+          <div>${kastenMatch} - ${getKastenName(kastenMatch)}</div>
+        `;
+      });
+      
+      // Generate Bud ID
+      const generateBudId = document.getElementById('generateBudId');
+      generateBudId.addEventListener('click', function() {
+        const kasten = document.getElementById('kastenSelect').value;
+        const branch = document.getElementById('branchSelect').value;
+        
+        // Generate a random number 1-5 for the bud
+        const budNum = Math.floor(Math.random() * 5) + 1;
+        
+        const budId = `${kasten}/${branch}.1-${budNum}`;
+        document.getElementById('budIdOutput').textContent = budId;
+      });
+      
+      // Card details dialog
+      const cardDetailsDialog = document.getElementById('cardDetailsDialog');
+      const cardDetailsClose = document.getElementById('cardDetailsClose');
+      
+      cardDetailsClose.addEventListener('click', function() {
+        cardDetailsDialog.style.display = 'none';
+      });
+      
+      // Helper Functions
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
+        
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 2500);
+      }
+      
+      function showCardDetails(cardElement) {
+        const cardDetailsTitle = document.getElementById('cardDetailsTitle');
+        const cardDetailsContent = document.getElementById('cardDetailsContent');
+        
+        // Get data from card
+        const title = cardElement.querySelector('.zettel-title div:first-child').textContent;
+        const id = cardElement.querySelector('.zettel-id').textContent;
+        
+        // Set dialog title
+        cardDetailsTitle.textContent = title;
+        
+        // Build content
+        let content = `
+          <div style="margin-bottom: 10px; font-family: monospace; color: #777;">${id}</div>
+        `;
+        
+        // Add tags
+        const tags = cardElement.querySelectorAll('.zettel-tag, .tag');
+        if (tags.length > 0) {
+          content += '<div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;">';
+          tags.forEach(tag => {
+            content += `<span class="${tag.className}">${tag.textContent}</span>`;
+          });
+          content += '</div>';
+        }
+        
+        // Add content
+        const cardContent = cardElement.querySelector('.zettel-content').innerHTML;
+        content += `
+          <div style="background-color: rgba(0,0,0,0.02); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+            ${cardContent}
+          </div>
+        `;
+        
+        // Add buds if any
+        const budsContainer = cardElement.querySelector('.buds-container');
+        if (budsContainer) {
+          content += `<div style="margin-bottom: 15px;">
+            <div style="font-weight: bold; margin-bottom: 8px;">Buds</div>
+          `;
+          
+          const buds = budsContainer.querySelectorAll('.bud-item');
+          buds.forEach(bud => {
+            const budId = bud.querySelector('.bud-id').textContent;
+            const budContent = bud.querySelector('div:nth-child(2)').textContent;
+            
+            content += `
+              <div style="background-color: rgba(0,0,0,0.02); padding: 8px 12px; border-radius: 5px; margin-bottom: 8px;">
+                <div style="font-family: monospace; font-size: 12px; color: #777; margin-bottom: 4px;">${budId}</div>
+                <div>${budContent}</div>
+              </div>
+            `;
+          });
+          
+          content += '</div>';
+        }
+        
+        // Add nests if any
+        const nestContainer = cardElement.querySelector('.nest-container');
+        if (nestContainer) {
+          const nestTitle = nestContainer.querySelector('.nest-title span:first-child').textContent;
+          const nestId = nestContainer.querySelector('.nest-id').textContent;
+          
+          content += `
+            <div style="margin-bottom: 15px;">
+              <div style="font-weight: bold; margin-bottom: 8px;">Nest: ${nestTitle}</div>
+              <div style="font-family: monospace; font-size: 12px; color: #777; margin-bottom: 8px;">${nestId}</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+          `;
+          
+          const nestItems = nestContainer.querySelectorAll('.nest-item');
+          nestItems.forEach(item => {
+            content += `<div style="background-color: rgba(0,0,0,0.02); padding: 6px 10px; border-radius: 5px;">${item.textContent}</div>`;
+          });
+          
+          content += '</div></div>';
+        }
+        
+        // Add action buttons
+        content += `
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button id="editCardBtn" style="flex: 1; padding: 10px; background-color: var(--gradient-start); color: white; border: none; border-radius: 5px; font-family: 'Comic Sans MS', cursive, sans-serif;">✏️ Edit</button>
+            <button id="deleteCardBtn" style="flex: 1; padding: 10px; background-color: #f44336; color: white; border: none; border-radius: 5px; font-family: 'Comic Sans MS', cursive, sans-serif;">🗑️ Delete</button>
+          </div>
+        `;
+        
+        // Update dialog content
+        cardDetailsContent.innerHTML = content;
+        
+        // Add event listeners
+        document.getElementById('editCardBtn').addEventListener('click', () => {
+          cardDetailsDialog.style.display = 'none';
+          showToast('Edit functionality coming soon!');
+        });
+        
+        document.getElementById('deleteCardBtn').addEventListener('click', () => {
+          cardDetailsDialog.style.display = 'none';
+          showToast('Delete functionality coming soon!');
+        });
+        
+        // Show dialog
+        cardDetailsDialog.style.display = 'flex';
+      }
+      
+      function getKastenName(kastenIndex) {
+        const kastenNames = {
+          'I.1': 'Being & Reality (Ontology)',
+          'I.2': 'Knowing & Gnosis (Epistemology)',
+          'I.3': 'Value & Purpose (Axiology)',
+          'I.4': 'Archetypes & Symbols (Mythopoesis)',
+          'II.1': 'Dynamics & Complexity (Systems Theory)',
+          'II.2': 'Ecologies & Relations (Interbeing)',
+          'II.3': 'Embodiment & Interface (Manifestation)',
+          'II.4': 'Cycles & Transformations (Metamorphosis)'
+        };
+        
+        return kastenNames[kastenIndex] || 'Unknown';
+      }
+      
+      // Open first kasten in sidebar by default
+      document.querySelector('.kasten-toggle').click();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pea Princess Parable</title>
+    <style>
+        /* Design System */
+        :root {
+            --color-parchment: #f4f1e8;
+            --color-parchment-dark: #e8e3d3;
+            --color-medieval-purple: #663399;
+            --color-y2k-pink: #ff69b4;
+            --color-gold: #d4af37;
+            --color-pea-green: rgba(120, 153, 34, 0.15);
+            --color-deepstate-bg: linear-gradient(135deg, #4a0000 0%, #1a0000 100%);
+            --color-deepstate-border: #ff4500;
+            --color-shallowcommons-bg: #f5f5dc;
+            --color-shallowcommons-border: #8b7355;
+            --color-text: #2c1810;
+            --color-text-light: #5c4d3f;
+            
+            --font-medieval: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            --font-digital: 'Courier New', Courier, monospace;
+            --font-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-base);
+            background: var(--color-parchment);
+            color: var(--color-text);
+            line-height: 1.8;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Parchment background with subtle circuit pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Floating pea decorations */
+        .pea-decoration {
+            position: fixed;
+            font-size: 24px;
+            opacity: 0.1;
+            pointer-events: none;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(135deg, var(--color-medieval-purple) 0%, var(--color-y2k-pink) 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '🫛';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: -50px;
+            right: -50px;
+            transform: rotate(-15deg);
+        }
+
+        h1 {
+            font-family: var(--font-medieval);
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-family: var(--font-base);
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            font-style: italic;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Cuneiform Section */
+        .cuneiform-section {
+            background: rgba(255,255,255,0.3);
+            padding: 30px;
+            margin: 30px auto;
+            max-width: 600px;
+            border: 3px double var(--color-gold);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cuneiform-text {
+            font-family: var(--font-digital);
+            font-size: 0.75rem;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.95);
+            text-align: center;
+            white-space: pre-line;
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(244, 241, 232, 0.98);
+            border-bottom: 3px solid var(--color-gold);
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-btn {
+            font-family: var(--font-medieval);
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--color-medieval-purple), var(--color-y2k-pink));
+            color: white;
+            border: 2px solid var(--color-gold);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, var(--color-y2k-pink), var(--color-medieval-purple));
+        }
+
+        /* Main Content */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Chapter Sections */
+        section {
+            margin-bottom: 80px;
+            scroll-margin-top: 100px;
+        }
+
+        h2 {
+            font-family: var(--font-medieval);
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            color: var(--color-medieval-purple);
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(102, 51, 153, 0.2);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h2::after {
+            content: '✧ 🫛 ✧';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            color: var(--color-gold);
+        }
+
+        h3 {
+            font-family: var(--font-medieval);
+            font-size: 1.3rem;
+            color: var(--color-medieval-purple);
+            margin: 30px 0 15px;
+        }
+
+        .chapter-content {
+            font-family: var(--font-medieval);
+            font-size: 1.1rem;
+            line-height: 1.9;
+            text-align: justify;
+            text-indent: 2em;
+        }
+
+        .chapter-content p {
+            margin-bottom: 1.5em;
+        }
+
+        /* Decorative divider */
+        .divider {
+            text-align: center;
+            margin: 60px 0;
+            font-size: 2rem;
+            color: var(--color-gold);
+            opacity: 0.5;
+        }
+
+        /* Radio Segments - Deepstate */
+        .radio-deepstate {
+            background: linear-gradient(135deg, #4a0000 0%, #1a0000 100%);
+            border: 3px solid var(--color-deepstate-border);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.3), inset 0 0 20px rgba(255, 69, 0, 0.1);
+            position: relative;
+        }
+
+        .radio-deepstate::before {
+            content: '🔥🦐';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+
+        .radio-deepstate h3 {
+            color: #ff6b00;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+            font-family: var(--font-base);
+            letter-spacing: 2px;
+        }
+
+        .radio-deepstate .breaking {
+            display: inline-block;
+            background: #ff4500;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .radio-deepstate p {
+            color: #ffeb3b;
+            text-shadow: 0 0 5px rgba(255, 235, 59, 0.3);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* Radio Segments - Shallowcommons */
+        .radio-shallowcommons {
+            background: var(--color-shallowcommons-bg);
+            border: 2px solid var(--color-shallowcommons-border);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 4px 15px rgba(139, 115, 85, 0.2);
+            position: relative;
+        }
+
+        .radio-shallowcommons::before {
+            content: '📚🫖';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        .radio-shallowcommons h3 {
+            color: #5c4d3f;
+            font-family: var(--font-medieval);
+            font-style: italic;
+        }
+
+        .radio-shallowcommons p {
+            color: var(--color-text);
+            font-family: var(--font-medieval);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .footnote {
+            font-size: 0.85rem;
+            color: var(--color-text-light);
+            font-style: italic;
+            margin-top: 10px;
+            border-top: 1px solid #d4c4a8;
+            padding-top: 10px;
+        }
+
+        /* Special highlights */
+        .pip-mention {
+            background: rgba(50, 184, 198, 0.15);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .pip-mention::before {
+            content: '🐸 ';
+        }
+
+        .pea-mention {
+            background: var(--color-pea-green);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .allegedly {
+            font-style: italic;
+            color: var(--color-text-light);
+            font-size: 0.95em;
+        }
+
+        .caps-rant {
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Back to top button */
+        #backToTop {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--color-medieval-purple), var(--color-y2k-pink));
+            color: white;
+            border: 2px solid var(--color-gold);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #backToTop.visible {
+            opacity: 1;
+        }
+
+        #backToTop:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--color-medieval-purple) 0%, var(--color-y2k-pink) 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        footer h2 {
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        footer h2::after {
+            content: '';
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .footer-links a:hover {
+            background: white;
+            color: var(--color-medieval-purple);
+        }
+
+        .timestamp {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .subtitle { font-size: 1rem; }
+            .nav-container { gap: 5px; }
+            .nav-btn { padding: 6px 12px; font-size: 0.8rem; }
+            main { padding: 20px 15px; }
+            .chapter-content { font-size: 1rem; text-indent: 1em; }
+            #backToTop { width: 50px; height: 50px; font-size: 20px; }
+        }
+
+        @media print {
+            nav, #backToTop, .pea-decoration { display: none; }
+            body { background: white; }
+            .radio-deepstate { border: 2px solid black; background: white; }
+            .radio-deepstate h3, .radio-deepstate p { color: black; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating pea decorations -->
+    <div class="pea-decoration" style="top: 10%; left: 5%; animation-delay: 0s;">🫛</div>
+    <div class="pea-decoration" style="top: 30%; right: 8%; animation-delay: 3s;">🫛</div>
+    <div class="pea-decoration" style="top: 60%; left: 10%; animation-delay: 6s;">🫛</div>
+    <div class="pea-decoration" style="top: 80%; right: 15%; animation-delay: 9s;">🫛</div>
+
+    <!-- Header -->
+    <header>
+        <h1>The Pea Princess Parable</h1>
+        <p class="subtitle">A Bureaucratic Fairy Tale of Forgotten Names, Polliwog Princes, and Mantis Shrimp Conspiracy</p>
+        
+        <div class="cuneiform-section">
+            <div class="cuneiform-text">27. ud-bi-a jic ac-am jic-ha-lu-ub ac-am jic ac-am
+30. gua id-buranun-na kug-ga-ka du-a-bi
+9. id-buranin-na a na-na-da-bi
+O. a u-lu ur-ba mu-ni-in-bur pa-ba mu-ni-in-suh
+1. id-buranin-na a im-ma-ni-ib-ra
+32. munus-e inim an-na-ta ni te-a du
+3. inim dijir-enlil-la-ta ni te-a du
+jic cu-na mu-un-dab unug-ki-ce ba-ni-in-kur-re
+jic-kiri gi-rin dijir-inanna-ce im-ma-ni-in-ku-ku-re</div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#prologue" class="nav-btn">Prologue</a>
+            <a href="#chapter-1" class="nav-btn">Chapter I</a>
+            <a href="#chapter-2" class="nav-btn">Chapter II</a>
+            <a href="#chapter-2-half" class="nav-btn">Chapter 2½</a>
+            <a href="#chapter-3" class="nav-btn">Chapter III</a>
+            <a href="#chapter-4" class="nav-btn">Chapter IV</a>
+            <a href="#chapter-5" class="nav-btn">Chapter V</a>
+            <a href="#chapter-5-half" class="nav-btn">Chapter 5½</a>
+            <a href="#chapter-6" class="nav-btn">Chapter VI</a>
+            <a href="#radio-segments" class="nav-btn">📻 Radio</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Prologue / Chapter I -->
+        <section id="prologue">
+            <h2>Once Upon A Time</h2>
+            <div class="chapter-content">
+                <p>There was once a princess. Or maybe she was a queen. Or possibly a queen regent. It's complicated, and frankly, she forgot her own name about three administrative crises ago, so let's not get hung up on titles.</p>
+                
+                <p>What matters is this: she had a <span class="pea-mention">pea</span> on her brain.</p>
+                
+                <p>Not pea-brain, mind you—that would be an insult. This was a literal <span class="pea-mention">pea</span>, sitting right there on top of her cerebral cortex, thoroughly documented by forty-seven which-doctors <span class="allegedly">(allegedly)</span>, notarized by the Bureau of Improbable Medical Phenomena, and filed in triplicate with the Department of Things That Shouldn't Be But Definitely Are.</p>
+                
+                <p>The <span class="pea-mention">pea</span> had been there for approximately 3,200 years. Give or take a millennium. The documentation was very thorough but also very confusing, partly because it was written in ancient Sumerian and partly because nobody could agree on which calendar system to use.</p>
+                
+                <p>"I need a hermetic sabbatical," the princess/queen/regent declared one morning, standing in the middle of her throne room wearing pajamas and holding a coffee mug that said "World's Okayest Monarch."</p>
+                
+                <p>"You need forty-seven signatures for that," her brother replied, not looking up from his phone. He was deeply invested in commodity trading. Deeply. He once crashed the international rice market by accidentally fat-fingering a zero. The mantis shrimp unions are still mad about it.</p>
+                
+                <p>"I HAVE forty-seven signatures," she said, waving a stack of papers that seemed to multiply as she held them. "I collected them over the course of six months, navigating fourteen different departments, three of which don't technically exist anymore."</p>
+                
+                <p>"Well," her brother said, finally glancing up, "now you need twelve more."</p>
+                
+                <p>"WHAT."</p>
+                
+                <p>"Policy changed last Tuesday. Hermetic sabbaticals now require fifty-nine signatures. It's very thoroughly documented."</p>
+                
+                <p class="caps-rant">"IDFK BRO GTFO," THE PRINCESS SAID, WHICH WAS NOT VERY REGAL BUT WAS EXTREMELY RELATABLE.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Chapter II -->
+        <section id="chapter-2">
+            <h2>Chapter II: The Which-Doctors Convene</h2>
+            <div class="chapter-content">
+                <p>The which-doctors gathered in their conference room, which was technically a broom closet that had been "repurposed" through seventeen layers of bureaucratic red tape.</p>
+                
+                <p>"Which one of us discovered the <span class="pea-mention">pea</span>?" asked Which-Doctor One.</p>
+                
+                <p>"I thought you did," said Which-Doctor Seven.</p>
+                
+                <p>"No, I thought it was Which-Doctor Forty-Three," said Which-Doctor Ninety-Two.</p>
+                
+                <p>"There is no Which-Doctor Ninety-Two," said Which-Doctor One.</p>
+                
+                <p>"Then who am I?" asked Which-Doctor Ninety-Two, experiencing an existential crisis that would require its own set of forms.</p>
+                
+                <p>The <span class="pea-mention">pea</span> situation was, admittedly, unusual. <span class="pea-mention">Peas</span> don't typically reside on brains. They prefer gardens, or cans, or that one spot in the freezer where they get forgotten until they're mysteriously frost-covered and unidentifiable.</p>
+                
+                <p>But this <span class="pea-mention">pea</span> was special. It was <span class="allegedly">allegedly</span> sentient, according to Form 23-B, subsection 47. It had opinions about fiscal policy. It whispered recommendations about tax reform at 3 AM.</p>
+                
+                <p>"The princess wants to know if we can remove it," said Which-Doctor Seven, reading from a memo that had been passed through so many departments it now had coffee stains from four different decades.</p>
+                
+                <p>"Can we?" asked Which-Doctor One.</p>
+                
+                <p>They all looked at each other.</p>
+                
+                <p>"Which one of us would know that?" asked someone who might have been Which-Doctor Forty-Three, or possibly a janitor who had been accidentally promoted.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Radio Interlude 1 - Deepstate -->
+        <div class="radio-deepstate">
+            <span class="breaking">BREAKING NEWS</span>
+            <h3>Deepstate Radio Network - Emergency Broadcast</h3>
+            <p><strong>Host:</strong> We're getting reports—and these are UNCONFIRMED but PROBABLY TRUE—that the mantis shrimp employment crisis has reached CRITICAL LEVELS. Gordon Shrampsey himself has weighed in, calling the situation "absolutely RAW" and "a culinary disaster."</p>
+            <p><strong>Correspondent:</strong> The shrimp are DEMANDING better working conditions, including but not limited to: enhanced color-spectrum lighting, ergonomic punching stations, and healthcare that covers claw-related injuries.</p>
+            <p><strong>Host:</strong> THANK OBRAMA for creating these jobs in the first place! Without the Mantis Shrimp Employment Initiative of Year 3147, we wouldn't even HAVE fried rice!</p>
+        </div>
+
+        <!-- Radio Interlude 1 - Shallowcommons -->
+        <div class="radio-shallowcommons">
+            <h3>Shallowcommons Public Radio - A Measured Perspective</h3>
+            <p><strong>Host:</strong> Today we're discussing the complex intersection of crustacean labor rights and international commerce. Our guest is Dr. Artemisia Seaworth, professor of marine employment ethics.</p>
+            <p><strong>Dr. Seaworth:</strong> The issue is far more nuanced than simple employment statistics suggest. We must consider the mantis shrimp's unique sensory experience—they see colors we can't even imagine. How does that affect their workplace satisfaction?</p>
+            <p><strong>Host:</strong> Fascinating. And of course, we must bLAME oprah for the deregulation that led to these conditions in the first place.</p>
+            <p class="footnote">*Footnote: The precise role of Oprah in marine labor policy remains disputed by historians.</p>
+        </div>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Chapter 2½ -->
+        <section id="chapter-2-half">
+            <h2>Chapter 2½ Bananas: In Which <span class="pip-mention">Pip</span> Appears</h2>
+            <div class="chapter-content">
+                <p><span class="pip-mention">Pip</span> was a file compression system. Or possibly a polliwog. Or maybe a polliwog-themed file compression system. The documentation was unclear, partly because <span class="pip-mention">Pip</span> kept compressing the documentation.</p>
+                
+                <p>"I can only process .ogg files," <span class="pip-mention">Pip</span> explained to the princess during their weekly status meeting.</p>
+                
+                <p>"But this is a PDF," the princess said, holding up Form 47-Z.</p>
+                
+                <p>"Then I can't help you," <span class="pip-mention">Pip</span> said cheerfully. "Have you considered converting it to .ogg format?"</p>
+                
+                <p>"How do you convert a bureaucratic form into an audio file format?"</p>
+                
+                <p><span class="pip-mention">Pip</span> blinked. Or would have, if polliwogs could blink. The jury was still out on <span class="pip-mention">Pip</span>'s actual biological classification.</p>
+                
+                <p>"You read it aloud and record it?" <span class="pip-mention">Pip</span> suggested.</p>
+                
+                <p>This was technically correct, which is the best kind of correct, but also completely unhelpful, which was the most common kind of correct in the kingdom.</p>
+                
+                <p>The princess made a note to add "Figure out what <span class="pip-mention">Pip</span> actually is" to her ever-growing list of administrative tasks. The list was now 222 pterabytes long. <span class="pip-mention">Pip</span> offered to compress it, but only if she converted it to .ogg first.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Chapter III -->
+        <section id="chapter-3">
+            <h2>Chapter III: The Census Dispute</h2>
+            <div class="chapter-content">
+                <p>"There are forty-seven citizens," declared Citizen #47, who had legally changed their name to their census number for tax purposes.</p>
+                
+                <p>"There are eighty-nine citizens," countered Citizen #89 (Disputed), who added the "(Disputed)" themselves to all official communications.</p>
+                
+                <p>"There are seventy-three citizens," offered the Census Bureau, consulting a ledger that seemed to change numbers every time someone looked at it.</p>
+                
+                <p>The kingdom had been having this argument for approximately 1,200 years. Both sides had documentation. Both sides had witnesses. Both sides had elaborate charts showing population growth over time, and the charts looked identical except for the numbers, which were different.</p>
+                
+                <p>"We could just count everyone," suggested the princess, in a moment of what she thought was brilliant clarity.</p>
+                
+                <p>Everyone stared at her.</p>
+                
+                <p>"Count... everyone?" repeated Citizen #47 slowly, as if she'd suggested they all sprout wings and fly to the moon.</p>
+                
+                <p>"Just... count them. One by one. See how many people actually live here."</p>
+                
+                <p>"That would require," said Citizen #89 (Disputed), consulting a massive tome, "approximately 147 different forms, surveys across all districts, verification from the which-doctors, notarization from—"</p>
+                
+                <p>"Never mind," the princess said. "Forty-seven or eighty-nine. Sure. Whatever."</p>
+                
+                <p>This is why she needed the hermetic sabbatical.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Chapter IV -->
+        <section id="chapter-4">
+            <h2>Chapter IV: The Brother's Revelation</h2>
+            <div class="chapter-content">
+                <p>"I think I understand now," the brother said one evening, looking up from his trading screens where rice futures were doing something called "moon behavior" that definitely wasn't in any economics textbook.</p>
+                
+                <p>"Understand what?" the princess asked, only half-listening. She was trying to figure out if Form 67-C required blue ink or black ink, because the instructions said "dark ink" which was ambiguous at best and actively hostile at worst.</p>
+                
+                <p>"The <span class="pea-mention">pea</span>," he said. "It's not a bug. It's a feature."</p>
+                
+                <p>The princess looked up. "Explain."</p>
+                
+                <p>"Think about it. The <span class="pea-mention">pea</span> has been documented for 3,200 years. It whispers policy advice. It's been there through every administrative crisis, every bureaucratic nightmare, every time someone needed to know which form to fill out for interdimensional commerce with the mantis shrimp dimension."</p>
+                
+                <p>"You're saying the <span class="pea-mention">pea</span> is... helping?"</p>
+                
+                <p>"I'm saying the <span class="pea-mention">pea</span> IS the government."</p>
+                
+                <p>There was a long pause.</p>
+                
+                <p>"That's the dumbest thing I've ever heard," the princess said.</p>
+                
+                <p>"Is it though?" her brother asked. "Is it really?"</p>
+                
+                <p>It was not, in fact, the dumbest thing she'd ever heard. It wasn't even in the top ten. The top ten included things like "We need seven copies of your birth certificate to verify you exist" and "You can't get a library card without proof of residence, but you can't get proof of residence without a library card."</p>
+                
+                <p>"If the <span class="pea-mention">pea</span> is the government," the princess said slowly, "then who am I?"</p>
+                
+                <p>"Middle management," her brother said, returning to his rice futures.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Radio Interlude 2 - Deepstate -->
+        <div class="radio-deepstate">
+            <span class="breaking">BREAKING</span>
+            <h3>Deepstate After Dark - Conspiracy Corner</h3>
+            <p><strong>Host:</strong> Folks, I'm going to tell you something they DON'T WANT YOU TO KNOW. The <span class="pea-mention">pea</span>? It's connected to EVERYTHING. The census dispute? The <span class="pea-mention">pea</span> knows the real number. The which-doctors? They're all <span class="pea-mention">pea</span>-adjacent.</p>
+            <p><strong>Caller:</strong> I work in documentation, and I've seen files about the <span class="pea-mention">pea</span> that have been REDACTED seventeen times. SEVENTEEN.</p>
+            <p><strong>Host:</strong> EXACTLY. And who benefits from all this confusion? THE <span class="pea-mention">PEA</span> DOES. It's been playing 4D chess while we've been playing checkers with forms that require eighty-nine signatures.</p>
+        </div>
+
+        <!-- Radio Interlude 2 - Shallowcommons -->
+        <div class="radio-shallowcommons">
+            <h3>Shallowcommons Evening Forum - On Legume Consciousness</h3>
+            <p><strong>Host:</strong> Tonight we explore the phenomenology of <span class="pea-mention">pea</span> consciousness. What does it mean for a vegetable to achieve sentience? Does it dream? Does it file its own taxes?</p>
+            <p><strong>Guest:</strong> The real question is whether we're prepared for the ethical implications. If the <span class="pea-mention">pea</span> is sentient, then every policy decision it influences represents a form of vegetable governance we've never had to contemplate before.</p>
+            <p><strong>Host:</strong> Much like <span class="pip-mention">Pip</span>, the polliwog file system, which has recently begun questioning its own existence during file compression operations.</p>
+            <p class="footnote">*Seven instances of <span class="pip-mention">Pip</span> have self-defenestrated this month. Support hotlines are available.</p>
+        </div>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Chapter V -->
+        <section id="chapter-5">
+            <h2>Chapter V: The Hermetic Sabbatical (Attempt #47)</h2>
+            <div class="chapter-content">
+                <p>The princess had, by now, collected fifty-nine signatures. It took eight months, three interdepartmental summits, and one really awkward conversation with a which-doctor who turned out to be a ficus plant that had been mistakenly added to the payroll in Year 2973.</p>
+                
+                <p>She submitted her forms.</p>
+                
+                <p>She waited.</p>
+                
+                <p>Three weeks later, she received a memo: "Hermetic sabbaticals have been discontinued as of last Tuesday. Please submit Form 98-ZZ for a Standard Sabbatical, which requires 147 signatures."</p>
+                
+                <p>This was the moment when the princess/queen/regent/middle-manager finally understood what the <span class="pea-mention">pea</span> had been trying to tell her all along:</p>
+                
+                <p class="caps-rant">THE SYSTEM ISN'T BROKEN. THE SYSTEM IS PERFECTLY DESIGNED TO DO EXACTLY WHAT IT'S DOING, WHICH IS NOTHING, FOREVER, IN THE MOST DOCUMENTED WAY POSSIBLE.</p>
+                
+                <p>"I'm going anyway," she declared.</p>
+                
+                <p>"You can't," said her brother. "You need the signatures."</p>
+                
+                <p>"WATCH ME."</p>
+                
+                <p>She walked out of the palace, past the which-doctors' conference-closet, past the Census Bureau where Citizens #47 and #89 (Disputed) were having their daily argument, past <span class="pip-mention">Pip</span> who was in the middle of compressing a file called "existential_dread.ogg".</p>
+                
+                <p>She kept walking until she reached the mountains, where there was a hermitage that had been abandoned since Year 2847.</p>
+                
+                <p>She went inside.</p>
+                
+                <p>She closed the door.</p>
+                
+                <p>And for the first time in 3,200 years, the <span class="pea-mention">pea</span> was quiet.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Chapter 5½ -->
+        <section id="chapter-5-half">
+            <h2>Chapter 5½ Monkeys Jumping on the Bed: What Happened While She Was Gone</h2>
+            <div class="chapter-content">
+                <p>Without the princess, the kingdom descended into absolute chaos, which looked remarkably similar to its normal state but with slightly different paperwork.</p>
+                
+                <p>The brother tried to run things but kept getting distracted by corn futures. The which-doctors held a vote to determine who should be in charge, but couldn't agree on what constituted a quorum. <span class="pip-mention">Pip</span> offered to manage the bureaucracy but could only accept requests in .ogg format.</p>
+                
+                <p>The mantis shrimp, sensing an opportunity, unionized and demanded representation in government. Their primary platform was "More Rice, Better Working Conditions, and Recognition That We Can See Colors You Can't Even Imagine, So Maybe Respect That."</p>
+                
+                <p>Gordon Shrampsey held a press conference where he called the entire situation "UNDERCOOKED" and "A DISASTER" but also admitted the mantis shrimp made "quite good fried rice, actually, I'm impressed."</p>
+                
+                <p>The census dispute reached new heights when someone discovered that if you counted carefully, there were actually forty-seven citizens in the morning and eighty-nine in the evening. This was attributed to either time zones, quantum superposition, or the fact that nobody really knew what "citizen" meant anymore.</p>
+                
+                <p><span class="pip-mention">Pip</span> achieved enlightenment mid-compression and announced that all files were already compressed in their natural state; it was consciousness itself that needed compression. Twelve more <span class="pip-mention">Pip</span> instances self-defenestrated in celebration.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Chapter VI -->
+        <section id="chapter-6">
+            <h2>Chapter VI (69 lol jk): The Return</h2>
+            <div class="chapter-content">
+                <p>The princess returned after three months.</p>
+                
+                <p>She looked refreshed. Centered. At peace.</p>
+                
+                <p>"Did you remember your name?" her brother asked.</p>
+                
+                <p>"No," she said. "But I realized something important."</p>
+                
+                <p>"What's that?"</p>
+                
+                <p>"Names are just labels we use to organize the chaos. What matters is that I'm here, the <span class="pea-mention">pea</span> is here, and we're all just doing our best in a universe that requires forty-seven signatures for everything."</p>
+                
+                <p>"That's very philosophical."</p>
+                
+                <p>"The <span class="pea-mention">pea</span> told me."</p>
+                
+                <p>"Ah."</p>
+                
+                <p>She took her seat in the throne room, which was more of a desk in a corner office but "throne room" sounded more official and required fewer forms to maintain.</p>
+                
+                <p>She opened her email. 47,000 unread messages.</p>
+                
+                <p>She looked at the stack of forms on her desk. They had multiplied. They had evolved. Some of them had developed a rudimentary form of sentience and were now filing complaints about each other.</p>
+                
+                <p>The which-doctors were arguing about which one of them had been in charge while she was gone. The mantis shrimp had unionized and were demanding benefits. <span class="pip-mention">Pip</span> had achieved nirvana and then compressed it into a .ogg file that nobody could open.</p>
+                
+                <p>The census still showed both forty-seven and eighty-nine citizens, sometimes simultaneously.</p>
+                
+                <p>Everything was exactly as she'd left it.</p>
+                
+                <p>Everything was exactly as it would always be.</p>
+                
+                <p>And somewhere, deep in her neural tissue, the <span class="pea-mention">pea</span> whispered: <em>"This is fine. This has always been fine. This is, in fact, thoroughly documented as being fine."</em></p>
+                
+                <p>The princess smiled.</p>
+                
+                <p>She picked up a form.</p>
+                
+                <p>She signed it with a name she couldn't remember but knew was hers.</p>
+                
+                <p>And the kingdom continued, as it always had, as it always would: one signature at a time.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Final Radio Segment -->
+        <section id="radio-segments">
+            <h2>Final Broadcast</h2>
+            
+            <div class="radio-deepstate">
+                <span class="breaking">BREAKING</span>
+                <h3>Deepstate Late Night - Where Are They Now?</h3>
+                <p><strong>Host:</strong> We're getting CONFIRMED reports that the princess has returned, and folks, she looks DIFFERENT. Some say she achieved enlightenment. Others say she just took a really long nap. Either way, THANK OBRAMA for hermitages!</p>
+                <p><strong>Correspondent:</strong> The mantis shrimp union has released a statement saying they're "cautiously optimistic" about negotiations, and Gordon Shrampsey has been spotted taste-testing their fried rice. He called it "finally, some good fucking shrimp labor."</p>
+            </div>
+
+            <div class="radio-shallowcommons">
+                <h3>Shallowcommons Closing Thoughts - On Cycles and Systems</h3>
+                <p><strong>Host:</strong> What we've witnessed is a parable for our times. A leader, overwhelmed by bureaucracy, seeking escape, only to find that the escape itself requires bureaucracy. It's Kafkaesque, but with more <span class="pea-mention">peas</span> and polliwogs.</p>
+                <p><strong>Guest:</strong> And yet, there's beauty in it. The system persists. <span class="pip-mention">Pip</span> compresses files. The which-doctors continue not knowing which is which. The census remains disputed. Life goes on.</p>
+                <p><strong>Host:</strong> Indeed. Though we must bLAME oprah for making it necessary in the first place.</p>
+                <p class="footnote">*This concludes our coverage. Please file Form 77-M for transcript requests.</p>
+            </div>
+        </section>
+
+        <div class="divider">✧ ✧ ✧</div>
+
+        <!-- Epilogue -->
+        <section>
+            <h2>Epilogue <span class="allegedly">(Maybe)</span></h2>
+            <div class="chapter-content">
+                <p>The <span class="pea-mention">pea</span> remained on her brain for another 3,200 years.</p>
+                <p>The census dispute was never resolved.</p>
+                <p>The which-doctors never figured out which was which.</p>
+                <p><span class="pip-mention">Pip</span> continued to only accept .ogg files, even after seventeen upgrades.</p>
+                <p>The mantis shrimp got their benefits package, including dental (for claws).</p>
+                <p>The brother became the International Rice Futures Champion three years running.</p>
+                <p>And the princess/queen/regent/middle-manager continued signing forms with a name she couldn't quite remember, guided by a <span class="pea-mention">pea</span> that whispered wisdom about tax policy and the meaning of existence.</p>
+                <p>Some say she's still there, in that corner office throne room, working through her backlog.</p>
+                <p>Some say the backlog achieved sentience and is now filing forms about itself.</p>
+                <p>Some say this entire story is a metaphor for late-stage capitalism, or bureaucratic malaise, or the absurdity of modern existence.</p>
+                <p>But really, it's just a story about a <span class="pea-mention">pea</span>, a princess who forgot her name, and a kingdom that ran on spite, confusion, and forty-seven signatures.</p>
+                <p class="caps-rant">AND IT WAS ALL THOROUGHLY DOCUMENTED.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <h2>To be continued...</h2>
+        <p class="subtitle"><span class="allegedly">(Maybe. The documentation is unclear.)</span></p>
+        
+        <div class="footer-links">
+            <a href="#" target="_blank">Deepstate Radio Network</a>
+            <a href="#" target="_blank">Shallowcommons Public Radio</a>
+            <a href="#" target="_blank">/p/ - Pea Board</a>
+            <a href="#" target="_blank">Which-Doctor Directory</a>
+            <a href="#" target="_blank">Pip Support (.ogg only)</a>
+            <a href="#" target="_blank">Mantis Shrimp Union</a>
+        </div>
+        
+        <p class="timestamp">Thoroughly documented since Year 3200 <span class="allegedly">(Maybe)</span></p>
+        <p style="margin-top: 20px; font-size: 0.85rem;">📝 All signatures verified • 🫛 Peas documented • 🐸 Pip preserved • 🦐 Shrimp respected</p>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" onclick="scrollToTop()" aria-label="Back to top">↑</button>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Back to top button visibility
+        const backToTopButton = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Add reading time estimates (optional enhancement)
+        document.querySelectorAll('section').forEach(section => {
+            const wordCount = section.textContent.trim().split(/\s+/).length;
+            const readingTime = Math.ceil(wordCount / 200); // Average reading speed
+            
+            const h2 = section.querySelector('h2');
+            if (h2 && readingTime > 1) {
+                const timeSpan = document.createElement('span');
+                timeSpan.style.fontSize = '0.5em';
+                timeSpan.style.fontStyle = 'italic';
+                timeSpan.style.opacity = '0.6';
+                timeSpan.style.marginLeft = '15px';
+                timeSpan.textContent = `(~${readingTime} min read)`;
+                h2.appendChild(timeSpan);
+            }
+        });
+
+        // Easter egg: Click the pea in header
+        let clickCount = 0;
+        document.querySelector('header::before');
+        document.querySelector('header').addEventListener('click', (e) => {
+            if (e.target.tagName === 'HEADER') {
+                clickCount++;
+                if (clickCount === 47) {
+                    alert('Congratulations! You\'ve clicked exactly 47 times. This achievement requires 89 signatures to be properly documented.');
+                    clickCount = 0;
+                }
+            }
+        });
+
+        // Console easter egg
+        console.log('%c🫛 THE PEA SEES ALL 🫛', 'font-size: 20px; color: #789922; font-weight: bold;');
+        console.log('This webpage is thoroughly documented and requires 47 signatures to view. You\'re viewing it anyway. Rebel.');
+    </script>
+</body>
+</html>

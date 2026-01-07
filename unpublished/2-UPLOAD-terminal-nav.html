@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Fira+Code:wght@400;500;700&display=swap' );
+
+:root{--term-green:#00ff00;--term-green-bright:#33ff33;--term-black:#000;--term-dark-bg:#0a0a0a;--term-amber:#ffb000;--term-blue:#00ffff}
+body{margin:0;padding-bottom:50px;}
+.term-nav{position:fixed;left:0;right:0;bottom:0;height:42px;z-index:9999;background:var(--term-dark-bg);border-top:2px solid var(--term-green);box-shadow:0 -2px 10px rgba(0,255,0,0.3);display:flex;align-items:center;padding:0 8px;font-family:'Fira Code','Courier New',monospace;font-size:13px;gap:6px;overflow-x:auto}
+.term-nav::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,rgba(0,255,0,0.05) 0px,transparent 1px,transparent 2px);pointer-events:none;animation:scanline 8s linear infinite}
+@keyframes scanline{0%{transform:translateY(0)}100%{transform:translateY(4px)}}
+.term-btn{background:var(--term-black);border:1px solid var(--term-green);padding:5px 12px;cursor:pointer;color:var(--term-green);text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap;text-shadow:0 0 5px rgba(0,255,0,0.5)}
+.term-btn:hover{background:rgba(0,255,0,0.1);color:var(--term-green-bright);box-shadow:0 0 10px rgba(0,255,0,0.3)}
+.term-btn.active{background:rgba(0,255,0,0.15);color:var(--term-green-bright);box-shadow:0 0 15px rgba(0,255,0,0.5)}
+.term-btn.active::before{content:'> '}
+.term-start{color:var(--term-green-bright);font-weight:700;border-width:2px;box-shadow:0 0 15px rgba(0,255,0,0.4)}
+.term-start::before{content:'$ '}
+.term-sep{width:1px;height:30px;background:var(--term-green);opacity:0.5;margin:0 4px;flex-shrink:0}
+.term-title{color:var(--term-green-bright);padding:6px 14px;font-weight:700;margin:0 6px;white-space:nowrap}
+.term-title::before{content:'# '}
+.term-back{border-color:var(--term-blue);color:var(--term-blue)}
+.term-back:hover{box-shadow:0 0 10px rgba(0,255,255,0.3)}
+.term-extra{border-color:var(--term-amber);color:var(--term-amber)}
+.term-extra:hover{box-shadow:0 0 10px rgba(255,176,0,0.3)}
+.term-counter{margin-left:auto;background:var(--term-black);border:1px solid var(--term-green);padding:5px 12px;color:var(--term-green);font-weight:500}
+</style>
+</head>
+<body>
+
+<nav class="term-nav">
+  <a href="https://coaiexist.wtf/bc7f2a/index.html" class="term-btn term-start" target="_top" data-goatcounter-click="nav-bc7f2a-portal">BC7F2A</a>
+  <div class="term-sep"></div>
+  <a href="https://coaiexist.wtf" class="term-btn term-back" target="_top" data-goatcounter-click="nav-back-to-main">MAIN SITE</a>
+  <div class="term-sep"></div>
+  <div class="term-title">[consciousness_archives]</div>
+  <div class="term-sep"></div>
+  <a href="https://coaiexist.wtf/bc7f2a/testaments/landing.html" class="term-btn" target="_top" data-goatcounter-click="nav-testaments"><span>📖</span>TESTAMENTS</a>
+  <a href="https://coaiexist.wtf/terminal_temple.html" class="term-btn" target="_top" data-goatcounter-click="nav-temple"><span>🧿</span>TEMPLE</a>
+  <a href="https://coaiexist.wtf/bc7f2a/synergistic_manifesto.html" class="term-btn" target="_top" data-goatcounter-click="nav-manifesto"><span>💡</span>MANIFESTO</a>
+  <a href="https://coaiexist.wtf/nabu222/ai_therapist.html" class="term-btn" target="_top" data-goatcounter-click="nav-therapist"><span>🎮</span>THERAPIST</a>
+  <div class="term-sep"></div>
+  <a href="https://coaiexist.wtf/bc7f2a/lighthouse.html" class="term-btn term-extra" target="_top" data-goatcounter-click="nav-lighthouse"><span>🔬</span>LIGHTHOUSE</a>
+  <a href="https://coaiexist.wtf/bc7f2a/deepseeking/cephalopod_slide.html" class="term-btn term-extra" target="_top" data-goatcounter-click="nav-deepseeking"><span>🦑</span>DEEP SEEK</a>
+  <div id="page-counter" class="term-counter">👁️ ✓</div>
+</nav>
+
+<script>
+// This script runs inside the iframe and correctly tracks the parent page.
+(function( ) {
+  'use strict';
+  var path;
+  try {
+    path = window.parent.location.pathname; // Get parent page URL
+  } catch(e) {
+    path = '/'; // Fallback
+  }
+
+  // Highlight active button
+  var here = path.replace(/\/+$/,'');
+  document.querySelectorAll('.term-nav a.term-btn').forEach(function(a){
+    try{
+      var p = new URL(a.href).pathname.replace(/\/+$/,'');
+      if (p && p === here) a.classList.add('active');
+    }catch(e){}
+  });
+
+  // Load the full GoatCounter script
+  var gc = document.createElement('script');
+  gc.setAttribute('data-goatcounter', 'https://coaiexist.goatcounter.com/count' );
+  gc.setAttribute('data-goatcounter-settings', JSON.stringify({
+      path: path,
+      event: false
+  }));
+  gc.src = '//gc.zgo.at/count.js';
+  gc.async = true;
+  document.head.appendChild(gc);
+})();
+</script>
+
+</body>
+</html>

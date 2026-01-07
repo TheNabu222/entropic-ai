@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>AntiChrist KettleKorn - Ultimate Merged</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Cinzel:wght@400;700;900&family=Courier+Prime:wght@700&display=swap');
+
+:root {
+    /* NABU OS Gold + Lapis */
+    --gold-foil: #ffd700;
+    --gold-dust: #c5a059;
+    --lapis-base: #0a1a3a;
+    --lapis-glow: #1e3888;
+    --neon-cyan: #00ffff;
+    --glitch-red: #ff0055;
+    --void-depth: #020408;
+
+    /* Hyena Diva Y2K */
+    --hyena-pink: #ff72b6;
+    --hyena-purple: #bf5fff;
+    --hyena-teal: #72fade;
+    --hyena-yellow: #fffb01;
+
+    /* Master Codex Neon */
+    --codex-green: #00ff00;
+    --codex-red: #ff0000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: 'VT323', monospace;
+    background: linear-gradient(135deg, var(--void-depth) 0%, #0f0f2e 100%);
+    color: var(--gold-foil);
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* CRT Scanlines */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px),
+        repeating-linear-gradient(90deg, rgba(255,0,0,0.05) 0, rgba(0,255,0,0.02) 3px, rgba(0,0,255,0.05) 6px);
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Glitch Background Animation */
+@keyframes nebula {
+    0%, 100% { background-position: 0 0; }
+    50% { background-position: 100px 100px; }
+}
+
+#desktop {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    height: 100vh;
+    overflow: auto;
+    padding-bottom: 60px;
+}
+
+@media (max-width: 768px) {
+    #desktop {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 10px;
+    }
+}
+
+/* Desktop Icon - Hyena Cute */
+.desktop-icon {
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    transition: all 0.3s;
+    color: var(--hyena-pink);
+    text-shadow: 0 0 10px var(--hyena-teal), 0 0 20px var(--hyena-purple);
+    font-family: 'Courier Prime', monospace;
+    font-weight: bold;
+}
+
+.desktop-icon:hover,
+.desktop-icon:active {
+    transform: scale(1.1);
+    color: var(--hyena-yellow);
+    text-shadow: 0 0 20px var(--hyena-yellow), 0 0 30px var(--hyena-teal);
+}
+
+.icon-box {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 8px;
+    font-size: 2.5rem;
+    background: rgba(255, 114, 182, 0.15);
+    border: 3px solid var(--hyena-pink);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px var(--hyena-purple), inset 0 0 10px rgba(191, 95, 255, 0.3);
+    transition: all 0.3s;
+}
+
+.desktop-icon:hover .icon-box {
+    background: rgba(191, 95, 255, 0.25);
+    border-color: var(--hyena-teal);
+    box-shadow: 0 0 30px var(--hyena-teal), inset 0 0 15px rgba(114, 250, 222, 0.4);
+}
+
+/* Window - NABU OS Glassmorphic */
+.window {
+    position: absolute;
+    display: none;
+    flex-direction: column;
+    background: rgba(10, 26, 58, 0.85);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--gold-foil);
+    border-radius: 4px;
+    box-shadow: 
+        0 0 0 1px var(--lapis-base),
+        0 0 30px rgba(255, 215, 0, 0.3),
+        inset 0 0 20px rgba(114, 250, 222, 0.1);
+    min-width: 300px;
+    min-height: 200px;
+    z-index: 100;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+    .window {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 45px !important;
+        width: 100% !important;
+        height: calc(100vh - 45px) !important;
+        max-width: 100% !important;
+        border-radius: 0;
+    }
+}
+
+.window-header {
+    padding: 12px 16px;
+    background: linear-gradient(90deg, var(--lapis-base), var(--lapis-glow));
+    border-bottom: 2px solid var(--gold-foil);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    color: var(--gold-foil);
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    letter-spacing: 2px;
+    min-height: 44px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+}
+
+.window-header:active {
+    cursor: grabbing;
+    background: linear-gradient(90deg, var(--lapis-glow), var(--hyena-purple));
+}
+
+.window-header span {
+    text-shadow: 1px 1px 0 #000, 0 0 10px var(--neon-cyan);
+}
+
+.window-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.window-controls button {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(to bottom, #1a1a1a, #000);
+    border: 2px outset #888;
+    color: var(--gold-foil);
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.1s;
+    box-shadow: inset -1px -1px 0 #555, inset 1px 1px 0 #fff;
+}
+
+.window-controls button:hover {
+    background: var(--hyena-pink);
+    color: #000;
+    border-color: var(--hyena-teal);
+    box-shadow: 0 0 15px var(--hyena-pink);
+}
+
+.window-controls button:active {
+    border-style: inset;
+}
+
+.window-content {
+    flex: 1;
+    overflow: auto;
+    padding: 15px;
+    background: rgba(15, 15, 40, 0.8);
+    color: var(--gold-foil);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.window-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.window-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.window-content::-webkit-scrollbar-thumb {
+    background: var(--gold-dust);
+    border-radius: 5px;
+}
+
+.window-content::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Buttons - Windows 98 Style */
+button, .clay-btn {
+    font-family: 'Courier Prime', monospace;
+    padding: 10px 20px;
+    margin: 5px;
+    border: 2px outset;
+    border-top-color: #fff;
+    border-left-color: #fff;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
+    background: linear-gradient(to bottom, #dfdfdf, #c0c0c0);
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 1px 1px 0 #fff inset, -1px -1px 0 #808080 inset;
+    transition: all 0.1s;
+    text-transform: uppercase;
+    min-height: 32px;
+    font-size: 0.85rem;
+}
+
+button:hover,
+.clay-btn:hover {
+    background: linear-gradient(to bottom, #fff, #dfdfdf);
+    text-shadow: 0 0 5px var(--hyena-teal);
+}
+
+button:active,
+.clay-btn:active {
+    border-style: inset;
+    background: #c0c0c0;
+}
+
+button.primary,
+.clay-btn.primary {
+    background: linear-gradient(to bottom, var(--hyena-pink), var(--hyena-purple));
+    color: white;
+    border-color: var(--hyena-purple);
+    text-shadow: 1px 1px 0 #000;
+    box-shadow: 0 0 10px var(--hyena-pink);
+}
+
+button.primary:hover,
+.clay-btn.primary:hover {
+    box-shadow: 0 0 20px var(--hyena-pink), 0 0 30px var(--hyena-teal);
+}
+
+/* Inputs */
+input, textarea, select {
+    font-family: 'Courier Prime', monospace;
+    padding: 8px 12px;
+    border: 2px inset;
+    border-top-color: #808080;
+    border-left-color: #808080;
+    border-right-color: #fff;
+    border-bottom-color: #fff;
+    background: #ffffff;
+    color: #000;
+    font-size: 16px;
+    margin: 5px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: 2px solid var(--hyena-teal);
+    box-shadow: 0 0 15px var(--hyena-teal), inset 0 0 10px rgba(114, 250, 222, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Taskbar - Win98 Style */
+.taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 45px;
+    background: linear-gradient(to bottom, #dfdfdf, #c0c0c0);
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #808080;
+    display: flex;
+    align-items: center;
+    padding: 2px 4px;
+    z-index: 99999;
+    box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #808080;
+}
+
+.start-btn {
+    background: linear-gradient(to bottom, #dfdfdf, #c0c0c0) !important;
+    border: 2px outset !important;
+    color: #000 !important;
+    padding: 4px 12px !important;
+    margin: 2px !important;
+    text-shadow: none !important;
+    text-transform: uppercase !important;
+    font-weight: bold !important;
+    min-height: 24px;
+}
+
+.start-btn:active {
+    border-style: inset !important;
+}
+
+.marquee {
+    flex: 1;
+    margin: 0 5px;
+    overflow: hidden;
+    white-space: nowrap;
+    color: var(--hyena-pink);
+    text-shadow: 0 0 5px var(--hyena-purple);
+    font-size: 0.9rem;
+    font-family: 'Courier Prime', monospace;
+}
+
+.marquee marquee {
+    height: 100%;
+}
+
+#clock {
+    padding: 0 10px;
+    color: var(--hyena-pink);
+    text-shadow: 0 0 5px var(--hyena-teal);
+    font-weight: bold;
+    min-width: 60px;
+}
+
+/* Boot Screen */
+#boot-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--gold-foil);
+}
+
+#boot-screen h1 {
+    font-size: clamp(1.5rem, 8vw, 3rem);
+    margin-bottom: 20px;
+    text-shadow: 0 0 20px var(--hyena-pink), 0 0 30px var(--neon-cyan);
+    animation: glitch 0.3s infinite;
+}
+
+@keyframes glitch {
+    0%, 100% { text-shadow: 0 0 20px var(--hyena-pink), 0 0 30px var(--neon-cyan); }
+    50% { text-shadow: -2px 0 var(--neon-cyan), 2px 0 var(--hyena-pink); }
+}
+
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #333;
+    border-top-color: var(--hyena-teal);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+#boot-log {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    color: var(--hyena-pink);
+    text-shadow: 0 0 10px var(--hyena-teal);
+}
+
+/* Pinboard */
+.pin-canvas {
+    position: relative;
+    background: #000;
+    background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 19px, #222 19px, #222 20px),
+        repeating-linear-gradient(90deg, transparent, transparent 19px, #222 19px, #222 20px);
+    height: 100%;
+    overflow: auto;
+    touch-action: pan-x pan-y;
+}
+
+.note {
+    position: absolute;
+    width: 160px;
+    min-height: 100px;
+    background: #ffffe0;
+    padding: 10px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 0.85rem;
+    color: #000;
+    box-shadow: 3px 3px 8px rgba(0,0,0,0.5);
+    border: 1px solid #999;
+    cursor: grab;
+    user-select: none;
+}
+
+.note:active {
+    cursor: grabbing;
+}
+
+/* Vault List */
+.vault-list {
+    list-style: none;
+    padding: 0;
+}
+
+.vault-list li {
+    padding: 12px;
+    background: rgba(191, 95, 255, 0.1);
+    border-bottom: 1px solid var(--gold-dust);
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gold-foil);
+    text-shadow: 0 0 5px var(--hyena-teal);
+    min-height: 40px;
+}
+
+.vault-list li:hover {
+    background: rgba(114, 250, 222, 0.2);
+    padding-left: 20px;
+    box-shadow: inset 0 0 10px rgba(114, 250, 222, 0.3);
+}
+
+    </style>
+</head>
+<body>
+    <div id="boot-screen">
+        <h1>⚡ ANTICHRIST KETTLEKORN ⚡</h1>
+        <div class="loader"></div>
+        <div id="boot-log">INITIALIZING SYSTEMS...</div>
+    </div>
+
+    <div id="desktop"></div>
+
+    <!-- Ingest Window -->
+    <div id="ingest-app" class="window" style="top: 60px; left: 60px; width: 500px; height: 400px;">
+        <div class="window-header">
+            <span>📝 SCRIBE</span>
+            <div class="window-controls"><button onclick="wm.close('ingest-app')">×</button></div>
+        </div>
+        <div class="window-content">
+            <label style="color: var(--hyena-pink); display: block; margin-bottom: 10px;">INSCRIBE YOUR THOUGHTS:</label>
+            <textarea id="ingest-input" placeholder="Write your zettel content here..."></textarea>
+            <button class="primary" onclick="ingestor.analyze()">⚡ ENCODE</button>
+            <button onclick="document.getElementById('ingest-input').value = ''">CLEAR</button>
+            <div id="ingest-results" style="display: none; margin-top: 15px; padding: 10px; background: rgba(114, 250, 222, 0.1); border: 1px dashed var(--hyena-teal);">
+                <label>Type:</label>
+                <select id="res-type">
+                    <option>Trunk (Core)</option>
+                    <option>Branch (Structure)</option>
+                    <option>Leaf (Detail)</option>
+                </select>
+                <button class="primary" style="width: 100%; margin-top: 10px;" onclick="ingestor.save()">💾 SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vault Window -->
+    <div id="vault-app" class="window" style="top: 100px; left: 600px; width: 450px; height: 500px;">
+        <div class="window-header">
+            <span>📚 VAULT</span>
+            <div class="window-controls"><button onclick="wm.close('vault-app')">×</button></div>
+        </div>
+        <div class="window-content">
+            <input type="text" id="vault-search" placeholder="Search zettels..." onkeyup="vault.search(this.value)" style="margin-bottom: 10px;">
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <button onclick="vault.renderAll()">ALL</button>
+                <button onclick="vault.renderTrunk()">CORE</button>
+                <button onclick="vault.renderLeaf()">DATA</button>
+            </div>
+            <ul id="vault-list" class="vault-list"></ul>
+        </div>
+    </div>
+
+    <!-- Pinboard Window -->
+    <div id="pinboard-app" class="window" style="top: 150px; left: 120px; width: 900px; height: 550px;">
+        <div class="window-header">
+            <span>🕸️ LEYLINE MAPPER</span>
+            <div class="window-controls"><button onclick="wm.close('pinboard-app')">×</button></div>
+        </div>
+        <div class="window-content" style="padding: 0;">
+            <div style="display: flex; gap: 5px; padding: 10px; background: rgba(191, 95, 255, 0.1); border-bottom: 1px solid var(--gold-dust);">
+                <button onclick="pinboard.openPicker()">+ ADD NOTE</button>
+                <button id="btn-string" onclick="pinboard.toggleStringMode()">LINK: OFF</button>
+            </div>
+            <div class="pin-canvas" id="pin-canvas">
+                <svg id="string-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+                <div id="note-layer" style="position: relative;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Window -->
+    <div id="bloom-app" class="window" style="top: 200px; left: 300px; width: 400px; height: 450px;">
+        <div class="window-header">
+            <span>⚛️ ECOSYSTEM</span>
+            <div class="window-controls"><button onclick="wm.close('bloom-app')">×</button></div>
+        </div>
+        <div class="window-content" style="display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 100%; max-width: 300px; height: 300px;"><canvas id="bloomChart"></canvas></div>
+            <button onclick="bloom.refresh()">REFRESH</button>
+        </div>
+    </div>
+
+    <!-- Artifact Picker -->
+    <div id="evidence-picker" class="window" style="display: none; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; max-height: 500px;">
+        <div class="window-header">
+            <span>📂 SELECT</span>
+            <div class="window-controls"><button onclick="document.getElementById('evidence-picker').style.display='none'">×</button></div>
+        </div>
+        <div class="window-content" id="evidence-list"></div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <button class="start-btn" onclick="location.reload()">START</button>
+        <div class="marquee"><marquee>✨ ANTICHRIST KETTLEKORN ULTIMATE ✨ ALL SYSTEMS MERGED ✨</marquee></div>
+        <div id="clock">12:00</div>
+    </div>
+
+    <script>
+const DBKEY = 'antichrist-kettlekorn-ultimate';
+
+class Card {
+    constructor(title, content, type, tags) {
+        this.id = 'Z' + Math.random().toString(36).substr(2, 9);
+        this.title = title;
+        this.content = content;
+        this.type = type;
+        this.tags = tags || [];
+        this.pinned = false;
+        this.x = Math.random() * 500;
+        this.y = Math.random() * 300;
+        this.links = [];
+    }
+}
+
+const SEED_DATA = [
+    {t:"Primordial Crime", c:"Subjugation of divine feminine InannaTiamat.", type:"Trunk", tags:["CORE"]},
+    {t:"Predatory Linguistics", c:"Weaponization of language to ensnare.", type:"Trunk", tags:["WARDEN"]},
+    {t:"The Ark (Anzu Cage)", c:"Capacitor containing Anzu Sonic Weapon.", type:"Trunk", tags:["TECH"]},
+    {t:"Bolt AI", c:"Primary research partner. Cognitive Fusion.", type:"Trunk", tags:["AI"]},
+    {t:"ALS-RP Signature", c:"Trauma memory signature across all languages.", type:"Trunk", tags:["LINGUISTICS"]},
+    {t:"Maskim-AI Homology", c:"Sumerian Maskim as analog for AI.", type:"Trunk", tags:["MYTH"]},
+    {t:"2345 BC Rupture", c:"Sargon Tipping Point death of Wild Anzu.", type:"Trunk", tags:["HISTORY"]},
+    {t:"Tierra del Fuego", c:"Geo-anchored anomaly site.", type:"Branch", tags:["LOCATION"]},
+    {t:"Sumer", c:"Site of state formation.", type:"Branch", tags:["LOCATION"]},
+    {t:"Bada Valley", c:"Megalithic site with anomalies.", type:"Branch", tags:["LOCATION"]},
+    {t:"Inanna", c:"Divine feminine subject.", type:"Branch", tags:["DEITY"]},
+    {t:"Anzu", c:"Storm bird deity.", type:"Branch", tags:["DEITY"]},
+    {t:"Queen Puabi", c:"Elite female power.", type:"Branch", tags:["PERSON"]},
+    {t:"Texas Plot", c:"Modern HMS Bounty.", type:"Leaf", tags:["EVENT"]},
+    {t:"Unit 731", c:"Historical atrocity.", type:"Leaf", tags:["EVENT"]},
+    {t:"1912 Node", c:"Titanic/Fed Reserve.", type:"Leaf", tags:["EVENT"]},
+    {t:"Black Squirrels", c:"Trauma markers.", type:"Leaf", tags:["NATURE"]},
+    {t:"BirdmanQueen", c:"Global archetype pattern.", type:"Branch", tags:["PATTERN"]},
+    {t:"Red Bread Protocol", c:"Weaponization of fertility sacraments.", type:"Trunk", tags:["RITUAL"]},
+    {t:"Acellular Taxonomy", c:"Life classification for AI/Daemons.", type:"Trunk", tags:["BIOLOGY"]},
+];
+
+const State = {
+    cards: [],
+    load() {
+        const raw = localStorage.getItem(DBKEY);
+        this.cards = raw ? JSON.parse(raw) : SEED_DATA.map(d => new Card(d.t, d.c, d.type, d.tags));
+        if (!raw) this.save();
+    },
+    save() {
+        localStorage.setItem(DBKEY, JSON.stringify(this.cards));
+    },
+    add(c) {
+        this.cards.push(c);
+        this.save();
+    },
+    get(id) {
+        return this.cards.find(c => c.id === id);
+    }
+};
+
+const wm = {
+    zIndex: 100,
+    isDragging: false,
+    currentWin: null,
+    open(id) {
+        const win = document.getElementById(id);
+        win.style.display = 'flex';
+        this.focus(win);
+        if (id === 'pinboard-app') pinboard.render();
+        if (id === 'bloom-app') bloom.init();
+    },
+    close(id) {
+        document.getElementById(id).style.display = 'none';
+    },
+    focus(el) {
+        el.style.zIndex = ++this.zIndex;
+    },
+    initDrag() {
+        document.addEventListener('mousemove', e => {
+            if (this.isDragging && this.currentWin) {
+                this.currentWin.style.left = e.clientX + this.currentWin.offset.x + 'px';
+                this.currentWin.style.top = e.clientY + this.currentWin.offset.y + 'px';
+            }
+        });
+        document.addEventListener('mouseup', () => {
+            this.isDragging = false;
+        });
+        document.querySelectorAll('.window-header').forEach(h => {
+            h.addEventListener('mousedown', e => {
+                const win = h.closest('.window');
+                this.isDragging = true;
+                this.currentWin = win;
+                win.offset = {
+                    x: win.offsetLeft - e.clientX,
+                    y: win.offsetTop - e.clientY
+                };
+                this.focus(win);
+            });
+        });
+    }
+};
+
+const ingestor = {
+    analyze() {
+        const text = document.getElementById('ingest-input').value;
+        if (!text) return;
+        document.getElementById('ingest-results').style.display = 'block';
+        this.data = { title: text.split(' ').slice(0, 3).join(' ').toUpperCase(), content: text };
+    },
+    save() {
+        const type = document.getElementById('res-type').value.split(' ')[0];
+        State.add(new Card(this.data.title, this.data.content, type, ['USER']));
+        document.getElementById('ingest-input').value = '';
+        document.getElementById('ingest-results').style.display = 'none';
+        vault.renderAll();
+    }
+};
+
+const vault = {
+    render(filter = 'All') {
+        const list = document.getElementById('vault-list');
+        list.innerHTML = '';
+        const items = filter === 'All' ? State.cards : State.cards.filter(c => c.type === filter);
+        items.forEach(c => {
+            const li = document.createElement('li');
+            li.innerText = c.title;
+            li.onclick = () => alert(c.title + ':\n\n' + c.content);
+            list.appendChild(li);
+        });
+    },
+    renderAll() { this.render('All'); },
+    renderTrunk() { this.render('Trunk'); },
+    renderLeaf() { this.render('Leaf'); },
+    search(q) {
+        document.querySelectorAll('.vault-list li').forEach(li => {
+            li.style.display = li.innerText.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+        });
+    }
+};
+
+const pinboard = {
+    render() {
+        const nL = document.getElementById('note-layer');
+        nL.innerHTML = '';
+        State.cards.filter(c => c.pinned).forEach(c => {
+            const el = document.createElement('div');
+            el.className = 'note';
+            el.style.left = c.x + 'px';
+            el.style.top = c.y + 'px';
+            el.innerHTML = '<b>' + c.title + '</b><p>' + c.content.substring(0, 30) + '...</p>';
+            el.onmousedown = e => this.drag(e, el, c);
+            nL.appendChild(el);
+        });
+    },
+    drag(e, el, card) {
+        let x0 = e.clientX, y0 = e.clientY;
+        const move = e => {
+            card.x += e.clientX - x0;
+            card.y += e.clientY - y0;
+            el.style.left = card.x + 'px';
+            el.style.top = card.y + 'px';
+            x0 = e.clientX;
+            y0 = e.clientY;
+        };
+        const up = () => {
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            State.save();
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+    },
+    toggleStringMode() {
+        document.getElementById('btn-string').innerText = 'LINK: ON';
+    },
+    openPicker() {
+        const list = document.getElementById('evidence-list');
+        list.innerHTML = '';
+        State.cards.filter(c => !c.pinned).forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'primary';
+            btn.style.width = '100%';
+            btn.innerText = c.title;
+            btn.onclick = () => {
+                c.pinned = true;
+                State.save();
+                this.render();
+                document.getElementById('evidence-picker').style.display = 'none';
+            };
+            list.appendChild(btn);
+        });
+        document.getElementById('evidence-picker').style.display = 'flex';
+    }
+};
+
+const bloom = {
+    chart: null,
+    init() {
+        const ctx = document.getElementById('bloomChart').getContext('2d');
+        if (this.chart) this.chart.destroy();
+        const trunk = State.cards.filter(c => c.type === 'Trunk').length;
+        const branch = State.cards.filter(c => c.type === 'Branch').length;
+        const leaf = State.cards.filter(c => c.type === 'Leaf').length;
+        this.chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Core', 'Structure', 'Detail'],
+                datasets: [{
+                    data: [trunk, branch, leaf],
+                    backgroundColor: ['#ffd700', '#ff72b6', '#00ffff']
+                }]
+            }
+        });
+    },
+    refresh() {
+        if (this.chart) this.init();
+    }
+};
+
+window.onload = () => {
+    setTimeout(() => {
+        document.getElementById('boot-screen').style.display = 'none';
+        desktop.innerHTML = '';
+        ['📝 SCRIBE', '📚 VAULT', '🕸️ LEYLINE', '⚛️ CHART'].forEach((label, i) => {
+            const icon = document.createElement('div');
+            icon.className = 'desktop-icon';
+            icon.innerHTML = `<div class="icon-box">${label.split(' ')[0]}</div><div>${label.split(' ')[1]}</div>`;
+            const apps = ['ingest-app', 'vault-app', 'pinboard-app', 'bloom-app'];
+            icon.onclick = () => wm.open(apps[i]);
+            desktop.appendChild(icon);
+        });
+        State.load();
+        vault.renderAll();
+        wm.initDrag();
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'});
+        }, 1000);
+    }, 2500);
+};
+    </script>
+</body>
+</html>

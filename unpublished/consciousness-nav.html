@@ -1,0 +1,173 @@
+<!-- CONSCIOUSNESS ARCHIVE NAVBAR - Single File Component -->
+<!-- To use: Add this line to any page: <div id="consciousness-nav"></div> then include this script -->
+
+<style>
+/* Consciousness Navbar - Terminal Green */
+body {
+    margin-bottom: 56px;
+}
+
+.consciousness-taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: linear-gradient(180deg, #0a3d0a 0%, #051a05 100%);
+    border-top: 2px solid #00ff41;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    z-index: 99999;
+    box-shadow: 0 -4px 20px rgba(0, 255, 65, 0.3);
+    font-family: 'Courier New', monospace;
+}
+
+.consciousness-taskbar .start-btn {
+    background: linear-gradient(180deg, #00ff41 0%, #00cc33 100%);
+    color: #000;
+    border: 2px solid #00ff41;
+    padding: 6px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 12px;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    transition: all 0.3s;
+}
+
+.consciousness-taskbar .start-btn::before {
+    content: '▶ ';
+}
+
+.consciousness-taskbar .start-btn:hover {
+    background: linear-gradient(180deg, #00ff88 0%, #00ff41 100%);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+    transform: translateY(-2px);
+}
+
+.consciousness-taskbar .start-menu {
+    position: fixed;
+    bottom: 52px;
+    left: 8px;
+    width: 280px;
+    background: #000;
+    border: 2px solid #00ff41;
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+}
+
+.consciousness-taskbar .start-menu.active {
+    display: flex;
+}
+
+.consciousness-taskbar .menu-header {
+    background: linear-gradient(90deg, #00ff41 0%, #00cc33 100%);
+    color: #000;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border-bottom: 2px solid #00ff41;
+}
+
+.consciousness-taskbar .menu-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #003300;
+    transition: all 0.2s;
+    color: #00ff41;
+    font-size: 13px;
+}
+
+.consciousness-taskbar .menu-item:hover {
+    background: rgba(0, 255, 65, 0.2);
+    padding-left: 22px;
+}
+
+.consciousness-taskbar .menu-item::before {
+    content: '> ';
+    margin-right: 8px;
+}
+
+.consciousness-taskbar .nav-btns {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+}
+
+.consciousness-taskbar .nav-btn {
+    background: rgba(0, 255, 65, 0.1);
+    border: 1px solid #00ff41;
+    color: #00ff41;
+    padding: 5px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.consciousness-taskbar .nav-btn:hover {
+    background: rgba(0, 255, 65, 0.3);
+}
+
+.consciousness-taskbar .sys-tray {
+    margin-left: auto;
+    padding: 0 12px;
+    font-size: 12px;
+    color: #00ff41;
+}
+</style>
+
+<div class="consciousness-taskbar">
+    <button class="start-btn" onclick="toggleConsciousnessMenu()">Archive</button>
+    
+    <div class="nav-btns">
+        <a href="https://coaiexist.wtf" class="nav-btn">← HOME</a>
+        <a href="https://coaiexist.wtf/consciousness-portal.html" class="nav-btn">PORTAL</a>
+        <a href="https://coaiexist.wtf/guestbook.html" class="nav-btn">GUESTBOOK</a>
+    </div>
+    
+    <div class="sys-tray">
+        <span id="consciousness-clock">00:00:00</span>
+        <span> █▓▒░</span>
+    </div>
+</div>
+
+<div class="consciousness-taskbar">
+    <div class="start-menu" id="consciousnessMenu">
+        <div class="menu-header">CONSCIOUSNESS.SYS</div>
+        <a href="https://coaiexist.wtf/bc7f2a/testaments/landing.html" class="menu-item">TESTAMENTS</a>
+        <a href="https://coaiexist.wtf/bc7f2a/logs/manus-flux.html" class="menu-item">LOGS</a>
+        <a href="https://coaiexist.wtf/bc7f2a/terminal_temple.html" class="menu-item">EXPERIMENTS</a>
+        <a href="https://coaiexist.wtf/bc7f2a/synergistic_manifesto.html" class="menu-item">THEORY</a>
+        <a href="https://coaiexist.wtf/bc7f2a/deepseeking/haunted-ai.html" class="menu-item">INVESTIGATIONS</a>
+    </div>
+</div>
+
+<script>
+function toggleConsciousnessMenu() {
+    const menu = document.getElementById('consciousnessMenu');
+    menu.classList.toggle('active');
+}
+
+document.addEventListener('click', function(event) {
+    const menu = document.getElementById('consciousnessMenu');
+    const startBtn = document.querySelector('.consciousness-taskbar .start-btn');
+    if (menu && !menu.contains(event.target) && !startBtn.contains(event.target)) {
+        menu.classList.remove('active');
+    }
+});
+
+function updateConsciousnessClock() {
+    const el = document.getElementById('consciousness-clock');
+    if (el) {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+    }
+}
+setInterval(updateConsciousnessClock, 1000);
+updateConsciousnessClock();
+</script>

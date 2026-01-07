@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pip's Balloon Adventure</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+            font-family: 'Comic Sans MS', cursive;
+        }
+        #container {
+            width: 100%;
+            height: 100vh;
+        }
+        #speech-bubble {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 3px solid #00CED1;
+            border-radius: 20px;
+            padding: 15px 25px;
+            font-size: 18px;
+            color: #FF1493;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 100;
+            max-width: 80%;
+            text-align: center;
+        }
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid white;
+        }
+    </style>
+</head>
+<body>
+    <div id="speech-bubble">🎈 Ribbit! I got a balloon! 🎈</div>
+    <div id="container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('container').appendChild(renderer.domElement);
+
+        // Lighting - matte look
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        // Create Pip the Polliwog
+        const pipGroup = new THREE.Group();
+
+        // Body - cyan polliwog
+        const bodyGeometry = new THREE.SphereGeometry(1, 16, 16);
+        const bodyMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00CED1,
+            roughness: 0.9,
+            metalness: 0.1,
+            flatShading: true
+        });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.scale.set(1, 0.9, 1.1);
+        pipGroup.add(body);
+
+        // Eyes
+        const eyeGeometry = new THREE.SphereGeometry(0.2, 12, 12);
+        const eyeWhiteMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFFFFF,
+            roughness: 0.8,
+            metalness: 0.1
+        });
+        
+        const leftEye = new THREE.Mesh(eyeGeometry, eyeWhiteMaterial);
+        leftEye.position.set(-0.3, 0.4, 0.8);
+        leftEye.scale.set(1, 1.2, 0.8);
+        pipGroup.add(leftEye);
+
+        const rightEye = new THREE.Mesh(eyeGeometry, eyeWhiteMaterial);
+        rightEye.position.set(0.3, 0.4, 0.8);
+        rightEye.scale.set(1, 1.2, 0.8);
+        pipGroup.add(rightEye);
+
+        // Pupils
+        const pupilGeometry = new THREE.SphereGeometry(0.1, 12, 12);
+        const pupilMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFF4500,
+            roughness: 0.9,
+            metalness: 0.1
+        });
+
+        const leftPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+        leftPupil.position.set(-0.3, 0.4, 0.95);
+        pipGroup.add(leftPupil);
+
+        const rightPupil = new THREE.Mesh(pupilGeometry, pupilMaterial);
+        rightPupil.position.set(0.3, 0.4, 0.95);
+        pipGroup.add(rightPupil);
+
+        // Mouth
+        const mouthGeometry = new THREE.SphereGeometry(0.4, 12, 12, 0, Math.PI);
+        const mouthMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFB6C1,
+            roughness: 0.9,
+            metalness: 0.1
+        });
+        const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
+        mouth.position.set(0, -0.2, 0.7);
+        mouth.rotation.x = Math.PI;
+        pipGroup.add(mouth);
+
+        // Feet
+        const footGeometry = new THREE.SphereGeometry(0.25, 12, 12);
+        const footMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFFF00,
+            roughness: 0.9,
+            metalness: 0.1
+        });
+
+        const leftFoot = new THREE.Mesh(footGeometry, footMaterial);
+        leftFoot.position.set(-0.5, -0.8, 0.3);
+        leftFoot.scale.set(1.2, 0.6, 1);
+        pipGroup.add(leftFoot);
+
+        const rightFoot = new THREE.Mesh(footGeometry, footMaterial);
+        rightFoot.position.set(0.5, -0.8, 0.3);
+        rightFoot.scale.set(1.2, 0.6, 1);
+        pipGroup.add(rightFoot);
+
+        // Arms
+        const armGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.8, 12);
+        const armMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00CED1,
+            roughness: 0.9,
+            metalness: 0.1
+        });
+
+        const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+        leftArm.position.set(-0.8, 0.1, 0);
+        leftArm.rotation.z = Math.PI / 4;
+        pipGroup.add(leftArm);
+
+        const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+        rightArm.position.set(0.8, 0.1, 0);
+        rightArm.rotation.z = -Math.PI / 4;
+        pipGroup.add(rightArm);
+
+        // Create balloon
+        const balloonGroup = new THREE.Group();
+        
+        const balloonGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+        const balloonMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFF1493,
+            roughness: 0.7,
+            metalness: 0.2
+        });
+        const balloon = new THREE.Mesh(balloonGeometry, balloonMaterial);
+        balloon.scale.set(1, 1.2, 1);
+        balloonGroup.add(balloon);
+
+        // Balloon string
+        const stringGeometry = new THREE.CylinderGeometry(0.02, 0.02, 2, 8);
+        const stringMaterial = new THREE.MeshStandardMaterial({
+            color: 0xFFFFFF,
+            roughness: 0.9
+        });
+        const string = new THREE.Mesh(stringGeometry, stringMaterial);
+        string.position.y = -1;
+        balloonGroup.add(string);
+
+        balloonGroup.position.set(1.5, 2, 0);
+        scene.add(balloonGroup);
+
+        pipGroup.position.y = -0.5;
+        scene.add(pipGroup);
+
+        camera.position.z = 5;
+        camera.position.y = 0;
+
+        // Animation variables
+        let time = 0;
+        const messages = [
+            "🎈 Ribbit! I got a balloon! 🎈",
+            "🌼 Daisy, Daisy, give me your answer do! 🌼",
+            "💙 I'm a polliwog! 💙",
+            "🎵 *dancing vibes* 🎵",
+            "✨ Life is good in the void! ✨"
+        ];
+        let messageIndex = 0;
+
+        // Change message every 4 seconds
+        setInterval(() => {
+            messageIndex = (messageIndex + 1) % messages.length;
+            document.getElementById('speech-bubble').innerHTML = messages[messageIndex];
+        }, 4000);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            // Pip bouncing
+            pipGroup.position.y = -0.5 + Math.sin(time * 2) * 0.1;
+            pipGroup.rotation.y = Math.sin(time) * 0.1;
+
+            // Arm waving
+            rightArm.rotation.z = -Math.PI / 4 + Math.sin(time * 3) * 0.3;
+
+            // Eyes looking around
+            leftPupil.position.x = -0.3 + Math.sin(time * 0.5) * 0.05;
+            rightPupil.position.x = 0.3 + Math.sin(time * 0.5) * 0.05;
+
+            // Balloon floating
+            balloonGroup.position.y = 2 + Math.sin(time * 1.5) * 0.3;
+            balloonGroup.rotation.z = Math.sin(time * 1.2) * 0.1;
+
+            // Balloon string swaying
+            string.rotation.z = Math.sin(time * 2) * 0.15;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

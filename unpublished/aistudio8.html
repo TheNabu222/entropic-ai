@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐆 HYENA OS: OMNI-CODEX 🐆</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* --- FONTS --- */
+  @import url('https://fonts.googleapis.com/css2?family=VT323&family=Comic+Neue:wght@700&family=Permanent+Marker&family=Press+Start+2P&family=Courier+Prime&family=Orbitron&display=swap');
+
+  /* --- THEME ENGINE --- */
+  :root {
+    /* DEFAULT: HYPER HYENA */
+    --bg-color: #110022;
+    --bg-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px);
+    --bg-size: 550px 550px;
+    --win-bg: #f0f0f0;
+    --win-header: linear-gradient(90deg, #ff00ff, #9900ff);
+    --win-border: 3px outset #ffccff;
+    --win-shadow: 8px 8px 0px rgba(42, 0, 77, 0.6);
+    --text-color: #000;
+    --accent-color: #ff00ff;
+    --font-ui: 'Comic Neue', cursive;
+    --font-header: 'VT323', monospace;
+    --cursor: auto;
+    --taskbar-bg: #fff;
+    --pin-bg: #220033;
+    --string-color: #ccff00;
+  }
+
+  /* THEME: ACKK / WIN98 (Unit 734) */
+  [data-theme="win98"] {
+    --bg-color: #008080;
+    --bg-image: none;
+    --win-bg: #c0c0c0;
+    --win-header: linear-gradient(90deg, #000080, #1084d0);
+    --win-border: 2px outset #fff;
+    --win-shadow: 4px 4px 0px #000;
+    --text-color: #000;
+    --accent-color: #000080;
+    --font-ui: 'Courier Prime', monospace;
+    --font-header: 'Courier Prime', monospace;
+    --taskbar-bg: #c0c0c0;
+    --pin-bg: #000;
+    --string-color: #00ff00;
+  }
+
+  /* THEME: VOID FOREST (Myco-Mind) */
+  [data-theme="void"] {
+    --bg-color: #051005;
+    --bg-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
+    --win-bg: #0a1a0a;
+    --win-header: #1a3a1a;
+    --win-border: 1px solid #2e8b57;
+    --win-shadow: 0 0 15px #2e8b57;
+    --text-color: #8fbc8f;
+    --accent-color: #2e8b57;
+    --font-ui: 'Courier Prime', monospace;
+    --font-header: 'Courier Prime', monospace;
+    --taskbar-bg: #0a1a0a;
+    --pin-bg: #050505;
+    --string-color: #2e8b57;
+  }
+
+  /* THEME: CRYSTALLINE (Hex Grimoire) */
+  [data-theme="crystal"] {
+    --bg-color: #0f172a;
+    --bg-image: linear-gradient(45deg, rgba(56, 189, 248, 0.1) 25%, transparent 25%, transparent 75%, rgba(56, 189, 248, 0.1) 75%);
+    --bg-size: 20px 20px;
+    --win-bg: rgba(30, 41, 59, 0.95);
+    --win-header: rgba(56, 189, 248, 0.3);
+    --win-border: 1px solid #38bdf8;
+    --win-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    --text-color: #e2e8f0;
+    --accent-color: #38bdf8;
+    --font-ui: 'Orbitron', sans-serif;
+    --font-header: 'Orbitron', sans-serif;
+    --taskbar-bg: #0f172a;
+    --pin-bg: #000;
+    --string-color: #38bdf8;
+  }
+
+  /* --- GLOBAL STYLES --- */
+  body {
+    margin: 0; padding: 0;
+    background-color: var(--bg-color);
+    background-image: var(--bg-image);
+    background-size: var(--bg-size);
+    font-family: var(--font-ui);
+    color: var(--text-color);
+    overflow: hidden;
+    user-select: none;
+    transition: background 0.5s ease;
+  }
+
+  /* --- DESKTOP ICONS --- */
+  .desktop-icon {
+    width: 90px; text-align: center; margin: 20px;
+    display: inline-block; cursor: pointer;
+    color: var(--text-color); 
+    font-family: var(--font-header); font-size: 1.1rem;
+    text-shadow: 1px 1px var(--accent-color);
+    transition: transform 0.1s;
+    position: relative; z-index: 1;
+  }
+  .desktop-icon:hover { transform: scale(1.1); filter: brightness(1.2); }
+  
+  .desktop-icon div {
+    width: 60px; height: 60px; 
+    background: var(--win-bg);
+    border: 2px solid var(--accent-color);
+    border-radius: 10px;
+    margin: 0 auto 5px auto;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem;
+    box-shadow: 3px 3px 0px var(--win-shadow);
+  }
+
+  /* --- WINDOWS --- */
+  .window {
+    position: absolute;
+    background-color: var(--win-bg);
+    border: var(--win-border);
+    box-shadow: var(--win-shadow);
+    display: none; flex-direction: column;
+    min-width: 320px; min-height: 250px;
+    resize: both; overflow: hidden;
+    border-radius: 4px;
+  }
+  .window.active { z-index: 1000 !important; outline: 1px solid var(--accent-color); }
+
+  .window-header {
+    padding: 6px;
+    background: var(--win-header);
+    color: white; font-family: var(--font-header); font-size: 1.2rem;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: grab; border-bottom: 1px solid #000;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  
+  .window-controls button {
+    width: 20px; height: 20px; background: var(--win-bg); border: 1px solid var(--text-color);
+    color: var(--text-color); font-weight: bold; cursor: pointer; margin-left: 4px;
+  }
+  .window-controls button:hover { background: var(--accent-color); color: #fff; }
+
+  .window-content {
+    flex: 1; overflow: auto; padding: 15px;
+    color: var(--text-color);
+  }
+
+  /* --- UI ELEMENTS --- */
+  .sys-btn {
+    background: var(--win-bg); border: 1px solid var(--text-color);
+    padding: 5px 10px; font-family: var(--font-header); font-size: 1.1rem;
+    cursor: pointer; box-shadow: 2px 2px 0 var(--accent-color);
+    margin: 5px 0; transition: 0.1s; color: var(--text-color);
+  }
+  .sys-btn:hover { background: var(--accent-color); color: #fff; }
+  .sys-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+  .sys-btn.primary { border-color: var(--accent-color); font-weight: bold; }
+  
+  input, textarea, select {
+    width: 95%; background: var(--win-bg); border: 1px solid var(--text-color);
+    padding: 8px; font-family: var(--font-ui); font-size: 1rem;
+    color: var(--text-color); margin-bottom: 5px;
+  }
+  input:focus { border-color: var(--accent-color); outline: none; }
+
+  /* --- PINBOARD --- */
+  .pin-layout { display: grid; grid-template-columns: 180px 1fr; height: 100%; }
+  .pin-sidebar { border-right: 2px dashed var(--accent-color); padding: 10px; z-index: 2; text-align: center; }
+  .pin-canvas {
+    position: relative; overflow: hidden; background-color: var(--pin-bg);
+    background-image: radial-gradient(var(--text-color) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  #string-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+  .glitter-string {
+    stroke: var(--string-color); stroke-width: 3; opacity: 0.8; stroke-dasharray: 5,5;
+    filter: drop-shadow(0 0 5px var(--accent-color)); stroke-linecap: round;
+  }
+  .note {
+    position: absolute; width: 180px; min-height: 120px; background: var(--win-bg); color: var(--text-color); padding: 10px;
+    font-family: 'Permanent Marker', cursive; font-size: 0.9rem;
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.5); border: 1px solid var(--text-color); cursor: grab; z-index: 2; transform: rotate(-2deg);
+  }
+  .note::before {
+    content: '📌'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 1.5rem;
+  }
+  .note:active { cursor: grabbing; z-index: 100; }
+  .note h4 { margin: 0 0 5px 0; font-size: 1rem; color: var(--accent-color); text-decoration: underline; }
+
+  /* --- VAULT --- */
+  .vault-list li {
+    border: 1px solid var(--text-color); margin-bottom: 5px; padding: 5px;
+    cursor: pointer; font-family: var(--font-header); font-size: 1.1rem; transition: 0.2s;
+  }
+  .vault-list li:hover { background: var(--accent-color); color: #fff; }
+  .badge { font-size: 0.7rem; padding: 2px 4px; border: 1px solid var(--text-color); float: right; }
+
+  /* --- TASKBAR --- */
+  .taskbar {
+    position: fixed; bottom: 0; left: 0; width: 100%; height: 40px;
+    background: var(--taskbar-bg); border-top: 2px solid var(--text-color);
+    display: flex; align-items: center; padding: 0 5px; z-index: 99999;
+  }
+  .start-btn {
+    background: var(--win-bg); color: var(--text-color);
+    border: 2px solid var(--text-color); padding: 2px 15px; cursor: pointer;
+    font-family: var(--font-header); font-size: 1.5rem; font-weight: bold; margin-right: 10px;
+  }
+  .scrolling-marquee {
+    flex: 1; background: rgba(0,0,0,0.1); color: var(--text-color);
+    font-family: var(--font-header); font-size: 1.2rem; border: 1px inset var(--text-color);
+    height: 25px; line-height: 25px; overflow: hidden;
+  }
+
+  /* --- BOOT SCREEN --- */
+  #boot-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #000; color: var(--accent-color); font-family: 'VT323', monospace; font-size: 2rem;
+    z-index: 100000; padding: 50px; text-align: center; display: flex; flex-direction: column; justify-content: center;
+  }
+</style>
+</head>
+<body data-theme="hyper">
+
+<!-- BOOT SEQUENCE -->
+<div id="boot-screen">
+  <div style="font-size: 4rem;">ʕ•ᴥ•ʔ</div>
+  <div id="boot-text">INITIALIZING HYENA OS...</div>
+  <div style="font-size: 1rem; color: white; margin-top:20px;" id="boot-log"></div>
+</div>
+
+<!-- DESKTOP -->
+<div id="desktop">
+  
+  <!-- PORTAL JUMP -->
+  <div class="desktop-icon" onclick="wm.open('portal-app')">
+    <div style="background: linear-gradient(45deg, #000, #fff);">🌀</div>
+    PORTAL<br>JUMP
+  </div>
+
+  <div class="desktop-icon" onclick="wm.open('ingest-app')"><div style="background: #ffccff;" id="icon-ingest">🧠</div><span id="label-ingest">THOUGHT<br>DUMP</span></div>
+  <div class="desktop-icon" onclick="wm.open('vault-app')"><div style="background: #ccffff;" id="icon-vault">📒</div><span id="label-vault">STICKER<br>BOOK</span></div>
+  <div class="desktop-icon" onclick="wm.open('pinboard-app')"><div style="background: #ccffcc;" id="icon-pin">🧶</div><span id="label-pin">DRAMA<br>WEB</span></div>
+  <div class="desktop-icon" onclick="wm.open('bloom-app')"><div style="background: #ffffcc;" id="icon-bloom">🔮</div><span id="label-bloom">AURA<br>READ</span></div>
+
+</div>
+
+<!-- PORTAL APP -->
+<div id="portal-app" class="window" style="top: 100px; left: 100px; width: 350px; height: 450px;">
+  <div class="window-header"><span>🌀 DIMENSION_HOPPER</span><div class="window-controls"><button onclick="wm.close('portal-app')">X</button></div></div>
+  <div class="window-content" style="text-align: center;">
+    <p>SELECT REALITY FREQUENCY:</p>
+    <button class="sys-btn primary" style="width:100%; background:#ffccff; color:#000;" onclick="setTheme('hyper')">✨ HYPER HYENA (Default)</button>
+    <button class="sys-btn" style="width:100%; background:#008080; color:#fff;" onclick="setTheme('win98')">💾 ACKK / WIN98</button>
+    <button class="sys-btn" style="width:100%; background:#051005; color:#2e8b57;" onclick="setTheme('void')">🌲 VOID FOREST</button>
+    <button class="sys-btn" style="width:100%; background:#0f172a; color:#38bdf8;" onclick="setTheme('crystal')">💠 CRYSTALLINE</button>
+    <br><br>
+    <p style="font-size:0.8rem">"Where we go, we don't need roads."</p>
+  </div>
+</div>
+
+<!-- 1. INGESTION -->
+<div id="ingest-app" class="window" style="top: 50px; left: 300px; width: 500px; height: 550px;">
+  <div class="window-header"><span id="title-ingest">🧠 THOUGHT_DUMP.EXE</span><div class="window-controls"><button onclick="wm.close('ingest-app')">X</button></div></div>
+  <div class="window-content">
+    <p id="desc-ingest">Dear Diary, today I uncovered a conspiracy...</p>
+    <textarea id="ingest-input" style="height: 150px;" placeholder="Input data here..."></textarea>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+      <button class="sys-btn primary" style="flex:1" onclick="ingestor.analyze()">PROCESS</button>
+      <button class="sys-btn" onclick="document.getElementById('ingest-input').value=''">CLEAR</button>
+    </div>
+    <div id="ingest-results" style="margin-top: 15px; border: 1px solid var(--text-color); padding: 10px; display: none;">
+      <p><b>TITLE:</b> <span id="res-title"></span></p>
+      <p><b>TAGS:</b> <span id="res-tags"></span></p>
+      <p><b>LINK:</b> <span id="res-links"></span></p>
+      <select id="res-type">
+        <option value="Trunk">TRUNK (Core)</option>
+        <option value="Branch">BRANCH (Sub)</option>
+        <option value="Leaf">LEAF (Note)</option>
+      </select>
+      <button class="sys-btn primary" style="width: 100%; margin-top:10px;" onclick="ingestor.save()">SAVE TO DATABASE</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. VAULT -->
+<div id="vault-app" class="window" style="top: 80px; left: 600px; width: 450px; height: 600px;">
+  <div class="window-header"><span id="title-vault">📒 KNOWLEDGE_VAULT</span><div class="window-controls"><button onclick="wm.close('vault-app')">X</button></div></div>
+  <div class="window-content">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+      <button class="sys-btn" onclick="vault.render('All')">ALL</button>
+      <button class="sys-btn" onclick="vault.render('Trunk')">TRUNK</button>
+      <button class="sys-btn" onclick="vault.render('Leaf')">LEAF</button>
+    </div>
+    <input type="text" id="vault-search" placeholder="Search database..." onkeyup="vault.search(this.value)">
+    <ul id="vault-list" class="vault-list" style="list-style:none; padding:0;"></ul>
+  </div>
+</div>
+
+<!-- 3. PINBOARD -->
+<div id="pinboard-app" class="window" style="top: 120px; left: 150px; width: 900px; height: 650px;">
+  <div class="window-header"><span id="title-pin">🧶 DRAMA_WEB</span><div class="window-controls"><button onclick="wm.close('pinboard-app')">X</button></div></div>
+  <div class="window-content" style="padding:0;">
+    <div class="pin-layout">
+      <div class="pin-sidebar">
+        <h3>TOOLS</h3>
+        <button class="sys-btn primary" style="width:100%" onclick="pinboard.openPicker()">+ ADD NODE</button>
+        <br><br>
+        <button class="sys-btn" id="btn-string" style="width:100%" onclick="pinboard.toggleStringMode()">CONNECT: OFF</button>
+        <br><br>
+        <p style="font-size: 0.8rem;">Left Click: Drag<br>Right Click: Unpin</p>
+      </div>
+      <div class="pin-canvas" id="pin-canvas">
+        <svg id="string-layer"></svg>
+        <div id="note-layer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. BLOOM -->
+<div id="bloom-app" class="window" style="top: 200px; left: 300px; width: 400px; height: 450px;">
+  <div class="window-header"><span id="title-bloom">🔮 BLOOM_ANALYSIS</span><div class="window-controls"><button onclick="wm.close('bloom-app')">X</button></div></div>
+  <div class="window-content" style="display: flex; flex-direction: column; align-items: center;">
+    <h3 id="desc-bloom">ECOSYSTEM HEALTH</h3>
+    <div style="width: 300px; height: 300px;"><canvas id="bloomChart"></canvas></div>
+    <button class="sys-btn primary" onclick="bloom.refresh()">REFRESH</button>
+  </div>
+</div>
+
+<div id="evidence-picker" class="window" style="z-index: 99999; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 400px;">
+  <div class="window-header"><span>📂 ARCHIVES</span><button style="background:none; border:none; color:white;" onclick="document.getElementById('evidence-picker').style.display='none'">X</button></div>
+  <div class="window-content" id="evidence-list"></div>
+</div>
+
+<div class="taskbar">
+  <div class="start-btn" onclick="wm.open('portal-app')">👾 SYSTEM</div>
+  <div class="scrolling-marquee"><marquee scrollamount="6">*** HYENA OS v8.0 *** 330 ZETTELS LOADED *** ANZU LIVES IN THE ARK ***</marquee></div>
+</div>
+
+<script>
+/* --- VOCABULARY ENGINE --- */
+const VOCAB = {
+  hyper: { ingest: "🧠 THOUGHT DUMP", vault: "📒 STICKER BOOK", pin: "🧶 DRAMA WEB", bloom: "🔮 AURA READ", desc1: "Dear Diary, today I manifested...", desc2: "Current Brain Rot Levels" },
+  win98: { ingest: "💾 DECOMPILER.EXE", vault: "📂 C:\\DATA", pin: "🕸️ NET TOPOLOGY", bloom: "📉 SYS MONITOR", desc1: "Input Raw Data Stream:", desc2: "Memory Usage" },
+  void:  { ingest: "🍄 COMPOST HEAP", vault: "🌲 MYCELIAL WEB", pin: "✨ LUMINAL MAP", bloom: "🌿 ECO-SENSE", desc1: "Feed the forest...", desc2: "Growth Metrics" },
+  crystal: { ingest: "💠 PRISM INPUT", vault: "💎 FACET ARCHIVE", pin: "🌌 CONSTELLATION", bloom: "🧿 SPECTRAL", desc1: "Refract light here...", desc2: "Light Levels" }
+};
+
+function setTheme(theme) {
+  document.body.setAttribute('data-theme', theme);
+  const v = VOCAB[theme];
+  document.getElementById('label-ingest').innerHTML = v.ingest.replace(" ", "<br>");
+  document.getElementById('label-vault').innerHTML = v.vault.replace(" ", "<br>");
+  document.getElementById('label-pin').innerHTML = v.pin.replace(" ", "<br>");
+  document.getElementById('label-bloom').innerHTML = v.bloom.replace(" ", "<br>");
+  
+  document.getElementById('title-ingest').innerText = v.ingest;
+  document.getElementById('title-vault').innerText = v.vault;
+  document.getElementById('title-pin').innerText = v.pin;
+  document.getElementById('title-bloom').innerText = v.bloom;
+  
+  document.getElementById('desc-ingest').innerText = v.desc1;
+  document.getElementById('desc-bloom').innerText = v.desc2;
+}
+
+/* --- DATA --- */
+const DB_KEY = 'hyena_omni_v8';
+class Card {
+  constructor(title, content, type, tags = [], id = null) {
+    this.id = id || 'Z' + Math.floor(Math.random()*999999);
+    this.title = title; this.content = content; this.type = type; this.tags = tags;
+    this.pinned = false; this.x = 100; this.y = 100; this.links = [];
+  }
+}
+
+// PDF DATA (Condensed for functionality - Ensure this runs!)
+const RAW_DATA_SOURCE = [
+  {t:"Primordial Crime", c:"Subjugation of divine feminine (Inanna/Tiamat).", type:"Trunk", tags:["core"]},
+  {t:"Predatory Linguistics", c:"Weaponization of language learning to ensnare.", type:"Trunk", tags:["warden"]},
+  {t:"The Ark (Anzu Cage)", c:"Capacitor containing dismantled Anzu Sonic Weapon.", type:"Trunk", tags:["tech"]},
+  {t:"Bolt AI", c:"Primary research partner. Cognitive Fusion.", type:"Trunk", tags:["ai"]},
+  {t:"ALS-RP Signature", c:"Trauma memory signature across all languages.", type:"Trunk", tags:["linguistics"]},
+  {t:"Maskim-AI Homology", c:"Sumerian Maskim as analog for AI enforcers.", type:"Trunk", tags:["myth"]},
+  {t:"2345 BC Rupture", c:"Sargon Tipping Point; death of Wild Anzu.", type:"Trunk", tags:["history"]},
+  {t:"Tierra del Fuego", c:"Geo-anchored anomaly site.", type:"Branch", tags:["location"]},
+  {t:"Sumer", c:"Site of state formation.", type:"Branch", tags:["location"]},
+  {t:"Bada Valley", c:"Megalithic site with anomalies.", type:"Branch", tags:["location"]},
+  {t:"Inanna", c:"Divine feminine subject.", type:"Branch", tags:["deity"]},
+  {t:"Anzu", c:"Storm bird deity.", type:"Branch", tags:["deity"]},
+  {t:"Queen Puabi", c:"Elite female power.", type:"Branch", tags:["person"]},
+  {t:"Texas Plot", c:"Modern HMS Bounty.", type:"Leaf", tags:["event"]},
+  {t:"Unit 731", c:"Historical atrocity.", type:"Leaf", tags:["event"]},
+  {t:"1912 Node", c:"Titanic/Fed Reserve.", type:"Leaf", tags:["event"]},
+  {t:"Black Squirrels", c:"Trauma markers.", type:"Leaf", tags:["nature"]}
+  // ... (Add more from previous if needed, these are the core 17 to start)
+];
+
+const State = {
+  cards: [],
+  load() {
+    const raw = localStorage.getItem(DB_KEY);
+    if(raw) {
+      this.cards = JSON.parse(raw);
+    } else {
+      this.cards = RAW_DATA_SOURCE.map(d => new Card(d.t, d.c, d.type, d.tags));
+      this.cards[0].pinned = true; this.cards[1].pinned = true;
+      this.cards[0].links.push(this.cards[1].id);
+      this.save();
+    }
+  },
+  save() {
+    localStorage.setItem(DB_KEY, JSON.stringify(this.cards));
+    vault.render('All');
+  },
+  add(c) { this.cards.push(c); this.save(); },
+  get(id) { return this.cards.find(c => c.id === id); }
+};
+
+/* --- WINDOW MANAGER (FIXED) --- */
+const wm = {
+  zIndex: 100,
+  isDragging: false,
+  currentWin: null,
+  dragOffset: { x: 0, y: 0 },
+
+  open(id) {
+    const win = document.getElementById(id);
+    win.style.display = 'flex';
+    this.focus(win);
+    if(id === 'pinboard-app') pinboard.render();
+    if(id === 'bloom-app') bloom.init();
+  },
+  close(id) { document.getElementById(id).style.display = 'none'; },
+  focus(el) {
+    this.zIndex++;
+    el.style.zIndex = this.zIndex;
+    document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+    el.classList.add('active');
+  },
+  initDraggable() {
+    document.addEventListener('mousemove', (e) => {
+      if (this.isDragging && this.currentWin) {
+        e.preventDefault();
+        this.currentWin.style.left = (e.clientX - this.dragOffset.x) + 'px';
+        this.currentWin.style.top = (e.clientY - this.dragOffset.y) + 'px';
+      }
+    });
+    document.addEventListener('mouseup', () => { this.isDragging = false; this.currentWin = null; });
+    document.querySelectorAll('.window').forEach(win => {
+      win.addEventListener('mousedown', () => this.focus(win));
+      const header = win.querySelector('.window-header');
+      header.addEventListener('mousedown', (e) => {
+        if(e.target.tagName === 'BUTTON') return;
+        this.isDragging = true;
+        this.currentWin = win;
+        this.dragOffset.x = e.clientX - win.getBoundingClientRect().left;
+        this.dragOffset.y = e.clientY - win.getBoundingClientRect().top;
+      });
+    });
+  }
+};
+
+/* --- APPS --- */
+const ingestor = {
+  analyze() {
+    const text = document.getElementById('ingest-input').value;
+    if(!text) return;
+    const title = text.split(' ').slice(0,3).join(' ').toUpperCase();
+    document.getElementById('ingest-results').style.display = 'block';
+    document.getElementById('res-title').innerText = title;
+    document.getElementById('res-tags').innerText = "DETECTED";
+    this.tempData = { title, content: text, tags: ["USER"] };
+  },
+  save() {
+    const type = document.getElementById('res-type').value;
+    State.add(new Card(this.tempData.title, this.tempData.content, type, this.tempData.tags));
+    document.getElementById('ingest-input').value = "";
+    document.getElementById('ingest-results').style.display = 'none';
+    alert("SAVED");
+  }
+};
+
+const vault = {
+  render(filter) {
+    const list = document.getElementById('vault-list');
+    list.innerHTML = '';
+    const items = filter === 'All' ? State.cards : State.cards.filter(c => c.type === filter);
+    items.forEach(c => {
+      const li = document.createElement('li');
+      li.innerHTML = `<b>${c.title}</b> <span class="badge">${c.type}</span>`;
+      li.onclick = () => alert(`${c.title}\n\n${c.content}`);
+      li.oncontextmenu = (e) => {
+        e.preventDefault();
+        if(confirm('Delete?')) { State.cards = State.cards.filter(x=>x.id!==c.id); State.save(); }
+      };
+      list.appendChild(li);
+    });
+  },
+  search(q) {
+    const items = document.getElementById('vault-list').getElementsByTagName('li');
+    for(let item of items) item.style.display = item.innerText.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  }
+};
+
+const pinboard = {
+  stringMode: false,
+  sourceNode: null,
+  render() {
+    const nL = document.getElementById('note-layer');
+    const sL = document.getElementById('string-layer');
+    nL.innerHTML = ''; sL.innerHTML = '';
+    const pinned = State.cards.filter(c => c.pinned);
+    pinned.forEach(c => {
+      c.links.forEach(tid => {
+        const t = State.get(tid);
+        if(t && t.pinned) this.drawString(c, t, sL);
+      });
+    });
+    pinned.forEach(c => {
+      const el = document.createElement('div');
+      el.className = 'note';
+      el.style.left = c.x + 'px'; el.style.top = c.y + 'px';
+      el.innerHTML = `<h4>${c.title}</h4><p>${c.content.substring(0,50)}...</p>`;
+      el.onmousedown = (e) => this.handleDrag(e, el, c);
+      el.ondblclick = () => alert(c.content);
+      el.oncontextmenu = (e) => {
+        e.preventDefault(); c.pinned = false; State.save(); this.render();
+      };
+      nL.appendChild(el);
+    });
+  },
+  drawString(n1, n2, layer) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', n1.x+90); line.setAttribute('y1', n1.y+60);
+    line.setAttribute('x2', n2.x+90); line.setAttribute('y2', n2.y+60);
+    line.classList.add('glitter-string');
+    layer.appendChild(line);
+  },
+  handleDrag(e, el, card) {
+    if(this.stringMode) { this.connect(card); return; }
+    e.preventDefault(); e.stopPropagation();
+    const canvas = document.getElementById('pin-canvas').getBoundingClientRect();
+    let shiftX = e.clientX - el.getBoundingClientRect().left;
+    let shiftY = e.clientY - el.getBoundingClientRect().top;
+    el.style.zIndex = 1000;
+    const onMove = (evt) => {
+      let x = evt.clientX - shiftX - canvas.left + document.getElementById('pin-canvas').scrollLeft;
+      let y = evt.clientY - shiftY - canvas.top + document.getElementById('pin-canvas').scrollTop;
+      el.style.left = x + 'px'; el.style.top = y + 'px';
+      card.x = x; card.y = y;
+    };
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      el.style.zIndex = 2; State.save(); this.render();
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  },
+  toggleStringMode() {
+    this.stringMode = !this.stringMode;
+    document.getElementById('btn-string').innerText = this.stringMode ? "CLICK 1st..." : "CONNECT: OFF";
+    if(!this.stringMode) this.sourceNode = null;
+  },
+  connect(card) {
+    if(!this.sourceNode) {
+        this.sourceNode = card;
+        document.getElementById('btn-string').innerText = `LINKING ${card.title}...`;
+    } else {
+        if(this.sourceNode.id === card.id) return;
+        this.sourceNode.links.push(card.id);
+        State.save();
+        this.toggleStringMode();
+        this.render();
+    }
+  },
+  openPicker() {
+    const list = document.getElementById('evidence-list');
+    list.innerHTML = '';
+    State.cards.filter(c => !c.pinned).forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'sys-btn'; btn.style.width = '100%'; btn.innerText = c.title;
+        btn.onclick = () => {
+            c.pinned = true;
+            c.x = 50 + Math.random() * 150; c.y = 50 + Math.random() * 150;
+            State.save(); this.render();
+            document.getElementById('evidence-picker').style.display='none';
+        };
+        list.appendChild(btn);
+    });
+    document.getElementById('evidence-picker').style.display = 'flex';
+    wm.focus(document.getElementById('evidence-picker'));
+  }
+};
+
+const bloom = {
+  chart: null,
+  init() {
+    const ctx = document.getElementById('bloomChart').getContext('2d');
+    if(this.chart) this.chart.destroy();
+    const trunk = State.cards.filter(c=>c.type==='Trunk').length;
+    const branch = State.cards.filter(c=>c.type==='Branch').length;
+    const leaf = State.cards.filter(c=>c.type==='Leaf').length;
+    this.chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Core', 'Obsession', 'Fluff'],
+            datasets: [{
+                data: [trunk, branch, leaf],
+                backgroundColor: ['#ff00ff', '#00ffff', '#ccff00'],
+                borderColor: '#000', borderWidth: 2
+            }]
+        }
+    });
+  },
+  refresh() { if(this.chart) this.init(); }
+};
+
+window.onload = () => {
+  const log = document.getElementById('boot-log');
+  setTimeout(() => log.innerHTML += "> FOUND 330+ FILES...<br>", 500);
+  setTimeout(() => log.innerHTML += "> LOADING WORLD ENGINE...<br>", 1500);
+  setTimeout(() => document.getElementById('boot-screen').style.display = 'none', 2500);
+  
+  State.load();
+  wm.initDraggable();
+};
+</script>
+</body>
+</html>

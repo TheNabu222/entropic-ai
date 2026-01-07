@@ -1,0 +1,751 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entropic Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script type="importmap">
+        {
+            "imports": {
+                "https://cdn.jsdelivr.net/npm/chart.js": "https://esm.sh/chart.js@4.4.2"
+            }
+        }
+    </script>
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d0221;
+            /* Fallback color */
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* Prevent scrollbars */
+            color: white;
+        }
+
+        /* Desktop styles */
+        .desktop {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            /* For absolute positioning of icons and windows */
+            cursor: default;
+            /* Default desktop cursor */
+            padding-top: 50px;
+            /* Space for top nav bar */
+            padding-left: 10px;
+            box-sizing: border-box;
+            background-color: #0d0221;
+            background-image: radial-gradient(circle at top left, #2d1956, #0d0221 60%);
+        }
+
+        /* New Top Nav Bar */
+        .top-nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(13, 2, 33, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            text-align: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #ff00ff;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            color: #ffc0cb;
+            text-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff;
+            padding: 5px 15px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 0, 255, 0.2);
+            color: white;
+            text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+        }
+
+        /* Icon styles */
+        .icon {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 15px;
+            cursor: pointer;
+            user-select: none;
+            width: 100px;
+            vertical-align: top;
+            text-align: center;
+            background: transparent;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+            color: inherit;
+        }
+
+        .icon img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+        }
+
+        .icon span {
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 4px #000, 0 0 6px #ff00ff;
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 100%;
+            text-align: center;
+        }
+
+        /* Window styles */
+        .window {
+            background-color: rgba(26, 10, 56, 0.7);
+            border: 1px solid #ff00ff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: absolute;
+            top: 50px;
+            left: 100px;
+            width: 320px;
+            height: 240px;
+            display: none;
+            flex-direction: column;
+            z-index: 10;
+            box-sizing: border-box;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .window.active {
+            display: flex;
+            z-index: 20;
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+        }
+
+        .window.resizable {
+            resize: none;
+            overflow: hidden;
+            min-width: 200px;
+            min-height: 150px;
+        }
+
+        .window-titlebar {
+            background: linear-gradient(to right, #ff00ff, #8a2be2);
+            color: white;
+            padding: 3px 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: grab;
+            height: 24px;
+            box-sizing: border-box;
+            text-shadow: 1px 1px 2px #000;
+            flex-shrink: 0;
+            border-bottom: 1px solid #8a2be2;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        .window-titlebar:active {
+            cursor: grabbing;
+        }
+
+        .window-title {
+            margin-right: auto;
+            margin-left: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: calc(100% - 60px);
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 4px;
+        }
+
+        .window-control-button {
+            width: 18px;
+            height: 18px;
+            background-color: transparent;
+            border: 1px solid #ffc0cb;
+            color: #ffc0cb;
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-family: "Lucida Sans Unicode", "Arial", sans-serif;
+            font-size: 0.9rem;
+            font-weight: bold;
+            line-height: 0;
+            padding: 0 0 1px 0;
+            transition: all 0.2s ease;
+        }
+
+        .window-control-button:hover {
+            background-color: rgba(255, 192, 203, 0.3);
+            color: white;
+            border-color: white;
+            text-shadow: 0 0 4px #ff00ff;
+        }
+
+        .window-content {
+            padding: 2px;
+            font-size: 0.9rem;
+            flex-grow: 1;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid #4b0082;
+            margin: 4px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+
+        .win-button {
+            background: transparent;
+            border: 1px solid #ff00ff;
+            color: #ff00ff;
+            text-shadow: 0 0 3px #ff00ff;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .win-button:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 5px #ff00ff;
+            color: white;
+        }
+        
+        /* --- Zettelkasten & Dialog Styles --- */
+        #hyenaDivaZettelkasten .window-content {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            padding: 10px !important;
+            background-color: #1a0b2e !important;
+        }
+        .tabs-container { display: flex; border-bottom: 1px solid #8a2be2; margin-bottom: 10px; flex-wrap: wrap; }
+        .zettel-container { flex-grow: 1; overflow-y: auto; background: rgba(0,0,0,0.2); border: 1px solid #4b0082; padding: 5px; }
+        .zettel-card { background: rgba(255, 255, 255, 0.05); border: 1px solid #8a2be2; padding: 8px; margin-bottom: 5px; cursor: pointer; transition: background-color 0.2s; display: flex; align-items: center; justify-content: space-between; }
+        .zettel-card:hover { background: rgba(255, 0, 255, 0.2); }
+        .zettel-title-container { display: flex; align-items: center; gap: 8px; flex-grow: 1; overflow: hidden; }
+        .zettel-title { font-weight: bold; color: #ffc0cb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .zettel-id { font-size: 0.7rem; color: #aaa; flex-shrink: 0; }
+        .trunk-card { border-left: 3px solid #ff1493; }
+        .branch-card { border-left: 3px solid #00c1ff; margin-left: 15px; }
+        .leaf-card { border-left: 3px solid #7fff00; margin-left: 30px; }
+        .flower-card { border-left: 3px solid #ffae00; margin-left: 45px; }
+        .fruit-card { border-left: 3px solid #ff4444; margin-left: 60px; }
+        .bud-card { border-left: 3px solid #c0c0ff; margin-left: 75px; }
+
+        .dialog-box { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 101; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .dialog-content { background-color: #0d0221; border: 2px solid #ff00ff; box-shadow: 0 0 20px #ff00ff; width: 600px; max-width: 90%; display: flex; flex-direction: column; }
+        .dialog-titlebar { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to right, #ff00ff, #8a2be2); color: white; padding: 4px 8px; font-weight: bold; }
+        .dialog-close { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        .dialog-inner-content { padding: 20px; max-height: 70vh; overflow-y: auto; }
+        .win98-label { display: block; margin: 10px 0 5px 0; color: #ffc0cb; font-weight: bold; }
+        .win98-input, .win98-textarea, .win98-select { background-color: white; border: 1px solid #808080; padding: 3px; color: black; width: 100%; box-sizing: border-box; }
+        .win98-textarea { height: 150px; resize: vertical; }
+
+        /* --- Other App-Specific Styles --- */
+        .pinboard-grid { display: grid; grid-template-columns: 250px 1fr 250px; grid-template-rows: 1fr; gap: 10px; width: 100%; height: 100%; grid-template-areas: "controls board tools"; }
+        .pinboard-panel { background-color: rgba(26, 10, 56, 0.6); border: 1px solid #ff00ff; padding: 10px; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); overflow-y: auto; }
+        .investigation-controls { grid-area: controls; }
+        .interactive-board-container { grid-area: board; padding: 0 !important; position: relative; }
+        .investigation-tools { grid-area: tools; }
+        .pinboard-node { position: absolute; background-color: rgba(10, 20, 40, 0.9); border: 1px solid #00c1ff; color: #e0e0e0; padding: 8px; border-radius: 4px; font-size: 0.75rem; cursor: grab; width: 200px; }
+        .thread-line { stroke: #ff3333; stroke-width: 2; filter: drop-shadow(0 0 2px #ff3333); }
+
+        #bloomSimulator .window-content { background-color: #0d0221; padding: 10px; display: flex; justify-content: center; align-items: center; }
+
+        .resizer { position: absolute; background: transparent; z-index: 30; }
+        .resizer-r { cursor: ew-resize; height: 100%; width: 6px; right: 0; top: 0; }
+        .resizer-b { cursor: ns-resize; width: 100%; height: 6px; bottom: 0; left: 0; }
+        .resizer-br { cursor: nwse-resize; width: 12px; height: 12px; right: 0; bottom: 0; z-index: 31; }
+
+        @media (max-width: 800px) {
+            body { overflow: auto; }
+            .desktop { padding: 60px 5px 50px 5px; height: auto; min-height: 100vh; flex-wrap: wrap; justify-content: center; }
+            .window { position: fixed !important; top: 40px !important; left: 0 !important; width: 100% !important; height: calc(100vh - 80px) !important; max-width: 100vw; border-radius: 0; }
+            .resizer { display: none; }
+            .pinboard-grid { grid-template-columns: 1fr; grid-template-rows: auto 50vh auto; grid-template-areas: "controls" "board" "tools"; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="#" class="nav-item" data-app="home">Home</a>
+        <a href="#" class="nav-item" data-app="about">About</a>
+        <a href="#" class="nav-item" data-app="patternVisualizer">Pattern Visualizer</a>
+        <a href="#" class="nav-item" data-app="hyenaDiva">Hyena Diva(?!)</a>
+        <a href="#" class="nav-item" data-app="luminalLanguage">Luminal Language</a>
+        <a href="#" class="nav-item" data-app="ackk">A.C.K.K.</a>
+    </nav>
+
+    <div class="desktop" id="desktop">
+        <!-- Desktop Icons -->
+        <button type="button" class="icon" data-app="entropicNexus">
+            <img src="https://storage.googleapis.com/gemini-95-icons/mycomputer.png" alt="Entropic Nexus" style="width: 70px; height: 50px" />
+            <span>Entropic Nexus</span>
+        </button>
+        <button type="button" class="icon" data-app="settings">
+            <img src="https://win98icons.alexmeub.com/icons/png/settings_gear-0.png" alt="Settings" />
+            <span>Settings</span>
+        </button>
+        <button type="button" class="icon" data-app="ingestionEngine">
+            <img src="https://win98icons.alexmeub.com/icons/png/file_lines-1.png" alt="Ingestion Engine" />
+            <span>Ingestion Engine</span>
+        </button>
+        <button type="button" class="icon" data-app="webWeaver">
+            <img src="https://storage.googleapis.com/gemini-95-icons/chrome-icon-2.png" alt="Web Weaver" />
+            <span>Web Weaver</span>
+        </button>
+        <button type="button" class="icon" data-app="tabletCreator">
+            <img src="https://storage.googleapis.com/gemini-95-icons/GemNotes.png" alt="Quick Tablet" />
+            <span>Quick Tablet</span>
+        </button>
+        <button type="button" class="icon" data-app="sigilCanvas">
+            <img src="https://storage.googleapis.com/gemini-95-icons/gempaint.png" alt="Sigil Canvas" />
+            <span>Sigil Canvas</span>
+        </button>
+        <button type="button" class="icon" data-app="bloomSimulator">
+            <img src="https://win98icons.alexmeub.com/icons/png/chart_pie_down-0.png" alt="Bloom Simulator" />
+            <span>Bloom Simulator</span>
+        </button>
+        <button type="button" class="icon" data-app="subspaceAnomaly">
+            <img src="https://64.media.tumblr.com/1d89dfa76381e5c14210a2149c83790d/7a15f84c681c1cf9-c1/s540x810/86985984be99d5591e0cbc0dea6f05ffa3136dac.png" alt="Subspace Anomaly" />
+            <span>Subspace Anomaly</span>
+        </button>
+        <button type="button" class="icon" data-app="aiCore">
+            <img src="https://storage.googleapis.com/gemini-95-icons/GeminiChatRetro.png" alt="AI Core" />
+            <span>AI Core</span>
+        </button>
+        <button type="button" class="icon" data-app="mindField">
+            <img src="https://storage.googleapis.com/gemini-95-icons/gemsweeper.png" alt="Mind Field" style="width: 48px; height: 48px" />
+            <span>Mind Field</span>
+        </button>
+        <button type="button" class="icon" data-app="mediaStream">
+            <img src="https://storage.googleapis.com/gemini-95-icons/ytmediaplayer.png" alt="Media Stream" style="width: 48px; height: 48px" />
+            <span>Media Stream</span>
+        </button>
+        <button type="button" class="icon" data-app="conspiracyPinboard">
+            <img src="https://win98icons.alexmeub.com/icons/png/address_book_user.png" alt="Conspiracy Pinboard" style="width: 48px; height: 48px" />
+            <span>Conspiracy Pinboard</span>
+        </button>
+
+        <!-- Link Icons -->
+        <button type="button" class="icon" data-url="https://entropic-ai.angelfire.com/dolphin.html">
+            <img src="https://win98icons.alexmeub.com/icons/png/msagent_dolphins-0.png" alt="Dolphin Link" style="width: 48px; height: 48px" />
+            <span>Dolphin Link</span>
+        </button>
+        <button type="button" class="icon" data-url="https://entropic-ai.angelfire.com/hdtv-game.html">
+            <img src="https://win98icons.alexmeub.com/icons/png/television-2.png" alt="HDTV Game" style="width: 48px; height: 48px" />
+            <span>HDTV Game</span>
+        </button>
+        <button type="button" class="icon" data-url="https://entropic-ai.angelfire.com/main/terminal_temple.html">
+            <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png" alt="Terminal Temple" style="width: 48px; height: 48px" />
+            <span>Terminal Temple</span>
+        </button>
+
+        <!-- Windows -->
+        <div class="window resizable" id="entropicNexus">
+            <div class="window-titlebar">
+                <span class="window-title">Entropic Nexus</span>
+                <div class="window-controls">
+                    <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                    <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+                </div>
+            </div>
+            <div class="window-content" style="background-color: rgba(0,0,0,0.4); flex-direction: row; align-items: flex-start;">
+                 <button type="button" id="knowledge-vault-icon" class="window-icon">
+                    <img src="https://pfst.cf2.poecdn.net/base/image/0ffd2bf15a7001f86e395096222147037538b25af55ef9b8c7ac8f6768b7397c?w=48&h=48" alt="Knowledge Vault" />
+                    <span>Knowledge Vault</span>
+                 </button>
+                 <button type="button" id="c-drive-icon-hub" class="window-icon">
+                    <img src="https://storage.googleapis.com/gemini-95-icons/cdrive.png" alt="C Drive" />
+                    <span>(C:) Drive</span>
+                </button>
+            </div>
+            <div class="resizer resizer-r"></div><div class="resizer resizer-b"></div><div class="resizer resizer-br"></div>
+        </div>
+        
+        <!-- Zettelkasten Window -->
+        <div class="window resizable" id="hyenaDivaZettelkasten" style="width: 900px; height: 700px;">
+            <div class="window-titlebar">
+                <span class="window-title">Zettelkasten - Knowledge Vault</span>
+                <div class="window-controls">
+                    <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                    <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+                </div>
+            </div>
+            <div class="window-content" id="hyenaDivaZettelkasten-content">
+                <!-- Zettelkasten UI will be rendered here by JS -->
+            </div>
+            <div class="resizer resizer-r"></div><div class="resizer resizer-b"></div><div class="resizer resizer-br"></div>
+        </div>
+        
+        <!-- Conspiracy Pinboard -->
+        <div class="window" id="conspiracyPinboard" style="width: 1200px; height: 800px; background-color: transparent; border: none; box-shadow: none;">
+             <div class="window-titlebar">
+                <span class="window-title">CONSPIRACY PINBOARD</span>
+                <div class="window-controls">
+                    <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                    <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+                </div>
+            </div>
+            <div class="window-content" style="padding: 10px; background-color: transparent;">
+                <div class="pinboard-grid">
+                    <div class="pinboard-panel investigation-controls">
+                        <h3>Investigation Controls</h3>
+                        <button id="add-evidence-btn">+ Add Evidence</button>
+                        <button id="draw-connection-btn">+ Connect Threads</button>
+                    </div>
+                    <div class="pinboard-panel connection-suggestions">
+                         <h3>Connection Suggestions</h3>
+                        <ul class="connection-suggestions-list"><li class="suggestion-placeholder">Click a node on the board to see suggestions.</li></ul>
+                    </div>
+                    <div class="pinboard-panel interactive-board-container">
+                        <div class="interactive-board">
+                            <div id="pinboard-nodes-container" style="position: relative; width: 100%; height: 100%;"></div>
+                            <svg id="pinboard-svg-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+                        </div>
+                    </div>
+                     <div class="pinboard-panel investigation-tools">
+                        <h3>Pinned Tablets</h3>
+                        <ul class="pinned-tablets-list"><li class="suggestion-placeholder">No tablets are currently pinned.</li></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add other window divs here from your document -->
+
+        <!-- Zettelkasten Dialog Box -->
+        <div id="zettelkasten-dialog" class="dialog-box">
+            <div class="dialog-content">
+                <div class="dialog-titlebar">
+                    <span id="dialog-title">View/Edit Tablet</span>
+                    <button id="dialog-close-button" class="dialog-close">&times;</button>
+                </div>
+                <div id="dialog-inner-content" class="dialog-inner-content">
+                    <!-- Dialog content will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        // This is a massive script, so I've added comments to explain the sections.
+        
+        // --- Library Imports & Setup ---
+        import { Chart, registerables } from 'https://cdn.jsdelivr.net/npm/chart.js';
+        Chart.register(...registerables);
+        
+        // --- Core OS State & DOM References ---
+        const desktop = document.getElementById('desktop');
+        const windows = document.querySelectorAll('.window');
+        const icons = document.querySelectorAll('.icon');
+        let activeWindow = null;
+        let highestZIndex = 20;
+        const openApps = new Map();
+        const paintResizeObserverMap = new Map();
+        const bloomResizeObserverMap = new Map();
+        let bloomChart = null;
+        const dosInstances = {}; // For compatibility with older functions
+
+        // --- Core OS Functions (open, close, minimize, drag/resize) ---
+        function bringToFront(windowElement) {
+            if (activeWindow === windowElement) return;
+            if (activeWindow) {
+                activeWindow.classList.remove('active');
+            }
+            highestZIndex++;
+            windowElement.style.zIndex = highestZIndex.toString();
+            windowElement.classList.add('active');
+            activeWindow = windowElement;
+        }
+
+        async function openApp(appName) {
+            const windowElement = document.getElementById(appName);
+            if (!windowElement) {
+                console.error(`Window element not found for app: ${appName}`);
+                return;
+            }
+
+            if (openApps.has(appName)) {
+                windowElement.style.display = 'flex';
+                bringToFront(windowElement);
+                // Refresh content if needed
+                if(appName === 'conspiracyPinboard') initConspiracyPinboard(windowElement);
+                if (appName === 'bloomSimulator') initBloomSimulator(windowElement);
+                return;
+            }
+
+            windowElement.style.display = 'flex';
+            bringToFront(windowElement);
+            openApps.set(appName, { windowEl: windowElement });
+
+            await initializeApp(appName, windowElement);
+        }
+
+        function closeApp(appName) {
+            const appData = openApps.get(appName);
+            if (!appData) return;
+            appData.windowEl.style.display = 'none';
+            appData.windowEl.classList.remove('active');
+            openApps.delete(appName);
+            // Add cleanup logic here if needed
+        }
+
+        function minimizeApp(appName) {
+             const appData = openApps.get(appName);
+             if (!appData) return;
+             appData.windowEl.style.display = 'none';
+        }
+        
+        async function openWebLink(url) {
+            // A simple implementation could be a new tab, or you could integrate with the WebWeaver app
+            window.open(url, '_blank');
+        }
+
+        // --- Zettelkasten Logic ---
+        const HIERARCHY_TYPES = ["Trunk", "Branch", "Leaf", "Flower", "Fruit", "Bud"];
+        class Card {
+            constructor({ id, parentId = null, title, content, type, timestamp = Date.now(), tags = [], links = [], isPinned = false, pinX = 0, pinY = 0 }) {
+                this.id = id;
+                this.parentId = parentId;
+                this.title = title;
+                this.content = content;
+                this.type = type;
+                this.timestamp = timestamp;
+                this.tags = tags;
+                this.links = links;
+                this.isPinned = isPinned;
+                this.pinX = pinX;
+                this.pinY = pinY;
+            }
+        }
+
+        function initHyenaDivaApp(container) {
+            let cards = [];
+            let currentTab = 'All';
+
+            function saveCards() {
+                localStorage.setItem('multiZettelkasten', JSON.stringify(cards));
+                window.dispatchEvent(new CustomEvent('zettelkastenUpdated'));
+            }
+
+            function loadCards() {
+                const stored = localStorage.getItem('multiZettelkasten');
+                if (stored) {
+                    try {
+                        cards = JSON.parse(stored).map(c => new Card(c));
+                    } catch (e) {
+                        cards = loadZettelkastenData();
+                        saveCards();
+                    }
+                } else {
+                    cards = loadZettelkastenData();
+                    saveCards();
+                }
+            }
+
+            function render() {
+                container.innerHTML = `
+                    <h1>Knowledge Vault</h1>
+                    <div class="tabs-container">
+                        <button class="win98-button tab-button" data-tab="All">All</button>
+                        ${HIERARCHY_TYPES.map(type => `<button class="win98-button tab-button" data-tab="${type}">${type}s</button>`).join('')}
+                        <button class="win98-button" id="new-card-button">+ New Tablet</button>
+                    </div>
+                    <div class="zettel-container" id="zettel-container"></div>`;
+                
+                container.querySelector('#new-card-button').addEventListener('click', () => showZettelkastenNewCardDialog());
+                
+                container.querySelectorAll('.tab-button').forEach(button => button.addEventListener('click', (e) => {
+                    currentTab = e.target.dataset.tab;
+                    renderCardList();
+                    container.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                }));
+                
+                container.querySelector(`.tab-button[data-tab="${currentTab}"]`).classList.add('active');
+                renderCardList();
+            }
+
+            function renderCardList() {
+                const zettelContainer = container.querySelector('#zettel-container');
+                zettelContainer.innerHTML = '';
+                loadCards();
+                const filteredCards = (currentTab === 'All') ? cards : cards.filter(card => card.type === currentTab);
+                sortCardsByHierarchy(filteredCards);
+
+                filteredCards.forEach(card => {
+                    const cardElement = document.createElement('div');
+                    cardElement.className = `zettel-card ${card.type.toLowerCase()}-card`;
+                    cardElement.dataset.id = card.id;
+                    cardElement.innerHTML = `<div class="zettel-title-container"><div class="zettel-title">${card.title}</div><div class="zettel-id">${card.id}</div></div>`;
+                    cardElement.addEventListener('click', () => showZettelDialog(card.id));
+                    zettelContainer.appendChild(cardElement);
+                });
+            }
+            
+            window.addEventListener('zettelkastenUpdated', () => {
+                if(openApps.has('hyenaDivaZettelkasten')) {
+                     renderCardList();
+                }
+            });
+
+            loadCards();
+            render();
+        }
+
+        function sortCardsByHierarchy(cards) {
+            const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+            cards.sort((a, b) => collator.compare(a.id, b.id));
+        }
+
+        function showZettelDialog(cardId) {
+             let cards = JSON.parse(localStorage.getItem('multiZettelkasten') || '[]').map(c => new Card(c));
+             const card = cards.find(c => c.id === cardId);
+             if (!card) return;
+
+             const dialog = document.getElementById('zettelkasten-dialog');
+             const dialogContent = document.getElementById('dialog-inner-content');
+             const dialogTitle = document.getElementById('dialog-title');
+
+             dialogTitle.textContent = `View/Edit: ${card.title}`;
+             dialogContent.innerHTML = `
+                <label class="win98-label">Title:</label><input type="text" id="edit-title" class="win98-input" value="${card.title}">
+                <label class="win98-label">Content:</label><textarea id="edit-content" class="win98-textarea">${card.content}</textarea>
+                <label class="win98-label">Type:</label><select id="edit-type" class="win98-select">${HIERARCHY_TYPES.map(type => `<option value="${type}" ${card.type === type ? 'selected' : ''}>${type}</option>`).join('')}</select>
+                <label class="win98-label">Tags:</label><input type="text" id="edit-tags" class="win98-input" value="${(card.tags || []).join(', ')}">
+                <div style="margin-top:20px;"><button id="save-card-button" class="win-button">Save</button></div>
+             `;
+             dialog.style.display = 'flex';
+
+             dialog.querySelector('#save-card-button').addEventListener('click', () => {
+                 const cardIndex = cards.findIndex(c => c.id === cardId);
+                 if (cardIndex === -1) return;
+                 cards[cardIndex].title = dialog.querySelector('#edit-title').value;
+                 cards[cardIndex].content = dialog.querySelector('#edit-content').value;
+                 cards[cardIndex].type = dialog.querySelector('#edit-type').value;
+                 cards[cardIndex].tags = dialog.querySelector('#edit-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+                 localStorage.setItem('multiZettelkasten', JSON.stringify(cards));
+                 window.dispatchEvent(new CustomEvent('zettelkastenUpdated'));
+                 dialog.style.display = 'none';
+             });
+        }
+        
+        function showZettelkastenNewCardDialog() { /* ... function body ... */ }
+        function loadZettelkastenData() { 
+            // This is your huge list of initial cards from page 42 onwards
+            return [ new Card({id: "1000", type: "Trunk", title: "Consciousness, Hermetics & Emergence", content: "..."}), /* ... and so on */ ];
+        }
+
+
+        // --- App Initializer Switchboard ---
+        async function initializeApp(appName, windowElement) {
+            const initializers = {
+                'hyenaDivaZettelkasten': () => initHyenaDivaApp(windowElement.querySelector('#hyenaDivaZettelkasten-content')),
+                'conspiracyPinboard': () => initConspiracyPinboard(windowElement),
+                'bloomSimulator': () => initBloomSimulator(windowElement),
+                // Add all your other app initializers here...
+            };
+            if (initializers[appName]) {
+                await initializers[appName]();
+            }
+        }
+        
+        // --- Placeholder for your other complex apps like Conspiracy Pinboard, Bloom Simulator, etc. ---
+        function initConspiracyPinboard(windowElement) { console.log('Initializing Conspiracy Pinboard'); }
+        function initBloomSimulator(windowElement) { console.log('Initializing Bloom Simulator'); }
+
+
+        // --- Event Listeners Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const handleItemClick = (item) => {
+                const appName = item.getAttribute('data-app');
+                const url = item.getAttribute('data-url');
+                if (url) {
+                    openWebLink(url);
+                } else if (appName) {
+                    openApp(appName);
+                }
+            };
+
+            icons.forEach(icon => icon.addEventListener('click', () => handleItemClick(icon)));
+            document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', (e) => { e.preventDefault(); handleItemClick(item); }));
+            
+            windows.forEach(windowElement => {
+                 const titleBar = windowElement.querySelector('.window-titlebar');
+                 const closeButton = windowElement.querySelector('.window-close');
+                 const minimizeButton = windowElement.querySelector('.window-minimize');
+
+                 windowElement.addEventListener('mousedown', () => bringToFront(windowElement), true);
+                 closeButton?.addEventListener('click', (e) => { e.stopPropagation(); closeApp(windowElement.id); });
+                 minimizeButton?.addEventListener('click', (e) => { e.stopPropagation(); minimizeApp(windowElement.id); });
+
+                 // Drag logic
+                 if (titleBar) {
+                    let isDragging = false, dragOffsetX, dragOffsetY;
+                    const startDragging = (e) => {
+                        if (e.target.closest('.window-control-button')) return;
+                        isDragging = true; bringToFront(windowElement);
+                        const rect = windowElement.getBoundingClientRect();
+                        dragOffsetX = e.clientX - rect.left;
+                        dragOffsetY = e.clientY - rect.top;
+                        document.addEventListener('mousemove', dragWindow);
+                        document.addEventListener('mouseup', stopDragging, { once: true });
+                    };
+                    const dragWindow = (e) => {
+                        if (!isDragging) return;
+                        let x = e.clientX - dragOffsetX; let y = e.clientY - dragOffsetY;
+                        const topNavHeight = 40;
+                        y = Math.max(topNavHeight, y);
+                        windowElement.style.left = `${x}px`;
+                        windowElement.style.top = `${y}px`;
+                    };
+                    const stopDragging = () => { isDragging = false; };
+                    titleBar.addEventListener('mousedown', startDragging);
+                 }
+            });
+            
+            document.getElementById('dialog-close-button')?.addEventListener('click', () => {
+                document.getElementById('zettelkasten-dialog').style.display = 'none';
+            });
+            
+            console.log("Entropic Nexus Initialized (JS)");
+        });
+
+    </script>
+</body>
+</html>

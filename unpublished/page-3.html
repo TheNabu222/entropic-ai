@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html><head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { font-family: 'Inter', sans-serif; padding: 20px; margin: 0; min-height: 100vh; color: #333; overflow-x: hidden; }
+                            .canvas-el { cursor: pointer; position: relative; transition: outline 0.2s; }
+                            .canvas-el:hover { outline: 1px dashed #00f0ff; }
+                            /* Native Resize Handle for Selected Elements - STABILIZED */
+                            .selected { 
+                                outline: 2px solid #ff00cc !important; 
+                                box-shadow: 0 0 15px rgba(255, 0, 204, 0.5); 
+                                resize: both; 
+                                overflow: auto; /* Changed from hidden to auto to force resize handle availability */
+                                z-index: 1000;
+                            }
+                            /* Special resizing rules for images/video to preserve ratios and handles */
+                            img.selected, video.selected, iframe.selected, embed.selected, object.selected {
+                                object-fit: fill; 
+                                resize: both;
+                                overflow: hidden; /* Hide scrollbars inside images */
+                                display: inline-block;
+                            }
+
+                            .selected:hover {
+                                overflow: auto; /* Show handle on hover */
+                            }
+                            /* Hide the actual bars, keep the handle */
+                            .selected::-webkit-scrollbar { width: 8px; height: 8px; }
+                            .selected::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+                            .selected::-webkit-scrollbar-track { background: transparent; }
+                            .selected::-webkit-corner { background: rgba(0,0,0,0.1); }
+                            
+                            .hover-highlight {
+                                outline: 2px dotted #00f0ff !important;
+                                z-index: 999;
+                            }
+                            @keyframes pulse { 0% { box-shadow: 0 0 5px #ff00cc; } 50% { box-shadow: 0 0 20px #ff00cc; } 100% { box-shadow: 0 0 5px #ff00cc; } }
+                        </style>
+                        <style id="global-theme-style"></style>
+                        <style id="custom-styles"></style>
+                        <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+                        <link href="https://fonts.googleapis.com/css2?family=VT323&amp;family=Inter:wght@400;700&amp;family=Comic+Neue:wght@700&amp;display=swap" rel="stylesheet">
+                    <style id="coai-animations">
+                    @keyframes anim-fadeIn { from { opacity:0; } to { opacity:1; } }
+                    @keyframes anim-slideUp { from { transform:translateY(50px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+                    @keyframes anim-zoomIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+                    @keyframes anim-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+                    @keyframes anim-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+                    @keyframes anim-shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+                    @keyframes anim-glow { 0% { box-shadow: 0 0 5px #fff; } 50% { box-shadow: 0 0 20px #ff00cc; } 100% { box-shadow: 0 0 5px #fff; } }
+                    .anim-fadeIn { animation: anim-fadeIn 0.8s ease forwards; }
+                    .anim-slideUp { animation: anim-slideUp 0.8s ease forwards; }
+                    .anim-zoomIn { animation: anim-zoomIn 0.5s ease forwards; }
+                    .anim-bounce { animation: anim-bounce 2s infinite; }
+                    .hover-pulse:hover { animation: anim-pulse 1s infinite; }
+                    .hover-shake:hover { animation: anim-shake 0.5s; }
+                    .hover-glow:hover { animation: anim-glow 1.5s infinite; }
+                    .hover-scale:hover { transform: scale(1.1); transition: transform 0.3s; }
+                </style></head>
+                    <body>
+                        <h1>COAIEXIST</h1>
+                        <p>Welcome to the digital frontier.</p>
+                    
+                    
+                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMzc1ZWY5ZjIyM2ExZjU4Y2YwODU4YzQ4ZDM5ZjA5YzYwYzcwYjQxZSZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PXM/l4FGr3nzq5u0m02vm/giphy.gif" style="position: absolute; top: 100px; left: 100px; width: 80px; transform: rotate(-15deg); filter: drop-shadow(rgba(0, 0, 0, 0.2) 2px 2px 0px);"><div style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; pointer-events: none; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%) 0% 0% / 100% 4px; box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 100px inset;"></div><div style="width: 60px; height: 120px; margin: 10px auto;"><svg viewBox="0 0 100 200" style="width:100%; height:100%; stroke:#00f0ff; stroke-width:8; stroke-linecap:round; stroke-linejoin:round; fill:none; filter:drop-shadow(0 0 5px cyan);"><path d="M 20,60 V 20 L 50,0 L 80,20 V 60"></path><path d="M 20,140 V 180 L 50,200 L 80,180 V 140"></path><path d="M 20,60 L 50,100 L 80,60"></path><path d="M 20,140 L 50,100 L 80,140"></path><line x1="20" y1="60" x2="20" y2="140"></line><line x1="80" y1="60" x2="80" y2="140"></line></svg></div><video src="https://www.youtube.com/watch?v=Gq4TT9KI2b0" controls="" style="max-width: 300px; background: rgb(0, 0, 0); position: absolute; left: 531.992px; top: 329.602px; width: 300px; margin: 0px; transform: none;"></video><img src="https://via.placeholder.com/150" style="max-width:100%;"><img src="https://via.placeholder.com/150" style="max-width:100%;"><audio src="" controls=""></audio><button class="btn">Click Me</button></body></html>

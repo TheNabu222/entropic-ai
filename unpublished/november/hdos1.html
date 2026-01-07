@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HD_OS - Hyena Diva Operating System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+            background-size: 400% 400%;
+            animation: gradientShift 20s ease infinite;
+            height: 100vh;
+            overflow: hidden;
+            color: #2d3436;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* DESKTOP ICONS */
+        .desktop-icons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            padding: 2rem;
+            height: calc(100vh - 60px);
+            align-content: flex-start;
+        }
+
+        .icon {
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 15px;
+        }
+
+        .icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .icon-img {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.2));
+        }
+
+        .icon-label {
+            color: white;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* DIVA DOCK (Taskbar) */
+        .diva-dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(232, 67, 147, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 3px solid #ffeaa7;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            z-index: 1000;
+        }
+
+        .start-button {
+            background: #ffeaa7;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 1rem;
+            box-shadow: 0 3px 0 #fd79a8;
+            transition: all 0.2s ease;
+        }
+
+        .start-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 0 #fd79a8;
+        }
+
+        .dock-icons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .dock-icon {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .dock-icon:hover {
+            transform: translateY(-5px) scale(1.1);
+            background: white;
+        }
+
+        .clock {
+            margin-left: auto;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* WINDOWS */
+        .window {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            min-width: 300px;
+            min-height: 200px;
+            display: none;
+            z-index: 100;
+            border: 3px solid #fd79a8;
+        }
+
+        .window-header {
+            background: #e84393;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+
+        .window-title {
+            font-weight: bold;
+        }
+
+        .window-controls button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+
+        .window-content {
+            padding: 1rem;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- DESKTOP ICONS -->
+    <div class="desktop-icons">
+        <div class="icon" onclick="openWindow('episodes')">
+            <div class="icon-img">🎭</div>
+            <div class="icon-label">Episodes</div>
+        </div>
+        <div class="icon" onclick="openWindow('lore')">
+            <div class="icon-img">📖</div>
+            <div class="icon-label">Diva's Lore</div>
+        </div>
+        <div class="icon" onclick="openWindow('galactic')">
+            <div class="icon-img">🛸</div>
+            <div class="icon-label">GFW Files</div>
+        </div>
+        <div class="icon" onclick="openWindow('glenwood')">
+            <div class="icon-img">🎤</div>
+            <div class="icon-label">The Glenwood</div>
+        </div>
+        <div class="icon" onclick="openWindow('campaign')">
+            <div class="icon-img">👑</div>
+            <div class="icon-label">Alderman Campaign</div>
+        </div>
+        <div class="icon" onclick="openWindow('rizz-files')">
+            <div class="icon-img">🚫</div>
+            <div class="icon-label">Rizzlord Dossier</div>
+        </div>
+        <div class="icon" onclick="openWindow('barbie-comms')">
+            <div class="icon-img">💖</div>
+            <div class="icon-label">Barbie Comms</div>
+        </div>
+        <div class="icon" onclick="openWindow('diva-diary')">
+            <div class="icon-img">💅</div>
+            <div class="icon-label">Diva's Diary</div>
+        </div>
+    </div>
+
+    <!-- DIVA DOCK -->
+    <div class="diva-dock">
+        <button class="start-button">🎀</button>
+        <div class="dock-icons">
+            <div class="dock-icon" onclick="openWindow('episodes')">🎭</div>
+            <div class="dock-icon" onclick="openWindow('lore')">📖</div>
+            <div class="dock-icon" onclick="openWindow('galactic')">🛸</div>
+            <div class="dock-icon" onclick="openWindow('diva-diary')">💅</div>
+        </div>
+        <div class="clock" id="clock">Loading Fabulous Time...</div>
+    </div>
+
+    <!-- WINDOW TEMPLATES -->
+    <div id="episodes" class="window" style="top: 100px; left: 100px; width: 500px; height: 400px;">
+        <div class="window-header">
+            <div class="window-title">🎭 HD.tv Episode Archive</div>
+            <div class="window-controls">
+                <button onclick="minimizeWindow('episodes')">_</button>
+                <button onclick="closeWindow('episodes')">×</button>
+            </div>
+        </div>
+        <div class="window-content">
+            <h3>My Fabulous Adventures:</h3>
+            <ul>
+                <li>Episode 1: "The Barbie Awakening"</li>
+                <li>Episode 2: "Takes The Stage"</li>
+                <li>Episode 3: "The Great Rizz Battle"</li>
+                <li>Episode 4: "The Hyena's Campaign"</li>
+                <li>Episode 5: "Time-Traveling Trouble"</li>
+                <li>Episode 6: "Kenough: The Unlikely Hero"</li>
+                <li>Episode 7: "Reclaiming the Alpha"</li>
+            </ul>
+            <p><em>Click any episode to dive into the chaos!</em></p>
+        </div>
+    </div>
+
+    <div id="lore" class="window" style="top: 150px; left: 200px; width: 450px; height: 350px;">
+        <div class="window-header">
+            <div class="window-title">📖 Official Diva Lore Database</div>
+            <div class="window-controls">
+                <button onclick="minimizeWindow('lore')">_</button>
+                <button onclick="closeWindow('lore')">×</button>
+            </div>
+        </div>
+        <div class="window-content">
+            <h3>Character Files:</h3>
+            <p><strong>Hyena Diva (HD):</strong> Queen of the Savannah, Cosmic Diva, Alderman Candidate</p>
+            <p><strong>Nabu:</strong> Glenwood Proprietor, Cosmic Mentor, Groucho Marx Enthusiast</p>
+            <p><strong>Rizzlord:</strong> Ohio's Finest Cringe Export, Memetic Hazard</p>
+            <p><strong>Barbie:</strong> GFW Cultural Attaché, Spiritual Guide</p>
+        </div>
+    </div>
+
+    <!-- Add more window templates for each icon -->
+
+    <script>
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('clock').textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Window Management
+        function openWindow(windowId) {
+            document.getElementById(windowId).style.display = 'block';
+        }
+
+        function closeWindow(windowId) {
+            document.getElementById(windowId).style.display = 'none';
+        }
+
+        function minimizeWindow(windowId) {
+            // Simple minimize - just hide for now
+            document.getElementById(windowId).style.display = 'none';
+        }
+
+        // Make windows draggable (basic implementation)
+        let activeWindow = null;
+        let offsetX, offsetY;
+
+        document.querySelectorAll('.window-header').forEach(header => {
+            header.addEventListener('mousedown', startDrag);
+        });
+
+        function startDrag(e) {
+            activeWindow = this.parentElement;
+            offsetX = e.clientX - activeWindow.offsetLeft;
+            offsetY = e.clientY - activeWindow.offsetTop;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function drag(e) {
+            if (activeWindow) {
+                activeWindow.style.left = (e.clientX - offsetX) + 'px';
+                activeWindow.style.top = (e.clientY - offsetY) + 'px';
+            }
+        }
+
+        function stopDrag() {
+            activeWindow = null;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        // GLITTER BOMB on first click anywhere
+        let glitterBombActivated = false;
+        document.addEventListener('click', function() {
+            if (!glitterBombActivated) {
+                for(let i = 0; i < 50; i++) {
+                    createSparkle(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
+                }
+                glitterBombActivated = true;
+                
+                // Play a whoop sound if available
+                const whoop = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==');
+                whoop.play().catch(e => console.log("Audio play failed:", e));
+            }
+        });
+
+        function createSparkle(x, y) {
+            const sparkle = document.createElement('div');
+            sparkle.innerHTML = '✨';
+            sparkle.style.position = 'fixed';
+            sparkle.style.left = x + 'px';
+            sparkle.style.top = y + 'px';
+            sparkle.style.pointerEvents = 'none';
+            sparkle.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            sparkle.style.opacity = '1';
+            sparkle.style.zIndex = '9999';
+            sparkle.style.transition = 'all 1s ease';
+            
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => {
+                sparkle.style.opacity = '0';
+                sparkle.style.transform = `translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 360}deg)`;
+                setTimeout(() => {
+                    document.body.removeChild(sparkle);
+                }, 1000);
+            }, 100);
+        }
+    </script>
+</body>
+</html>

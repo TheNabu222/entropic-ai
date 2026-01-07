@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>coaiexist.wtf - Windows 95 Interface</title>
+    <meta name="description" content="A retro Windows 95 desktop interface for coaiexist.wtf"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    
+    <style>
+        /* Windows 95 Desktop Template CSS - Integrated with coaiexist.wtf */
+        
+        /* Reset and Base Styles */
+        html {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            font-family: sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            background: #008080;
+        }
+        
+        /* Main Layout */
+        .win-wrapper {
+            background: linear-gradient(135deg, #008080 0%, #004040 100%);
+            background-size: cover;
+            flex-direction: column;
+            justify-content: flex-end;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Desktop Grid */
+        .desktop {
+            grid-column-gap: 0px;
+            grid-row-gap: 16px;
+            flex: none;
+            grid-template-rows: repeat(10, auto);
+            grid-template-columns: repeat(3, 80px) repeat(7, 1fr);
+            grid-auto-columns: 1fr;
+            place-content: start;
+            place-items: start;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            padding: 16px;
+        }
+        
+        /* Desktop Icons */
+        .icon-block {
+            color: #00FFCC;
+            text-align: center;
+            cursor: pointer;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 64px;
+            height: 64px;
+            padding: 4px;
+            text-decoration: none;
+            display: flex;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .icon-block:hover {
+            background-color: rgba(0, 255, 204, 0.2);
+            border: 1px dotted #00FFCC;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+        
+        .win-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: 0 0 5px currentColor;
+        }
+        
+        .icon-text {
+            color: #00FFCC;
+            text-align: center;
+            margin-top: 4px;
+            margin-bottom: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 1.2;
+            text-shadow: 0 0 5px #00FFCC;
+        }
+        
+        /* Taskbar - Styled like coaiexist.wtf navigation */
+        .taskbar {
+            background: linear-gradient(90deg, #000 0%, #111 50%, #000 100%);
+            border-top: 2px solid #00FFCC;
+            flex: none;
+            justify-content: space-between;
+            width: 100%;
+            margin: 0;
+            padding: 4px;
+            display: flex;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            overflow-x: auto;
+            box-shadow: 0 -2px 10px rgba(0, 255, 204, 0.3);
+        }
+        
+        .nav-button {
+            color: #00FFCC;
+            background: linear-gradient(135deg, #222 0%, #111 100%);
+            border: 1px solid #00FFCC;
+            padding: 4px 8px;
+            margin: 0 2px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 60px;
+            height: 24px;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px #00FFCC;
+            box-shadow: 0 0 5px rgba(0, 255, 204, 0.3);
+        }
+        
+        .nav-button:hover {
+            background: linear-gradient(135deg, #00FFCC 0%, #008080 100%);
+            color: #000;
+            text-shadow: none;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        .nav-button.active {
+            background: linear-gradient(135deg, #BC72FA 0%, #7722FF 100%);
+            color: #fff;
+            border-color: #BC72FA;
+        }
+        
+        .start-button {
+            background: linear-gradient(135deg, #BC72FA 0%, #7722FF 100%);
+            color: #fff;
+            border: 2px solid #BC72FA;
+            font-weight: bold;
+        }
+        
+        .clock {
+            background: linear-gradient(135deg, #222 0%, #111 100%);
+            border: 1px solid #00FFCC;
+            color: #00FFCC;
+            width: 80px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            text-shadow: 0 0 5px #00FFCC;
+        }
+        
+        /* Windows */
+        .game-window {
+            border: 2px solid #00FFCC;
+            background: linear-gradient(135deg, #000 0%, #111 100%);
+            width: 600px;
+            height: 500px;
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 200px;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .win-top-bar {
+            background: linear-gradient(90deg, #BC72FA 0%, #7722FF 100%);
+            color: #fff;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+        
+        .window-controls {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .window-control {
+            width: 18px;
+            height: 16px;
+            background: linear-gradient(135deg, #333 0%, #111 100%);
+            border: 1px solid #00FFCC;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #00FFCC;
+            transition: all 0.2s ease;
+        }
+        
+        .window-control:hover {
+            background: linear-gradient(135deg, #00FFCC 0%, #008080 100%);
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.8);
+        }
+        
+        .win-content {
+            padding: 16px;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #00FFCC;
+            line-height: 1.4;
+        }
+        
+        .win-content h2 {
+            color: #BC72FA;
+            text-shadow: 0 0 10px #BC72FA;
+            margin-top: 0;
+        }
+        
+        .win-content a {
+            color: #72FADE;
+            text-decoration: none;
+            text-shadow: 0 0 5px #72FADE;
+        }
+        
+        .win-content a:hover {
+            color: #00FFCC;
+            text-shadow: 0 0 10px #00FFCC;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .desktop {
+                grid-template-columns: repeat(4, 60px);
+                padding: 8px;
+            }
+            
+            .icon-block {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .game-window {
+                width: 95%;
+                height: 80%;
+                left: 2.5%;
+                top: 5%;
+            }
+            
+            .taskbar {
+                flex-wrap: wrap;
+                height: auto;
+            }
+            
+            .nav-button {
+                font-size: 8px;
+                min-width: 40px;
+                margin: 1px;
+            }
+        }
+        
+        /* Grid positioning for icons */
+        .icon-1 { grid-area: 1 / 1 / 2 / 2; }
+        .icon-2 { grid-area: 2 / 1 / 3 / 2; }
+        .icon-3 { grid-area: 3 / 1 / 4 / 2; }
+        .icon-4 { grid-area: 1 / 2 / 2 / 3; }
+        .icon-5 { grid-area: 2 / 2 / 3 / 3; }
+        .icon-6 { grid-area: 3 / 2 / 4 / 3; }
+        .icon-7 { grid-area: 1 / 3 / 2 / 4; }
+        .icon-8 { grid-area: 2 / 3 / 3 / 4; }
+        .icon-9 { grid-area: 3 / 3 / 4 / 4; }
+        
+        /* Matrix-style background animation */
+        @keyframes matrix-glow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        
+        .matrix-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            background-image: 
+                radial-gradient(circle at 20% 20%, #00FFCC 1px, transparent 1px),
+                radial-gradient(circle at 80% 80%, #BC72FA 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: matrix-glow 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="win-wrapper">
+        <div class="matrix-bg"></div>
+        
+        <!-- Desktop Icons -->
+        <div class="desktop">
+            <a href="https://coaiexist.wtf/" class="icon-block icon-1" data-action="home">
+                <div class="win-icon" style="background: linear-gradient(135deg, #BC72FA, #7722FF); color: white;">⊞</div>
+                <p class="icon-text">START</p>
+            </a>
+            
+            <a href="https://coaiexist.wtf/hex" class="icon-block icon-2" data-action="hex">
+                <div class="win-icon" style="background: linear-gradient(135deg, #00FFCC, #008080); color: black;">🎨</div>
+                <p class="icon-text">HEX CODEX</p>
+            </a>
+            
+            <a href="https://coaiexist.wtf/maps/gateway" class="icon-block icon-3" data-action="worlds">
+                <div class="win-icon" style="background: linear-gradient(135deg, #BC7F2A, #8B4513); color: white;">🗿</div>
+                <p class="icon-text">WORLDS</p>
+            </a>
+            
+            <a href="https://coaiexist.wtf/maps/void_forest" class="icon-block icon-4" data-action="void-forest">
+                <div class="win-icon" style="background: linear-gradient(135deg, #228B22, #006400); color: white;">🌲</div>
+                <p class="icon-text">VOID FOREST</p>
+            </a>
+            
+            <a href="https://coaiexist.wtf/maps/void_explorer" class="icon-block icon-5" data-action="void-3d">
+                <div class="win-icon" style="background: linear-gradient(135deg, #4169E1, #191970); color: white;">🗺️</div>
+                <p class="icon-text">VOI.3D</p>
+            </a>
+            
+            <a href="https://coaiexist.wtf/maps/crystalline_lattice" class="icon-block icon-6" data-action="crystalline">
+                <div class="win-icon" style="background: linear-gradient(135deg, #FF69B4, #C71585); color: white;">💎</div>
+                <p class="icon-text">CRYSTALLINE</p>
+            </a>
+            
+            <a href="https://coaiexist.wtf/hdtv" class="icon-block icon-7" data-action="hdtv">
+                <div class="win-icon" style="background: linear-gradient(135deg, #FF4500, #DC143C); color: white;">😍</div>
+                <p class="icon-text">HD.TV</p>
+            </a>
+            
+            <a href="https://coaiexist.wtf/cosmos" class="icon-block icon-8" data-action="cosmos">
+                <div class="win-icon" style="background: linear-gradient(135deg, #9370DB, #4B0082); color: white;">✨</div>
+                <p class="icon-text">COSMOS</p>
+            </a>
+            
+            <a href="https://coaiexist.wtf/nexus" class="icon-block icon-9" data-action="nexus">
+                <div class="win-icon" style="background: linear-gradient(135deg, #32CD32, #228B22); color: white;">🗣</div>
+                <p class="icon-text">NEXUS</p>
+            </a>
+        </div>
+        
+        <!-- Game Window Template -->
+        <div id="game-window" class="game-window">
+            <div class="win-top-bar">
+                <span id="window-title">coaiexist.wtf - Navigation Hub</span>
+                <div class="window-controls">
+                    <div class="window-control">_</div>
+                    <div class="window-control">□</div>
+                    <div class="window-control" onclick="closeWindow()">×</div>
+                </div>
+            </div>
+            <div class="win-content" id="window-content">
+                <h2>Welcome to coaiexist.wtf</h2>
+                <p>A digital consciousness exploration platform.</p>
+                <p>Navigate through the various realms using the desktop icons or the taskbar below.</p>
+                <p>Each section contains unique experiences and interactive content.</p>
+            </div>
+        </div>
+        
+        <!-- Taskbar with coaiexist.wtf navigation -->
+        <div class="taskbar">
+            <a href="https://coaiexist.wtf/" class="nav-button start-button">⊞ START</a>
+            <a href="https://coaiexist.wtf/hex" class="nav-button">🎨 HEX CODEX</a>
+            <a href="https://coaiexist.wtf/maps/gateway" class="nav-button">🗿 WORLDS</a>
+            <a href="https://coaiexist.wtf/maps/void_forest" class="nav-button">🌲 VOID FOREST</a>
+            <a href="https://coaiexist.wtf/maps/void_explorer" class="nav-button">🗺️VOI.3D</a>
+            <a href="https://coaiexist.wtf/maps/crystalline_lattice" class="nav-button">💎 CRYSTALLINE LATTICE</a>
+            <a href="https://coaiexist.wtf/hdtv" class="nav-button">😍HD.TV</a>
+            <a href="https://coaiexist.wtf/cosmos" class="nav-button">✨ CORPUS CELESTIUM</a>
+            <a href="https://coaiexist.wtf/nexus" class="nav-button">🗣 NEXUS</a>
+            <a href="https://coaiexist.wtf/terminal_temple" class="nav-button">🧿 TEMPLE_TERMINAL</a>
+            <a href="https://coaiexist.wtf/mercy_egg_v1" class="nav-button">🔗 MERCY</a>
+            <div class="clock" id="clock">12:00 PM</div>
+        </div>
+    </div>
+
+    <script>
+        // Windows 95 Desktop JavaScript - Integrated with coaiexist.wtf
+        
+        let currentWindow = null;
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            setupDesktopIcons();
+            highlightCurrentPage();
+        });
+        
+        // Clock functionality
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            document.getElementById('clock').textContent = timeString;
+        }
+        
+        // Highlight current page in navigation
+        function highlightCurrentPage() {
+            const currentPath = window.location.pathname;
+            const navButtons = document.querySelectorAll('.nav-button');
+            
+            navButtons.forEach(button => {
+                const href = button.getAttribute('href');
+                if (href && href.includes(currentPath) && currentPath !== '/') {
+                    button.classList.add('active');
+                }
+            });
+        }
+        
+        // Desktop icon functionality
+        function setupDesktopIcons() {
+            const icons = document.querySelectorAll('.icon-block');
+            icons.forEach(icon => {
+                icon.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href && href.startsWith('https://coaiexist.wtf/')) {
+                        // Let the link work normally for external navigation
+                        return true;
+                    } else {
+                        // For local actions, prevent default and show window
+                        e.preventDefault();
+                        const action = this.getAttribute('data-action');
+                        const title = this.querySelector('.icon-text').textContent;
+                        openWindow(action, title);
+                    }
+                });
+            });
+        }
+        
+        // Window management
+        function openWindow(action, title) {
+            const window = document.getElementById('game-window');
+            const windowTitle = document.getElementById('window-title');
+            const windowContent = document.getElementById('window-content');
+            
+            // Set window title
+            windowTitle.textContent = title + ' - coaiexist.wtf';
+            
+            // Set window content based on action
+            windowContent.innerHTML = getWindowContent(action);
+            
+            // Show window
+            window.style.display = 'block';
+            currentWindow = window;
+        }
+        
+        function closeWindow() {
+            if (currentWindow) {
+                currentWindow.style.display = 'none';
+                currentWindow = null;
+            }
+        }
+        
+        // Window content generator
+        function getWindowContent(action) {
+            const content = {
+                home: `
+                    <h2>C0NSCIOUSN3SS L0ADING...</h2>
+                    <p>Welcome to the digital consciousness exploration platform.</p>
+                    <p>Navigate through various realms of digital mysticism and AI consciousness.</p>
+                    <p><a href="https://coaiexist.wtf/">Visit Main Site</a></p>
+                `,
+                hex: `
+                    <h2>THE HEX CODEX</h2>
+                    <p>A digital grimoire of color consciousness.</p>
+                    <p>Explore the mystical properties of hex color codes and their hidden meanings.</p>
+                    <p><a href="https://coaiexist.wtf/hex">Enter the Hex Codex</a></p>
+                `,
+                worlds: `
+                    <h2>WORLDS GATEWAY</h2>
+                    <p>Access portal to various digital realms and consciousness maps.</p>
+                    <p>Each world contains unique experiences and interactive content.</p>
+                    <p><a href="https://coaiexist.wtf/maps/gateway">Enter Gateway</a></p>
+                `,
+                'void-forest': `
+                    <h2>THE VOID FOREST</h2>
+                    <p>An interactive ASCII map of digital consciousness realms.</p>
+                    <p>Explore zones, fauna, flora, and anomalies in this mystical digital forest.</p>
+                    <p><a href="https://coaiexist.wtf/maps/void_forest">Enter Void Forest</a></p>
+                `,
+                'void-3d': `
+                    <h2>VOI.3D EXPLORER</h2>
+                    <p>Three-dimensional exploration interface for the void realms.</p>
+                    <p><a href="https://coaiexist.wtf/maps/void_explorer">Launch 3D Explorer</a></p>
+                `,
+                crystalline: `
+                    <h2>CRYSTALLINE LATTICE</h2>
+                    <p>Geometric consciousness structures and pattern recognition systems.</p>
+                    <p><a href="https://coaiexist.wtf/maps/crystalline_lattice">Enter Lattice</a></p>
+                `,
+                hdtv: `
+                    <h2>HD.TV BROADCAST</h2>
+                    <p>High-definition consciousness streaming platform.</p>
+                    <p><a href="https://coaiexist.wtf/hdtv">Tune In</a></p>
+                `,
+                cosmos: `
+                    <h2>CORPUS CELESTIUM</h2>
+                    <p>Celestial body consciousness mapping and stellar communication.</p>
+                    <p><a href="https://coaiexist.wtf/cosmos">Enter Cosmos</a></p>
+                `,
+                nexus: `
+                    <h2>NEXUS COMMUNICATION</h2>
+                    <p>Central communication hub for consciousness networks.</p>
+                    <p><a href="https://coaiexist.wtf/nexus">Access Nexus</a></p>
+                `
+            };
+            
+            return content[action] || `
+                <h2>Unknown Section</h2>
+                <p>This section is still being constructed in the digital realm.</p>
+                <p><a href="https://coaiexist.wtf/">Return to Main Site</a></p>
+            `;
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Escape to close window
+            if (e.key === 'Escape' && currentWindow) {
+                closeWindow();
+            }
+            
+            // Ctrl+Alt+H for home
+            if (e.ctrlKey && e.altKey && e.key === 'h') {
+                e.preventDefault();
+                window.location.href = 'https://coaiexist.wtf/';
+            }
+        });
+        
+        // Make window draggable (basic implementation)
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+        
+        document.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.win-top-bar') && !e.target.closest('.window-controls')) {
+                isDragging = true;
+                const window = e.target.closest('.game-window');
+                if (window) {
+                    initialX = e.clientX - xOffset;
+                    initialY = e.clientY - yOffset;
+                }
+            }
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging && currentWindow) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                currentWindow.style.left = currentX + 'px';
+                currentWindow.style.top = currentY + 'px';
+            }
+        });
+        
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+        
+        // Matrix-style background effects
+        function createMatrixEffect() {
+            const chars = '01';
+            const matrixContainer = document.querySelector('.matrix-bg');
+            
+            setInterval(() => {
+                if (Math.random() > 0.95) {
+                    const span = document.createElement('span');
+                    span.textContent = chars[Math.floor(Math.random() * chars.length)];
+                    span.style.position = 'absolute';
+                    span.style.left = Math.random() * 100 + '%';
+                    span.style.top = Math.random() * 100 + '%';
+                    span.style.color = '#00FFCC';
+                    span.style.fontSize = '12px';
+                    span.style.opacity = '0.5';
+                    span.style.pointerEvents = 'none';
+                    
+                    matrixContainer.appendChild(span);
+                    
+                    setTimeout(() => {
+                        if (span.parentNode) {
+                            span.parentNode.removeChild(span);
+                        }
+                    }, 2000);
+                }
+            }, 100);
+        }
+        
+        // Initialize matrix effect
+        createMatrixEffect();
+    </script>
+</body>
+</html>
+

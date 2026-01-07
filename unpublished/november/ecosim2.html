@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ecosystem Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      /* ===== CSS VARIABLES ===== */
+      :root {
+        --color-black: #000;
+        --color-green-main: #4ade80; /* green-400 */
+        --color-green-dark: #166534; /* green-700 */
+        --color-green-darker: #14532d; /* green-800 */
+        --color-green-darkest: #052e16; /* green-900 */
+        --color-red-main: #ef4444; /* red-500 */
+        --color-yellow-main: #facc15; /* yellow-400 */
+        --color-cyan-main: #22d3ee; /* cyan-400 */
+        --color-purple-main: #a78bfa; /* purple-400 */
+        --color-lime-main: #a3e635; /* lime-400 */
+        --color-orange-main: #fb923c; /* orange-400 */
+        --color-white: #f0f0f0;
+        --color-gray-light: #cccccc;
+        
+        --glow-green: 0 0 5px var(--color-green-main), 0 0 10px var(--color-green-main), 0 0 15px var(--color-green-main);
+        --glow-cyan: 0 0 5px var(--color-cyan-main), 0 0 10px var(--color-cyan-main), 0 0 15px var(--color-cyan-main);
+        --glow-purple: 0 0 5px var(--color-purple-main), 0 0 10px var(--color-purple-main), 0 0 15px var(--color-purple-main);
+        --glow-yellow: 0 0 5px var(--color-yellow-main), 0 0 10px var(--color-yellow-main), 0 0 15px var(--color-yellow-main);
+        
+        --border-glow: 0 0 5px currentColor;
+      }
+      
+      /* ===== BASE STYLES ===== */
+      * { 
+        box-sizing: border-box; 
+        margin: 0;
+        padding: 0;
+      }
+      
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: var(--color-black);
+        color: var(--color-white);
+        font-family: 'Fira Code', monospace;
+        line-height: 1.5;
+      }
+      
+      /* ===== LAYOUT ===== */
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 1rem;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+      
+      main {
+        flex-grow: 1;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        min-height: 0;
+      }
+      
+      @media (min-width: 768px) {
+        main {
+          grid-template-columns: 1fr 2fr 1fr;
+        }
+      }
+      
+      /* ===== TYPOGRAPHY ===== */
+      .text-center { text-align: center; }
+      .text-sm { font-size: 0.875rem; }
+      .text-xs { font-size: 0.75rem; }
+      .text-lg { font-size: 1.125rem; }
+      .text-xl { font-size: 1.25rem; }
+      .text-2xl { font-size: 1.5rem; }
+      .text-3xl { font-size: 1.875rem; }
+      .text-4xl { font-size: 2.25rem; }
+      .font-bold { font-weight: 700; }
+      .font-semibold { font-weight: 600; }
+      .opacity-60 { opacity: 0.6; }
+      .opacity-80 { opacity: 0.8; }
+      .capitalize { text-transform: capitalize; }
+      .whitespace-pre { white-space: pre; }
+      .whitespace-pre-wrap { white-space: pre-wrap; }
+      
+      /* ===== FLEX & GRID UTILITIES ===== */
+      .flex { display: flex; }
+      .flex-col { flex-direction: column; }
+      .flex-grow { flex-grow: 1; }
+      .flex-shrink-0 { flex-shrink: 0; }
+      .items-center { align-items: center; }
+      .justify-center { justify-content: center; }
+      .space-y-4 > * + * { margin-top: 1rem; }
+      .gap-4 { gap: 1rem; }
+      
+      /* ===== SPACING ===== */
+      .p-2 { padding: 0.5rem; }
+      .p-3 { padding: 0.75rem; }
+      .p-4 { padding: 1rem; }
+      .pb-4 { padding-bottom: 1rem; }
+      .pt-4 { padding-top: 1rem; }
+      .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+      .mt-2 { margin-top: 0.5rem; }
+      .mt-4 { margin-top: 1rem; }
+      .mb-2 { margin-bottom: 0.5rem; }
+      .h-full { height: 100%; }
+      .w-full { width: 100%; }
+      
+      /* ===== BORDERS & BACKGROUNDS ===== */
+      .border { border: 1px solid var(--color-green-darker); }
+      .border-2 { border-width: 2px; }
+      .border-b-2 { border-bottom-width: 2px; }
+      .border-y-2 { border-top-width: 2px; border-bottom-width: 2px; }
+      .border-t-2 { border-top-width: 2px; }
+      .border-green-700 { border-color: var(--color-green-dark); }
+      .border-green-800 { border-color: var(--color-green-darker); }
+      .border-yellow-400 { border-color: var(--color-yellow-main); }
+      .border-cyan-400 { border-color: var(--color-cyan-main); }
+      .border-purple-400 { border-color: var(--color-purple-main); }
+      
+      .bg-black-50 { background-color: rgba(0,0,0,0.5); }
+      .bg-green-900-10 { background-color: rgba(5, 46, 22, 0.3); }
+      .bg-green-900-20 { background-color: rgba(5, 46, 22, 0.4); }
+      .bg-yellow-900-30 { background-color: rgba(60, 43, 6, 0.5); }
+      .bg-cyan-900-20 { background-color: rgba(6, 44, 60, 0.4); }
+      .bg-purple-900-20 { background-color: rgba(49, 46, 129, 0.4); }
+      
+      /* ===== TEXT COLORS ===== */
+      .text-white { color: var(--color-white); }
+      .text-gray-light { color: var(--color-gray-light); }
+      .text-green-main { color: var(--color-green-main); }
+      .text-green-light { color: #7cf07c; }
+      .text-cyan-main { color: var(--color-cyan-main); }
+      .text-yellow-main { color: var(--color-yellow-main); }
+      .text-purple-main { color: var(--color-purple-main); }
+      .text-lime-main { color: var(--color-lime-main); }
+      .text-red-main { color: var(--color-red-main); }
+      .text-orange-main { color: var(--color-orange-main); }
+      
+      /* ===== INTERACTIVITY ===== */
+      .overflow-hidden { overflow: hidden; }
+      .overflow-y-auto { overflow-y: auto; }
+      .overflow-x-hidden { overflow-x: hidden; }
+      .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
+      .duration-500 { transition-duration: 500ms; }
+      .duration-1000 { transition-duration: 1000ms; }
+      
+      /* ===== CUSTOM COMPONENTS ===== */
+      /* Header */
+      #header {
+        position: relative;
+        z-index: 10;
+      }
+      
+      #header h1 {
+        position: relative;
+        display: inline-block;
+        text-shadow: var(--glow-green);
+        color: var(--color-lime-main);
+      }
+      
+      .glitch-1, .glitch-2 {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.8;
+        clip-path: inset(25% 0 50% 0);
+        animation: glitch-anim 2s infinite linear alternate-reverse;
+      }
+      
+      .glitch-1 {
+        color: var(--color-red-main);
+        text-shadow: var(--glow-purple);
+        animation-delay: 0.1s;
+      }
+      
+      .glitch-2 {
+        color: var(--color-cyan-main);
+        text-shadow: var(--glow-cyan);
+        animation-delay: 0.2s;
+        clip-path: inset(50% 0 25% 0);
+      }
+      
+      /* Biome Selector */
+      .biome-btn {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        color: var(--color-gray-light);
+      }
+      
+      .biome-btn:hover {
+        box-shadow: var(--glow-green);
+        transform: translateY(-2px);
+        color: var(--color-white);
+      }
+      
+      .biome-btn.active {
+        box-shadow: var(--glow-green);
+        border-color: var(--color-green-main);
+        color: var(--color-lime-main);
+      }
+      
+      /* Event Announcer */
+      #event-announcer {
+        position: relative;
+        overflow: hidden;
+        color: var(--color-white);
+      }
+      
+      .event-active {
+        box-shadow: var(--glow-yellow);
+        animation: pulse-glow 2s infinite;
+      }
+      
+      /* Viewport */
+      #simulation-viewport {
+        position: relative;
+        box-shadow: var(--glow-green);
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+      
+      #simulation-viewport pre {
+        font-size: 12px;
+        line-height: 1;
+        filter: contrast(1.2);
+        color: var(--color-white);
+      }
+      
+      .starvation { 
+        filter: grayscale(1) brightness(0.7); 
+        opacity: 0.6; 
+      }
+      
+      .aggressive { 
+        animation: pulse-red 1s infinite; 
+      }
+      
+      /* Terminal */
+      #terminal {
+        position: relative;
+        box-shadow: var(--glow-green);
+        color: var(--color-white);
+      }
+      
+      #terminal-input {
+        background: transparent;
+        border: none;
+        color: var(--color-lime-main);
+        width: 100%;
+        outline: none;
+        margin-left: 0.5rem;
+        font-family: 'Fira Code', monospace;
+      }
+      
+      /* Codex */
+      #codex {
+        position: relative;
+        box-shadow: var(--glow-cyan);
+        color: var(--color-white);
+      }
+      
+      /* Control Panel & Status Display */
+      #control-panel, #status-display {
+        position: relative;
+        box-shadow: var(--glow-purple);
+        color: var(--color-white);
+      }
+      
+      /* Footer */
+      footer {
+        color: var(--color-gray-light);
+      }
+      
+      footer a {
+        color: var(--color-cyan-main);
+        transition: color 0.3s;
+      }
+      
+      footer a:hover {
+        color: var(--color-lime-main);
+      }
+      
+      /* ===== ANIMATIONS ===== */
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      
+      @keyframes pulse-red {
+        0%, 100% { color: var(--color-red-main); }
+        50% { color: var(--color-yellow-main); }
+      }
+      
+      @keyframes pulse-glow {
+        0%, 100% { box-shadow: var(--glow-yellow); }
+        50% { box-shadow: 0 0 10px var(--color-yellow-main), 0 0 20px var(--color-yellow-main), 0 0 30px var(--color-yellow-main); }
+      }
+      
+      @keyframes breathe { 
+        0%, 100% { transform: scale(1.0); } 
+        50% { transform: scale(0.95); } 
+      }
+      
+      @keyframes energy-spark { 
+        0% { transform: scale(0.5); opacity: 1; box-shadow: 0 0 12px 6px #fff, 0 0 8px 4px #0f0; } 
+        100% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 4px 2px #fff, 0 0 2px 1px #0f0; } 
+      }
+      
+      @keyframes fade-out-up { 
+        0% { opacity: 1; transform: translateY(0); } 
+        100% { opacity: 0; transform: translateY(-10px); } 
+      }
+      
+      @keyframes sparkle-up { 
+        0% { opacity: 1; transform: translateY(0) scale(1); } 
+        100% { opacity: 0; transform: translateY(-20px) scale(0.5); } 
+      }
+      
+      @keyframes clash { 
+        0%, 100% { transform: scale(1); opacity: 0.8; } 
+        50% { transform: scale(1.5); opacity: 1; } 
+      }
+      
+      @keyframes fall { 
+        to { transform: translateY(110vh) translateX(-20vw); } 
+      }
+      
+      @keyframes wind { 
+        to { transform: translateX(110vw); } 
+      }
+      
+      @keyframes glimmer { 
+        0%, 100% { opacity: 0; transform: scale(0.5); } 
+        50% { opacity: 1; transform: scale(1); } 
+      }
+      
+      @keyframes lattice-pulse { 
+        0%, 100% { opacity: 0.5; } 
+        50% { opacity: 1; } 
+      }
+      
+      @keyframes glitch-anim {
+        0% { transform: translate(0); }
+        20% { transform: translate(-2px, 2px); }
+        40% { transform: translate(-2px, -2px); }
+        60% { transform: translate(2px, 2px); }
+        80% { transform: translate(2px, -2px); }
+        100% { transform: translate(0); }
+      }
+      
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+      }
+      
+      /* ===== EFFECTS ===== */
+      /* Scanline Effect */
+      @keyframes scan { 
+        0% { transform: translateY(-10%); } 
+        100% { transform: translateY(110%); } 
+      }
+      
+      .scanline::before { 
+        content: " "; 
+        display: block; 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        bottom: 0; 
+        right: 0; 
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                    linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04)); 
+        z-index: 2; 
+        background-size: 100% 3px, 4px 100%; 
+        pointer-events: none; 
+      }
+      
+      .scanline::after { 
+        content: " "; 
+        display: block; 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        bottom: 0; 
+        right: 0; 
+        background: rgba(0, 255, 0, 0.05); 
+        opacity: 0; 
+        z-index: 3; 
+        pointer-events: none; 
+        animation: scan 8s linear infinite; 
+      }
+      
+      /* Particle Effects */
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+      
+      .particle {
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(74, 222, 128, 0.3);
+        animation: float 3s infinite ease-in-out;
+      }
+      
+      /* Grid Lines */
+      .grid-lines {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+          linear-gradient(rgba(74, 222, 128, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(74, 222, 128, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        pointer-events: none;
+        z-index: 1;
+      }
+      
+      /* Custom scrollbar */
+      ::-webkit-scrollbar { 
+        width: 8px; 
+        height: 8px; 
+      }
+      
+      ::-webkit-scrollbar-track { 
+        background: #111; 
+        border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb { 
+        background: var(--color-green-main); 
+        border-radius: 4px;
+        box-shadow: var(--border-glow);
+      }
+      
+      ::-webkit-scrollbar-thumb:hover { 
+        background: var(--color-lime-main); 
+      }
+      
+      /* ===== RESPONSIVE ADJUSTMENTS ===== */
+      @media (max-width: 767px) {
+        .container {
+          padding: 0.5rem;
+        }
+        
+        #header h1 {
+          font-size: 1.75rem;
+        }
+        
+        .biome-btn span:last-child {
+          display: none;
+        }
+      }
+    </style>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="particles" id="background-particles"></div>
+    <div class="grid-lines"></div>
+    
+    <div id="root" class="container scanline">
+        <header id="header" class="text-center border-b-2 border-green-700 pb-4 flex-shrink-0">
+            <h1 class="text-4xl font-bold">
+              <span class="glitch-1">Ecosystem Simulator</span>
+              <span class="relative z-10">Ecosystem Simulator</span>
+              <span class="glitch-2">Ecosystem Simulator</span>
+            </h1>
+            <p class="text-sm opacity-80 mt-2 text-cyan-main">// COVERT ANALYSIS FRAMEWORK v2.3 //</p>
+        </header>
+
+        <div id="biome-selector" class="text-center my-4 p-2 border-y-2 border-green-700 flex-shrink-0 text-white"></div>
+
+        <div id="event-announcer" class="relative flex flex-col justify-center text-center p-3 my-4 border-2 transition-all duration-500 h-44 flex-shrink-0"></div>
+
+        <main>
+            <div id="codex" class="p-4 border border-green-800 bg-green-900-20 h-full overflow-y-auto">
+                <h3 class="text-xl font-bold mb-2 text-center border-b-2 border-cyan-400 pb-2 text-white">Ecosystem Codex</h3>
+                <p class="text-center mb-4 text-gray-light"><strong class="text-lime-main">Biome:</strong> <span class="text-lime-main font-bold">Temperate Mossland</span></p>
+                <div class="space-y-2">
+                    <div class="w-full text-left p-2 transition-all hover:bg-green-900-20" style="background: rgba(0,0,0,0.4);">
+                        <div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;">
+                            <span class="text-green-600 text-xl w-6 text-center">▒</span>
+                            <div>
+                                <span class="font-semibold text-white">Moss</span>
+                                <div class="w-full h-1.5 mt-1 rounded-full overflow-hidden" style="background-color: rgba(5, 46, 22, 0.5);">
+                                    <div class="bg-lime-400 h-full" style="width: 15%;"></div>
+                                </div>
+                            </div>
+                            <span class="font-bold text-lg text-white">x42</span>
+                        </div>
+                    </div>
+                    <div class="w-full text-left p-2 transition-all hover:bg-green-900-20" style="background: rgba(0,0,0,0.4);">
+                        <div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;">
+                            <span class="text-green-400 text-xl w-6 text-center">ψ</span>
+                            <div>
+                                <span class="font-semibold text-white">Grasses</span>
+                                <div class="w-full h-1.5 mt-1 rounded-full overflow-hidden" style="background-color: rgba(5, 46, 22, 0.5);">
+                                    <div class="bg-lime-400 h-full" style="width: 22%;"></div>
+                                </div>
+                            </div>
+                            <span class="font-bold text-lg text-white">x38</span>
+                        </div>
+                    </div>
+                    <div class="w-full text-left p-2 transition-all hover:bg-green-900-20" style="background: rgba(0,0,0,0.4);">
+                        <div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;">
+                            <span class="text-orange-300 text-xl w-6 text-center">🦌</span>
+                            <div>
+                                <span class="font-semibold text-white">Deer</span>
+                                <div class="w-full h-1.5 mt-1 rounded-full overflow-hidden" style="background-color: rgba(5, 46, 22, 0.5);">
+                                    <div class="bg-lime-400 h-full" style="width: 18%;"></div>
+                                </div>
+                            </div>
+                            <span class="font-bold text-lg text-white">x24</span>
+                        </div>
+                    </div>
+                    <div class="w-full text-left p-2 transition-all hover:bg-green-900-20" style="background: rgba(0,0,0,0.4);">
+                        <div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.75rem;">
+                            <span class="text-lime-500 text-xl w-6 text-center">🐍</span>
+                            <div>
+                                <span class="font-semibold text-white">Snake</span>
+                                <div class="w-full h-1.5 mt-1 rounded-full overflow-hidden" style="background-color: rgba(5, 46, 22, 0.5);">
+                                    <div class="bg-lime-400 h-full" style="width: 12%;"></div>
+                                </div>
+                            </div>
+                            <span class="font-bold text-lg text-white">x15</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="simulation-viewport" class="relative border-2 border-green-700 p-2 h-full overflow-hidden transition-all duration-1000">
+                <div id="biome-aesthetic-overlay" class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden"></div>
+                <div id="environmental-effects-overlay" class="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden"></div>
+                <pre id="viewport-grid" class="text-xs leading-tight font-mono whitespace-pre w-full h-full flex flex-col justify-center text-white"></pre>
+                <div id="visual-effects-overlay" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+            </div>
+            <div class="md:col-span-1 flex flex-col space-y-4 min-h-0 overflow-y-auto">
+                <div id="control-panel" class="p-4 border border-green-800 bg-green-900-10">
+                    <h3 class="text-lg font-bold mb-2 text-white">Abiotic Controls</h3>
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <label for="temperature" class="capitalize text-gray-light">Temperature: 20</label>
+                            <input id="temperature" type="range" min="0" max="100" step="1" value="20" data-factor="temperature" class="control-slider w-full h-1 bg-green-900 appearance-none cursor-pointer rounded-full">
+                        </div>
+                        <div>
+                            <label for="precipitation" class="capitalize text-gray-light">Precipitation: 50</label>
+                            <input id="precipitation" type="range" min="0" max="100" step="1" value="50" data-factor="precipitation" class="control-slider w-full h-1 bg-green-900 appearance-none cursor-pointer rounded-full">
+                        </div>
+                        <div>
+                            <label for="wind" class="capitalize text-gray-light">Wind: 10</label>
+                            <input id="wind" type="range" min="0" max="100" step="1" value="10" data-factor="wind" class="control-slider w-full h-1 bg-green-900 appearance-none cursor-pointer rounded-full">
+                        </div>
+                        <div>
+                            <label for="soilPH" class="capitalize text-gray-light">Soil PH: 7.0</label>
+                            <input id="soilPH" type="range" min="0" max="14" step="0.1" value="7.0" data-factor="soilPH" class="control-slider w-full h-1 bg-green-900 appearance-none cursor-pointer rounded-full">
+                        </div>
+                    </div>
+                    <div class="flex" style="gap: 0.5rem; margin-top: 1rem;">
+                        <button id="run-pause-btn" class="flex-1 p-2 transition-all hover:bg-green-800 text-white" style="background: var(--color-green-darker);">PAUSE</button>
+                        <button id="reset-btn" class="flex-1 p-2 transition-all hover:bg-red-800 text-white" style="background: #991b1b;">RESET</button>
+                    </div>
+                </div>
+                <div id="status-display" class="p-4 border border-green-800 bg-green-900-10">
+                    <h3 class="text-lg font-bold mb-2 text-white">Ecosystem Health</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem;" class="text-sm">
+                        <span class="text-gray-light">Population:</span><span style="text-align: right;" class="text-lime-main">104</span>
+                        <span class="text-gray-light">Species Richness:</span><span style="text-align: right;" class="text-lime-main">4</span>
+                        <span class="text-gray-light">Avg. Vitality:</span><span style="text-align: right;" class="text-lime-main">78.5%</span>
+                        <span class="text-gray-light">Total Energy:</span><span style="text-align: right;" class="text-lime-main">8,642</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="terminal" class="my-4 p-4 border border-green-800 bg-black-50 h-48 flex flex-col font-mono text-sm flex-shrink-0">
+            <div id="terminal-log" class="flex-grow overflow-y-auto pr-2">
+                <p class="text-green-main">COVERT ANALYSIS FRAMEWORK v2.3 TERMINAL</p>
+                <p class="text-gray-light">Initializing ecosystem simulation...</p>
+                <p class="text-cyan-main">> Biome: Temperate Mossland</p>
+                <p class="text-gray-light">Population stabilized at 104 organisms</p>
+                <p class="text-yellow-main">[EVENT] Heat Wave detected</p>
+                <p class="text-gray-light">Environmental factors adjusting...</p>
+            </div>
+            <div class="flex mt-2">
+                <span class="text-lime-main">&gt;</span>
+                <input id="terminal-input" type="text" spellCheck="false" autofocus placeholder="Type 'help' for commands..." />
+            </div>
+        </div>
+        
+        <footer id="footer" class="text-center border-t-2 border-green-700 pt-4 mt-4 text-xs opacity-60 flex-shrink-0">
+          <p class="text-gray-light">SYSTEM ONLINE | ALL CHANNELS SECURE | ECOLOGICAL MASK ACTIVE</p>
+          <p class="text-gray-light">NAVIGATE TO: <a href="https://coaiexist.wtf/hex" class="underline">/hex</a> | <a href="https://coaiexist.wtf/maps/gateway" class="underline">/gateway</a> | <a href="https://coaiexist.wtf/maps/void_forest" class="underline">/void_forest</a></p>
+        </footer>
+    </div>
+
+    <!-- Navigation Frame -->
+    <iframe src="/nav.html" 
+            style="position:fixed;bottom:0;left:0;width:100%;height:50px;border:none;z-index:9999;">
+    </iframe>
+
+<script>
+(function() {
+    'use strict';
+
+    // Initialize the simulation viewport with sample content
+    function initializeViewport() {
+        const viewport = document.getElementById('viewport-grid');
+        let gridContent = '';
+        
+        // Create a simple grid representation
+        for (let i = 0; i < 30; i++) {
+            let line = '';
+            for (let j = 0; j < 70; j++) {
+                // Randomly place some creatures
+                const rand = Math.random();
+                if (rand < 0.02) {
+                    line += '<span class="text-green-600">▒</span>';
+                } else if (rand < 0.04) {
+                    line += '<span class="text-green-400">ψ</span>';
+                } else if (rand < 0.045) {
+                    line += '<span class="text-orange-300">🦌</span>';
+                } else if (rand < 0.047) {
+                    line += '<span class="text-lime-500">🐍</span>';
+                } else {
+                    line += ' ';
+                }
+            }
+            gridContent += `<div>${line}</div>`;
+        }
+        
+        viewport.innerHTML = gridContent;
+    }
+
+    // Create background particles
+    function createParticles() {
+        const container = document.getElementById('background-particles');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            const size = Math.random() * 3 + 1;
+            const left = Math.random() * 100;
+            const top = Math.random() * 100;
+            const delay = Math.random() * 5;
+            const duration = 3 + Math.random() * 4;
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${left}%`;
+            particle.style.top = `${top}%`;
+            particle.style.animationDelay = `${delay}s`;
+            particle.style.animationDuration = `${duration}s`;
+            
+            container.appendChild(particle);
+        }
+    }
+
+    // Initialize the app
+    function initialize() {
+        initializeViewport();
+        createParticles();
+        
+        // Set up event listeners for buttons
+        document.getElementById('run-pause-btn').addEventListener('click', function() {
+            const isRunning = this.textContent === 'PAUSE';
+            this.textContent = isRunning ? 'RUN' : 'PAUSE';
+            // Add simulation control logic here
+        });
+        
+        document.getElementById('reset-btn').addEventListener('click', function() {
+            // Add reset logic here
+            initializeViewport();
+        });
+        
+        // Set up biome selector buttons
+        const biomeButtons = document.querySelectorAll('.biome-btn');
+        biomeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                biomeButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                // Add biome change logic here
+            });
+        });
+        
+        // Set up terminal input
+        document.getElementById('terminal-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && this.value.trim() !== '') {
+                const command = this.value.trim();
+                // Add command processing logic here
+                this.value = '';
+            }
+        });
+    }
+
+    // Run on page load
+    document.addEventListener('DOMContentLoaded', initialize);
+
+})();
+</script>
+</body>
+</html>

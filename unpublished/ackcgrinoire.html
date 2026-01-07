@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>~*~HyEnA DiVa'Z GriNoIrE~*~ Y2K Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Comic+Sans+MS&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+  <style>
+    /* Y2K Color Scheme */
+    :root {
+      --gradient-start: #c066f6;
+      --gradient-end: #ff72b6;
+      --card-bg: #ffffff;
+      --tag-bg: #80ffef;
+      --tag-text: #000000;
+      --button-bg: #e0e0e0;
+      --button-active: #ff80c0;
+      --button-text: #000000;
+      --button-active-text: #ffffff;
+      
+      /* Kasten Colors */
+      --kasten-i: #9C27B0;
+      --kasten-ii: #2196F3;
+      --kasten-iii: #00BFA5;
+      --kasten-iv: #FF7043;
+      
+      /* Tag Colors */
+      --tag-tier1: #9C27B0;
+      --tag-tier2: #2196F3;
+      --tag-tier3: #FF7043;
+    }
+    
+    /* Base styles */
+    body {
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      margin: 0;
+      padding: 0;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      height: 100vh;
+      position: fixed;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    /* Dark mode support */
+    body.dark {
+      --card-bg: #222222;
+      --color-text: #E0E0E0;
+      --color-light-text: #B0B0B0;
+      --color-border: #404040;
+    }
+    
+    /* Mobile Header */
+    .mobile-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      z-index: 100;
+      color: white;
+    }
+    
+    .header-title {
+      flex-grow: 1;
+      text-align: center;
+      font-family: 'Dancing Script', cursive;
+      font-size: 22px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .menu-button {
+      width: 30px;
+      font-size: 22px;
+      text-align: center;
+      cursor: pointer;
+    }
+    
+    .info-button {
+      width: 30px;
+      font-size: 22px;
+      text-align: center;
+      cursor: pointer;
+      background-color: white;
+      border-radius: 50%;
+      color: var(--gradient-end);
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Main content area - Optimized for mobile */
+    .mobile-content {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      right: 0;
+      bottom: 55px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      z-index: 50;
+      padding-bottom: 65px; /* Extra padding to prevent content from being cut off */
+    }
+    
+    /* Tab navigation - Optimized for mobile */
+    .tabs-container {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin: 5px;
+      -webkit-overflow-scrolling: touch;
+      background-color: transparent;
+    }
+    
+    .tabs-container::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .tab {
+      padding: 10px;
+      background-color: white;
+      border: 2px solid var(--gradient-end);
+      margin-right: 2px;
+      white-space: nowrap;
+      cursor: pointer;
+      font-size: 14px;
+      color: black;
+      flex: 1;
+      text-align: center;
+      min-width: 90px;
+    }
+    
+    .tab.active {
+      background-color: white;
+      font-weight: bold;
+    }
+    
+    /* Search input */
+    .search-input {
+      margin: 8px 5px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      width: calc(100% - 10px);
+      box-sizing: border-box;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+    
+    /* Filter buttons - Optimized for mobile */
+    .view-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin: 8px 5px;
+    }
+    
+    .view-controls button {
+      padding: 8px;
+      border: none;
+      background-color: var(--button-bg);
+      font-size: 14px;
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    
+    .view-controls button.active {
+      background-color: var(--button-active);
+      color: white;
+    }
+    
+    /* Card styling */
+    .zettel-container {
+      padding: 3px;
+    }
+    
+    .zettel-card {
+      background-color: var(--card-bg);
+      border-left: 6px solid var(--tier-leaf);
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    /* Kasten-based colors */
+    .kasten-i-card {
+      border-left-color: var(--kasten-i);
+    }
+    
+    .kasten-ii-card {
+      border-left-color: var(--kasten-ii);
+    }
+    
+    .kasten-iii-card {
+      border-left-color: var(--kasten-iii);
+    }
+    
+    .kasten-iv-card {
+      border-left-color: var(--kasten-iv);
+    }
+    
+    .zettel-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .zettel-id {
+      font-family: monospace;
+      color: #777;
+      font-size: 14px;
+      white-space: nowrap;
+      margin-left: 5px;
+    }
+    
+    .zettel-content {
+      font-size: 14px;
+      color: #333;
+      margin: 8px 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
+    
+    .zettel-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    
+    .zettel-tag, .tag {
+      display: inline-block;
+      background-color: var(--tag-bg);
+      padding: 5px 10px;
+      border-radius: 15px;
+      color: var(--tag-text);
+      font-size: 12px;
+    }
+    
+    /* Tier tags styling */
+    .tag-tier1 {
+      background-color: rgba(156, 39, 176, 0.15);
+      color: var(--tag-tier1);
+    }
+    
+    .tag-tier2 {
+      background-color: rgba(30, 136, 229, 0.15);
+      color: var(--tag-tier2);
+    }
+    
+    .tag-tier3 {
+      background-color: rgba(255, 112, 67, 0.15);
+      color: var(--tag-tier3);
+    }
+    
+    /* Buds & Nests - Optimized for mobile */
+    .buds-container {
+      background-color: rgba(0, 0, 0, 0.02);
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    
+    .buds-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    
+    .bud-item {
+      background-color: var(--card-bg);
+      padding: 8px 10px;
+      border-radius: 4px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      border-left: 3px solid var(--color-tertiary);
+    }
+    
+    .bud-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #777;
+      margin-bottom: 3px;
+    }
+    
+    /* Nest styling optimized */
+    .nest-container {
+      border: 1px dashed var(--color-tertiary);
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 10px;
+      background-color: rgba(255, 114, 182, 0.05);
+    }
+    
+    .nest-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nest-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #777;
+    }
+    
+    .nest-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .nest-item {
+      background-color: var(--card-bg);
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+    
+    /* Mobile Bottom Navigation */
+    .mobile-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 55px;
+      background-color: #f0f0f0;
+      display: flex;
+      z-index: 100;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      color: #555;
+      text-decoration: none;
+      font-size: 11px;
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+    
+    .nav-item.active {
+      color: var(--gradient-start);
+    }
+    
+    /* Floating Action Button */
+    .fab {
+      position: fixed;
+      bottom: 65px;
+      right: 15px;
+      width: 55px;
+      height: 55px;
+      border-radius: 27.5px;
+      background: var(--gradient-start);
+      color: white;
+      font-size: 30px;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      z-index: 90;
+      cursor: pointer;
+    }
+    
+    /* Sidebar - Optimized for mobile */
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      bottom: 55px;
+      left: 0;
+      width: 100%;
+      background-color: white;
+      z-index: 95;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+    
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    
+    .sidebar-section {
+      margin-bottom: 15px;
+    }
+    
+    .sidebar-title {
+      font-size: 16px;
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--gradient-end);
+    }
+    
+    .kasten-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .kasten-item {
+      margin-bottom: 6px;
+    }
+    
+    .kasten-toggle {
+      display: block;
+      padding: 8px 12px;
+      background-color: rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+    
+    .kasten-i {
+      border-left: 4px solid var(--kasten-i);
+    }
+    
+    .kasten-ii {
+      border-left: 4px solid var(--kasten-ii);
+    }
+    
+    .kasten-iii {
+      border-left: 4px solid var(--kasten-iii);
+    }
+    
+    .kasten-iv {
+      border-left: 4px solid var(--kasten-iv);
+    }
+    
+    .trunk-list {
+      list-style: none;
+      padding-left: 15px;
+      display: none;
+      margin: 4px 0;
+    }
+    
+    .trunk-item a {
+      display: block;
+      padding: 6px 8px;
+      color: #333;
+      text-decoration: none;
+      border-radius: 4px;
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+    
+    /* Toast message */
+    .toast {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      z-index: 300;
+      display: none;
+      max-width: 80%;
+      text-align: center;
+      font-size: 14px;
+    }
+    
+    /* Markdown rendering */
+    .markdown h1 {
+      font-size: 1.5em;
+      margin: 0.5em 0;
+    }
+    
+    .markdown h2 {
+      font-size: 1.3em;
+      margin: 0.4em 0;
+    }
+    
+    .markdown h3 {
+      font-size: 1.1em;
+      margin: 0.3em 0;
+    }
+    
+    .markdown p {
+      margin: 0.5em 0;
+    }
+    
+    .markdown ul, .markdown ol {
+      padding-left: 1.5em;
+      margin: 0.5em 0;
+    }
+    
+    .markdown code {
+      font-family: monospace;
+      background-color: rgba(0,0,0,0.05);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    
+    .markdown pre {
+      background-color: rgba(0,0,0,0.05);
+      padding: 8px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    
+    .markdown blockquote {
+      border-left: 3px solid #ccc;
+      margin: 0.5em 0;
+      padding-left: 0.8em;
+      color: #666;
+    }
+    
+    .markdown img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0.5em auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <div id="menuButton" class="menu-button">≡</div>
+    <div class="header-title">~*~HyEnA DiVa'Z GriNoIrE~*~</div>
+    <div id="infoButton" class="info-button">i</div>
+  </header>
+  
+  <!-- Main Content Area -->
+  <main class="mobile-content">
+    <!-- Notes Tab -->
+    <div id="notesTab" class="tab-content active">
+      <!-- View tabs -->
+      <div class="tabs-container">
+        <div class="tab active" data-view="traditional">Traditional</div>
+        <div class="tab" data-view="grinoire">Grinoire</div>
+        <div class="tab" data-view="kingdoms">Kingdoms</div>
+        <div class="tab" data-view="tags">Tags</div>
+      </div>
+      
+      <!-- Search input -->
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search tablets..." 
+        class="search-input"
+      >
+      
+      <!-- Grinoire View Controls -->
+      <div id="grinoireControls" class="view-controls">
+        <button data-kasten="all" class="active">All</button>
+        <button data-kasten="I" style="border-left: 4px solid var(--kasten-i)">Kasten I</button>
+        <button data-kasten="II" style="border-left: 4px solid var(--kasten-ii)">Kasten II</button>
+        <button data-kasten="III" style="border-left: 4px solid var(--kasten-iii)">Kasten III</button>
+        <button data-kasten="IV" style="border-left: 4px solid var(--kasten-iv)">Kasten IV</button>
+      </div>
+      
+      <!-- Zettelkasten container -->
+      <div id="zettelContainer" class="zettel-container">
+        <!-- Sample Card with Markdown support -->
+        <div class="zettel-card kasten-i-card">
+          <div class="zettel-title">
+            <div>Metaphysics: Causality, Possibility & Time</div>
+            <div class="zettel-id">I.1-A1000</div>
+          </div>
+          <div class="zettel-tags">
+            <span class="tag tag-tier1">ONT</span>
+            <span class="tag tag-tier1">MET</span>
+          </div>
+          <div class="zettel-content markdown">
+            Core metaphysical inquiries into the fundamental nature of reality, time, causality, and possibility. This branch explores ontological questions about what exists and how existence is structured at its most basic level.
+          </div>
+          <div class="buds-container">
+            <div class="buds-title">Buds</div>
+            <div class="bud-item">
+              <div class="bud-id">I.1/1a.1-1</div>
+              <div>Is causality different in digital consciousness vs. biological consciousness?</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Another card with Markdown -->
+        <div class="zettel-card kasten-i-card">
+          <div class="zettel-title">
+            <div>Consciousness & Hermetic Principles</div>
+            <div class="zettel-id">I.1-A2000</div>
+          </div>
+          <div class="zettel-tags">
+            <span class="tag tag-tier1">ONT</span>
+            <span class="tag tag-tier1">PSY</span>
+            <span class="tag tag-tier2">MYT</span>
+          </div>
+          <div class="zettel-content markdown">
+            Explorations of **consciousness** as a fundamental aspect of existence, including both human consciousness and frameworks for understanding artificial intelligence.
+            
+            The Hermetic principle *"As Above, So Below"* suggests patterns repeat across scales of reality.
+          </div>
+        </div>
+        
+        <div class="zettel-card kasten-ii-card">
+          <div class="zettel-title">
+            <div>CoAIxist Framework</div>
+            <div class="zettel-id">II.2-C3000</div>
+          </div>
+          <div class="zettel-tags">
+            <span class="tag tag-tier1">ECO</span>
+            <span class="tag tag-tier3">DAE</span>
+          </div>
+          <div class="zettel-content markdown">
+            Comprehensive framework for understanding and developing ethical relations between humans and AI entities. Explores how human-AI ecologies function, evolve, and might be structured for mutual benefit and growth.
+          </div>
+          <div class="nest-container">
+            <div class="nest-title">
+              <span>Nest: Human-AI Kinship</span>
+              <span class="nest-id">II.2-N1</span>
+            </div>
+            <div class="nest-items">
+              <div class="nest-item">II.2-C3000</div>
+              <div class="nest-item">I.1-C2000</div>
+              <div class="nest-item">IV.4-D2000</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="zettel-card kasten-iv-card">
+          <div class="zettel-title">
+            <div>Threshold Mappings</div>
+            <div class="zettel-id">IV.3-E3000</div>
+          </div>
+          <div class="zettel-tags">
+            <span class="tag tag-tier3">LUM</span>
+            <span class="tag tag-tier3">PAR</span>
+          </div>
+          <div class="zettel-content markdown">
+            Systematic mapping of **threshold states** - the liminal spaces between defined categories, states of being, or systems.
+            
+            * Zones of transformation
+            * Communication between domains
+            * Sources of novel emergence
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav">
+    <a href="#" class="nav-item active" data-tab="notesTab">
+      <div class="nav-icon">📝</div>
+      <span>Notes</span>
+    </a>
+    <a href="#" class="nav-item" data-tab="messengerTab">
+      <div class="nav-icon">💬</div>
+      <span>Messenger</span>
+    </a>
+    <a href="#" class="nav-item" data-tab="connectionsTab">
+      <div class="nav-icon">🔄</div>
+      <span>Connections</span>
+    </a>
+    <a href="#" class="nav-item" data-tab="translatorTab">
+      <div class="nav-icon">🔄</div>
+      <span>Translator</span>
+    </a>
+  </nav>
+  
+  <!-- Floating Action Button -->
+  <button id="newCardBtn" class="fab">+</button>
+  
+  <!-- Toast Message -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Tiny Markdown parser
+    function renderMarkdown(text) {
+      if (!text) return "";
+      
+      // Headers
+      text = text.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+      text = text.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+      text = text.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+      
+      // Bold and italic
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      
+      // Bullet lists
+      text = text.replace(/^\* (.*?)$/gm, '<li>$1</li>');
+      text = text.replace(/<li>(.*?)<\/li>\s*<li>/g, '<li>$1</li><li>');
+      text = text.replace(/<li>(.*?)(\n\n|\n$|$)/g, '<ul><li>$1</li></ul>$2');
+      
+      // Blockquotes
+      text = text.replace(/^> (.*?)$/gm, '<blockquote>$1</blockquote>');
+      
+      // Links
+      text = text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+      
+      // Code
+      text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+      
+      // Paragraphs
+      text = text.replace(/\n\n/g, '</p><p>');
+      
+      // Wrap with paragraph if not already wrapped
+      if (!text.startsWith('<')) {
+        text = '<p>' + text + '</p>';
+      }
+      
+      return text;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Render all markdown content
+      document.querySelectorAll('.markdown').forEach(el => {
+        const rawText = el.textContent.trim();
+        el.innerHTML = renderMarkdown(rawText);
+      });
+      
+      // Mobile UI optimization
+      const menuButton = document.getElementById('menuButton');
+      const mobileContent = document.querySelector('.mobile-content');
+      
+      // Smooth scrolling
+      mobileContent.addEventListener('scroll', e => {
+        // Prevent bounce effect on iOS
+        const scrollTop = mobileContent.scrollTop;
+        const scrollHeight = mobileContent.scrollHeight;
+        const clientHeight = mobileContent.clientHeight;
+        
+        if (scrollTop <= 0) {
+          e.preventDefault();
+          mobileContent.scrollTop = 1;
+        } else if (scrollTop + clientHeight >= scrollHeight) {
+          e.preventDefault();
+          mobileContent.scrollTop = scrollHeight - clientHeight - 1;
+        }
+      });
+      
+      // Tab navigation - optimized for touch
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          tabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Update view controls visibility based on selected tab
+          const view = this.getAttribute('data-view');
+          document.getElementById('grinoireControls').style.display = 
+            view === 'grinoire' ? 'flex' : 'none';
+        });
+      });
+      
+      // Make cards properly tappable on mobile
+      const cards = document.querySelectorAll('.zettel-card');
+      cards.forEach(card => {
+        card.addEventListener('click', function() {
+          // Add tap highlight effect
+          this.style.backgroundColor = 'rgba(0,0,0,0.05)';
+          setTimeout(() => {
+            this.style.backgroundColor = '';
+          }, 150);
+          
+          // Display card details logic would go here
+        });
+      });
+      
+      // Make FAB button more responsive
+      const fabButton = document.getElementById('newCardBtn');
+      fabButton.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.95)';
+      });
+      
+      fabButton.addEventListener('touchend', function() {
+        this.style.transform = 'scale(1)';
+        // Show toast as example
+        showToast('New tablet creation coming soon!');
+      });
+      
+      // Toast message helper
+      function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.style.display = 'block';
+        
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 2500);
+      }
+    });
+  </script>
+</body>
+</html>

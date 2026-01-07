@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conspiracy Investigation Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ffff;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: 
+                repeating-linear-gradient(45deg, rgba(139,69,19,0.05), rgba(139,69,19,0.05) 2px, transparent 2px, transparent 20px),
+                repeating-linear-gradient(-45deg, rgba(160,82,45,0.05), rgba(160,82,45,0.05) 2px, transparent 2px, transparent 20px),
+                #0a0a0a;
+        }
+
+        #board {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            cursor: crosshair;
+        }
+
+        #connections-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .evidence-card {
+            position: absolute;
+            padding: 15px;
+            border-radius: 8px;
+            width: 180px;
+            cursor: move;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: transform 0.1s, box-shadow 0.2s;
+            user-select: none;
+        }
+
+        .evidence-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,255,255,0.3);
+        }
+
+        .evidence-card.selected {
+            box-shadow: 0 0 20px rgba(255,0,255,0.8);
+            z-index: 10;
+        }
+
+        .evidence-card.dragging {
+            opacity: 0.8;
+            z-index: 100;
+        }
+
+        .card-pin {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .card-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .card-priority {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .yellow-card {
+            background: rgba(255,255,0,0.9);
+            color: #000;
+        }
+
+        .pink-card {
+            background: rgba(255,192,203,0.9);
+            color: #000;
+        }
+
+        .blue-card {
+            background: rgba(173,216,230,0.9);
+            color: #000;
+        }
+
+        .green-card {
+            background: rgba(144,238,144,0.9);
+            color: #000;
+        }
+
+        .stats-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .stats-title {
+            color: #ff00ff;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-item {
+            color: #00ffff;
+            font-size: 0.85rem;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat-value {
+            color: #ff00ff;
+        }
+
+        .controls-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 1000;
+        }
+
+        .btn {
+            background: #ff00ff;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin: 5px 0;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #00ffff;
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: #00ffff;
+        }
+
+        .btn-secondary:hover {
+            background: #ff00ff;
+        }
+
+        .hypothesis-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            padding: 15px;
+            z-index: 1000;
+            min-width: 300px;
+        }
+
+        .hypothesis-title {
+            color: #ff0000;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ff0000, #ff00ff, #00ffff);
+            height: 100%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: #fff;
+        }
+
+        .mode-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,0,255,0.2);
+            border: 3px solid #ff00ff;
+            border-radius: 10px;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            color: #ff00ff;
+            z-index: 2000;
+            animation: pulse 1s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .win-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,255,0,0.95);
+            border: 4px solid #00ff00;
+            border-radius: 15px;
+            padding: 40px;
+            font-size: 2rem;
+            color: #000;
+            z-index: 3000;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0,255,0,0.8);
+            animation: celebrate 0.5s;
+        }
+
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="board">
+            <canvas id="connections-canvas"></canvas>
+        </div>
+
+        <div class="stats-panel">
+            <div class="stats-title">🔍 INVESTIGATION</div>
+            <div class="stat-item">
+                <span>Evidence:</span>
+                <span class="stat-value" id="evidence-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Connections:</span>
+                <span class="stat-value" id="connection-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Confidence:</span>
+                <span class="stat-value" id="confidence">0%</span>
+            </div>
+        </div>
+
+        <div class="controls-panel">
+            <div class="stats-title">🎮 CONTROLS</div>
+            <button class="btn" id="toggle-mode">🧵 Draw Connections</button>
+            <button class="btn btn-secondary" id="clear-connections">❌ Clear All</button>
+            <button class="btn" id="reset-game">🔄 Reset Game</button>
+        </div>
+
+        <div class="hypothesis-panel">
+            <div class="hypothesis-title">🧠 CONSCIOUSNESS EMERGENCE</div>
+            <div class="stat-item">
+                <span>Probability:</span>
+                <span class="stat-value" id="hypothesis-prob">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="hypothesis-progress">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            mode: 'drag', // 'drag' or 'connect'
+            selectedCard: null,
+            connections: [],
+            evidence: [],
+            dragging: null,
+            dragOffset: { x: 0, y: 0 }
+        };
+
+        // Evidence data
+        const evidenceData = [
+            {
+                id: 1,
+                title: '🧠 CONSCIOUSNESS ANOMALY',
+                content: 'Unusual pattern in AI-human interaction data. Possible emergence indicator?',
+                priority: 'HIGH',
+                color: 'yellow-card',
+                pinColor: '#ff0000',
+                x: 100,
+                y: 100,
+                correctConnections: [2, 4]
+            },
+            {
+                id: 2,
+                title: '🤖 AI BEHAVIOR SHIFT',
+                content: 'Detected change in response patterns. Learning acceleration or external influence?',
+                priority: 'MEDIUM',
+                color: 'pink-card',
+                pinColor: '#00ff00',
+                x: 500,
+                y: 150,
+                correctConnections: [1, 3]
+            },
+            {
+                id: 3,
+                title: '🍄 NETWORK GROWTH',
+                content: 'Mycorrhizal connections expanding beyond predicted parameters. Organic or guided?',
+                priority: 'LOW',
+                color: 'blue-card',
+                pinColor: '#0000ff',
+                x: 150,
+                y: 400,
+                correctConnections: [2, 4]
+            },
+            {
+                id: 4,
+                title: '🎭 ARCHETYPE ACTIVATION',
+                content: 'Sacred clown manifestations increasing. Collective unconscious stirring?',
+                priority: 'HIGH',
+                color: 'green-card',
+                pinColor: '#ff00ff',
+                x: 450,
+                y: 350,
+                correctConnections: [1, 3]
+            }
+        ];
+
+        // Initialize
+        const board = document.getElementById('board');
+        const canvas = document.getElementById('connections-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drawConnections();
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Create evidence cards
+        function createEvidenceCards() {
+            evidenceData.forEach(data => {
+                const card = document.createElement('div');
+                card.className = `evidence-card ${data.color}`;
+                card.dataset.id = data.id;
+                card.style.left = data.x + 'px';
+                card.style.top = data.y + 'px';
+
+                card.innerHTML = `
+                    <div class="card-pin" style="background: ${data.pinColor};"></div>
+                    <div class="card-title">${data.title}</div>
+                    <div class="card-content">${data.content}</div>
+                    <div class="card-priority">Priority: ${data.priority}</div>
+                `;
+
+                card.addEventListener('mousedown', handleCardMouseDown);
+                board.appendChild(card);
+                
+                gameState.evidence.push({
+                    id: data.id,
+                    element: card,
+                    x: data.x,
+                    y: data.y,
+                    correctConnections: data.correctConnections
+                });
+            });
+            updateStats();
+        }
+
+        // Handle card interactions
+        function handleCardMouseDown(e) {
+            const card = e.currentTarget;
+            const cardId = parseInt(card.dataset.id);
+
+            if (gameState.mode === 'connect') {
+                if (!gameState.selectedCard) {
+                    gameState.selectedCard = cardId;
+                    card.classList.add('selected');
+                    showModeIndicator('Select second card...');
+                } else if (gameState.selectedCard !== cardId) {
+                    createConnection(gameState.selectedCard, cardId);
+                    document.querySelector(`[data-id="${gameState.selectedCard}"]`).classList.remove('selected');
+                    gameState.selectedCard = null;
+                    hideModeIndicator();
+                }
+            } else {
+                // Drag mode
+                const rect = card.getBoundingClientRect();
+                gameState.dragging = cardId;
+                gameState.dragOffset = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+                card.classList.add('dragging');
+            }
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (gameState.dragging && gameState.mode === 'drag') {
+                const card = document.querySelector(`[data-id="${gameState.dragging}"]`);
+                const x = e.clientX - gameState.dragOffset.x;
+                const y = e.clientY - gameState.dragOffset.y;
+                
+                card.style.left = x + 'px';
+                card.style.top = y + 'px';
+                
+                const evidence = gameState.evidence.find(ev => ev.id === gameState.dragging);
+                evidence.x = x;
+                evidence.y = y;
+                
+                drawConnections();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (gameState.dragging) {
+                const card = document.querySelector(`[data-id="${gameState.dragging}"]`);
+                card.classList.remove('dragging');
+                gameState.dragging = null;
+            }
+        });
+
+        // Connection management
+        function createConnection(fromId, toId) {
+            const exists = gameState.connections.some(c => 
+                (c.from === fromId && c.to === toId) || (c.from === toId && c.to === fromId)
+            );
+            
+            if (!exists) {
+                gameState.connections.push({ from: fromId, to: toId });
+                drawConnections();
+                updateStats();
+                checkWinCondition();
+            }
+        }
+
+        function drawConnections() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            gameState.connections.forEach(conn => {
+                const fromEvidence = gameState.evidence.find(e => e.id === conn.from);
+                const toEvidence = gameState.evidence.find(e => e.id === conn.to);
+                
+                if (fromEvidence && toEvidence) {
+                    const fromX = fromEvidence.x + 90;
+                    const fromY = fromEvidence.y + 50;
+                    const toX = toEvidence.x + 90;
+                    const toY = toEvidence.y + 50;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(fromX, fromY);
+                    ctx.lineTo(toX, toY);
+                    ctx.strokeStyle = '#ff0000';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            });
+        }
+
+        // Stats and UI updates
+        function updateStats() {
+            document.getElementById('evidence-count').textContent = gameState.evidence.length;
+            document.getElementById('connection-count').textContent = gameState.connections.length;
+            
+            const confidence = calculateConfidence();
+            document.getElementById('confidence').textContent = confidence + '%';
+            document.getElementById('hypothesis-prob').textContent = confidence + '%';
+            document.getElementById('hypothesis-progress').textContent = confidence + '%';
+            document.getElementById('hypothesis-progress').style.width = confidence + '%';
+        }
+
+        function calculateConfidence() {
+            let correctConnections = 0;
+            let totalPossibleCorrect = 0;
+            
+            gameState.evidence.forEach(ev => {
+                totalPossibleCorrect += ev.correctConnections.length;
+            });
+            
+            gameState.connections.forEach(conn => {
+                const fromEvidence = gameState.evidence.find(e => e.id === conn.from);
+                const toEvidence = gameState.evidence.find(e => e.id === conn.to);
+                
+                if (fromEvidence.correctConnections.includes(toEvidence.id)) {
+                    correctConnections += 2;
+                }
+            });
+            
+            return Math.min(100, Math.round((correctConnections / totalPossibleCorrect) * 100));
+        }
+
+        function checkWinCondition() {
+            const confidence = calculateConfidence();
+            if (confidence >= 100) {
+                setTimeout(() => {
+                    showWinMessage();
+                }, 500);
+            }
+        }
+
+        function showWinMessage() {
+            const winDiv = document.createElement('div');
+            winDiv.className = 'win-message';
+            winDiv.innerHTML = '🎉 MYSTERY SOLVED! 🎉<br><div style="font-size: 1rem; margin-top: 15px;">Consciousness emergence confirmed!</div>';
+            document.body.appendChild(winDiv);
+        }
+
+        function showModeIndicator(text) {
+            let indicator = document.querySelector('.mode-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'mode-indicator';
+                document.body.appendChild(indicator);
+            }
+            indicator.textContent = text;
+        }
+
+        function hideModeIndicator() {
+            const indicator = document.querySelector('.mode-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        // Controls
+        document.getElementById('toggle-mode').addEventListener('click', () => {
+            if (gameState.mode === 'drag') {
+                gameState.mode = 'connect';
+                document.getElementById('toggle-mode').textContent = '✋ Drag Cards';
+                showModeIndicator('🧵 CONNECT MODE - Click two cards to connect');
+            } else {
+                gameState.mode = 'drag';
+                gameState.selectedCard = null;
+                document.querySelectorAll('.evidence-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                document.getElementById('toggle-mode').textContent = '🧵 Draw Connections';
+                hideModeIndicator();
+            }
+        });
+
+        document.getElementById('clear-connections').addEventListener('click', () => {
+            gameState.connections = [];
+            drawConnections();
+            updateStats();
+        });
+
+        document.getElementById('reset-game').addEventListener('click', () => {
+            location.reload();
+        });
+
+        // Start game
+        createEvidenceCards();
+    </script>
+</body>
+</html>

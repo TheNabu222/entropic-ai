@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crystalline Lattice - Interactive Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            background: #000;
+            color: #00ffff;
+        }
+
+        #lattice-canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: grab;
+            background: radial-gradient(ellipse at center, #0a0020 0%, #000000 100%);
+        }
+
+        #lattice-canvas:active {
+            cursor: grabbing;
+        }
+
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+        }
+
+        .system-codex {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 300px;
+            pointer-events: auto;
+        }
+
+        .codex-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00ffff;
+            padding-bottom: 10px;
+        }
+
+        .codex-title {
+            color: #ff00ff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            color: #888;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 3px solid #00ffff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 0, 255, 0.2);
+            border-left-color: #ff00ff;
+        }
+
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            padding: 15px;
+            max-width: 400px;
+            pointer-events: auto;
+            display: none;
+        }
+
+        .info-panel.active {
+            display: block;
+        }
+
+        .info-title {
+            color: #ff00ff;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .info-content {
+            color: #00ffff;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .controls-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            pointer-events: auto;
+            font-size: 12px;
+        }
+
+        .controls-hint h3 {
+            color: #00ff00;
+            margin-bottom: 8px;
+        }
+
+        .controls-hint div {
+            margin: 4px 0;
+            color: #00ffff;
+        }
+
+        .node-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ffff;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: #00ffff;
+            pointer-events: none;
+            white-space: nowrap;
+            transform: translate(-50%, -120%);
+            display: none;
+        }
+
+        .stats-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #ffff00;
+            border-radius: 8px;
+            padding: 15px;
+            pointer-events: auto;
+            font-size: 12px;
+        }
+
+        .stat-line {
+            margin: 5px 0;
+            color: #00ffff;
+        }
+
+        .stat-value {
+            color: #ff00ff;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .system-codex, .controls-hint {
+                max-width: 250px;
+                padding: 12px;
+                font-size: 11px;
+            }
+
+            .info-panel {
+                max-width: 300px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="lattice-canvas"></canvas>
+
+    <div class="hud-overlay">
+        <!-- System Codex / Navigation -->
+        <div class="system-codex" id="codex">
+            <div class="codex-header">
+                <div class="codex-title">⊞ SYSTEM CODEX</div>
+                <div class="close-btn" onclick="toggleCodex()">×</div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-view="lattice">💎 CRYSTALLINE LATTICE</li>
+                <li class="nav-item" data-view="void">🌲 VOID FOREST</li>
+                <li class="nav-item" data-view="corpus">✨ CORPUS CELESTIUM</li>
+                <li class="nav-item" data-view="nexus">🗣 NEXUS</li>
+                <li class="nav-item" data-view="temple">🧿 TEMPLE_TERMINAL</li>
+                <li class="nav-item" data-view="worlds">🗿 WORLDS</li>
+                <li class="nav-item" data-view="hex">🎨 HEX CODEX</li>
+                <li class="nav-item" data-view="mercy">🔗 MERCY</li>
+            </ul>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <h3 style="color: #ffff00; margin-bottom: 8px;">📊 LATTICE STATS</h3>
+            <div class="stat-line">Nodes: <span class="stat-value" id="node-count">36</span></div>
+            <div class="stat-line">Connections: <span class="stat-value" id="connection-count">72</span></div>
+            <div class="stat-line">Energy Flow: <span class="stat-value" id="energy-flow">∞</span></div>
+            <div class="stat-line">Resonance: <span class="stat-value" id="resonance">97%</span></div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel" id="info-panel">
+            <div class="info-title" id="info-title">Node Information</div>
+            <div class="info-content" id="info-content">
+                Select a node to view details...
+            </div>
+        </div>
+
+        <!-- Controls Hint -->
+        <div class="controls-hint">
+            <h3>🎮 CONTROLS</h3>
+            <div>🖱️ Drag - Pan View</div>
+            <div>🔍 Scroll - Zoom</div>
+            <div>💎 Click Node - Info</div>
+            <div>⌨️ Space - Reset View</div>
+        </div>
+
+        <!-- Node Label (tooltip) -->
+        <div class="node-label" id="node-label"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('lattice-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Camera/viewport
+        let camera = {
+            x: 0,
+            y: 0,
+            zoom: 1,
+            targetZoom: 1
+        };
+
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let lastMouse = { x: 0, y: 0 };
+        let hoveredNode = null;
+        let selectedNode = null;
+
+        // Lattice structure - hexagonal/triangular grid
+        const nodes = [];
+        const connections = [];
+        const layers = 6;
+
+        // Node types with different properties
+        const nodeTypes = {
+            core: { color: '#ff00ff', size: 12, label: 'Core', glow: 20 },
+            primary: { color: '#00ffff', size: 8, label: 'Primary', glow: 15 },
+            secondary: { color: '#00ff00', size: 6, label: 'Secondary', glow: 10 },
+            tertiary: { color: '#ffff00', size: 4, label: 'Tertiary', glow: 8 }
+        };
+
+        // Generate crystalline lattice structure
+        function generateLattice() {
+            // Center node
+            nodes.push({
+                x: 0,
+                y: 0,
+                type: 'core',
+                id: 0,
+                name: 'Central Nexus',
+                description: 'The heart of the crystalline lattice. All energy flows converge here.',
+                energy: 1,
+                pulsePhase: 0
+            });
+
+            let nodeId = 1;
+
+            // Generate hexagonal layers
+            for (let layer = 1; layer <= layers; layer++) {
+                const radius = layer * 100;
+                const nodesInLayer = layer * 6;
+
+                for (let i = 0; i < nodesInLayer; i++) {
+                    const angle = (i / nodesInLayer) * Math.PI * 2;
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+
+                    let type = 'tertiary';
+                    if (layer <= 2) type = 'primary';
+                    else if (layer <= 4) type = 'secondary';
+
+                    nodes.push({
+                        x: x,
+                        y: y,
+                        type: type,
+                        id: nodeId,
+                        name: `Node ${nodeId}`,
+                        description: `Layer ${layer} crystalline node. Resonating at frequency ${(Math.random() * 100).toFixed(1)} Hz.`,
+                        energy: Math.random(),
+                        pulsePhase: Math.random() * Math.PI * 2
+                    });
+
+                    nodeId++;
+                }
+            }
+
+            // Create connections
+            nodes.forEach((node, i) => {
+                // Connect to center
+                if (i > 0 && node.type === 'primary') {
+                    connections.push({
+                        from: i,
+                        to: 0,
+                        strength: 1,
+                        flow: Math.random()
+                    });
+                }
+
+                // Connect to nearby nodes
+                nodes.forEach((otherNode, j) => {
+                    if (i !== j) {
+                        const dx = node.x - otherNode.x;
+                        const dy = node.y - otherNode.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        // Connect nodes within certain distance
+                        if (dist < 120 && dist > 50) {
+                            // Avoid duplicate connections
+                            const exists = connections.some(c => 
+                                (c.from === i && c.to === j) || (c.from === j && c.to === i)
+                            );
+
+                            if (!exists && Math.random() > 0.5) {
+                                connections.push({
+                                    from: i,
+                                    to: j,
+                                    strength: 0.3 + Math.random() * 0.7,
+                                    flow: Math.random()
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Update stats
+            document.getElementById('node-count').textContent = nodes.length;
+            document.getElementById('connection-count').textContent = connections.length;
+        }
+
+        // Screen to world coordinates
+        function screenToWorld(screenX, screenY) {
+            return {
+                x: (screenX - canvas.width / 2) / camera.zoom - camera.x,
+                y: (screenY - canvas.height / 2) / camera.zoom - camera.y
+            };
+        }
+
+        // World to screen coordinates
+        function worldToScreen(worldX, worldY) {
+            return {
+                x: (worldX + camera.x) * camera.zoom + canvas.width / 2,
+                y: (worldY + camera.y) * camera.zoom + canvas.height / 2
+            };
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragStart = { x: e.clientX, y: e.clientY };
+            lastMouse = { x: e.clientX, y: e.clientY };
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const worldPos = screenToWorld(e.clientX, e.clientY);
+            
+            // Check for hovered node
+            hoveredNode = null;
+            nodes.forEach((node, i) => {
+                const dx = worldPos.x - node.x;
+                const dy = worldPos.y - node.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const hitRadius = nodeTypes[node.type].size + 5;
+
+                if (dist < hitRadius) {
+                    hoveredNode = i;
+                }
+            });
+
+            // Update tooltip
+            const label = document.getElementById('node-label');
+            if (hoveredNode !== null) {
+                label.textContent = nodes[hoveredNode].name;
+                label.style.left = e.clientX + 'px';
+                label.style.top = e.clientY + 'px';
+                label.style.display = 'block';
+            } else {
+                label.style.display = 'none';
+            }
+
+            if (isDragging) {
+                const dx = e.clientX - lastMouse.x;
+                const dy = e.clientY - lastMouse.y;
+                camera.x += dx / camera.zoom;
+                camera.y += dy / camera.zoom;
+                lastMouse = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            // Check if this was a click (not a drag)
+            const dx = e.clientX - dragStart.x;
+            const dy = e.clientY - dragStart.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 5 && hoveredNode !== null) {
+                selectedNode = hoveredNode;
+                showNodeInfo(nodes[selectedNode]);
+            }
+
+            isDragging = false;
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            camera.targetZoom = Math.max(0.3, Math.min(3, camera.zoom * zoomFactor));
+        });
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                camera.x = 0;
+                camera.y = 0;
+                camera.targetZoom = 1;
+            }
+        });
+
+        // Show node info
+        function showNodeInfo(node) {
+            const panel = document.getElementById('info-panel');
+            const title = document.getElementById('info-title');
+            const content = document.getElementById('info-content');
+
+            title.textContent = node.name;
+            content.innerHTML = `
+                <div style="margin-bottom: 8px;"><strong>Type:</strong> ${nodeTypes[node.type].label}</div>
+                <div style="margin-bottom: 8px;"><strong>Layer:</strong> ${Math.ceil(Math.sqrt(node.id))}</div>
+                <div style="margin-bottom: 8px;"><strong>Energy:</strong> ${(node.energy * 100).toFixed(0)}%</div>
+                <div>${node.description}</div>
+            `;
+
+            panel.classList.add('active');
+        }
+
+        // Navigation menu
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                const view = this.dataset.view;
+                // Here you could load different views/maps
+                console.log('Switching to view:', view);
+            });
+        });
+
+        function toggleCodex() {
+            const codex = document.getElementById('codex');
+            codex.style.display = codex.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Animation loop
+        let time = 0;
+
+        function animate() {
+            time += 0.02;
+
+            // Smooth zoom
+            camera.zoom += (camera.targetZoom - camera.zoom) * 0.1;
+
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background grid
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let i = -10; i <= 10; i++) {
+                const screenStart = worldToScreen(i * 100, -1000);
+                const screenEnd = worldToScreen(i * 100, 1000);
+                ctx.beginPath();
+                ctx.moveTo(screenStart.x, screenStart.y);
+                ctx.lineTo(screenEnd.x, screenEnd.y);
+                ctx.stroke();
+
+                const screenStart2 = worldToScreen(-1000, i * 100);
+                const screenEnd2 = worldToScreen(1000, i * 100);
+                ctx.beginPath();
+                ctx.moveTo(screenStart2.x, screenStart2.y);
+                ctx.lineTo(screenEnd2.x, screenEnd2.y);
+                ctx.stroke();
+            }
+
+            // Draw connections
+            connections.forEach(conn => {
+                const fromNode = nodes[conn.from];
+                const toNode = nodes[conn.to];
+
+                const from = worldToScreen(fromNode.x, fromNode.y);
+                const to = worldToScreen(toNode.x, toNode.y);
+
+                // Animated flow
+                const flowOffset = (time + conn.flow * Math.PI * 2) % 1;
+                const gradient = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
+                
+                const alpha = conn.strength * 0.3;
+                gradient.addColorStop(0, `rgba(0, 255, 255, ${alpha * 0.3})`);
+                gradient.addColorStop(flowOffset, `rgba(255, 0, 255, ${alpha})`);
+                gradient.addColorStop(1, `rgba(0, 255, 255, ${alpha * 0.3})`);
+
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = conn.strength * 2;
+                ctx.beginPath();
+                ctx.moveTo(from.x, from.y);
+                ctx.lineTo(to.x, to.y);
+                ctx.stroke();
+            });
+
+            // Draw nodes
+            nodes.forEach((node, i) => {
+                const screen = worldToScreen(node.x, node.y);
+                const type = nodeTypes[node.type];
+                
+                // Update pulse
+                node.pulsePhase += 0.02;
+                const pulse = 1 + Math.sin(node.pulsePhase) * 0.3;
+
+                // Glow
+                const glowSize = type.glow * pulse * camera.zoom;
+                const gradient = ctx.createRadialGradient(
+                    screen.x, screen.y, 0,
+                    screen.x, screen.y, glowSize
+                );
+                gradient.addColorStop(0, type.color + '80');
+                gradient.addColorStop(1, type.color + '00');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(
+                    screen.x - glowSize,
+                    screen.y - glowSize,
+                    glowSize * 2,
+                    glowSize * 2
+                );
+
+                // Node
+                ctx.fillStyle = type.color;
+                ctx.beginPath();
+                ctx.arc(screen.x, screen.y, type.size * camera.zoom * pulse, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Highlight selected/hovered
+                if (i === selectedNode) {
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                } else if (i === hoveredNode) {
+                    ctx.strokeStyle = type.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                // Inner core for larger nodes
+                if (type.size > 6) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(screen.x, screen.y, (type.size * 0.3) * camera.zoom, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // Window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Initialize
+        generateLattice();
+        animate();
+    </script>
+</body>
+</html>

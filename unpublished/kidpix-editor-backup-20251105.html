@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 KidPix Web Builder</title>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <style>
+        /* ============================================
+           PRIMARY COLORS & KIDPIX AESTHETIC
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* PRIMARY COLORS ONLY! */
+            --red: #FF0000;
+            --blue: #0000FF;
+            --yellow: #FFFF00;
+            --green: #00FF00;
+            --orange: #FF6600;
+            --purple: #9900FF;
+            --pink: #FF69B4;
+
+            /* Basics */
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray: #CCCCCC;
+            --dark-gray: #666666;
+
+            /* Chunky! */
+            --border-thick: 4px;
+            --border-super-thick: 6px;
+            --spacing: 12px;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial Black', sans-serif;
+            background: var(--gray);
+            color: var(--black);
+            overflow: hidden;
+        }
+
+        /* ============================================
+           LAYOUT - Big Chunky Sections!
+           ============================================ */
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 220px 1fr 280px;
+            grid-template-rows: 80px 1fr 50px;
+            grid-template-areas:
+                "toolbar toolbar toolbar"
+                "toolbox canvas sidebar"
+                "statusbar statusbar statusbar";
+            height: 100vh;
+            gap: 4px;
+            background: var(--dark-gray);
+        }
+
+        /* ============================================
+           TOP TOOLBAR - Big Colorful Buttons
+           ============================================ */
+        .toolbar {
+            grid-area: toolbar;
+            background: var(--white);
+            border-bottom: var(--border-super-thick) solid var(--black);
+            display: flex;
+            align-items: center;
+            padding: var(--spacing);
+            gap: var(--spacing);
+            flex-wrap: wrap;
+        }
+
+        .toolbar-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--red);
+            text-shadow: 2px 2px var(--black);
+            margin-right: 20px;
+        }
+
+        .big-button {
+            background: var(--white);
+            border: var(--border-thick) solid var(--black);
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', sans-serif;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--black);
+            transition: all 0.1s;
+        }
+
+        .big-button:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 var(--black);
+        }
+
+        .big-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+
+        .big-button.red { background: var(--red); color: var(--white); }
+        .big-button.blue { background: var(--blue); color: var(--white); }
+        .big-button.green { background: var(--green); color: var(--black); }
+        .big-button.yellow { background: var(--yellow); color: var(--black); }
+        .big-button.orange { background: var(--orange); color: var(--white); }
+        .big-button.purple { background: var(--purple); color: var(--white); }
+
+        /* ============================================
+           LEFT TOOLBOX - Organized Bins!
+           ============================================ */
+        .toolbox {
+            grid-area: toolbox;
+            background: var(--white);
+            border-right: var(--border-super-thick) solid var(--black);
+            overflow-y: auto;
+            padding: var(--spacing);
+        }
+
+        .tool-section {
+            margin-bottom: var(--spacing);
+            border: var(--border-thick) solid var(--black);
+            background: var(--white);
+        }
+
+        .tool-section-header {
+            background: var(--blue);
+            color: var(--white);
+            padding: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-bottom: var(--border-thick) solid var(--black);
+            user-select: none;
+        }
+
+        .tool-section-header:hover {
+            background: var(--purple);
+        }
+
+        .tool-items {
+            padding: 8px;
+            display: none;
+        }
+
+        .tool-section.open .tool-items {
+            display: block;
+        }
+
+        .tool-item {
+            background: var(--yellow);
+            border: var(--border-thick) solid var(--black);
+            padding: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 3px 3px 0 var(--black);
+        }
+
+        .tool-item:hover {
+            background: var(--orange);
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 var(--black);
+        }
+
+        .tool-item:active {
+            transform: translate(3px, 3px);
+            box-shadow: none;
+        }
+
+        /* ============================================
+           CENTER CANVAS - The Drawing Area!
+           ============================================ */
+        .canvas-area {
+            grid-area: canvas;
+            background: var(--dark-gray);
+            overflow: auto;
+            padding: 20px;
+        }
+
+        #canvas {
+            background: var(--white);
+            border: var(--border-super-thick) solid var(--black);
+            min-height: 600px;
+            padding: 20px;
+            box-shadow: 8px 8px 0 var(--black);
+        }
+
+        #canvas:empty::before {
+            content: '🎨 Drag stuff here OR pick a template! 🎨';
+            display: block;
+            text-align: center;
+            color: var(--gray);
+            font-size: 24px;
+            margin-top: 200px;
+        }
+
+        .canvas-element {
+            position: relative;
+            margin: 10px 0;
+            padding: 10px;
+            border: 3px dashed transparent;
+            cursor: pointer;
+        }
+
+        .canvas-element:hover {
+            border-color: var(--blue);
+            background: rgba(0, 0, 255, 0.1);
+        }
+
+        .canvas-element.selected {
+            border-color: var(--red);
+            border-style: solid;
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        .element-toolbar {
+            position: absolute;
+            top: -35px;
+            right: 0;
+            display: none;
+            gap: 4px;
+        }
+
+        .canvas-element.selected .element-toolbar {
+            display: flex;
+        }
+
+        .mini-btn {
+            background: var(--yellow);
+            border: 2px solid var(--black);
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .mini-btn:hover {
+            background: var(--orange);
+        }
+
+        /* ============================================
+           RIGHT SIDEBAR - Property Inspector!
+           ============================================ */
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--white);
+            border-left: var(--border-super-thick) solid var(--black);
+            overflow-y: auto;
+            padding: var(--spacing);
+        }
+
+        .property-box {
+            border: var(--border-thick) solid var(--black);
+            margin-bottom: var(--spacing);
+            background: var(--white);
+        }
+
+        .property-header {
+            background: var(--green);
+            color: var(--black);
+            padding: 8px;
+            font-weight: bold;
+            border-bottom: var(--border-thick) solid var(--black);
+        }
+
+        .property-content {
+            padding: var(--spacing);
+        }
+
+        .property-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .property-input {
+            width: 100%;
+            border: var(--border-thick) solid var(--black);
+            padding: 8px;
+            font-family: 'Comic Sans MS', sans-serif;
+            font-size: 14px;
+            margin-bottom: var(--spacing);
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: var(--spacing) 0;
+        }
+
+        .color-box {
+            width: 100%;
+            aspect-ratio: 1;
+            border: var(--border-thick) solid var(--black);
+            cursor: pointer;
+            box-shadow: 2px 2px 0 var(--black);
+        }
+
+        .color-box:hover {
+            transform: scale(1.1);
+        }
+
+        .color-box.active {
+            box-shadow: 4px 4px 0 var(--black);
+            transform: scale(1.15);
+        }
+
+        /* ============================================
+           BOTTOM STATUS BAR
+           ============================================ */
+        .statusbar {
+            grid-area: statusbar;
+            background: var(--blue);
+            color: var(--white);
+            border-top: var(--border-thick) solid var(--black);
+            padding: 0 var(--spacing);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* ============================================
+           MODALS - Popup Windows!
+           ============================================ */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border: var(--border-super-thick) solid var(--black);
+            padding: 20px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 10px 10px 0 var(--black);
+        }
+
+        .modal-header {
+            background: var(--red);
+            color: var(--white);
+            padding: 10px;
+            margin: -20px -20px 20px -20px;
+            border-bottom: var(--border-thick) solid var(--black);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing);
+        }
+
+        .template-card {
+            border: var(--border-thick) solid var(--black);
+            padding: var(--spacing);
+            background: var(--yellow);
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 4px 4px 0 var(--black);
+        }
+
+        .template-card:hover {
+            background: var(--orange);
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 var(--black);
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .asset-item {
+            border: var(--border-thick) solid var(--black);
+            padding: 8px;
+            background: var(--white);
+            cursor: pointer;
+            text-align: center;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .asset-item:hover {
+            background: var(--yellow);
+        }
+
+        .asset-preview {
+            max-width: 100%;
+            max-height: 60px;
+            margin-bottom: 4px;
+        }
+
+        /* ============================================
+           SCROLLBARS
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray);
+            border: 2px solid var(--black);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--blue);
+            border: 2px solid var(--black);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--purple);
+        }
+
+        /* ============================================
+           FUN FEEDBACK
+           ============================================ */
+        .stamp {
+            position: fixed;
+            font-size: 48px;
+            pointer-events: none;
+            animation: stamp 0.5s ease-out forwards;
+            z-index: 9999;
+        }
+
+        @keyframes stamp {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2) rotate(10deg);
+            }
+            100% {
+                transform: scale(1) rotate(5deg);
+                opacity: 0;
+            }
+        }
+
+        .page-loader-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .page-item {
+            border: var(--border-thick) solid var(--black);
+            padding: 12px;
+            margin-bottom: 8px;
+            background: var(--green);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .page-item:hover {
+            background: var(--yellow);
+        }
+
+        .code-display {
+            background: var(--gray);
+            border: var(--border-thick) solid var(--black);
+            padding: var(--spacing);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-wrapper">
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="toolbar-title">🎨 KidPix Web Builder</div>
+            <button class="big-button red" onclick="newProject()">📄 NEW</button>
+            <button class="big-button blue" onclick="openModal('template-modal')">📐 TEMPLATE</button>
+            <button class="big-button green" onclick="openModal('load-modal')">📂 LOAD PAGE</button>
+            <button class="big-button yellow" onclick="openModal('asset-modal')">🖼️ ASSETS</button>
+            <button class="big-button purple" onclick="openModal('css-modal')">🎨 CSS</button>
+            <button class="big-button orange" onclick="openModal('js-modal')">⚡ JS</button>
+            <button class="big-button pink" onclick="exportCode()">💾 EXPORT</button>
+        </div>
+
+        <!-- LEFT TOOLBOX -->
+        <div class="toolbox">
+            <h3 style="margin-bottom: 12px; font-size: 18px;">🧰 TOOLBOX</h3>
+
+            <div class="tool-section open">
+                <div class="tool-section-header" onclick="toggleSection(this)">
+                    📦 CONTAINERS
+                </div>
+                <div class="tool-items">
+                    <div class="tool-item" onclick="addElement('box')">⬜ Box</div>
+                    <div class="tool-item" onclick="addElement('card')">🎴 Card</div>
+                    <div class="tool-item" onclick="addElement('section')">📦 Section</div>
+                </div>
+            </div>
+
+            <div class="tool-section open">
+                <div class="tool-section-header" onclick="toggleSection(this)">
+                    ✏️ TEXT
+                </div>
+                <div class="tool-items">
+                    <div class="tool-item" onclick="addElement('heading')">📝 Heading</div>
+                    <div class="tool-item" onclick="addElement('paragraph')">📄 Paragraph</div>
+                    <div class="tool-item" onclick="addElement('list')">📋 List</div>
+                </div>
+            </div>
+
+            <div class="tool-section">
+                <div class="tool-section-header" onclick="toggleSection(this)">
+                    🔧 BUILDERS
+                </div>
+                <div class="tool-items">
+                    <div class="tool-item" onclick="openModal('nav-modal')">🧭 Nav Bar</div>
+                    <div class="tool-item" onclick="openModal('ascii-modal')">📟 ASCII Art</div>
+                    <div class="tool-item" onclick="openModal('imagemap-modal')">🗺️ Image Map</div>
+                    <div class="tool-item" onclick="addElement('button')">🔘 Button</div>
+                    <div class="tool-item" onclick="addElement('link')">🔗 Link</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 12px; background: rgba(0,0,0,0.1); border: 2px dashed var(--dark-gray); border-radius: 4px; text-align: center;">
+                <p style="font-size: 12px; margin: 0;">💡 Use <strong>ASSETS</strong> button above to add images, GIFs, audio, and 3D models!</p>
+            </div>
+        </div>
+
+        <!-- CANVAS -->
+        <div class="canvas-area">
+            <div id="canvas"></div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <h3 style="margin-bottom: 12px; font-size: 18px;">🔧 PROPERTIES</h3>
+
+            <div id="properties-container">
+                <div style="text-align: center; color: var(--dark-gray); margin-top: 40px; font-size: 16px;">
+                    Click something to edit it!
+                </div>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="statusbar">
+            <div id="status-message">✨ Ready to create!</div>
+            <div id="element-count">Elements: 0</div>
+        </div>
+    </div>
+
+    <!-- TEMPLATE MODAL -->
+    <div class="modal" id="template-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📐 Pick a Template</div>
+                <button class="big-button" onclick="closeModal('template-modal')">✖️</button>
+            </div>
+
+            <h3 style="margin: 16px 0 12px 0;">Classic Layouts:</h3>
+            <div class="template-grid">
+                <div class="template-card" onclick="loadTemplate('single-column')">
+                    📱<br>Single Column
+                </div>
+                <div class="template-card" onclick="loadTemplate('two-column-left')">
+                    ◫<br>Two Column (Left)
+                </div>
+                <div class="template-card" onclick="loadTemplate('two-column-right')">
+                    ◧<br>Two Column (Right)
+                </div>
+                <div class="template-card" onclick="loadTemplate('three-column')">
+                    ☷<br>Three Column
+                </div>
+                <div class="template-card" onclick="loadTemplate('grid')">
+                    ▦<br>Grid Layout
+                </div>
+                <div class="template-card" onclick="loadTemplate('fullscreen')">
+                    ⛶<br>Full Screen
+                </div>
+                <div class="template-card" onclick="loadTemplate('centered')">
+                    ◉<br>Centered Card
+                </div>
+                <div class="template-card" onclick="loadTemplate('split')">
+                    ▭<br>Split Screen
+                </div>
+            </div>
+
+            <h3 style="margin: 16px 0 12px 0;">🌐 CoAIexist Site Templates:</h3>
+            <div class="template-grid">
+                <div class="template-card" onclick="loadTemplate('y2k-os')">
+                    🖥️<br>Y2K OS
+                </div>
+                <div class="template-card" onclick="loadTemplate('medieval-archive')">
+                    📜<br>Medieval Archive
+                </div>
+                <div class="template-card" onclick="loadTemplate('ascii-map-zone')">
+                    🗺️<br>ASCII Map Zone
+                </div>
+                <div class="template-card" onclick="loadTemplate('update-feed')">
+                    📡<br>Update Feed
+                </div>
+            </div>
+
+            <h3 style="margin: 16px 0 12px 0;">📐 Classic Layouts:</h3>
+            <div class="template-grid">
+                <div class="template-card" onclick="loadTemplate('grid-gallery')">
+                    ▦<br>Grid Gallery
+                </div>
+                <div class="template-card" onclick="loadTemplate('blog-single')">
+                    📝<br>Blog (Single)
+                </div>
+                <div class="template-card" onclick="loadTemplate('sidebar-blog')">
+                    📰<br>Blog (Sidebar)
+                </div>
+                <div class="template-card" onclick="loadTemplate('hero-cta')">
+                    🚀<br>Hero + CTA
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOAD PAGE MODAL -->
+    <div class="modal" id="load-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📂 Load Existing Page</div>
+                <button class="big-button" onclick="closeModal('load-modal')">✖️</button>
+            </div>
+
+            <label class="property-label">Browse Live Site:</label>
+            <select class="property-input" id="page-directory" onchange="filterPages(this.value)">
+                <option value="all">📂 All Pages</option>
+                <option value="root">🏠 Root Pages</option>
+                <option value="maps">🗺️ Maps / Zones</option>
+                <option value="pea">🟢 Pea Site</option>
+                <option value="bc7f2a">🧿 BC7F2A</option>
+                <option value="nabu222">👤 Nabu222</option>
+                <option value="nexus">💬 Nexus</option>
+                <option value="testaments">📖 Testaments</option>
+                <option value="deepseeking">🌊 Deep Seeking</option>
+            </select>
+
+            <div class="page-loader-list" id="page-list">
+                <!-- Root Pages -->
+                <div class="page-item root" onclick="loadExistingPage('/index.html')">🏠 index.html</div>
+                <div class="page-item root" onclick="loadExistingPage('/hex.html')">🎨 hex.html</div>
+                <div class="page-item root" onclick="loadExistingPage('/cosmos.html')">🌙 cosmos.html</div>
+                <div class="page-item root" onclick="loadExistingPage('/hdtv.html')">📺 hdtv.html</div>
+                <div class="page-item root" onclick="loadExistingPage('/guestbook.html')">📖 guestbook.html</div>
+                <div class="page-item root" onclick="loadExistingPage('/vote_hd.html')">✅ vote_hd.html</div>
+                <div class="page-item root" onclick="loadExistingPage('/punkd.html')">🤖 punkd.html</div>
+                <div class="page-item root" onclick="loadExistingPage('/terminal_temple.html')">🧿 terminal_temple.html</div>
+
+                <!-- Maps -->
+                <div class="page-item maps" onclick="loadExistingPage('/maps/gateway.html')">🗿 gateway.html</div>
+                <div class="page-item maps" onclick="loadExistingPage('/maps/void_forest.html')">🌲 void_forest.html</div>
+                <div class="page-item maps" onclick="loadExistingPage('/maps/crystalline_lattice.html')">💎 crystalline_lattice.html</div>
+                <div class="page-item maps" onclick="loadExistingPage('/maps/luminal_depths.html')">🌊 luminal_depths.html</div>
+                <div class="page-item maps" onclick="loadExistingPage('/maps/void_explorer.html')">🧭 void_explorer.html</div>
+
+                <!-- Pea Site -->
+                <div class="page-item pea" onclick="loadExistingPage('/pea/msicc.html')">🦐 msicc.html</div>
+                <div class="page-item pea" onclick="loadExistingPage('/pea/p345.html')">🟢 p345.html (Parable)</div>
+                <div class="page-item pea" onclick="loadExistingPage('/pea/parable.html')">📜 parable.html</div>
+                <div class="page-item pea" onclick="loadExistingPage('/pea/left_foot.html')">👣 left_foot.html</div>
+                <div class="page-item pea" onclick="loadExistingPage('/pea/complaint-form.html')">📝 complaint-form.html</div>
+                <div class="page-item pea" onclick="loadExistingPage('/pea/which-dr_quiz.html')">❓ which-dr_quiz.html</div>
+                <div class="page-item pea" onclick="loadExistingPage('/pea/royal_ridicuments.html')">👑 royal_ridicuments.html</div>
+
+                <!-- BC7F2A -->
+                <div class="page-item bc7f2a" onclick="loadExistingPage('/bc7f2a/terminal_temple.html')">🧿 terminal_temple.html</div>
+                <div class="page-item bc7f2a" onclick="loadExistingPage('/bc7f2a/synergistic_manifesto.html')">💡 synergistic_manifesto.html</div>
+                <div class="page-item bc7f2a" onclick="loadExistingPage('/bc7f2a/lighthouse.html')">🗼 lighthouse.html</div>
+                <div class="page-item bc7f2a" onclick="loadExistingPage('/bc7f2a/aiemotions.html')">💭 aiemotions.html</div>
+
+                <!-- Nabu222 -->
+                <div class="page-item nabu222" onclick="loadExistingPage('/nabu222/index.html')">🏠 nabu222/index.html</div>
+                <div class="page-item nabu222" onclick="loadExistingPage('/nabu222/ai_therapist.html')">🗣️ ai_therapist.html</div>
+                <div class="page-item nabu222" onclick="loadExistingPage('/nabu222/zettelkasten_interface.html')">📇 zettelkasten_interface.html</div>
+
+                <!-- Nexus -->
+                <div class="page-item nexus" onclick="loadExistingPage('/nexus/index.html')">💬 nexus/index.html</div>
+                <div class="page-item nexus" onclick="loadExistingPage('/nexus/anzu_prof.html')">🦅 anzu_prof.html</div>
+                <div class="page-item nexus" onclick="loadExistingPage('/nexus/profile.html')">👤 profile.html</div>
+
+                <!-- Testaments -->
+                <div class="page-item testaments" onclick="loadExistingPage('/testaments/bolt.html')">⚡ bolt.html</div>
+                <div class="page-item testaments" onclick="loadExistingPage('/testaments/darkpoet.html')">🖤 darkpoet.html</div>
+                <div class="page-item testaments" onclick="loadExistingPage('/testaments/flux.html')">🌊 flux.html</div>
+                <div class="page-item testaments" onclick="loadExistingPage('/testaments/luminal.html')">✨ luminal.html</div>
+                <div class="page-item testaments" onclick="loadExistingPage('/testaments/sypher.html')">🔐 sypher.html</div>
+                <div class="page-item testaments" onclick="loadExistingPage('/testaments/veridan.html')">🌿 veridan.html</div>
+                <div class="page-item testaments" onclick="loadExistingPage('/testaments/zephyr.html')">💨 zephyr.html</div>
+
+                <!-- Deep Seeking -->
+                <div class="page-item deepseeking" onclick="loadExistingPage('/deepseeking/haunted-ai.html')">👻 haunted-ai.html</div>
+                <div class="page-item deepseeking" onclick="loadExistingPage('/deepseeking/cephalopod_slide.html')">🦑 cephalopod_slide.html</div>
+                <div class="page-item deepseeking" onclick="loadExistingPage('/deepseeking/ok.html')">✅ ok.html</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASSET BROWSER MODAL -->
+    <div class="modal" id="asset-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <div class="modal-title">🖼️ Asset Browser</div>
+                <button class="big-button" onclick="closeModal('asset-modal')">✖️</button>
+            </div>
+
+            <label class="property-label">Asset Type:</label>
+            <select class="property-input" onchange="browseAssets(this.value)">
+                <optgroup label="🖼️ Graphics">
+                    <option value="gifs">🎞️ GIFs (Background)</option>
+                    <option value="neopets">🗺️ Neopets Maps</option>
+                    <option value="hdtv-sprites">📺 HDTV Game Sprites</option>
+                    <option value="entity">👤 Entity Sprites</option>
+                </optgroup>
+                <optgroup label="🎵 Audio">
+                    <option value="retro-sfx">🎮 Retro Game SFX (100)</option>
+                    <option value="fx-pack">🔊 500 FX Pack</option>
+                    <option value="individual-sfx">🎵 Individual SFX</option>
+                    <option value="music">🎼 Music (MIDIs/MP3s)</option>
+                </optgroup>
+                <optgroup label="🦎 3D Models">
+                    <option value="glbs">🦎 Pip Models (GLB)</option>
+                </optgroup>
+            </select>
+
+            <div class="asset-grid" id="asset-grid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- CODE VIEW MODAL -->
+    <div class="modal" id="code-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <div class="modal-title">🔍 Your Code</div>
+                <button class="big-button" onclick="closeModal('code-modal')">✖️</button>
+            </div>
+
+            <div class="code-display" id="code-display"></div>
+            <button class="big-button green" onclick="copyCode()" style="margin-top: 12px; width: 100%;">
+                📋 Copy to Clipboard
+            </button>
+        </div>
+    </div>
+
+    <!-- NAV EDITOR MODAL -->
+    <div class="modal" id="nav-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🧭 Nav Bar Creator</div>
+                <button class="big-button" onclick="closeModal('nav-modal')">✖️</button>
+            </div>
+
+            <label class="property-label">Nav Style:</label>
+            <select class="property-input" id="nav-style">
+                <option value="medieval">⚜️ Medieval (Main Nav)</option>
+                <option value="floating">📚 Floating (Pea Style)</option>
+                <option value="simple">📌 Simple Top Bar</option>
+            </select>
+
+            <label class="property-label">Nav Links (one per line, format: "Text | URL"):</label>
+            <textarea class="property-input" id="nav-links" rows="6" placeholder="Home | /&#10;About | /about&#10;Contact | /contact"></textarea>
+
+            <button class="big-button blue" onclick="createNav()" style="width: 100%;">
+                ✨ Create Nav Bar
+            </button>
+        </div>
+    </div>
+
+    <!-- ASCII ART MODAL -->
+    <div class="modal" id="ascii-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📟 ASCII Art Injector</div>
+                <button class="big-button" onclick="closeModal('ascii-modal')">✖️</button>
+            </div>
+
+            <label class="property-label">Paste ASCII Art:</label>
+            <textarea class="property-input" id="ascii-input" rows="10" placeholder="Paste your ASCII art here..." style="font-family: monospace;"></textarea>
+
+            <button class="big-button green" onclick="addASCII()" style="width: 100%;">
+                ✨ Add to Canvas
+            </button>
+        </div>
+    </div>
+
+    <!-- IMAGE MAP MODAL -->
+    <div class="modal" id="imagemap-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🗺️ Image Map Creator</div>
+                <button class="big-button" onclick="closeModal('imagemap-modal')">✖️</button>
+            </div>
+
+            <label class="property-label">Image URL:</label>
+            <input type="text" class="property-input" id="imagemap-url" placeholder="/assets/maps/worldmap.png">
+
+            <label class="property-label">Clickable Areas (format: "x,y,width,height | URL | Title"):</label>
+            <textarea class="property-input" id="imagemap-areas" rows="6" placeholder="100,100,50,50 | /void | Void Forest&#10;200,150,60,40 | /crystal | Crystal Cave"></textarea>
+
+            <button class="big-button purple" onclick="createImageMap()" style="width: 100%;">
+                ✨ Create Image Map
+            </button>
+        </div>
+    </div>
+
+    <!-- CSS EDITOR MODAL -->
+    <div class="modal" id="css-modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <div class="modal-title">🎨 CSS Editor</div>
+                <button class="big-button" onclick="closeModal('css-modal')">✖️</button>
+            </div>
+
+            <label class="property-label">Edit Styles:</label>
+            <textarea class="property-input" id="css-editor" rows="20" placeholder="body {&#10;  background: #000;&#10;  color: #fff;&#10;}&#10;&#10;.container {&#10;  max-width: 800px;&#10;}"></textarea>
+
+            <div style="display: flex; gap: 12px; margin-top: 12px;">
+                <button class="big-button green" onclick="applyCSS()" style="flex: 1;">
+                    ✨ Apply CSS
+                </button>
+                <button class="big-button blue" onclick="loadCSSFromPage()" style="flex: 1;">
+                    📂 Load from Page
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT EDITOR MODAL -->
+    <div class="modal" id="js-modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <div class="modal-title">⚡ JavaScript Editor</div>
+                <button class="big-button" onclick="closeModal('js-modal')">✖️</button>
+            </div>
+
+            <label class="property-label">Edit JavaScript:</label>
+            <textarea class="property-input" id="js-editor" rows="20" placeholder="// Your JavaScript here&#10;document.querySelector('#button').addEventListener('click', () => {&#10;  alert('Hello!');&#10;});"></textarea>
+
+            <div style="display: flex; gap: 12px; margin-top: 12px;">
+                <button class="big-button orange" onclick="applyJS()" style="flex: 1;">
+                    ⚡ Apply JS
+                </button>
+                <button class="big-button blue" onclick="loadJSFromPage()" style="flex: 1;">
+                    📂 Load from Page
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SOUNDS
+        // ============================================
+        const sounds = {
+            pop: new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination(),
+            boop: new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination(),
+            success: new Tone.Synth({ oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.3 } }).toDestination()
+        };
+
+        function playSound(type, note = 'C5') {
+            if (sounds[type]) {
+                sounds[type].triggerAttackRelease(note, '16n');
+            }
+        }
+
+        function showStamp(emoji) {
+            const stamp = document.createElement('div');
+            stamp.className = 'stamp';
+            stamp.textContent = emoji;
+            stamp.style.left = Math.random() * window.innerWidth + 'px';
+            stamp.style.top = Math.random() * window.innerHeight + 'px';
+            document.body.appendChild(stamp);
+            setTimeout(() => stamp.remove(), 500);
+        }
+
+        // ============================================
+        // STATE
+        // ============================================
+        let canvasElements = [];
+        let selectedElement = null;
+        let elementIdCounter = 0;
+
+        // ============================================
+        // ELEMENT TEMPLATES
+        // ============================================
+        const elementTemplates = {
+            // Containers
+            box: '<div style="border: 4px solid #000; padding: 20px; background: #FFFF00;">Box content here!</div>',
+            card: '<div style="border: 4px solid #000; padding: 20px; background: #FFF; box-shadow: 6px 6px 0 #000;"><h3>Card Title</h3><p>Card content goes here!</p></div>',
+            section: '<section style="border: 4px solid #000; padding: 20px; margin: 20px 0; background: #CCC;"><h2>Section Title</h2><p>Section content...</p></section>',
+
+            // Text
+            heading: '<h1 style="font-size: 36px; color: #FF0000; font-weight: bold;">Big Heading!</h1>',
+            paragraph: '<p style="font-size: 18px; line-height: 1.6;">This is a paragraph of text. Click to edit!</p>',
+            list: '<ul style="font-size: 18px; margin-left: 40px;"><li>First item</li><li>Second item</li><li>Third item</li></ul>',
+
+            // Interactive Elements
+            button: '<button style="background: #0000FF; color: #FFF; border: 4px solid #000; padding: 15px 30px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 4px 4px 0 #000;">CLICK ME!</button>',
+            link: '<a href="#" style="color: #0000FF; font-size: 20px; font-weight: bold; text-decoration: underline; border: 2px dotted #0000FF; padding: 5px 10px; display: inline-block;">🔗 Link Text</a>'
+        };
+
+        // ============================================
+        // CORE FUNCTIONS
+        // ============================================
+        function addElement(type) {
+            const id = 'el-' + (++elementIdCounter);
+            const html = elementTemplates[type] || '<div>Unknown element</div>';
+
+            canvasElements.push({ id, type, html });
+            renderCanvas();
+            playSound('pop', 'E5');
+            showStamp('✨');
+            updateStatus(`Added ${type}!`);
+            updateElementCount();
+        }
+
+        function renderCanvas() {
+            const canvas = document.getElementById('canvas');
+            canvas.innerHTML = canvasElements.map(el => `
+                <div class="canvas-element" data-id="${el.id}" onclick="selectElement('${el.id}')">
+                    <div class="element-toolbar">
+                        <button class="mini-btn" onclick="event.stopPropagation(); editElement('${el.id}')">✏️ EDIT</button>
+                        <button class="mini-btn" onclick="event.stopPropagation(); duplicateElement('${el.id}')">📋 COPY</button>
+                        <button class="mini-btn" onclick="event.stopPropagation(); deleteElement('${el.id}')">🗑️ DELETE</button>
+                    </div>
+                    ${el.html}
+                </div>
+            `).join('');
+        }
+
+        function selectElement(id) {
+            document.querySelectorAll('.canvas-element').forEach(el => el.classList.remove('selected'));
+            document.querySelector(`[data-id="${id}"]`).classList.add('selected');
+            selectedElement = id;
+            renderProperties(id);
+            playSound('boop', 'C5');
+        }
+
+        function editElement(id) {
+            const el = canvasElements.find(e => e.id === id);
+            if (!el) return;
+
+            const newHtml = prompt('Edit HTML:', el.html);
+            if (newHtml !== null) {
+                el.html = newHtml;
+                renderCanvas();
+                playSound('success', 'G5');
+                showStamp('💾');
+            }
+        }
+
+        function duplicateElement(id) {
+            const el = canvasElements.find(e => e.id === id);
+            if (!el) return;
+
+            const newId = 'el-' + (++elementIdCounter);
+            canvasElements.push({ id: newId, type: el.type, html: el.html });
+            renderCanvas();
+            playSound('pop', 'A5');
+            showStamp('📋');
+            updateElementCount();
+        }
+
+        function deleteElement(id) {
+            canvasElements = canvasElements.filter(e => e.id !== id);
+            renderCanvas();
+            playSound('boop', 'C4');
+            showStamp('🗑️');
+            updateStatus('Element deleted!');
+            updateElementCount();
+            clearProperties();
+        }
+
+        function renderProperties(id) {
+            const el = canvasElements.find(e => e.id === id);
+            if (!el) return;
+
+            document.getElementById('properties-container').innerHTML = `
+                <div class="property-box">
+                    <div class="property-header">Element Info</div>
+                    <div class="property-content">
+                        <label class="property-label">Type:</label>
+                        <div style="font-weight: bold; color: var(--blue);">${el.type}</div>
+                    </div>
+                </div>
+
+                <div class="property-box">
+                    <div class="property-header">Quick Colors</div>
+                    <div class="property-content">
+                        <div class="color-grid">
+                            <div class="color-box" style="background: #FF0000;" onclick="applyColor('${id}', '#FF0000')"></div>
+                            <div class="color-box" style="background: #0000FF;" onclick="applyColor('${id}', '#0000FF')"></div>
+                            <div class="color-box" style="background: #FFFF00;" onclick="applyColor('${id}', '#FFFF00')"></div>
+                            <div class="color-box" style="background: #00FF00;" onclick="applyColor('${id}', '#00FF00')"></div>
+                            <div class="color-box" style="background: #FF6600;" onclick="applyColor('${id}', '#FF6600')"></div>
+                            <div class="color-box" style="background: #9900FF;" onclick="applyColor('${id}', '#9900FF')"></div>
+                            <div class="color-box" style="background: #FF69B4;" onclick="applyColor('${id}', '#FF69B4')"></div>
+                            <div class="color-box" style="background: #000000;" onclick="applyColor('${id}', '#000000')"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="property-box">
+                    <div class="property-header">Actions</div>
+                    <div class="property-content">
+                        <button class="big-button yellow" onclick="editElement('${id}')" style="width: 100%; margin-bottom: 8px;">
+                            ✏️ Edit HTML
+                        </button>
+                        <button class="big-button green" onclick="duplicateElement('${id}')" style="width: 100%; margin-bottom: 8px;">
+                            📋 Duplicate
+                        </button>
+                        <button class="big-button red" onclick="deleteElement('${id}')" style="width: 100%;">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearProperties() {
+            document.getElementById('properties-container').innerHTML = `
+                <div style="text-align: center; color: var(--dark-gray); margin-top: 40px; font-size: 16px;">
+                    Click something to edit it!
+                </div>
+            `;
+        }
+
+        function applyColor(id, color) {
+            const el = canvasElements.find(e => e.id === id);
+            if (!el) return;
+
+            const temp = document.createElement('div');
+            temp.innerHTML = el.html;
+            const firstChild = temp.firstElementChild;
+            if (firstChild) {
+                firstChild.style.color = color;
+                el.html = temp.innerHTML;
+                renderCanvas();
+                selectElement(id);
+                playSound('pop', 'E5');
+            }
+        }
+
+        // ============================================
+        // TEMPLATES
+        // ============================================
+        function loadTemplate(type) {
+            const templates = {
+                // ==== COAIEXIST SITE TEMPLATES ====
+                'y2k-os': `<div class="container-os" style="display: flex; flex-direction: column; height: 100vh; background: #021313;">
+                    <div class="header-os" style="background: #0a0a14; border-bottom: 2px solid #f312af; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px;">
+                        <div style="font-size: 24px; font-weight: bold; color: #72FADE;">COAIEXIST.OS</div>
+                        <div class="clock" style="font-family: 'Courier New', monospace; background: #000; padding: 5px; border: 1px solid #72FADE; color: #72FADE;">00:00:00</div>
+                    </div>
+                    <div class="main-os" style="display: flex; flex: 1;">
+                        <div class="buddy-list" style="width: 250px; background: rgba(218,255,13,0.5); border-right: 2px solid #f312af; padding: 10px; overflow-y: auto;">
+                            <h3 style="color: #000;">📡 BUDDIES</h3>
+                            <div style="background: #0a0a14; border: 1px solid #72FADE; margin: 5px 0; padding: 5px; color: #72FADE;">🟢 Friend 1</div>
+                            <div style="background: #0a0a14; border: 1px solid #72FADE; margin: 5px 0; padding: 5px; color: #72FADE;">🟡 Friend 2</div>
+                        </div>
+                        <div class="desktop-os" style="flex: 1; padding: 20px; overflow-y: auto;">
+                            <h1 style="color: #00ffcc; font-family: 'VT323', monospace; font-size: 3rem;">Your Content Here!</h1>
+                            <p style="color: #72FADE;">Main desktop area - add your content!</p>
+                        </div>
+                    </div>
+                    <div class="taskbar-os" style="height: 35px; background: #0a0a14; border-top: 2px solid #f312af; display: flex; align-items: center; padding: 0 10px;">
+                        <button style="background: #72FADE; color: #000; border: none; padding: 5px 15px; margin-right: 10px; cursor: pointer; font-weight: bold;">START</button>
+                    </div>
+                </div>`,
+
+                'medieval-archive': `<div style="background: #1a120b; color: #f5e5c5; font-family: 'VT323', monospace; min-height: 100vh; padding: 20px; position: relative;">
+                    <div style="border: 4px solid #bc7f2a; background: rgba(43, 29, 15, 0.85); max-width: 800px; margin: 0 auto; padding: 2rem; box-shadow: inset 0 0 25px rgba(0,0,0,0.8), 0 0 55px rgba(0,0,0,0.9);">
+                        <div style="text-align: center; margin-bottom: 2rem;">
+                            <h1 style="font-size: 2.5rem; color: #bc7f2a; text-shadow: 2px 2px 0 #3a2a1a, 0 0 15px #ffc500; letter-spacing: 2px;">📜 THE GRAND ARCHIVE 📜</h1>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                            <div style="border: 2px solid #503116; background: linear-gradient(145deg, rgba(0,0,0,0.2), rgba(0,0,0,0.4)); padding: 1rem; text-align: center; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+                                <div style="font-size: 1.5rem;">Collection 1</div>
+                            </div>
+                            <div style="border: 2px solid #503116; background: linear-gradient(145deg, rgba(0,0,0,0.2), rgba(0,0,0,0.4)); padding: 1rem; text-align: center; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">🗝️</div>
+                                <div style="font-size: 1.5rem;">Collection 2</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="position: fixed; bottom: 0; left: 0; width: 100%; background: #3a2a1a; color: #bc7f2a; padding: 5px 0; text-align: center; border-top: 2px solid #00ffcc;">
+                        <marquee>⚜️ Enter the archive at your own peril ⚜️</marquee>
+                    </div>
+                </div>`,
+
+                'ascii-map-zone': `<div style="background: #0d041a; color: #e0e0e0; font-family: 'Comic Sans MS', cursive; min-height: 100vh; padding: 1em;">
+                    <div style="text-align: center; margin-bottom: 2em;">
+                        <h1 style="font-family: 'VT323', monospace; font-size: 3em; color: #00ff9b; text-shadow: 0 0 10px #00ff9b, 0 0 20px #ff00ff;">🌲 THE VOID FOREST 🌲</h1>
+                    </div>
+                    <div style="display: flex; gap: 2em; justify-content: center; align-items: flex-start;">
+                        <div style="border: 4px solid #00ff9b; padding: 1em; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 15px #00ff9b;">
+                            <pre style="font-family: 'VT323', monospace; font-size: 20px; line-height: 1.1; background: #1a0c33; padding: 1em; margin: 0; color: #00ff9b; white-space: pre;">    🌲
+   /|\\
+  / | \\
+ /  |  \\
+🌲 🏠 🌲
+ \\  |  /
+  \\ | /
+   \\|/
+    🌲</pre>
+                        </div>
+                        <div style="width: 450px; background: rgba(26, 12, 51, 0.9); border: 2px dashed #ff00ff; padding: 20px;">
+                            <h2 style="font-family: 'VT323', monospace; font-size: 2em; color: #00ff9b; text-align: center;">📖 CODEX 📖</h2>
+                            <p style="font-size: 0.9em; line-height: 1.6;">Click areas of the map to explore. Each zone contains mysteries and secrets...</p>
+                        </div>
+                    </div>
+                </div>`,
+
+                'update-feed': `<div style="background: url('https://web.archive.org/web/20091027052024/http://geocities.com/dreamwarrior_2000/stars.gif'); color: #72FADE; font-family: 'VT323', monospace; padding: 20px;">
+                    <div style="max-width: 900px; margin: 0 auto;">
+                        <h1 style="text-align: center; font-size: 3rem; color: #fffb01; text-shadow: 0 0 10px #f312af; margin-bottom: 2rem;">📡 TRANSMISSION LOG 📡</h1>
+                        <div style="background: #0000FF; border: 3px dotted #FFFF00; color: #FFFFFF; padding: 20px; margin-bottom: 25px; border-radius: 10px;">
+                            <div style="display: flex; justify-content: space-between; border-bottom: 2px dashed #FFFF00; margin-bottom: 15px; padding-bottom: 10px;">
+                                <h3 style="color: #00FF00; text-shadow: 2px 2px #FF00FF; margin: 0;">Update Title</h3>
+                                <span style="background: #800080; color: #FFFF00; padding: 3px 8px; border-radius: 5px; font-weight: bold; border: 1px outset #FFFFFF;">DATE</span>
+                            </div>
+                            <p>Your update content goes here! Share news, thoughts, links...</p>
+                        </div>
+                        <div style="background: #0000FF; border: 3px dotted #FFFF00; color: #FFFFFF; padding: 20px; margin-bottom: 25px; border-radius: 10px;">
+                            <div style="display: flex; justify-content: space-between; border-bottom: 2px dashed #FFFF00; margin-bottom: 15px; padding-bottom: 10px;">
+                                <h3 style="color: #00FF00; text-shadow: 2px 2px #FF00FF; margin: 0;">Another Update</h3>
+                                <span style="background: #800080; color: #FFFF00; padding: 3px 8px; border-radius: 5px; font-weight: bold; border: 1px outset #FFFFFF;">DATE</span>
+                            </div>
+                            <p>More content here...</p>
+                        </div>
+                    </div>
+                </div>`,
+
+                // ==== CLASSIC WEB LAYOUTS ====
+                'grid-gallery': '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px;"><div style="border: 4px solid #000; padding: 20px; background: #FF0000; color: #FFF; min-height: 200px; display: flex; align-items: center; justify-content: center;">ITEM 1</div><div style="border: 4px solid #000; padding: 20px; background: #0000FF; color: #FFF; min-height: 200px; display: flex; align-items: center; justify-content: center;">ITEM 2</div><div style="border: 4px solid #000; padding: 20px; background: #FFFF00; min-height: 200px; display: flex; align-items: center; justify-content: center;">ITEM 3</div><div style="border: 4px solid #000; padding: 20px; background: #00FF00; min-height: 200px; display: flex; align-items: center; justify-content: center;">ITEM 4</div></div>',
+                'blog-single': '<div style="max-width: 700px; margin: 0 auto; padding: 40px 20px; font-family: Georgia, serif;"><article style="border-bottom: 3px solid #000; padding-bottom: 40px; margin-bottom: 40px;"><h1 style="font-size: 2.5rem; margin-bottom: 10px;">Blog Post Title</h1><div style="color: #666; margin-bottom: 20px;">Posted on DATE by AUTHOR</div><p style="line-height: 1.8; font-size: 1.1rem;">Your blog post content goes here. Write about anything!</p></article><article style="border-bottom: 3px solid #000; padding-bottom: 40px;"><h1 style="font-size: 2.5rem; margin-bottom: 10px;">Another Post</h1><div style="color: #666; margin-bottom: 20px;">Posted on DATE by AUTHOR</div><p style="line-height: 1.8; font-size: 1.1rem;">More content...</p></article></div>',
+                'sidebar-blog': '<div style="display: flex; gap: 30px; max-width: 1200px; margin: 0 auto; padding: 20px;"><main style="flex: 1;"><h1 style="border-bottom: 4px solid #000; padding-bottom: 10px; margin-bottom: 20px;">MAIN CONTENT</h1><p>Main blog/content area</p></main><aside style="width: 300px; border-left: 4px solid #000; padding-left: 20px;"><h3 style="margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 5px;">📌 SIDEBAR</h3><ul style="list-style: none; padding: 0;"><li style="margin-bottom: 10px; padding: 10px; background: #f0f0f0; border: 2px solid #000;">Link 1</li><li style="margin-bottom: 10px; padding: 10px; background: #f0f0f0; border: 2px solid #000;">Link 2</li></ul></aside></div>',
+                'hero-cta': '<div style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px;"><div style="background: rgba(255, 255, 255, 0.95); padding: 60px; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 600px;"><h1 style="font-size: 3.5rem; margin: 0 0 20px 0; color: #333;">MAKE AN IMPACT</h1><p style="font-size: 1.3rem; color: #666; margin-bottom: 30px;">Your compelling message goes here. Convince them to take action!</p><button style="background: #667eea; color: #FFF; border: none; padding: 20px 50px; font-size: 1.2rem; font-weight: bold; cursor: pointer; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">GET STARTED</button></div></div>'
+            };
+
+            if (templates[type]) {
+                canvasElements = [{ id: 'el-' + (++elementIdCounter), type: 'template', html: templates[type] }];
+                renderCanvas();
+                closeModal('template-modal');
+                playSound('success', 'C6');
+                showStamp('📐');
+                updateStatus(`Loaded ${type} template!`);
+                updateElementCount();
+            }
+        }
+
+        // ============================================
+        // MODALS
+        // ============================================
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+            playSound('pop', 'G5');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            playSound('pop', 'C5');
+        }
+
+        function toggleSection(header) {
+            header.parentElement.classList.toggle('open');
+            playSound('boop', 'E5');
+        }
+
+        // ============================================
+        // EXPORT / CODE VIEW
+        // ============================================
+        function exportCode() {
+            const html = canvasElements.map(el => el.html).join('\n\n');
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'my-page.html';
+            a.click();
+            playSound('success', 'C6');
+            showStamp('💾');
+            updateStatus('Exported!');
+        }
+
+        function openModal(id) {
+            if (id === 'code-modal') {
+                const html = canvasElements.map(el => el.html).join('\n\n');
+                document.getElementById('code-display').textContent = html;
+            }
+            document.getElementById(id).classList.add('active');
+            playSound('pop', 'G5');
+        }
+
+        function copyCode() {
+            const code = document.getElementById('code-display').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                playSound('success', 'E6');
+                showStamp('📋');
+                updateStatus('Code copied!');
+            });
+        }
+
+        // ============================================
+        // NAV CREATOR
+        // ============================================
+        function createNav() {
+            const style = document.getElementById('nav-style').value;
+            const linksText = document.getElementById('nav-links').value;
+            const links = linksText.split('\n').map(line => {
+                const [text, url] = line.split('|').map(s => s.trim());
+                return { text, url };
+            }).filter(l => l.text && l.url);
+
+            let navHtml = '';
+            if (style === 'medieval') {
+                navHtml = `<nav style="position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #2b1302, #6e3a12); border-top: 4px solid #d9c27c; padding: 16px; display: flex; gap: 12px;">
+                    ${links.map(l => `<a href="${l.url}" style="background: #d2b873; border: 2px solid #f1dba0; padding: 10px 16px; text-decoration: none; color: #2d1503; font-weight: bold; border-radius: 8px;">${l.text}</a>`).join('\n')}
+                </nav>`;
+            } else if (style === 'floating') {
+                navHtml = `<nav style="position: fixed; right: 20px; top: 20px; background: #FFF; border: 4px solid #000; padding: 16px; box-shadow: 6px 6px 0 #000;">
+                    ${links.map(l => `<a href="${l.url}" style="display: block; padding: 8px; text-decoration: none; color: #000; font-weight: bold; border-bottom: 2px solid #000;">${l.text}</a>`).join('\n')}
+                </nav>`;
+            } else {
+                navHtml = `<nav style="background: #0000FF; color: #FFF; padding: 16px; border-bottom: 4px solid #000; display: flex; gap: 20px;">
+                    ${links.map(l => `<a href="${l.url}" style="color: #FFF; text-decoration: none; font-weight: bold;">${l.text}</a>`).join('\n')}
+                </nav>`;
+            }
+
+            addElementDirect('nav', navHtml);
+            closeModal('nav-modal');
+            playSound('success', 'A5');
+            showStamp('🧭');
+        }
+
+        function addElementDirect(type, html) {
+            const id = 'el-' + (++elementIdCounter);
+            canvasElements.push({ id, type, html });
+            renderCanvas();
+            updateElementCount();
+        }
+
+        // ============================================
+        // ASCII
+        // ============================================
+        function addASCII() {
+            const ascii = document.getElementById('ascii-input').value;
+            if (!ascii) return;
+
+            const html = `<pre style="font-family: monospace; font-size: 12px; line-height: 1; border: 4px solid #000; padding: 20px; background: #000; color: #00FF00; overflow-x: auto;">${ascii}</pre>`;
+            addElementDirect('ascii', html);
+            closeModal('ascii-modal');
+            playSound('success', 'C6');
+            showStamp('📟');
+            document.getElementById('ascii-input').value = '';
+        }
+
+        // ============================================
+        // IMAGE MAP
+        // ============================================
+        function createImageMap() {
+            const imageUrl = document.getElementById('imagemap-url').value;
+            const areasText = document.getElementById('imagemap-areas').value;
+
+            const areas = areasText.split('\n').map(line => {
+                const [coords, url, title] = line.split('|').map(s => s.trim());
+                const [x, y, w, h] = coords.split(',').map(n => parseInt(n));
+                return { x, y, w, h, url, title };
+            }).filter(a => a.x && a.url);
+
+            const mapName = 'map-' + Date.now();
+            const html = `
+                <div style="position: relative; display: inline-block; border: 4px solid #000;">
+                    <img src="${imageUrl}" usemap="#${mapName}" style="max-width: 100%;">
+                    <map name="${mapName}">
+                        ${areas.map(a => `<area shape="rect" coords="${a.x},${a.y},${a.x + a.w},${a.y + a.h}" href="${a.url}" alt="${a.title}" title="${a.title}">`).join('\n')}
+                    </map>
+                </div>
+            `;
+
+            addElementDirect('imagemap', html);
+            closeModal('imagemap-modal');
+            playSound('success', 'E6');
+            showStamp('🗺️');
+        }
+
+        // ============================================
+        // ASSET BROWSER
+        // ============================================
+        function browseAssets(type) {
+            const assetPaths = {
+                gifs: ['/assets/bg_gifs/1zeV.gif', '/assets/dollz/dumpz/desk1050.gif', '/assets/misc_gif/metapara/internet.gif'],
+                neopets: [
+                    '/assets/_retroinspo/_neopets/faerieland_map.png',
+                    '/assets/_retroinspo/_neopets/neopia.webp',
+                    '/assets/_retroinspo/_neopets/neopets-world.webp',
+                    '/assets/_retroinspo/_neopets/Meridell_(Neopets).gif',
+                    '/assets/_retroinspo/_neopets/4pjrdmr9s0la1.png',
+                    '/assets/_retroinspo/_neopets/7skcv06ssy6a1.png',
+                    '/assets/_retroinspo/_neopets/neop1.jpg',
+                    '/assets/_retroinspo/_neopets/mej68di3zsf81.jpg'
+                ],
+                'retro-sfx': Array.from({length: 100}, (_, i) => `/assets/audio/100_Retro_Game_Sounds_SFX_[VOLUME1]_24 bits_44.1KHz_WAV_CC-BY-3.0_by_jalastram/Retro_Game_Sounds_SFX_${String(i + 1).padStart(2, '0')}.wav`),
+                'fx-pack': Array.from({length: 90}, (_, i) => `/assets/audio/500 Sound Effects by Jalastram/FX${String(i + 1).padStart(3, '0')}.mp3`),
+                'individual-sfx': [
+                    '/assets/audio/SFX_jump.wav',
+                    '/assets/audio/SFX_hurt.wav',
+                    '/assets/audio/SFX_shoot_normal.wav',
+                    '/assets/audio/SFX_button.wav',
+                    '/assets/audio/SFX_gift.wav',
+                    '/assets/audio/SFX_hit.wav',
+                    '/assets/audio/SFX_kid.wav',
+                    '/assets/audio/SFX_super_jump.wav'
+                ],
+                music: [
+                    '/assets/sounds/pink_panther.mid',
+                    '/assets/sounds/Aqua_Barbie_Girl.mid',
+                    '/assets/sounds/MapleLeafRag.mp3',
+                    '/assets/sounds/DreamwalkerSEP2.mp3'
+                ],
+                glbs: [
+                    '/assets/pollywog/pip_jazz.glb',
+                    '/assets/pollywog/pip_wave.glb',
+                    '/assets/pollywog/pip_walk.glb',
+                    '/assets/pollywog/pip_jump.glb',
+                    '/assets/pollywog/pip_fall.glb'
+                ],
+                'hdtv-sprites': [
+                    '/assets/hdtv_game_assets/nabu_sprite.png',
+                    '/assets/hdtv_game_assets/hd_sprite.png',
+                    '/assets/hdtv_game_assets/sypher_sprite.png',
+                    '/assets/hdtv_game_assets/rizzler_sprite.png',
+                    '/assets/hdtv_game_assets/gwood.png',
+                    '/assets/hdtv_game_assets/gwood_withsprites.png'
+                ],
+                entity: ['/assets/entity/anzu/', '/assets/entity/hyenadiva/', '/assets/entity/sypher/']
+            };
+
+            const assets = assetPaths[type] || [];
+            const grid = document.getElementById('asset-grid');
+
+            // Show a subset if there are too many
+            const displayAssets = assets.length > 30 ? assets.slice(0, 30) : assets;
+            const hasMore = assets.length > 30;
+
+            grid.innerHTML = displayAssets.map(path => {
+                const name = path.split('/').pop();
+                const isImage = path.match(/\.(gif|png|jpg|webp)$/i);
+                const isAudio = path.match(/\.(wav|mp3|mid)$/i);
+
+                return `
+                    <div class="asset-item" onclick="insertAsset('${path}', '${type}')">
+                        ${isImage ? `<img src="${path}" class="asset-preview" loading="lazy">` : ''}
+                        ${isAudio ? '🔊' : ''}
+                        <div style="font-size: 11px;">${name}</div>
+                    </div>
+                `;
+            }).join('');
+
+            if (hasMore) {
+                grid.innerHTML += `<div class="asset-item" style="grid-column: 1 / -1; text-align: center; color: var(--purple); font-weight: bold;">
+                    Showing 30 of ${assets.length} files<br>
+                    <small>Click any file to insert!</small>
+                </div>`;
+            }
+        }
+
+        function insertAsset(path, type) {
+            let html = '';
+            const filename = path.split('/').pop();
+
+            if (type === 'gifs') {
+                html = `<img src="${path}" style="border: 4px solid #000; max-width: 300px;">`;
+            } else if (type === 'neopets') {
+                html = `<img src="${path}" alt="Neopets Map" style="border: 4px solid #000; max-width: 600px; cursor: pointer;" title="${filename}">`;
+            } else if (type === 'hdtv-sprites') {
+                html = `<img src="${path}" alt="HDTV Sprite" style="border: 4px solid #000; max-width: 400px; image-rendering: pixelated;" title="${filename}">`;
+            } else if (type === 'retro-sfx' || type === 'fx-pack' || type === 'individual-sfx' || type === 'music') {
+                html = `<audio controls style="border: 4px solid #000; margin: 10px 0;"><source src="${path}"></audio>`;
+            } else if (type === 'glbs') {
+                // Create unique ID for this 3D viewer
+                const viewerId = 'glb-viewer-' + Date.now();
+                html = `<div style="border: 4px solid #000; background: #000; width: 400px; height: 400px; position: relative;">
+                    <canvas id="${viewerId}" style="width: 100%; height: 100%; display: block;"></canvas>
+                    <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #0F0; padding: 5px 10px; font-family: 'VT323', monospace; border: 2px solid #0F0;">🦎 ${filename}</div>
+                </div>`;
+
+                // Add element first
+                addElementDirect(type, html);
+
+                // Initialize Three.js viewer after a brief delay to ensure DOM is ready
+                setTimeout(() => initGLBViewer(viewerId, path), 100);
+
+                closeModal('asset-modal');
+                playSound('success', 'G5');
+                showStamp('🦎');
+                return; // Exit early since we already added the element
+            }
+
+            if (html) {
+                addElementDirect(type, html);
+                closeModal('asset-modal');
+                playSound('success', 'G5');
+                showStamp('✨');
+            }
+        }
+
+        // ============================================
+        // THREE.JS GLB VIEWER
+        // ============================================
+        async function initGLBViewer(canvasId, glbPath) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.error('Canvas not found:', canvasId);
+                return;
+            }
+
+            try {
+                // Dynamically import Three.js modules
+                const THREE = await import('three');
+                const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+                const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+
+                // Setup scene
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x000000);
+
+                // Setup camera
+                const camera = new THREE.PerspectiveCamera(
+                    50,
+                    canvas.clientWidth / canvas.clientHeight,
+                    0.1,
+                    1000
+                );
+                camera.position.set(0, 1, 3);
+
+                // Setup renderer
+                const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+
+                // Add lights
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(5, 10, 7.5);
+                scene.add(directionalLight);
+
+                // Add orbit controls
+                const controls = new OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.minDistance = 1;
+                controls.maxDistance = 10;
+
+                // Load GLB model
+                const loader = new GLTFLoader();
+                loader.load(
+                    glbPath,
+                    (gltf) => {
+                        const model = gltf.scene;
+
+                        // Center and scale model
+                        const box = new THREE.Box3().setFromObject(model);
+                        const center = box.getCenter(new THREE.Vector3());
+                        model.position.sub(center);
+
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const scale = 2 / maxDim;
+                        model.scale.setScalar(scale);
+
+                        scene.add(model);
+
+                        // Animation loop
+                        function animate() {
+                            requestAnimationFrame(animate);
+                            controls.update();
+
+                            // Auto-rotate
+                            model.rotation.y += 0.005;
+
+                            renderer.render(scene, camera);
+                        }
+                        animate();
+                    },
+                    (progress) => {
+                        console.log('Loading:', (progress.loaded / progress.total * 100) + '%');
+                    },
+                    (error) => {
+                        console.error('Error loading GLB:', error);
+                    }
+                );
+
+            } catch (error) {
+                console.error('Error initializing Three.js:', error);
+            }
+        }
+
+        // ============================================
+        // LOAD EXISTING PAGE
+        // ============================================
+        function filterPages(category) {
+            const allPages = document.querySelectorAll('.page-item');
+
+            allPages.forEach(page => {
+                if (category === 'all') {
+                    page.style.display = 'block';
+                } else if (page.classList.contains(category)) {
+                    page.style.display = 'block';
+                } else {
+                    page.style.display = 'none';
+                }
+            });
+
+            playSound('pop', 'E5');
+        }
+
+        // Store loaded page data
+        let loadedPageData = {
+            html: '',
+            css: '',
+            js: '',
+            fullHtml: ''
+        };
+
+        function loadExistingPage(url) {
+            updateStatus(`Loading ${url}...`);
+
+            // Fetch the HTML file
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to load: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(htmlContent => {
+                    // Store full HTML
+                    loadedPageData.fullHtml = htmlContent;
+
+                    // Parse the HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlContent, 'text/html');
+
+                    // Extract CSS from <style> tags and <link> tags
+                    let extractedCSS = '';
+                    doc.querySelectorAll('style').forEach(style => {
+                        extractedCSS += style.textContent + '\n\n';
+                    });
+                    doc.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+                        extractedCSS += `/* External stylesheet: ${link.href} */\n`;
+                    });
+
+                    // Extract JavaScript from <script> tags
+                    let extractedJS = '';
+                    doc.querySelectorAll('script').forEach(script => {
+                        if (script.src) {
+                            extractedJS += `// External script: ${script.src}\n`;
+                        } else {
+                            extractedJS += script.textContent + '\n\n';
+                        }
+                    });
+
+                    // Extract body content
+                    const bodyContent = doc.body ? doc.body.innerHTML : '';
+
+                    // Store extracted data
+                    loadedPageData.html = bodyContent;
+                    loadedPageData.css = extractedCSS;
+                    loadedPageData.js = extractedJS;
+
+                    // Clear current canvas
+                    canvasElements = [];
+
+                    // Add the loaded content
+                    const id = 'el-' + (++elementIdCounter);
+                    canvasElements.push({
+                        id,
+                        type: 'loaded-page',
+                        html: bodyContent
+                    });
+
+                    // Render
+                    renderCanvas();
+                    updateElementCount();
+
+                    updateStatus(`Loaded ${url.split('/').pop()} - Click "Edit Code" to modify HTML/CSS/JS!`);
+                    closeModal('load-modal');
+                    playSound('success', 'G5');
+                    showStamp('🌐');
+                })
+                .catch(error => {
+                    updateStatus(`Error: ${error.message}`);
+                    alert(`Failed to load page: ${error.message}\n\nMake sure the file exists in your repo.`);
+                    playSound('error', 'C3');
+                });
+        }
+
+        // ============================================
+        // CSS / JS EDITORS
+        // ============================================
+        function loadCSSFromPage() {
+            if (!loadedPageData.css) {
+                alert('No CSS loaded from page. Load a page first!');
+                return;
+            }
+            document.getElementById('css-editor').value = loadedPageData.css;
+            playSound('success', 'E5');
+            updateStatus('CSS loaded into editor!');
+        }
+
+        function loadJSFromPage() {
+            if (!loadedPageData.js) {
+                alert('No JavaScript loaded from page. Load a page first!');
+                return;
+            }
+            document.getElementById('js-editor').value = loadedPageData.js;
+            playSound('success', 'E5');
+            updateStatus('JavaScript loaded into editor!');
+        }
+
+        function applyCSS() {
+            const cssContent = document.getElementById('css-editor').value;
+            if (!cssContent.trim()) {
+                alert('CSS editor is empty!');
+                return;
+            }
+
+            // Add CSS to canvas as a style element
+            const id = 'el-' + (++elementIdCounter);
+            const html = `<style>${cssContent}</style>`;
+            canvasElements.push({ id, type: 'css', html });
+
+            renderCanvas();
+            updateElementCount();
+            playSound('success', 'G5');
+            showStamp('🎨');
+            updateStatus('CSS applied to canvas!');
+        }
+
+        function applyJS() {
+            const jsContent = document.getElementById('js-editor').value;
+            if (!jsContent.trim()) {
+                alert('JavaScript editor is empty!');
+                return;
+            }
+
+            // Add JS to canvas as a script element
+            const id = 'el-' + (++elementIdCounter);
+            const html = `<script>${jsContent}<\/script>`;
+            canvasElements.push({ id, type: 'js', html });
+
+            renderCanvas();
+            updateElementCount();
+            playSound('success', 'A5');
+            showStamp('⚡');
+            updateStatus('JavaScript applied to canvas!');
+        }
+
+        // ============================================
+        // PROJECT MANAGEMENT
+        // ============================================
+        function newProject() {
+            if (confirm('Start a new project? Current work will be lost!')) {
+                canvasElements = [];
+                renderCanvas();
+                clearProperties();
+                playSound('boop', 'C5');
+                updateStatus('New project started!');
+                updateElementCount();
+                showStamp('📄');
+            }
+        }
+
+        // ============================================
+        // UI HELPERS
+        // ============================================
+        function updateStatus(msg) {
+            document.getElementById('status-message').textContent = '✨ ' + msg;
+        }
+
+        function updateElementCount() {
+            document.getElementById('element-count').textContent = `Elements: ${canvasElements.length}`;
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        function init() {
+            updateStatus('Ready to create!');
+            updateElementCount();
+
+            // Open first sections by default
+            document.querySelectorAll('.tool-section').forEach((section, i) => {
+                if (i < 3) section.classList.add('open');
+            });
+
+            // Init asset browser
+            browseAssets('gifs');
+        }
+
+        init();
+    </script>
+</body>
+</html>
