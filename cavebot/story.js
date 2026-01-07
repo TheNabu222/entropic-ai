@@ -23,10 +23,6 @@ const SCENES = {
     blurb: 'Dusk wind over the copper river. Every ripple hums with buried code.',
     background: './assets/backdrops/scenes/_cavebot-scenes_4-anzu&nabu-duskyriver.png',
     sprite: './assets/sprites/Nabu/_sprites_nabu1-idle.png',
-    artLabel: 'Anzu & Nabu — dusky river backdrop',
-    spriteLabel: 'Nabu idle sprite with bow lowered',
-    spriteAlt: 'Nabu standing at ease with bow lowered',
-    artAlt: 'Anzu and Nabu framed by a dusky river with fireflies',
     intro: 'You and Anzu arrive where the river meets ancient circuitry. The night is bright with signals.',
     hotspots: [
       {
@@ -64,10 +60,6 @@ const SCENES = {
     blurb: 'Obsidian monoliths ring with footsteps from old raiders. The path is narrow and honest.',
     background: './assets/backdrops/scenes/_cavebot-scenes_3-nabu&gilgrokmeshargue.png',
     sprite: './assets/sprites/Nabu/_sprites_nabu4-tenseskystare.png',
-    artLabel: 'Nabu & Gilgrokmesh — basalt ridge standoff',
-    spriteLabel: 'Nabu tense sky stare sprite',
-    spriteAlt: 'Nabu gripping a spear, tense against storm clouds',
-    artAlt: 'Nabu and Gilgrokmesh arguing by basalt monoliths',
     intro: 'You scale the ridge. Gilgrokmesh waits, watching the storm gather below.',
     hotspots: [
       {
@@ -107,10 +99,6 @@ const SCENES = {
     blurb: 'An elevator of roots lowers you beneath the dunes. Luminous code drips like rain.',
     background: './assets/backdrops/scenes/_cavebot-scenes_5-nabu&anzu.png',
     sprite: './assets/sprites/Nabu/_sprites_nabu2-ritual.png',
-    artLabel: 'Nabu & Anzu — vault ritual',
-    spriteLabel: 'Nabu ritual pose sprite',
-    spriteAlt: 'Nabu kneeling mid-ritual with a spear across the lap',
-    artAlt: 'Nabu and Anzu sharing light inside the vault chamber',
     intro: 'The vault accepts the flute melody. Lights bloom as archived spirits wake.',
     hotspots: [
       {

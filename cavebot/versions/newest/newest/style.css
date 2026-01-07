@@ -1,0 +1,380 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+:root {
+    --color-pink: #FF69B4;
+    --color-blue: #00FFFF;
+    --color-sidebar-bg: #8FE3D9; /* Light Cyan/Teal from reference */
+    --color-dialogue-bg: #EAE4D3; /* Beige/Off-white */
+    --color-text-main: #000;
+    --color-border-dark: #2c2c2c;
+    
+    --font-header: 'Press Start 2P', cursive; /* Chunky pixel font */
+    --font-body: 'VT323', monospace; /* Taller, readable pixel font */
+}
+
+* {
+    box-sizing: border-box;
+    image-rendering: pixelated; /* Essential for the retro feel */
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: var(--color-text-main);
+    font-family: var(--font-body);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#game-container {
+    width: 960px;
+    height: 640px;
+    background-color: #222;
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    grid-template-rows: 1fr 200px;
+    grid-template-areas:
+        "stage sidebar"
+        "dialogue sidebar";
+    
+    /* Complex Border Simulation */
+    border: 4px solid var(--color-blue);
+    box-shadow: 
+        0 0 0 4px var(--color-pink),
+        0 0 20px var(--color-blue);
+    position: relative;
+}
+
+/* --- STAGE (Main View) --- */
+#stage {
+    grid-area: stage;
+    position: relative;
+    background-color: #000;
+    overflow: hidden;
+    border-right: 4px solid var(--color-pink);
+    border-bottom: 4px solid var(--color-pink);
+}
+
+.layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#bg-layer {
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.5s ease;
+}
+
+#sprite-layer img {
+    position: absolute;
+    bottom: 0;
+    transition: transform 0.3s;
+}
+
+/* --- SIDEBAR --- */
+#sidebar {
+    grid-area: sidebar;
+    background-color: var(--color-sidebar-bg);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-left: 4px solid var(--color-blue);
+    font-family: var(--font-header);
+    color: #2c3e50;
+}
+
+.panel-header {
+    font-size: 0.8rem;
+    border-bottom: 2px solid #2c3e50;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+/* Stats */
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+}
+
+.dice-icon {
+    font-size: 0.8rem;
+    opacity: 0.5;
+}
+
+/* Glitch Bar */
+.glitch-bar-container {
+    height: 10px;
+    background: #444;
+    border: 1px solid #000;
+    margin-top: 5px;
+}
+
+.glitch-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-blue), var(--color-pink));
+    width: 0%;
+    transition: width 0.3s;
+}
+
+/* Inventory */
+#inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+
+.inv-slot {
+    width: 100%;
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.5);
+    border: 2px solid #2c3e50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inv-slot img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+/* Log */
+#log-container {
+    flex-grow: 1;
+    background: rgba(0, 0, 0, 0.1);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    overflow-y: auto;
+    padding: 5px;
+    border: 1px inset rgba(0,0,0,0.2);
+}
+
+.log-entry {
+    margin-bottom: 4px;
+    font-size: 0.9em;
+}
+
+/* --- DIALOGUE AREA --- */
+#dialogue-area {
+    grid-area: dialogue;
+    background-color: var(--color-dialogue-bg);
+    padding: 20px;
+    position: relative;
+    border-top: 4px solid var(--color-pink);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Name Tag - Rainbow Gradient from reference */
+#speaker-tag {
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: black;
+    color: white; /* Fallback */
+    padding: 5px 10px;
+    font-family: var(--font-header);
+    font-size: 0.8rem;
+    border: 2px solid white;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
+    
+    /* Rainbow Text Gradient */
+    background-image: linear-gradient(45deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 0.5px white; /* Make it readable */
+    animation: rainbow 5s ease infinite;
+    background-color: #222; /* Background for the box itself, text sits on top */
+}
+
+/* Fix for background-clip hiding the box background */
+#speaker-tag {
+    /* Re-doing this approach to match visual of "Label on top of box" */
+    background: #222;
+    color: white;
+    -webkit-text-stroke: 0;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    background-image: none;
+    border: 2px solid var(--color-pink);
+}
+#speaker-tag::after {
+    /* The rainbow text effect */
+    content: attr(data-text); /* Requires JS to sync, or we just style the text inside */
+}
+
+/* Simpler Rainbow Text approach */
+#speaker-tag {
+    background: #000;
+    border: 2px solid var(--color-pink);
+    color: white;
+    text-shadow: 2px 2px 0px #FF69B4;
+}
+
+
+#dialogue-text {
+    font-family: 'Times New Roman', serif; /* Matching reference image serif style */
+    font-size: 1.4rem;
+    line-height: 1.4;
+    color: #2c2c2c;
+    margin-bottom: 15px;
+    flex-grow: 1;
+}
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.2rem;
+    background-color: var(--color-pink);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+}
+
+/* --- CHOICES --- */
+#choice-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+button {
+    background: transparent;
+    border: 2px solid #2c2c2c;
+    padding: 8px 16px;
+    font-family: var(--font-header);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: #fff;
+    box-shadow: 3px 3px 0px #2c2c2c;
+}
+
+button:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px var(--color-pink);
+    border-color: var(--color-pink);
+    color: var(--color-pink);
+}
+
+button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #2c2c2c;
+}
+
+button.skill-check {
+    border-color: var(--color-blue);
+}
+
+button.skill-check:hover {
+    box-shadow: 4px 4px 0px var(--color-blue);
+    color: var(--color-blue);
+}
+
+/* --- VFX --- */
+@keyframes rainbow { 
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Dice Animation */
+#dice-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+    pointer-events: none;
+}
+
+.die {
+    font-family: var(--font-header);
+    font-size: 4rem;
+    color: white;
+    text-shadow: 3px 3px 0px #000;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.die.success { color: var(--color-blue); }
+.die.fail { color: var(--color-pink); }
+
+@keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* CRT Scanlines Overlay */
+#crt-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.1) 50%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* Start Overlay */
+#start-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-blue);
+    font-family: var(--font-header);
+    font-size: 2rem;
+}
+
+#start-overlay.hidden {
+    display: none;
+}
+
+#start-btn {
+    margin-top: 30px;
+    font-size: 1rem;
+    padding: 15px 30px;
+    background: black;
+    color: var(--color-pink);
+    border: 2px solid var(--color-pink);
+    box-shadow: 0 0 10px var(--color-pink);
+}
+
+#start-btn:hover {
+    background: var(--color-pink);
+    color: black;
+}

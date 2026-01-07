@@ -32,8 +32,6 @@ function initGame() {
   dom.signalLog = $('signal-log');
   dom.routes = $('map-routes');
   dom.clock = $('clock');
-  dom.artLabel = $('art-label');
-  dom.spriteLabel = $('sprite-label');
   dom.helpBtn = $('help-btn');
   dom.resetBtn = $('reset-btn');
   dom.helpOverlay = $('help-overlay');
@@ -72,13 +70,8 @@ function setScene(sceneId) {
   if (!scene) return;
   state.currentScene = sceneId;
 
-  dom.backdrop.src = scene.background;
-  dom.backdrop.alt = scene.artAlt || friendlyAssetLabel(scene.background, scene.name);
+  dom.backdrop.style.backgroundImage = `url(${scene.background})`;
   dom.character.src = scene.sprite;
-  dom.character.alt = scene.spriteAlt || friendlyAssetLabel(scene.sprite, `${scene.name} companion`);
-  dom.artLabel.textContent = scene.artLabel || friendlyAssetLabel(scene.background, scene.name);
-  dom.spriteLabel.textContent = scene.spriteLabel || friendlyAssetLabel(scene.sprite, 'Sprite focus');
-  dom.spriteLabel.style.display = dom.spriteLabel.textContent ? 'inline-flex' : 'none';
   dom.sceneTitle.textContent = scene.name;
 
   const firstVisit = !state.visited.has(sceneId);
@@ -332,12 +325,4 @@ function resetRun() {
 
 function toggleHelp(open) {
   dom.helpOverlay.classList.toggle('visible', open);
-}
-
-function friendlyAssetLabel(path, fallback) {
-  if (!path) return fallback || '';
-  const file = path.split('/').pop()?.split('.')[0] || '';
-  const cleaned = file.replace(/^_+/, '').replace(/[_-]+/g, ' ').replace(/&/g, ' & ');
-  const label = cleaned.replace(/\s+/g, ' ').trim();
-  return label || fallback || '';
 }

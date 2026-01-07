@@ -16,6 +16,7 @@ file_mapping = {
     '_cavebot-bg_reedbed(day)_4.png': 'bg_reedbed.png',
     '_cavebot-bg_river-ikibala(night)_2.png': 'bg_river_night.png',
     '_cavebot-bg_steppe-megafauna(day)_1.png': 'bg_steppe.png',
+
     
     # Sprites - Nabu
     '_cavebot-sprites_nabu-neutral-standing_1.png': 'nabu_stand.png',
@@ -25,6 +26,7 @@ file_mapping = {
     '_sprites_nabu(offer)_6.png': 'nabu_offer.png',
     '_sprites_nabu(stargaze)_2.png': 'nabu_stargaze.png',
     'sprites_nabu(thoughtful)_1.png': 'nabu_think.png',
+
     
     # Sprites - Anzu/Bird/Mecha
     '_cavebot-sprites_anzu(shoebill)_1.png': 'anzu_shoebill.png',
