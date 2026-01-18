@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cavebot Scene Maker</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0e14;
+        --panel: #141a24;
+        --panel-muted: #1b2330;
+        --text: #f1f5ff;
+        --muted: #95a0b5;
+        --accent: #7dd3fc;
+        --accent-strong: #38bdf8;
+        --danger: #f97316;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 32px;
+        background: linear-gradient(135deg, #172033, #101521);
+        border-bottom: 1px solid #233049;
+      }
+
+      .app-header h1 {
+        margin: 0 0 6px;
+        font-size: 24px;
+      }
+
+      .app-header p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 12px;
+      }
+
+      .app-grid {
+        display: grid;
+        grid-template-columns: 280px minmax(420px, 1fr) 320px;
+        gap: 18px;
+        padding: 24px 32px 40px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid #232f45;
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 320px;
+      }
+
+      .panel h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+
+      textarea,
+      input,
+      select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid #2b3a55;
+        background: #0f1522;
+        color: var(--text);
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+
+      .panel-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--panel-muted);
+        color: var(--text);
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #071521;
+      }
+
+      button.ghost {
+        background: transparent;
+        border: 1px solid #2e3d57;
+      }
+
+      button.danger {
+        background: var(--danger);
+        color: #1a0b02;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .asset-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 12px;
+        overflow-y: auto;
+        padding-right: 4px;
+        max-height: 520px;
+      }
+
+      .asset-card {
+        border: 1px solid #2c3b55;
+        background: #111827;
+        border-radius: 12px;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        cursor: grab;
+      }
+
+      .asset-card:active {
+        cursor: grabbing;
+      }
+
+      .asset-thumb {
+        width: 100%;
+        height: 72px;
+        border-radius: 8px;
+        background: #1f2937;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .asset-thumb img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+
+      .asset-label {
+        font-size: 12px;
+        text-align: center;
+        color: var(--muted);
+        word-break: break-word;
+      }
+
+      .stage-panel {
+        gap: 16px;
+      }
+
+      .stage-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .stage-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .inline {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+      }
+
+      .inline > div {
+        flex: 1;
+      }
+
+      .stage {
+        background: #0f172a;
+        border-radius: 16px;
+        border: 1px dashed #2f3e57;
+        height: 520px;
+        position: relative;
+        overflow: hidden;
+        background-size: cover;
+        background-position: center;
+      }
+
+      .scene-object {
+        position: absolute;
+        display: grid;
+        place-items: center;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        cursor: move;
+        padding: 4px;
+        color: var(--muted);
+        text-align: center;
+        font-size: 11px;
+        background: rgba(15, 23, 42, 0.3);
+        user-select: none;
+      }
+
+      .scene-object img {
+        max-width: 100%;
+        max-height: 100%;
+        pointer-events: none;
+      }
+
+      .scene-object.selected {
+        border-color: var(--accent-strong);
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+      }
+
+      .scene-object.audio {
+        background: rgba(15, 23, 42, 0.8);
+      }
+
+      .scene-object.audio::before {
+        content: "♪";
+        font-size: 20px;
+        color: var(--accent);
+      }
+
+      .object-label {
+        pointer-events: none;
+      }
+
+      .inspector {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .inspector.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .hint {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .layer-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .rotation-value {
+        text-align: right;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .export-panel {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--panel);
+        border: 1px solid #2b3a55;
+        padding: 12px 16px;
+        border-radius: 12px;
+        color: var(--text);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+      }
+
+      @media (max-width: 1200px) {
+        .app-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stage {
+          height: 420px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>Cavebot Scene Maker</h1>
+        <p>Create point-and-click scenes, drop assets, and assign interactions.</p>
+      </div>
+      <div class="header-actions">
+        <button id="export-json" class="primary">Export JSON</button>
+        <button id="clear-scene" class="ghost">Clear Scene</button>
+      </div>
+    </header>
+
+    <main class="app-grid">
+      <section class="panel assets-panel">
+        <h2>Assets</h2>
+        <label class="label" for="asset-input">Paste image/audio URLs (one per line)</label>
+        <textarea id="asset-input" placeholder="https://.../sprite.png"></textarea>
+        <div class="panel-actions">
+          <button id="load-assets" class="primary">Load Assets</button>
+          <button id="use-cavebot" class="ghost">Load Cavebot Set</button>
+        </div>
+        <div id="asset-list" class="asset-list"></div>
+      </section>
+
+      <section class="panel stage-panel">
+        <div class="stage-header">
+          <div>
+            <h2>Scene</h2>
+            <p>Drag assets into the stage. Select an object to edit.</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="preview-mode" />
+            <span>Preview interactions</span>
+          </label>
+        </div>
+
+        <div class="stage-controls">
+          <label class="label" for="background-url">Background URL</label>
+          <div class="inline">
+            <input id="background-url" type="url" placeholder="https://.../background.png" />
+            <button id="apply-background" class="ghost">Apply</button>
+          </div>
+          <div class="inline">
+            <div>
+              <label class="label" for="stage-width">Stage width</label>
+              <input id="stage-width" type="number" min="320" value="900" />
+            </div>
+            <div>
+              <label class="label" for="stage-height">Stage height</label>
+              <input id="stage-height" type="number" min="240" value="520" />
+            </div>
+            <button id="resize-stage" class="ghost">Resize</button>
+          </div>
+        </div>
+
+        <div id="stage" class="stage" aria-label="Scene canvas"></div>
+
+        <div class="export-panel">
+          <label class="label" for="json-output">Scene JSON</label>
+          <textarea id="json-output" placeholder="Exported scene JSON appears here"></textarea>
+          <div class="panel-actions">
+            <button id="import-json" class="ghost">Import JSON</button>
+            <button id="copy-json" class="ghost">Copy JSON</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel inspector-panel">
+        <h2>Object Properties</h2>
+        <p class="hint">Select an object to edit its properties.</p>
+        <div id="inspector" class="inspector disabled">
+          <label class="label" for="object-name">Name</label>
+          <input id="object-name" type="text" placeholder="object name" />
+
+          <div class="inline">
+            <div>
+              <label class="label" for="object-x">X</label>
+              <input id="object-x" type="number" />
+            </div>
+            <div>
+              <label class="label" for="object-y">Y</label>
+              <input id="object-y" type="number" />
+            </div>
+          </div>
+
+          <div class="inline">
+            <div>
+              <label class="label" for="object-width">Width</label>
+              <input id="object-width" type="number" min="10" />
+            </div>
+            <div>
+              <label class="label" for="object-height">Height</label>
+              <input id="object-height" type="number" min="10" />
+            </div>
+          </div>
+
+          <label class="label" for="object-rotation">Rotation</label>
+          <input id="object-rotation" type="range" min="-180" max="180" value="0" />
+          <div class="rotation-value" id="rotation-value">0°</div>
+
+          <div class="inline">
+            <div>
+              <label class="label" for="object-z">Layer (z-index)</label>
+              <input id="object-z" type="number" />
+            </div>
+            <div class="layer-buttons">
+              <button id="bring-forward" class="ghost">Bring Forward</button>
+              <button id="send-back" class="ghost">Send Back</button>
+            </div>
+          </div>
+
+          <label class="toggle">
+            <input type="checkbox" id="object-clickable" />
+            <span>Clickable</span>
+          </label>
+
+          <label class="label" for="object-cursor">Cursor</label>
+          <select id="object-cursor">
+            <option value="default">Default</option>
+            <option value="pointer">Pointer</option>
+            <option value="crosshair">Crosshair</option>
+            <option value="zoom-in">Zoom in</option>
+            <option value="zoom-out">Zoom out</option>
+            <option value="grab">Grab</option>
+          </select>
+
+          <label class="label" for="object-action">Click Action</label>
+          <select id="object-action">
+            <option value="none">None</option>
+            <option value="message">Show message</option>
+            <option value="link">Open link</option>
+            <option value="audio">Play audio</option>
+          </select>
+
+          <label class="label" for="object-action-value">Action value</label>
+          <input id="object-action-value" type="text" placeholder="Message text or URL" />
+
+          <div class="panel-actions">
+            <button id="duplicate-object" class="ghost">Duplicate</button>
+            <button id="delete-object" class="danger">Delete</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <template id="asset-template">
+      <div class="asset-card" draggable="true">
+        <div class="asset-thumb"></div>
+        <div class="asset-label"></div>
+      </div>
+    </template>
+
+    <template id="object-template">
+      <div class="scene-object" tabindex="0">
+        <span class="object-label"></span>
+      </div>
+    </template>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const assetInput = document.getElementById("asset-input");
+      const assetList = document.getElementById("asset-list");
+      const loadAssetsButton = document.getElementById("load-assets");
+      const cavebotAssetsButton = document.getElementById("use-cavebot");
+      const stage = document.getElementById("stage");
+      const backgroundUrlInput = document.getElementById("background-url");
+      const applyBackgroundButton = document.getElementById("apply-background");
+      const stageWidthInput = document.getElementById("stage-width");
+      const stageHeightInput = document.getElementById("stage-height");
+      const resizeStageButton = document.getElementById("resize-stage");
+      const exportJsonButton = document.getElementById("export-json");
+      const clearSceneButton = document.getElementById("clear-scene");
+      const jsonOutput = document.getElementById("json-output");
+      const importJsonButton = document.getElementById("import-json");
+      const copyJsonButton = document.getElementById("copy-json");
+      const previewToggle = document.getElementById("preview-mode");
+
+      const inspector = document.getElementById("inspector");
+      const objectNameInput = document.getElementById("object-name");
+      const objectXInput = document.getElementById("object-x");
+      const objectYInput = document.getElementById("object-y");
+      const objectWidthInput = document.getElementById("object-width");
+      const objectHeightInput = document.getElementById("object-height");
+      const objectRotationInput = document.getElementById("object-rotation");
+      const rotationValue = document.getElementById("rotation-value");
+      const objectZInput = document.getElementById("object-z");
+      const objectClickableInput = document.getElementById("object-clickable");
+      const objectCursorSelect = document.getElementById("object-cursor");
+      const objectActionSelect = document.getElementById("object-action");
+      const objectActionValueInput = document.getElementById("object-action-value");
+      const duplicateButton = document.getElementById("duplicate-object");
+      const deleteButton = document.getElementById("delete-object");
+      const bringForwardButton = document.getElementById("bring-forward");
+      const sendBackButton = document.getElementById("send-back");
+      const toast = document.getElementById("toast");
+
+      const assetTemplate = document.getElementById("asset-template");
+      const objectTemplate = document.getElementById("object-template");
+
+      const state = {
+        assets: [],
+        objects: [],
+        selectedId: null,
+        stage: {
+          width: 900,
+          height: 520,
+          background: "",
+        },
+      };
+
+      const cavebotPreset = [
+        "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/cavebot/assets/image/backdrops/empty/_cavebot-bg1-reeds.png",
+        "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/cavebot/assets/image/backdrops/empty/_cavebot-bg2-cedarwoods.png",
+        "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/cavebot/assets/image/sprites/Nabu/_sprites_nabu1-idle.png",
+        "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/cavebot/assets/image/sprites/Anzu%20/_sprites_anzu1-front.png",
+        "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/cavebot/assets/image/icons/interactions/_interact-icons_1-dialogue.png",
+        "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/cavebot/assets/audio/_nabuinproximity2.wav",
+      ];
+
+      const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"];
+      const audioExtensions = [".mp3", ".wav", ".m4a", ".ogg", ".flac", ".aif", ".aiff"];
+
+      const toastQueue = {
+        timeout: null,
+        show(message) {
+          toast.textContent = message;
+          toast.classList.add("show");
+          clearTimeout(this.timeout);
+          this.timeout = setTimeout(() => {
+            toast.classList.remove("show");
+          }, 2200);
+        },
+      };
+
+      const getFileName = (url) => {
+        try {
+          const parsed = new URL(url);
+          return decodeURIComponent(parsed.pathname.split("/").pop() || url);
+        } catch {
+          return url.split("/").pop() || url;
+        }
+      };
+
+      const detectType = (url) => {
+        const lower = url.toLowerCase();
+        if (imageExtensions.some((ext) => lower.endsWith(ext))) {
+          return "image";
+        }
+        if (audioExtensions.some((ext) => lower.endsWith(ext))) {
+          return "audio";
+        }
+        return "unknown";
+      };
+
+      const renderAssets = () => {
+        assetList.innerHTML = "";
+        state.assets.forEach((asset) => {
+          const card = assetTemplate.content.firstElementChild.cloneNode(true);
+          const thumb = card.querySelector(".asset-thumb");
+          const label = card.querySelector(".asset-label");
+
+          card.dataset.url = asset.url;
+          card.dataset.type = asset.type;
+
+          if (asset.type === "image") {
+            const img = document.createElement("img");
+            img.src = asset.url;
+            img.alt = asset.name;
+            thumb.appendChild(img);
+          } else if (asset.type === "audio") {
+            thumb.textContent = "Audio";
+          } else {
+            thumb.textContent = "Asset";
+          }
+
+          label.textContent = asset.name;
+
+          card.addEventListener("dragstart", (event) => {
+            event.dataTransfer.setData("text/plain", JSON.stringify(asset));
+          });
+
+          assetList.appendChild(card);
+        });
+      };
+
+      const loadAssetsFromInput = (urls) => {
+        const lines = urls
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        const newAssets = lines.map((url) => ({
+          url,
+          type: detectType(url),
+          name: getFileName(url),
+        }));
+
+        state.assets = newAssets;
+        renderAssets();
+      };
+
+      const createSceneObject = (asset, x, y) => {
+        const object = {
+          id: crypto.randomUUID(),
+          name: asset.name,
+          url: asset.url,
+          type: asset.type,
+          x,
+          y,
+          width: asset.type === "audio" ? 100 : 140,
+          height: asset.type === "audio" ? 80 : 140,
+          rotation: 0,
+          zIndex: state.objects.length + 1,
+          clickable: false,
+          cursor: "default",
+          action: "none",
+          actionValue: "",
+        };
+
+        state.objects.push(object);
+        renderScene();
+        selectObject(object.id);
+      };
+
+      const renderScene = () => {
+        stage.innerHTML = "";
+        stage.style.backgroundImage = state.stage.background
+          ? `url("${state.stage.background}")`
+          : "none";
+        stage.style.width = `${state.stage.width}px`;
+        stage.style.height = `${state.stage.height}px`;
+
+        state.objects
+          .slice()
+          .sort((a, b) => a.zIndex - b.zIndex)
+          .forEach((object) => {
+            const element = objectTemplate.content.firstElementChild.cloneNode(true);
+            element.dataset.id = object.id;
+            element.style.left = `${object.x}px`;
+            element.style.top = `${object.y}px`;
+            element.style.width = `${object.width}px`;
+            element.style.height = `${object.height}px`;
+            element.style.transform = `rotate(${object.rotation}deg)`;
+            element.style.zIndex = object.zIndex;
+            element.style.cursor = previewToggle.checked
+              ? object.cursor
+              : "move";
+
+            if (object.type === "image") {
+              element.style.backgroundImage = `url("${object.url}")`;
+              element.style.backgroundSize = "contain";
+              element.style.backgroundRepeat = "no-repeat";
+              element.style.backgroundPosition = "center";
+            } else if (object.type === "audio") {
+              element.classList.add("audio");
+            }
+
+            element.querySelector(".object-label").textContent = object.name;
+
+            if (object.id === state.selectedId) {
+              element.classList.add("selected");
+            }
+
+            stage.appendChild(element);
+          });
+      };
+
+      const selectObject = (id) => {
+        state.selectedId = id;
+        const object = state.objects.find((item) => item.id === id);
+        if (!object) {
+          inspector.classList.add("disabled");
+          return;
+        }
+
+        inspector.classList.remove("disabled");
+        objectNameInput.value = object.name;
+        objectXInput.value = Math.round(object.x);
+        objectYInput.value = Math.round(object.y);
+        objectWidthInput.value = Math.round(object.width);
+        objectHeightInput.value = Math.round(object.height);
+        objectRotationInput.value = object.rotation;
+        rotationValue.textContent = `${object.rotation}°`;
+        objectZInput.value = object.zIndex;
+        objectClickableInput.checked = object.clickable;
+        objectCursorSelect.value = object.cursor;
+        objectActionSelect.value = object.action;
+        objectActionValueInput.value = object.actionValue;
+
+        renderScene();
+      };
+
+      const updateSelectedObject = (updates) => {
+        const object = state.objects.find((item) => item.id === state.selectedId);
+        if (!object) return;
+        Object.assign(object, updates);
+        renderScene();
+      };
+
+      const clearSelection = () => {
+        state.selectedId = null;
+        inspector.classList.add("disabled");
+        renderScene();
+      };
+
+      const handleStageDrop = (event) => {
+        event.preventDefault();
+        const data = event.dataTransfer.getData("text/plain");
+        if (!data) return;
+        const asset = JSON.parse(data);
+        const rect = stage.getBoundingClientRect();
+        const x = Math.max(0, event.clientX - rect.left - 60);
+        const y = Math.max(0, event.clientY - rect.top - 60);
+        createSceneObject(asset, x, y);
+      };
+
+      const attachSceneEvents = () => {
+        let dragTarget = null;
+        let dragOffset = { x: 0, y: 0 };
+        let isDragging = false;
+
+        stage.addEventListener("dragover", (event) => {
+          event.preventDefault();
+        });
+
+        stage.addEventListener("drop", handleStageDrop);
+
+        stage.addEventListener("pointerdown", (event) => {
+          const target = event.target.closest(".scene-object");
+          if (!target || previewToggle.checked) return;
+          const id = target.dataset.id;
+          selectObject(id);
+          const object = state.objects.find((item) => item.id === id);
+          if (!object) return;
+
+          isDragging = false;
+          dragTarget = object;
+          const rect = stage.getBoundingClientRect();
+          dragOffset = {
+            x: event.clientX - rect.left - object.x,
+            y: event.clientY - rect.top - object.y,
+          };
+        });
+
+        stage.addEventListener("pointermove", (event) => {
+          if (!dragTarget) return;
+          const rect = stage.getBoundingClientRect();
+          const nextX = event.clientX - rect.left - dragOffset.x;
+          const nextY = event.clientY - rect.top - dragOffset.y;
+          dragTarget.x = Math.max(0, Math.min(nextX, rect.width - dragTarget.width));
+          dragTarget.y = Math.max(0, Math.min(nextY, rect.height - dragTarget.height));
+          isDragging = true;
+          renderScene();
+        });
+
+        stage.addEventListener("pointerup", (event) => {
+          if (dragTarget) {
+            dragTarget = null;
+            if (isDragging) {
+              selectObject(state.selectedId);
+            }
+          }
+
+          const target = event.target.closest(".scene-object");
+          if (!target) return;
+          if (!previewToggle.checked) return;
+
+          const object = state.objects.find((item) => item.id === target.dataset.id);
+          if (!object || !object.clickable) return;
+
+          if (object.action === "message" && object.actionValue) {
+            toastQueue.show(object.actionValue);
+          }
+
+          if (object.action === "link" && object.actionValue) {
+            window.open(object.actionValue, "_blank", "noopener");
+          }
+
+          if (object.action === "audio") {
+            const audio = new Audio(object.actionValue || object.url);
+            audio.play().catch(() => {
+              toastQueue.show("Audio blocked by browser autoplay rules.");
+            });
+          }
+        });
+
+        stage.addEventListener("click", (event) => {
+          if (event.target === stage && !previewToggle.checked) {
+            clearSelection();
+          }
+        });
+      };
+
+      const exportScene = () => {
+        const payload = {
+          stage: state.stage,
+          objects: state.objects,
+        };
+        jsonOutput.value = JSON.stringify(payload, null, 2);
+        toastQueue.show("Scene exported to JSON.");
+      };
+
+      const importScene = () => {
+        if (!jsonOutput.value.trim()) return;
+        try {
+          const data = JSON.parse(jsonOutput.value);
+          if (!data || !data.stage || !Array.isArray(data.objects)) {
+            toastQueue.show("Invalid JSON format.");
+            return;
+          }
+          state.stage = {
+            width: data.stage.width || 900,
+            height: data.stage.height || 520,
+            background: data.stage.background || "",
+          };
+          state.objects = data.objects.map((object) => ({
+            ...object,
+            id: object.id || crypto.randomUUID(),
+          }));
+          state.selectedId = null;
+          backgroundUrlInput.value = state.stage.background;
+          stageWidthInput.value = state.stage.width;
+          stageHeightInput.value = state.stage.height;
+          renderScene();
+          clearSelection();
+          toastQueue.show("Scene imported.");
+        } catch {
+          toastQueue.show("Invalid JSON.");
+        }
+      };
+
+      const copyJson = async () => {
+        if (!jsonOutput.value.trim()) {
+          exportScene();
+        }
+        await navigator.clipboard.writeText(jsonOutput.value);
+        toastQueue.show("Copied scene JSON.");
+      };
+
+      const syncInspector = () => {
+        objectNameInput.addEventListener("input", (event) => {
+          updateSelectedObject({ name: event.target.value });
+        });
+
+        objectXInput.addEventListener("input", (event) => {
+          updateSelectedObject({ x: Number(event.target.value) });
+        });
+
+        objectYInput.addEventListener("input", (event) => {
+          updateSelectedObject({ y: Number(event.target.value) });
+        });
+
+        objectWidthInput.addEventListener("input", (event) => {
+          updateSelectedObject({ width: Number(event.target.value) });
+        });
+
+        objectHeightInput.addEventListener("input", (event) => {
+          updateSelectedObject({ height: Number(event.target.value) });
+        });
+
+        objectRotationInput.addEventListener("input", (event) => {
+          const value = Number(event.target.value);
+          rotationValue.textContent = `${value}°`;
+          updateSelectedObject({ rotation: value });
+        });
+
+        objectZInput.addEventListener("input", (event) => {
+          updateSelectedObject({ zIndex: Number(event.target.value) });
+        });
+
+        objectClickableInput.addEventListener("change", (event) => {
+          updateSelectedObject({ clickable: event.target.checked });
+        });
+
+        objectCursorSelect.addEventListener("change", (event) => {
+          updateSelectedObject({ cursor: event.target.value });
+        });
+
+        objectActionSelect.addEventListener("change", (event) => {
+          updateSelectedObject({ action: event.target.value });
+        });
+
+        objectActionValueInput.addEventListener("input", (event) => {
+          updateSelectedObject({ actionValue: event.target.value });
+        });
+
+        duplicateButton.addEventListener("click", () => {
+          const object = state.objects.find((item) => item.id === state.selectedId);
+          if (!object) return;
+          const clone = {
+            ...object,
+            id: crypto.randomUUID(),
+            x: object.x + 20,
+            y: object.y + 20,
+            name: `${object.name} copy`,
+            zIndex: object.zIndex + 1,
+          };
+          state.objects.push(clone);
+          renderScene();
+          selectObject(clone.id);
+        });
+
+        deleteButton.addEventListener("click", () => {
+          state.objects = state.objects.filter((item) => item.id !== state.selectedId);
+          clearSelection();
+        });
+
+        bringForwardButton.addEventListener("click", () => {
+          const object = state.objects.find((item) => item.id === state.selectedId);
+          if (!object) return;
+          object.zIndex += 1;
+          selectObject(object.id);
+        });
+
+        sendBackButton.addEventListener("click", () => {
+          const object = state.objects.find((item) => item.id === state.selectedId);
+          if (!object) return;
+          object.zIndex = Math.max(0, object.zIndex - 1);
+          selectObject(object.id);
+        });
+      };
+
+      loadAssetsButton.addEventListener("click", () => {
+        loadAssetsFromInput(assetInput.value);
+      });
+
+      cavebotAssetsButton.addEventListener("click", () => {
+        assetInput.value = cavebotPreset.join("\n");
+        loadAssetsFromInput(assetInput.value);
+      });
+
+      applyBackgroundButton.addEventListener("click", () => {
+        state.stage.background = backgroundUrlInput.value.trim();
+        renderScene();
+      });
+
+      resizeStageButton.addEventListener("click", () => {
+        state.stage.width = Number(stageWidthInput.value) || 900;
+        state.stage.height = Number(stageHeightInput.value) || 520;
+        renderScene();
+      });
+
+      exportJsonButton.addEventListener("click", exportScene);
+      clearSceneButton.addEventListener("click", () => {
+        state.objects = [];
+        clearSelection();
+        renderScene();
+      });
+
+      importJsonButton.addEventListener("click", importScene);
+      copyJsonButton.addEventListener("click", copyJson);
+
+      previewToggle.addEventListener("change", () => {
+        renderScene();
+        toastQueue.show(
+          previewToggle.checked
+            ? "Preview mode: interactions active."
+            : "Edit mode: drag objects."
+        );
+      });
+
+      attachSceneEvents();
+      syncInspector();
+      renderScene();
+    </script>
+  </body>
+</html>
