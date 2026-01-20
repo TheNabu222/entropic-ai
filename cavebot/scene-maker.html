@@ -135,45 +135,13 @@
         cursor: not-allowed;
       }
 
-      
-      .asset-controls {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .asset-controls select,
-      .asset-controls input[type="search"] {
-        width: 100%;
-      }
-
-      .asset-section {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .asset-section-title {
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--muted);
-        margin-top: 4px;
-      }
-
       .asset-list {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        overflow-y: auto;
-        padding-right: 4px;
-        max-height: 520px;
-      }
-
-      .asset-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: 12px;
+        overflow-y: auto;
+        padding-right: 4px;
+        max-height: 520px;
       }
 
       .asset-card {
@@ -293,17 +261,6 @@
 
       .object-label {
         pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.15s ease;
-        padding: 2px 6px;
-        border-radius: 6px;
-        background: rgba(11, 14, 20, 0.65);
-      }
-
-      .scene-object.selected .object-label,
-      .scene-object:hover .object-label,
-      .stage.show-labels .object-label {
-        opacity: 1;
       }
 
       .inspector {
@@ -399,21 +356,6 @@
         <div class="panel-actions">
           <button id="load-assets" class="primary">Load Assets</button>
           <button id="use-cavebot" class="ghost">Load Cavebot Set</button>
-        </div>
-        <div class="asset-controls">
-          <input id="asset-search" type="search" placeholder="Filter assets" />
-          <select id="asset-type-filter">
-            <option value="all">All types</option>
-            <option value="image">Images</option>
-            <option value="audio">Audio</option>
-          </select>
-          <select id="asset-group-filter">
-            <option value="all">All folders</option>
-          </select>
-          <label class="toggle">
-            <input type="checkbox" id="show-object-labels" />
-            <span>Show object labels</span>
-          </label>
         </div>
         <div id="asset-list" class="asset-list"></div>
       </section>
@@ -557,10 +499,6 @@
     <script>
       const assetInput = document.getElementById("asset-input");
       const assetList = document.getElementById("asset-list");
-      const assetSearchInput = document.getElementById("asset-search");
-      const assetTypeFilter = document.getElementById("asset-type-filter");
-      const assetGroupFilter = document.getElementById("asset-group-filter");
-      const showObjectLabelsToggle = document.getElementById("show-object-labels");
       const loadAssetsButton = document.getElementById("load-assets");
       const cavebotAssetsButton = document.getElementById("use-cavebot");
       const stage = document.getElementById("stage");
@@ -642,34 +580,6 @@
         }
       };
 
-      const prettyNameFromPath = (url) => {
-        const fileName = getFileName(url);
-        const base = fileName.replace(/\.[^/.]+$/, "");
-        const cleaned = base
-          .replace(/^_+/, "")
-          .replace(/^unsorted[-_]?/i, "")
-          .replace(/cavebot[-_]?/i, "")
-          .replace(/sprites?[-_]?/i, "")
-          .replace(/[-_]+/g, " ")
-          .trim();
-        return cleaned || base || fileName;
-      };
-
-      const getGroupName = (url) => {
-        try {
-          const parts = new URL(url).pathname.split("/").filter(Boolean);
-          const assetsIndex = parts.indexOf("assets");
-          const relevant = assetsIndex >= 0 ? parts[assetsIndex + 1 : -1] : parts.slice(0, -1);
-          if (!relevant.length) return "assets";
-          if (relevant.length >= 2) {
-            return `${relevant[relevant.length - 2]}/${relevant[relevant.length - 1]}`;
-          }
-          return relevant[0];
-        } catch {
-          return "assets";
-        }
-      };
-
       const detectType = (url) => {
         const lower = url.toLowerCase();
         if (imageExtensions.some((ext) => lower.endsWith(ext))) {
@@ -681,90 +591,35 @@
         return "unknown";
       };
 
-      const updateGroupFilterOptions = () => {
-        const current = assetGroupFilter.value;
-        const groups = Array.from(new Set(state.assets.map((asset) => asset.group))).sort();
-        assetGroupFilter.innerHTML = '<option value="all">All folders</option>';
-        groups.forEach((group) => {
-          const option = document.createElement("option");
-          option.value = group;
-          option.textContent = group;
-          assetGroupFilter.appendChild(option);
-        });
-        assetGroupFilter.value = groups.includes(current) ? current : "all";
-      };
-
       const renderAssets = () => {
         assetList.innerHTML = "";
-        const searchTerm = assetSearchInput.value.trim().toLowerCase();
-        const typeFilter = assetTypeFilter.value;
-        const groupFilter = assetGroupFilter.value;
+        state.assets.forEach((asset) => {
+          const card = assetTemplate.content.firstElementChild.cloneNode(true);
+          const thumb = card.querySelector(".asset-thumb");
+          const label = card.querySelector(".asset-label");
 
-        const filteredAssets = state.assets.filter((asset) => {
-          const matchesSearch = !searchTerm ||
-            asset.name.toLowerCase().includes(searchTerm) ||
-            asset.rawName.toLowerCase().includes(searchTerm);
-          const matchesType = typeFilter === "all" || asset.type === typeFilter;
-          const matchesGroup = groupFilter === "all" || asset.group === groupFilter;
-          return matchesSearch && matchesType && matchesGroup;
-        });
+          card.dataset.url = asset.url;
+          card.dataset.type = asset.type;
 
-        const grouped = new Map();
-        filteredAssets.forEach((asset) => {
-          if (!grouped.has(asset.group)) {
-            grouped.set(asset.group, []);
+          if (asset.type === "image") {
+            const img = document.createElement("img");
+            img.src = asset.url;
+            img.alt = asset.name;
+            thumb.appendChild(img);
+          } else if (asset.type === "audio") {
+            thumb.textContent = "Audio";
+          } else {
+            thumb.textContent = "Asset";
           }
-          grouped.get(asset.group).push(asset);
-        });
 
-        Array.from(grouped.keys())
-          .sort()
-          .forEach((group) => {
-            const section = document.createElement("div");
-            section.className = "asset-section";
+          label.textContent = asset.name;
 
-            const title = document.createElement("div");
-            title.className = "asset-section-title";
-            title.textContent = group;
-            section.appendChild(title);
-
-            const grid = document.createElement("div");
-            grid.className = "asset-grid";
-
-            grouped.get(group)
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .forEach((asset) => {
-                const card = assetTemplate.content.firstElementChild.cloneNode(true);
-                const thumb = card.querySelector(".asset-thumb");
-                const label = card.querySelector(".asset-label");
-
-                card.dataset.url = asset.url;
-                card.dataset.type = asset.type;
-                card.title = asset.rawName;
-
-                if (asset.type === "image") {
-                  const img = document.createElement("img");
-                  img.src = asset.url;
-                  img.alt = asset.name;
-                  thumb.appendChild(img);
-                } else if (asset.type === "audio") {
-                  thumb.textContent = "Audio";
-                } else {
-                  thumb.textContent = "Asset";
-                }
-
-                label.textContent = asset.name;
-
-                card.addEventListener("dragstart", (event) => {
-                  event.dataTransfer.setData("text/plain", JSON.stringify(asset));
-                });
-
-                grid.appendChild(card);
-              });
-
-            section.appendChild(grid);
-            assetList.appendChild(section);
+          card.addEventListener("dragstart", (event) => {
+            event.dataTransfer.setData("text/plain", JSON.stringify(asset));
           });
+
+          assetList.appendChild(card);
+        });
       };
 
       const loadAssetsFromInput = (urls) => {
@@ -773,19 +628,13 @@
           .map((line) => line.trim())
           .filter(Boolean);
 
-        const newAssets = lines.map((url) => {
-          const rawName = getFileName(url);
-          return {
-            url,
-            type: detectType(url),
-            name: prettyNameFromPath(url),
-            rawName,
-            group: getGroupName(url),
-          };
-        });
+        const newAssets = lines.map((url) => ({
+          url,
+          type: detectType(url),
+          name: getFileName(url),
+        }));
 
         state.assets = newAssets;
-        updateGroupFilterOptions();
         renderAssets();
       };
 
@@ -1147,14 +996,6 @@
             ? "Preview mode: interactions active."
             : "Edit mode: drag objects."
         );
-      });
-
-      assetSearchInput.addEventListener("input", renderAssets);
-      assetTypeFilter.addEventListener("change", renderAssets);
-      assetGroupFilter.addEventListener("change", renderAssets);
-      stage.classList.toggle("show-labels", showObjectLabelsToggle.checked);
-      showObjectLabelsToggle.addEventListener("change", () => {
-        stage.classList.toggle("show-labels", showObjectLabelsToggle.checked);
       });
 
       attachSceneEvents();
