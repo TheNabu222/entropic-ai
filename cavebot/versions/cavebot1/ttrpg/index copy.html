@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAVEBOT // Point & Click Chronicle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="top-bar">
+      <div id="brand">
+        <span class="title">CAVEBOT</span>
+        <span class="subtitle">Echoes of Anzu • point & click RPG</span>
+      </div>
+      <div id="map-routes" aria-label="Travel routes"></div>
+      <div id="status-readout">
+        <span id="clock">00:00</span>
+      </div>
+      <div id="actions">
+        <button id="help-btn" class="ghost">How to play</button>
+        <button id="reset-btn" class="danger ghost">Reset run</button>
+      </div>
+    </header>
+
+    <main id="layout">
+      <section id="stage">
+        <div id="backdrop" role="img" aria-label="scene backdrop"></div>
+        <div id="stage-frame"></div>
+        <img id="character" alt="companion sprite" />
+        <div id="hotspot-layer" aria-live="polite"></div>
+        <div id="scene-title"></div>
+      </section>
+
+      <aside id="hud">
+        <div class="panel">
+          <div class="panel-heading">Vitals</div>
+          <div class="stat-row"><span>Instinct</span><div class="stat-bar"><div class="fill" data-stat="instinct"></div></div></div>
+          <div class="stat-row"><span>Signal</span><div class="stat-bar"><div class="fill" data-stat="signal"></div></div></div>
+          <div class="stat-row"><span>Resolve</span><div class="stat-bar"><div class="fill" data-stat="resolve"></div></div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading">Inventory</div>
+          <div id="inventory-grid"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading">Quest Log</div>
+          <div id="quest-log"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading">Signal Log</div>
+          <div id="signal-log"></div>
+        </div>
+      </aside>
+    </main>
+
+    <section id="dialogue">
+      <div id="speaker"></div>
+      <div id="dialogue-text"></div>
+      <div id="choices"></div>
+    </section>
+  </div>
+
+  <script src="story.js"></script>
+  <script src="game.js"></script>
+
+  <div id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="overlay-content">
+      <div class="overlay-header">
+        <h2 id="help-title">How to play</h2>
+        <button id="close-help" aria-label="Close help" class="ghost">×</button>
+      </div>
+      <div class="overlay-body">
+        <p>Click hotspots on the stage to interact. Rewards might be stats, inventory, or quests.</p>
+        <p>Travel buttons unlock when their requirements are met. Hover to see what you still need.</p>
+        <p>Your run auto-saves between visits. Use “Reset run” if you want to start clean.</p>
+      </div>
+      <div class="overlay-footer">
+        <button id="close-help-footer" class="primary">Back to the ridge</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
