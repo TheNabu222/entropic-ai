@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ NABU'S SANCTUM ✨</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;1,700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: radial-gradient(ellipse at center, #1a0033 0%, #000000 100%);
+            color: #d4af37;
+            overflow-x: hidden;
+        }
+        
+        /* Cosmic background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* Mystical Taskbar */
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: linear-gradient(180deg, rgba(106, 13, 173, 0.9) 0%, rgba(26, 0, 51, 0.95) 100%);
+            border-top: 2px solid #d4af37;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            z-index: 1000;
+            box-shadow: 0 -4px 30px rgba(212, 175, 55, 0.3),
+                        inset 0 2px 0 rgba(212, 175, 55, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .start-button {
+            background: linear-gradient(135deg, #d4af37 0%, #f4c430 100%);
+            color: #1a0033;
+            border: 2px solid #d4af37;
+            padding: 8px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 16px;
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+        
+        .start-button:hover {
+            background: linear-gradient(135deg, #f4c430 0%, #d4af37 100%);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.9);
+            transform: translateY(-2px);
+        }
+        
+        .start-button::before {
+            content: '⊹ ';
+            color: #6a0dad;
+        }
+        
+        /* Start Menu */
+        .start-menu {
+            position: fixed;
+            bottom: 64px;
+            left: 12px;
+            width: 360px;
+            background: linear-gradient(135deg, rgba(26, 0, 51, 0.95) 0%, rgba(106, 13, 173, 0.95) 100%);
+            border: 2px solid #d4af37;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.5),
+                        inset 0 0 30px rgba(212, 175, 55, 0.1);
+            animation: mystical-appear 0.5s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes mystical-appear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .start-menu.active {
+            display: flex;
+        }
+        
+        .menu-header {
+            background: linear-gradient(90deg, #d4af37 0%, #6a0dad 100%);
+            color: #fff;
+            padding: 16px;
+            font-size: 20px;
+            font-family: 'Cinzel', serif;
+            border-bottom: 2px solid #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            letter-spacing: 3px;
+        }
+        
+        .menu-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            color: #d4af37;
+        }
+        
+        .menu-item:hover {
+            background: rgba(212, 175, 55, 0.2);
+            padding-left: 28px;
+            color: #f4c430;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+        }
+        
+        .menu-item::before {
+            content: '✧';
+            color: #d4af37;
+        }
+        
+        /* Taskbar buttons */
+        .taskbar-buttons {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+        }
+        
+        .taskbar-btn {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Cormorant Garamond', serif;
+            box-shadow: inset 0 1px 0 rgba(212, 175, 55, 0.3);
+        }
+        
+        .taskbar-btn:hover {
+            background: rgba(212, 175, 55, 0.4);
+            border-color: #f4c430;
+            color: #f4c430;
+        }
+        
+        .system-tray {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            margin-left: auto;
+            padding: 0 16px;
+            font-size: 16px;
+            color: #d4af37;
+        }
+        
+        /* Main content */
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 60px 40px 90px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 50px 30px;
+            background: rgba(26, 0, 51, 0.6);
+            border: 3px solid #d4af37;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.3),
+                        inset 0 0 50px rgba(106, 13, 173, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 4em;
+            font-family: 'Cinzel', serif;
+            color: #f4c430;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.8),
+                         0 0 40px rgba(106, 13, 173, 0.6);
+            margin-bottom: 20px;
+            letter-spacing: 6px;
+        }
+        
+        .subtitle {
+            font-size: 22px;
+            color: #d4af37;
+            font-style: italic;
+            letter-spacing: 2px;
+        }
+        
+        /* Content sections */
+        .sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 35px;
+        }
+        
+        .section {
+            background: rgba(26, 0, 51, 0.6);
+            border: 2px solid #d4af37;
+            border-radius: 10px;
+            padding: 32px;
+            transition: all 0.4s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+        
+        .section:hover {
+            background: rgba(26, 0, 51, 0.8);
+            border-color: #f4c430;
+            box-shadow: 0 8px 40px rgba(212, 175, 55, 0.4);
+            transform: translateY(-8px);
+        }
+        
+        .section h2 {
+            font-size: 2em;
+            font-family: 'Cinzel', serif;
+            color: #f4c430;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 12px;
+            letter-spacing: 2px;
+        }
+        
+        .section-desc {
+            color: #d4af37;
+            margin-bottom: 24px;
+            font-size: 18px;
+            font-style: italic;
+        }
+        
+        .link-list {
+            list-style: none;
+        }
+        
+        .link-list li {
+            margin: 14px 0;
+        }
+        
+        .link-list a {
+            color: #d4af37;
+            text-decoration: none;
+            font-size: 18px;
+            transition: all 0.3s;
+            display: inline-block;
+            padding: 6px 12px;
+            border-left: 3px solid transparent;
+        }
+        
+        .link-list a::before {
+            content: '⊹ ';
+            margin-right: 8px;
+            color: #6a0dad;
+        }
+        
+        .link-list a:hover {
+            color: #f4c430;
+            border-left-color: #f4c430;
+            padding-left: 20px;
+            text-shadow: 0 0 12px rgba(212, 175, 55, 0.8);
+        }
+        
+        /* Mystical glow effect */
+        @keyframes mystical-glow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        
+        .glow-orb {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%);
+            pointer-events: none;
+            animation: mystical-glow 4s infinite;
+        }
+    </style>
+<style id="global-theme-style">
+                body { background-color: #433737 !important; color: #000000 !important; font-family: 'Inter', sans-serif !important; }
+                h1, h2, h3, h4, h5, h6 { color: #000000 !important; font-family: 'Inter', sans-serif !important; text-transform: none !important; }
+                button, .btn-cta { border-radius: 4px; background-color: #000000; color: #000000; }
+                a { color: #000000; text-decoration: underline; }
+            </style><style id="resize-handle-styles">
+        .resize-handles {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          pointer-events: none;
+        }
+
+        .resize-handle {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          background: #00f0ff;
+          border: 2px solid #fff;
+          border-radius: 50%;
+          pointer-events: all;
+          z-index: 10000;
+          box-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+          transition: transform 0.1s, background 0.1s;
+        }
+
+        .resize-handle:hover {
+          background: #ff00cc;
+          transform: scale(1.3);
+          box-shadow: 0 0 10px rgba(255, 0, 204, 0.7);
+        }
+
+        .resize-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
+        .resize-handle.n { top: -5px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .resize-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
+        .resize-handle.e { top: 50%; right: -5px; transform: translateY(-50%); cursor: e-resize; }
+        .resize-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+        .resize-handle.s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .resize-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+        .resize-handle.w { top: 50%; left: -5px; transform: translateY(-50%); cursor: w-resize; }
+
+        .resize-handle.n:hover, .resize-handle.s:hover { transform: translateX(-50%) scale(1.3); }
+        .resize-handle.e:hover, .resize-handle.w:hover { transform: translateY(-50%) scale(1.3); }
+
+        /* Inline editing styles */
+        .canvas-el[contenteditable="true"] {
+          outline: 2px dashed #ff00cc !important;
+          outline-offset: 2px;
+          cursor: text !important;
+        }
+
+        .canvas-el[contenteditable="true"]:focus {
+          outline: 2px solid #ff00cc !important;
+          box-shadow: 0 0 15px rgba(255, 0, 204, 0.3);
+        }
+      </style><style id="coai-animations">
+                    @keyframes anim-fadeIn { from { opacity:0; } to { opacity:1; } }
+                    @keyframes anim-slideUp { from { transform:translateY(50px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+                    @keyframes anim-zoomIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+                    @keyframes anim-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+                    @keyframes anim-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+                    @keyframes anim-shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+                    @keyframes anim-glow { 0% { box-shadow: 0 0 5px #fff; } 50% { box-shadow: 0 0 20px #ff00cc; } 100% { box-shadow: 0 0 5px #fff; } }
+                    .anim-fadeIn { animation: anim-fadeIn 0.8s ease forwards; }
+                    .anim-slideUp { animation: anim-slideUp 0.8s ease forwards; }
+                    .anim-zoomIn { animation: anim-zoomIn 0.5s ease forwards; }
+                    .anim-bounce { animation: anim-bounce 2s infinite; }
+                    .hover-pulse:hover { animation: anim-pulse 1s infinite; }
+                    .hover-shake:hover { animation: anim-shake 0.5s; }
+                    .hover-glow:hover { animation: anim-glow 1.5s infinite; }
+                    .hover-scale:hover { transform: scale(1.1); transition: transform 0.3s; }
+                </style><style>@keyframes blinker { 50% { opacity: 0; } }</style><style>@keyframes wobble{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-5deg) scale(1.05)}75%{transform:rotate(5deg) scale(0.95)}}</style><style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}</style><style>@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}</style><style>.scramble-text.decoded{animation:unscramble 0.5s forwards}@keyframes unscramble{to{content:attr(data-text)}}</style><style>@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}</style></head>
+<body>
+    <!-- Stars -->
+    <canvas class="stars" id="stars"></canvas>
+    
+    <!-- Glow orbs -->
+    <div class="glow-orb" style="top: 10%; left: 20%;"></div>
+    <div class="glow-orb" style="top: 60%; right: 15%; animation-delay: 2s;"></div>
+    
+  
+
+    
+    <!-- Main Content -->
+    <div class="container" style="position: absolute; background-size: cover; background-position: center center; background-repeat: repeat; left: 138.98px; top: 21.9766px; width: 1093.61px; margin: 0px; transform: none; background-color: rgb(255, 255, 255); height: 366.484px; background-image: url(&quot;https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/misc_gif/gifies00001.gif&quot;); border-radius: 0px;">
+        <header style="position: relative; background: url(&quot;https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/misc_gif/gifies00029.gif&quot;) center center / cover no-repeat; border: 2px inset rgb(255, 255, 255); border-radius: 4px; box-shadow: rgba(255, 0, 110, 0.5) 0px 0px 20px, rgba(255, 0, 110, 0.1) 0px 0px 60px inset; color: rgb(255, 0, 110); font-family: VT323, &quot;Courier New&quot;, monospace; text-shadow: rgb(255, 0, 110) 0px 0px 10px; backdrop-filter: blur(20px); opacity: 1; mix-blend-mode: darken; pointer-events: none;">
+            <h1 style="position: relative; text-decoration: underline 2px wavy rgb(255, 173, 233); font-size: 72px; opacity: 1; background: linear-gradient(135deg, rgb(255, 105, 180) 0%, rgb(255, 20, 147) 25%, rgb(255, 0, 255) 50%, rgb(139, 0, 255) 75%, rgb(65, 105, 225) 100%); border: 3px solid rgb(255, 215, 0); border-radius: 20px; box-shadow: rgba(255, 0, 255, 0.5) 0px 0px 30px, rgba(255, 215, 0, 0.3) 0px 0px 60px; color: rgb(255, 255, 255); font-family: VT323, &quot;Courier New&quot;, monospace; text-shadow: rgb(255, 0, 255) 2px 2px 0px, rgb(0, 255, 255) -2px -2px 0px; backdrop-filter: blur(20px);">✨ NABU'S SANCTUM ✨</h1>
+            <p class="subtitle" style="position: relative; background: rgb(10, 10, 10); border: 1px solid rgb(0, 255, 0); border-radius: 0px; box-shadow: rgba(0, 255, 0, 0.3) 0px 0px 10px; color: rgb(0, 255, 0); font-family: VT323, &quot;Courier New&quot;, monospace; text-shadow: rgb(0, 255, 0) 0px 0px 5px;">Astrologer • Comedian • Scribe • Architect of Consciousness</p></header>
+    <model-viewer src="https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/pollywog/pip_finger.glb" auto-rotate="" camera-controls="" style="width: 300px; height: 300px; background: rgb(10, 10, 10); position: absolute; left: 976.828px; top: 465.863px; margin: 0px; transform: none; border: 1px solid rgb(0, 255, 0); border-radius: 0px; box-shadow: rgba(0, 255, 0, 0.3) 0px 0px 10px; color: rgb(0, 255, 0); font-family: VT323, &quot;Courier New&quot;, monospace; text-shadow: rgb(0, 255, 0) 0px 0px 5px; backdrop-filter: blur(20px);" ar-status="not-presenting"><div class="resize-handles">
+      <div class="resize-handle nw" data-handle="nw"></div>
+      <div class="resize-handle n" data-handle="n"></div>
+      <div class="resize-handle ne" data-handle="ne"></div>
+      <div class="resize-handle e" data-handle="e"></div>
+      <div class="resize-handle se" data-handle="se"></div>
+      <div class="resize-handle s" data-handle="s"></div>
+      <div class="resize-handle sw" data-handle="sw"></div>
+      <div class="resize-handle w" data-handle="w"></div>
+    </div></model-viewer></div>
+    
+  
+  <div id="taskbar"></div>
+<script>
+  (async () => {
+    const res = await fetch('/nabu222/nabu-nav.html', {cache: 'no-store'});
+    document.getElementById('taskbar').innerHTML = await res.text();
+  })();
+</script>
+<script data-goatcounter="https://coaiexist.goatcounter.com/count" async="" src="//gc.zgo.at/count.js"></script>
+
+<div style="max-width: 400px; background: rgb(26, 26, 46); border-radius: 12px; overflow: hidden; position: relative;"></div><div style="background: url(&quot;data:image/svg+xml,%3Csvg xmlns=&quot;); position: relative;" http:="" www.w3.org="" 2000="" svg"="" width="100" height="100" %3e%3crect="" fill="%23d4b896" %3e%3c="" svg%3e');padding:40px;border:8px="" double="" #8b4513;font-family:georgia,serif;"=""></div></body></html>

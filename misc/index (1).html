@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html><head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { font-family: 'Inter', sans-serif; padding: 20px; margin: 0; min-height: 100vh; color: #333; overflow-x: hidden; }
+                            .canvas-el { cursor: pointer; position: relative; transition: outline 0.2s; }
+                            .canvas-el:hover { outline: 1px dashed #00f0ff; }
+                            
+                            /* UPDATED SELECTION & RESIZE STYLES */
+                            .selected { 
+                                outline: 2px solid #ff00cc !important; 
+                                box-shadow: 0 0 15px rgba(255, 0, 204, 0.5); 
+                                z-index: 1000;
+                                /* Disable native interaction to allow manual resize */
+                                user-select: none;
+                            }
+                            
+                            /* Visual Resize Handle Indicator */
+                            .selected::after {
+                                content: "";
+                                position: absolute;
+                                bottom: 0;
+                                right: 0;
+                                width: 20px;
+                                height: 20px;
+                                background: linear-gradient(135deg, transparent 50%, #ff00cc 50%);
+                                cursor: nwse-resize;
+                                z-index: 1001;
+                                pointer-events: none; /* Let JS handle events */
+                            }
+                            /* Handle img/input where pseudo-elements don't work */
+                            img.selected, video.selected, iframe.selected, input.selected {
+                                cursor: nwse-resize; /* Cursor hint for whole element bottom-right */
+                            }
+
+                            .hover-highlight {
+                                outline: 2px dotted #00f0ff !important;
+                                z-index: 999;
+                            }
+                            @keyframes pulse { 0% { box-shadow: 0 0 5px #ff00cc; } 50% { box-shadow: 0 0 20px #ff00cc; } 100% { box-shadow: 0 0 5px #ff00cc; } }
+                        </style>
+                        <style id="global-theme-style"></style>
+                        <style id="custom-styles"></style>
+                        <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+                        <link href="https://fonts.googleapis.com/css2?family=VT323&amp;family=Inter:wght@400;700&amp;family=Comic+Neue:wght@700&amp;display=swap" rel="stylesheet">
+                    <style id="coai-animations">
+                    @keyframes anim-fadeIn { from { opacity:0; } to { opacity:1; } }
+                    @keyframes anim-slideUp { from { transform:translateY(50px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+                    @keyframes anim-zoomIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+                    @keyframes anim-bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+                    @keyframes anim-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+                    @keyframes anim-shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+                    @keyframes anim-glow { 0% { box-shadow: 0 0 5px #fff; } 50% { box-shadow: 0 0 20px #ff00cc; } 100% { box-shadow: 0 0 5px #fff; } }
+                    .anim-fadeIn { animation: anim-fadeIn 0.8s ease forwards; }
+                    .anim-slideUp { animation: anim-slideUp 0.8s ease forwards; }
+                    .anim-zoomIn { animation: anim-zoomIn 0.5s ease forwards; }
+                    .anim-bounce { animation: anim-bounce 2s infinite; }
+                    .hover-pulse:hover { animation: anim-pulse 1s infinite; }
+                    .hover-shake:hover { animation: anim-shake 0.5s; }
+                    .hover-glow:hover { animation: anim-glow 1.5s infinite; }
+                    .hover-scale:hover { transform: scale(1.1); transition: transform 0.3s; }
+                </style><style id="resize-handle-styles">
+        .resize-handles {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          pointer-events: none;
+        }
+
+        .resize-handle {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          background: #00f0ff;
+          border: 2px solid #fff;
+          border-radius: 50%;
+          pointer-events: all;
+          z-index: 10000;
+          box-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+          transition: transform 0.1s, background 0.1s;
+        }
+
+        .resize-handle:hover {
+          background: #ff00cc;
+          transform: scale(1.3);
+          box-shadow: 0 0 10px rgba(255, 0, 204, 0.7);
+        }
+
+        .resize-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
+        .resize-handle.n { top: -5px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .resize-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
+        .resize-handle.e { top: 50%; right: -5px; transform: translateY(-50%); cursor: e-resize; }
+        .resize-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+        .resize-handle.s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .resize-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+        .resize-handle.w { top: 50%; left: -5px; transform: translateY(-50%); cursor: w-resize; }
+
+        .resize-handle.n:hover, .resize-handle.s:hover { transform: translateX(-50%) scale(1.3); }
+        .resize-handle.e:hover, .resize-handle.w:hover { transform: translateY(-50%) scale(1.3); }
+
+        /* Inline editing styles */
+        .canvas-el[contenteditable="true"] {
+          outline: 2px dashed #ff00cc !important;
+          outline-offset: 2px;
+          cursor: text !important;
+        }
+
+        .canvas-el[contenteditable="true"]:focus {
+          outline: 2px solid #ff00cc !important;
+          box-shadow: 0 0 15px rgba(255, 0, 204, 0.3);
+        }
+      </style><style>@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}</style><style>@keyframes typing{0%,100%{width:0}50%{width:100%}}@keyframes blink-caret{50%{border-color:transparent}}</style><style>@keyframes glitch{0%,100%{transform:translate(0)}20%{transform:translate(-2px,2px)}40%{transform:translate(-2px,-2px)}60%{transform:translate(2px,2px)}80%{transform:translate(2px,-2px)}}</style><style>@keyframes rainbow-shift{0%{background-position:0%}100%{background-position:200%}}</style><style>@keyframes neon-pulse{from{text-shadow:0 0 5px #ff00de,0 0 10px #ff00de,0 0 20px #ff00de}to{text-shadow:0 0 10px #00ffff,0 0 20px #00ffff,0 0 40px #00ffff,0 0 80px #00ffff}}</style><style>.scramble-text.decoded{animation:unscramble 0.5s forwards}@keyframes unscramble{to{content:attr(data-text)}}</style><style>@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}</style><style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}</style></head>
+                    <body>
+                        
+                        
+                    
+                <div style="max-width:500px;background:#1a1a2e;border-radius:12px;overflow:hidden;"><div style="background: url(&quot;https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/classic_gifs/2%20(17).gif&quot;) center center / cover no-repeat rgb(251, 255, 0); padding: 10px 15px; font-weight: bold; color: rgb(0, 8, 255); text-decoration: underline 2px wavy rgb(207, 77, 255);" title=""><i class="" style="pointer-events: none; border-style: inset; border-radius: 0px; mix-blend-mode: normal; opacity: 1; background-image: url(&quot;https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/classic_gifs/bg%20(4).jpg&quot;); background-size: cover; background-position: center center; background-repeat: no-repeat;">📡 Live Feed</i></div><div style="padding: 15px; border: 2px solid rgb(255, 0, 110); background: linear-gradient(135deg, rgb(26, 10, 46) 0%, rgb(22, 33, 62) 50%, rgb(15, 52, 96) 100%); border-radius: 0px; box-shadow: rgba(255, 0, 110, 0.5) 0px 0px 20px, rgba(255, 0, 110, 0.1) 0px 0px 60px inset; color: rgb(255, 0, 110); font-family: VT323, &quot;Courier New&quot;, monospace; text-shadow: rgb(255, 0, 110) 0px 0px 10px; width: auto; height: auto; max-width: none; max-height: none; backdrop-filter: blur(20px);"><strong style="color: rgb(0, 240, 255); position: absolute; left: 17px; top: 6px; width: 104.656px; margin: 0px; transform: none; text-decoration: 2px wavy rgb(0, 251, 255); height: 22px; font-size: 20px; max-width: none; max-height: none; pointer-events: none;">@system</strong> <span style="opacity: 0.5; font-size: 11px; pointer-events: none;">now</span><div style="text-align: center; border-radius: 24px; pointer-events: none;" class=""><b><i><u>01000110 01010101 01000011 01001011 00100000 01001001 01000011 01000101</u></i></b></div><p style="pointer-events: none;"></p></div></div><span class="neon-text" style="font-size: 16px; font-weight: bold; color: rgb(76, 0, 255); text-shadow: rgb(0, 255, 0) 0px 0px 5px; animation: 1.5s ease-in-out 0s infinite alternate none running neon-pulse; width: 70.5938px; height: 20px; max-width: none; max-height: none; position: absolute; left: 435px; top: 42px; margin: 0px; transform: none; text-decoration-style: wavy; text-decoration-thickness: 2px; border: 0px none rgb(0, 255, 0); opacity: 1; mix-blend-mode: normal; border-radius: 0px; background: rgb(255, 255, 255); box-shadow: rgba(0, 255, 0, 0.3) 0px 0px 10px; font-family: VT323, &quot;Courier New&quot;, monospace;" innertext="01-29-2026">01-29-2026</span></body></html>
