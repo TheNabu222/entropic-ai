@@ -24,6 +24,7 @@
       flex-direction: column;
       gap: 0.5rem;
       padding: 0.5rem;
+      height: 100vh;
     }
 
     header {
@@ -57,25 +58,32 @@
     }
 
     main {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: minmax(560px, 1.7fr) minmax(360px, 1fr);
+      gap: 0.75rem;
+      align-items: start;
+      flex: 1;
+      min-height: 0;
+      height: calc(100vh - 6rem);
     }
 
     .stage-column {
-      flex: 1 1 480px;
-      max-width: 840px;
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      min-width: 0;
     }
 
     .assets-column {
-      flex: 0 1 360px;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
       gap: 0.5rem;
+      min-width: 0;
+      min-height: 0;
+      position: sticky;
+      top: 0.5rem;
+      height: calc(100vh - 6rem);
+      overflow: hidden;
     }
 
     .panel {
@@ -87,6 +95,8 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+      min-height: 0;
+      height: 100%;
     }
 
     .panel h2 {
@@ -161,7 +171,8 @@
 
     #stage {
       position: relative;
-      width: min(90vw, 760px);
+      width: 100%;
+      max-width: none;
       aspect-ratio: 4 / 3;
       border-radius: 0;
       border: 2px inset #808080;
@@ -229,20 +240,27 @@
     .tile-grid {
       display: grid;
       gap: 0.75rem;
+      flex: 1;
+      min-height: 0;
     }
 
     .tile-grid--backgrounds {
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      max-height: clamp(280px, 48vh, 520px);
       overflow: auto;
       padding-right: 0.25rem;
     }
 
     .tile-grid--props {
       grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-      max-height: clamp(320px, 52vh, 480px);
       overflow: auto;
       padding-right: 0.25rem;
+    }
+
+    .prop-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(140px, 1fr);
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .prop-search {
@@ -267,6 +285,25 @@
 
     .prop-search input::placeholder {
       color: rgba(45, 16, 56, 0.55);
+    }
+
+    .prop-sort {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(45, 16, 56, 0.8);
+    }
+
+    .prop-sort select {
+      font: inherit;
+      padding: 0.35rem 0.45rem;
+      border-radius: 6px;
+      border: 1px solid rgba(45, 16, 56, 0.25);
+      background: #fff;
+      color: inherit;
     }
 
     .prop-results {
@@ -319,6 +356,8 @@
       display: block;
       width: 100%;
       height: auto;
+      max-height: 168px;
+      object-fit: contain;
       image-rendering: pixelated;
     }
 
@@ -464,6 +503,28 @@
       border-color: rgba(125, 0, 185, 0.6);
     }
 
+    .panel {
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .panel__header {
+      position: sticky;
+      top: 0;
+      background: inherit;
+      padding-bottom: 0.25rem;
+      z-index: 1;
+    }
+
+    .panel__body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+
     footer {
       text-align: center;
       font-size: 0.85rem;
@@ -476,18 +537,27 @@
       text-transform: uppercase;
     }
 
+    @media (max-width: 1080px) {
+      main {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .assets-column {
+        grid-template-rows: auto auto;
+        position: static;
+        height: auto;
+        overflow: visible;
+      }
+    }
+
     @media (max-width: 960px) {
       body {
         padding-bottom: 3rem;
       }
 
-      .assets-column {
-        order: -1;
-        flex-basis: 100%;
-      }
-
-      .tile-grid--props {
-        max-height: 340px;
+      .prop-controls {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -542,23 +612,41 @@
     </section>
     <section class="assets-column">
       <div class="panel">
-        <h2>Backdrops</h2>
-        <small>Select a Glenwood vibe or rooftop view to set the scene.</small>
-        <div class="tile-grid tile-grid--backgrounds" id="backgrounds"></div>
+        <div class="panel__header">
+          <h2>Backdrops</h2>
+          <small>Select a Glenwood vibe or rooftop view to set the scene.</small>
+        </div>
+        <div class="panel__body">
+          <div class="tile-grid tile-grid--backgrounds" id="backgrounds"></div>
+        </div>
       </div>
       <div class="panel">
-        <div>
-          <h2>Prop Library</h2>
-          <small>Characters, furniture, curtains, and more. Tap to spawn a clone onto the stage.</small>
+        <div class="panel__header">
+          <div>
+            <h2>Prop Library</h2>
+            <small>Characters, furniture, curtains, and more. Tap to spawn a clone onto the stage.</small>
+          </div>
+          <div class="prop-controls">
+            <label class="prop-search">
+              <span class="visually-hidden">Search props</span>
+              <input type="search" id="prop-search" placeholder="Search props..." autocomplete="off" />
+            </label>
+            <label class="prop-sort" for="prop-sort">
+              <span>Sort</span>
+              <select id="prop-sort" name="prop-sort">
+                <option value="hero">Hero picks</option>
+                <option value="alpha">A → Z</option>
+                <option value="category">Category</option>
+              </select>
+            </label>
+          </div>
+          <div class="category-tabs" id="category-tabs"></div>
+          <div class="prop-results" id="prop-results" aria-live="polite"></div>
         </div>
-        <label class="prop-search">
-          <span class="visually-hidden">Search props</span>
-          <input type="search" id="prop-search" placeholder="Search props..." autocomplete="off" />
-        </label>
-        <div class="category-tabs" id="category-tabs"></div>
-        <div class="prop-results" id="prop-results" aria-live="polite"></div>
-        <div class="tile-grid tile-grid--props" id="prop-list"></div>
-        <button type="button" class="stage-button stage-button--secondary" id="load-more-props" hidden>Load more props</button>
+        <div class="panel__body">
+          <div class="tile-grid tile-grid--props" id="prop-list"></div>
+          <button type="button" class="stage-button stage-button--secondary" id="load-more-props" hidden>Load more props</button>
+        </div>
       </div>
     </section>
   </main>
@@ -12899,37 +12987,69 @@ wall1142|Wall 1142|wall1142.gif|decor|220`;
     const categoryPriority = new Map(categories.map((category, index) => [category.id, index]));
     const getCategoryRank = (categoryId) =>
       categoryPriority.has(categoryId) ? categoryPriority.get(categoryId) : categoryPriority.size;
+    const propLibrary = [...heroProps, ...dumpzProps, ...customProps];
 
-    const propLibrary = [...heroProps, ...dumpzProps, ...customProps].sort((a, b) => {
-      const heroRankA = heroOrder.has(a.id) ? heroOrder.get(a.id) : Number.POSITIVE_INFINITY;
-      const heroRankB = heroOrder.has(b.id) ? heroOrder.get(b.id) : Number.POSITIVE_INFINITY;
-      if (heroRankA !== heroRankB) {
-        return heroRankA - heroRankB;
+    const SORT_STORAGE_KEY = "hdtv-prop-sort";
+    const sortLabels = {
+      hero: "Hero picks",
+      alpha: "A → Z",
+      category: "Category"
+    };
+
+    const sortComparators = {
+      hero: (a, b) => {
+        const heroRankA = heroOrder.has(a.id) ? heroOrder.get(a.id) : Number.POSITIVE_INFINITY;
+        const heroRankB = heroOrder.has(b.id) ? heroOrder.get(b.id) : Number.POSITIVE_INFINITY;
+        if (heroRankA !== heroRankB) {
+          return heroRankA - heroRankB;
+        }
+
+        const categoryRankA = getCategoryRank(a.category);
+        const categoryRankB = getCategoryRank(b.category);
+        if (categoryRankA !== categoryRankB) {
+          return categoryRankA - categoryRankB;
+        }
+
+        const typeComparison = labelCollator.compare(a.typeLabel, b.typeLabel);
+        if (typeComparison !== 0) {
+          return typeComparison;
+        }
+
+        const variantComparison = labelCollator.compare(a.variantKey, b.variantKey);
+        if (variantComparison !== 0) {
+          return variantComparison;
+        }
+
+        const labelComparison = labelCollator.compare(a.label, b.label);
+        if (labelComparison !== 0) {
+          return labelComparison;
+        }
+
+        return labelCollator.compare(a.id, b.id);
+      },
+      alpha: (a, b) => {
+        const labelComparison = labelCollator.compare(a.label, b.label);
+        if (labelComparison !== 0) {
+          return labelComparison;
+        }
+        return labelCollator.compare(a.id, b.id);
+      },
+      category: (a, b) => {
+        const categoryRankA = getCategoryRank(a.category);
+        const categoryRankB = getCategoryRank(b.category);
+        if (categoryRankA !== categoryRankB) {
+          return categoryRankA - categoryRankB;
+        }
+        const labelComparison = labelCollator.compare(a.label, b.label);
+        if (labelComparison !== 0) {
+          return labelComparison;
+        }
+        return labelCollator.compare(a.id, b.id);
       }
+    };
 
-      const categoryRankA = getCategoryRank(a.category);
-      const categoryRankB = getCategoryRank(b.category);
-      if (categoryRankA !== categoryRankB) {
-        return categoryRankA - categoryRankB;
-      }
-
-      const typeComparison = labelCollator.compare(a.typeLabel, b.typeLabel);
-      if (typeComparison !== 0) {
-        return typeComparison;
-      }
-
-      const variantComparison = labelCollator.compare(a.variantKey, b.variantKey);
-      if (variantComparison !== 0) {
-        return variantComparison;
-      }
-
-      const labelComparison = labelCollator.compare(a.label, b.label);
-      if (labelComparison !== 0) {
-        return labelComparison;
-      }
-
-      return labelCollator.compare(a.id, b.id);
-    });
+    const storedSortMode = localStorage.getItem(SORT_STORAGE_KEY);
+    let sortMode = Object.keys(sortComparators).includes(storedSortMode) ? storedSortMode : "hero";
     const stage = document.getElementById("stage");
     const stageGrid = document.getElementById("stage-grid");
     const backgroundsContainer = document.getElementById("backgrounds");
@@ -12937,6 +13057,7 @@ wall1142|Wall 1142|wall1142.gif|decor|220`;
     const propList = document.getElementById("prop-list");
     const propResults = document.getElementById("prop-results");
     const propSearchInput = document.getElementById("prop-search");
+    const propSortSelect = document.getElementById("prop-sort");
     const loadMoreButton = document.getElementById("load-more-props");
     const currentBackdropLabel = document.getElementById("current-backdrop");
     const clearStageButton = document.getElementById("clear-stage");
@@ -12966,6 +13087,7 @@ wall1142|Wall 1142|wall1142.gif|decor|220`;
     let filteredItems = [];
     let renderedCount = 0;
     let searchTerm = "";
+    propSortSelect.value = sortMode;
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -13356,15 +13478,18 @@ wall1142|Wall 1142|wall1142.gif|decor|220`;
 
     const filterPropLibrary = () => {
       const query = searchTerm.trim().toLowerCase();
-      filteredItems = propLibrary.filter((item) => {
-        const matchesCategory = activeCategory === "all" || item.category === activeCategory;
-        const matchesQuery =
-          !query ||
-          item.labelLower.includes(query) ||
-          item.typeLabelLower.includes(query) ||
-          item.idLower.includes(query);
-        return matchesCategory && matchesQuery;
-      });
+      const comparator = sortComparators[sortMode] || sortComparators.hero;
+      filteredItems = propLibrary
+        .filter((item) => {
+          const matchesCategory = activeCategory === "all" || item.category === activeCategory;
+          const matchesQuery =
+            !query ||
+            item.labelLower.includes(query) ||
+            item.typeLabelLower.includes(query) ||
+            item.idLower.includes(query);
+          return matchesCategory && matchesQuery;
+        })
+        .sort(comparator);
       renderedCount = 0;
     };
 
@@ -13380,7 +13505,8 @@ wall1142|Wall 1142|wall1142.gif|decor|220`;
       const showing = Math.min(renderedCount, total);
       const showingText = showing.toLocaleString();
       const totalText = total.toLocaleString();
-      propResults.textContent = `Showing ${showingText} of ${totalText} props`;
+      const sortLabel = sortLabels[sortMode] || "Hero picks";
+      propResults.textContent = `Showing ${showingText} of ${totalText} props (${sortLabel} sort)`;
     };
 
     const updateLoadMoreButton = () => {
@@ -13435,6 +13561,14 @@ wall1142|Wall 1142|wall1142.gif|decor|220`;
     bringFrontButton.addEventListener("click", bringToFront);
     sendBackButton.addEventListener("click", sendToBack);
     deleteButton.addEventListener("click", removeSelected);
+
+    propSortSelect.addEventListener("change", (event) => {
+      const nextMode = event.target.value;
+      sortMode = Object.keys(sortComparators).includes(nextMode) ? nextMode : "hero";
+      localStorage.setItem(SORT_STORAGE_KEY, sortMode);
+      filterPropLibrary();
+      renderPropTiles(true);
+    });
 
     propSearchInput.addEventListener("input", (event) => {
       searchTerm = event.target.value;
