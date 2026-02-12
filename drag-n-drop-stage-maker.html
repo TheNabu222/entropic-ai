@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hyena Diva Drag-n-Drop Stage Maker</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Trebuchet MS", "Gill Sans", system-ui, sans-serif;
+      background: radial-gradient(circle at 20% 20%, #fff5ff 0%, #ffe3ff 35%, #f9f8ff 75%, #f4f7ff 100%);
+      min-height: 100%;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: #2d1038;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: clamp(1rem, 2.5vw, 2rem);
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid rgba(45, 16, 56, 0.15);
+      border-radius: 18px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 16px 30px rgba(45, 16, 56, 0.12);
+      text-align: center;
+      backdrop-filter: blur(6px);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    header p {
+      margin: 0.5rem auto 0;
+      max-width: 60ch;
+      color: rgba(45, 16, 56, 0.75);
+      line-height: 1.45;
+    }
+
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+    }
+
+    .stage-column {
+      flex: 1 1 480px;
+      max-width: 840px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .assets-column {
+      flex: 0 1 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 18px;
+      border: 1px solid rgba(45, 16, 56, 0.18);
+      box-shadow: 0 20px 36px rgba(45, 16, 56, 0.14);
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .panel small {
+      color: rgba(45, 16, 56, 0.65);
+      display: block;
+      line-height: 1.35;
+    }
+
+    .stage-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .stage-toolbar--stage {
+      margin-top: 1rem;
+      justify-content: center;
+      gap: clamp(0.5rem, 1.5vw, 1rem);
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .stage-button {
+      background: rgba(125, 0, 185, 0.15);
+      color: #2d1038;
+      border: 1px solid rgba(125, 0, 185, 0.35);
+      border-radius: 999px;
+      padding: 0.55rem 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      transition: transform 140ms ease, background 140ms ease;
+    }
+
+    .stage-button:hover {
+      background: rgba(125, 0, 185, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .stage-wrapper {
+      position: relative;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 22px;
+      border: 2px solid rgba(45, 16, 56, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6), 0 24px 42px rgba(45, 16, 56, 0.16);
+      padding: clamp(0.75rem, 2vw, 1.5rem);
+    }
+
+    #stage {
+      position: relative;
+      width: min(90vw, 760px);
+      aspect-ratio: 4 / 3;
+      border-radius: 18px;
+      border: 2px solid rgba(45, 16, 56, 0.22);
+      overflow: hidden;
+      background: #e8d4ff center / cover no-repeat;
+      touch-action: none;
+    }
+
+    #stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 40%, transparent 65%, rgba(255, 255, 255, 0.1));
+      mix-blend-mode: screen;
+    }
+
+    #stage-grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 150ms ease;
+      background-image: linear-gradient(0deg, rgba(125, 0, 185, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 0, 185, 0.2) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    #stage.show-grid #stage-grid {
+      opacity: 1;
+    }
+
+    .stage-meta {
+      text-align: center;
+      color: rgba(45, 16, 56, 0.7);
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .stage-item {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      transform-origin: center center;
+      max-width: 520px;
+      user-select: none;
+      cursor: grab;
+      touch-action: none;
+      transition: filter 160ms ease;
+    }
+
+    .stage-item__image {
+      display: block;
+      width: 100%;
+      height: auto;
+      pointer-events: none;
+      image-rendering: pixelated;
+      filter: var(--stage-filter, none);
+      box-shadow: var(--stage-shadow, none);
+      opacity: var(--stage-opacity, 1);
+      animation-duration: var(--anim-speed, 2.4s);
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+    }
+    .stage-item:active {
+      cursor: grabbing;
+    }
+
+    .stage-item.is-selected {
+      filter: drop-shadow(0 0 14px rgba(125, 0, 185, 0.75));
+      outline: 3px solid rgba(255, 255, 255, 0.75);
+      outline-offset: -6px;
+    }
+
+    .tile-grid {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .tile-grid--backgrounds {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      max-height: clamp(280px, 48vh, 520px);
+      overflow: auto;
+      padding-right: 0.25rem;
+    }
+
+    .tile-grid--props {
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      max-height: clamp(320px, 52vh, 480px);
+      overflow: auto;
+      padding-right: 0.25rem;
+    }
+
+    .prop-search {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-radius: 999px;
+      background: rgba(125, 0, 185, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(125, 0, 185, 0.2);
+      padding: 0.35rem 0.9rem;
+    }
+
+    .prop-search input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      outline: none;
+      padding: 0.15rem 0;
+    }
+
+    .prop-search input::placeholder {
+      color: rgba(45, 16, 56, 0.55);
+    }
+
+    .prop-results {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(45, 16, 56, 0.55);
+    }
+
+    .stage-button--secondary {
+      background: rgba(45, 16, 56, 0.08);
+      border-color: rgba(45, 16, 56, 0.28);
+      color: rgba(45, 16, 56, 0.9);
+      align-self: center;
+      padding-inline: 1.5rem;
+    }
+
+    .stage-button--secondary:hover {
+      background: rgba(45, 16, 56, 0.16);
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .tile {
+      position: relative;
+      border: 2px solid transparent;
+      border-radius: 16px;
+      background: rgba(248, 232, 255, 0.8);
+      padding: 0.35rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      transition: border-color 160ms ease, transform 160ms ease;
+    }
+
+    .tile img {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+    }
+
+    .tile__label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: rgba(45, 16, 56, 0.7);
+      text-align: center;
+    }
+
+    .tile__meta {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(45, 16, 56, 0.45);
+      text-align: center;
+    }
+
+    .tile:hover {
+      border-color: rgba(125, 0, 185, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .tile.is-selected {
+      border-color: rgba(125, 0, 185, 0.95);
+      box-shadow: 0 0 0 3px rgba(125, 0, 185, 0.22);
+    }
+
+    .category-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .category-tabs button {
+      background: rgba(45, 16, 56, 0.08);
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: background 150ms ease, border-color 150ms ease;
+    }
+
+    .category-tabs button:hover {
+      background: rgba(45, 16, 56, 0.16);
+    }
+
+    .category-tabs button.is-active {
+      border-color: rgba(125, 0, 185, 0.8);
+      background: rgba(125, 0, 185, 0.2);
+    }
+
+    #inspector {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 18px;
+      border: 1px solid rgba(45, 16, 56, 0.16);
+      box-shadow: 0 16px 30px rgba(45, 16, 56, 0.12);
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    #inspector h2 {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 1rem;
+    }
+
+    .inspector-empty {
+      color: rgba(45, 16, 56, 0.6);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .inspector-name {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      color: rgba(125, 0, 185, 0.85);
+    }
+
+    .inspector-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .inspector-controls label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .inspector-controls input[type="range"] {
+      width: 100%;
+    }
+
+    .inspector-controls select,
+    .inspector-controls input[type="number"],
+    .inspector-controls input[type="text"] {
+      width: 100%;
+      padding: 0.35rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(45, 16, 56, 0.2);
+      font: inherit;
+    }
+
+    .inspector-output {
+      font-size: 0.85rem;
+      color: rgba(45, 16, 56, 0.7);
+      letter-spacing: 0.05em;
+    }
+
+    .inspector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .inspector-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .inspector-actions button {
+      background: rgba(45, 16, 56, 0.08);
+      border: 1px solid rgba(45, 16, 56, 0.14);
+      border-radius: 12px;
+      padding: 0.45rem 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.75rem;
+    }
+
+    .inspector-actions button:hover,
+    .inspector-actions button[aria-pressed="true"] {
+      background: rgba(125, 0, 185, 0.2);
+      border-color: rgba(125, 0, 185, 0.6);
+    }
+
+    .inspector-nudge {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(44px, 1fr));
+      gap: 0.35rem;
+      align-items: center;
+      justify-items: center;
+    }
+
+    .inspector-nudge button {
+      width: 100%;
+      min-height: 36px;
+      border-radius: 10px;
+      border: 1px solid rgba(45, 16, 56, 0.14);
+      background: rgba(45, 16, 56, 0.08);
+    }
+
+    .inspector-nudge button:hover {
+      background: rgba(125, 0, 185, 0.2);
+      border-color: rgba(125, 0, 185, 0.6);
+    }
+
+    .inspector-section {
+      padding: 0.5rem 0.65rem;
+      border-radius: 12px;
+      border: 1px solid rgba(45, 16, 56, 0.12);
+      background: rgba(255, 255, 255, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .anim-float {
+      animation-name: floaty;
+    }
+
+    .anim-bob {
+      animation-name: bob;
+    }
+
+    .anim-shimmer {
+      animation-name: shimmer;
+      animation-duration: calc(var(--anim-speed, 2.4s) * 1.2);
+    }
+
+    .anim-spin {
+      animation-name: spin;
+      animation-timing-function: linear;
+    }
+
+    .anim-pulse {
+      animation-name: pulse;
+    }
+
+    @keyframes floaty {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @keyframes bob {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(6px);
+      }
+    }
+
+    @keyframes shimmer {
+      0%,
+      100% {
+        filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+      }
+      50% {
+        filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.7));
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        opacity: 0.8;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: rgba(45, 16, 56, 0.65);
+      line-height: 1.4;
+    }
+
+    footer strong {
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 960px) {
+      body {
+        padding-bottom: 3rem;
+      }
+
+      .assets-column {
+        order: -1;
+        flex-basis: 100%;
+      }
+
+      .tile-grid--props {
+        max-height: 340px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Hyena Diva Drag-n-Drop Stage Maker</h1>
+    <p>
+      Build your own Hyena Diva scene inspired by the Glenwood open mic adventures. Pick a backdrop, drag props and
+      friends onto the stage, and fine-tune their poses just like the classic pixel doll makers.
+    </p>
+  </header>
+  <main>
+    <section class="stage-column">
+      <div class="stage-wrapper">
+        <div id="stage" role="application" aria-label="Hyena Diva stage designer">
+          <div id="stage-grid" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="stage-toolbar stage-toolbar--stage">
+        <button type="button" class="stage-button" id="clear-stage">Clear Stage</button>
+        <button type="button" class="stage-button" id="scatter-stage">Scatter Props</button>
+        <button type="button" class="stage-button" id="grid-toggle" aria-pressed="false">Toggle Grid</button>
+        <button type="button" class="stage-button" id="reset-backdrop">Reset Backdrop</button>
+      </div>
+      <div class="stage-toolbar stage-toolbar--stage">
+        <button type="button" class="stage-button" id="save-scene">Save Scene</button>
+        <button type="button" class="stage-button" id="load-scene">Load Scene</button>
+        <button type="button" class="stage-button" id="copy-scene">Copy Scene</button>
+        <button type="button" class="stage-button" id="paste-scene">Paste Scene</button>
+        <input type="file" id="scene-input" accept="application/json" hidden />
+      </div>
+      <div class="stage-meta">Current Backdrop: <span id="current-backdrop">None</span></div>
+      <aside id="inspector" aria-live="polite">
+        <h2>Prop Inspector</h2>
+        <p class="inspector-empty" data-empty="true">Tap a prop to edit its size, rotation, and layering. Classic
+          dress-up vibes await!</p>
+        <div class="inspector-name" id="inspector-name" hidden></div>
+        <div class="inspector-controls" data-controls="true" hidden>
+          <label>
+            Size
+            <input type="range" id="size-range" min="40" max="220" value="100" />
+            <span class="inspector-output">Scale: <span id="size-output">100%</span></span>
+          </label>
+          <label>
+            Rotation
+            <input type="range" id="rotation-range" min="-180" max="180" value="0" />
+            <span class="inspector-output">Angle: <span id="rotation-output">0°</span></span>
+          </label>
+          <div class="inspector-section">
+            <label>
+              Opacity
+              <input type="range" id="opacity-range" min="20" max="100" value="100" />
+              <span class="inspector-output">Opacity: <span id="opacity-output">100%</span></span>
+            </label>
+            <label>
+              Blur
+              <input type="range" id="blur-range" min="0" max="16" value="0" />
+              <span class="inspector-output">Blur: <span id="blur-output">0px</span></span>
+            </label>
+            <label>
+              Hue
+              <input type="range" id="hue-range" min="-180" max="180" value="0" />
+              <span class="inspector-output">Hue: <span id="hue-output">0°</span></span>
+            </label>
+            <label>
+              Saturation
+              <input type="range" id="saturation-range" min="0" max="200" value="100" />
+              <span class="inspector-output">Saturation: <span id="saturation-output">100%</span></span>
+            </label>
+            <label>
+              Brightness
+              <input type="range" id="brightness-range" min="50" max="180" value="100" />
+              <span class="inspector-output">Brightness: <span id="brightness-output">100%</span></span>
+            </label>
+            <label>
+              Shadow Glow
+              <input type="range" id="shadow-range" min="0" max="24" value="0" />
+              <span class="inspector-output">Glow: <span id="shadow-output">0px</span></span>
+            </label>
+          </div>
+          <div class="inspector-section">
+            <label>
+              Animation
+              <select id="animation-select">
+                <option value="none">None</option>
+                <option value="float">Float</option>
+                <option value="bob">Bob</option>
+                <option value="shimmer">Shimmer</option>
+                <option value="spin">Spin</option>
+                <option value="pulse">Pulse</option>
+              </select>
+            </label>
+            <label>
+              Animation Speed
+              <input type="range" id="animation-speed" min="60" max="240" value="140" />
+              <span class="inspector-output">Speed: <span id="animation-speed-output">1.4s</span></span>
+            </label>
+          </div>
+          <div class="inspector-section">
+            <div class="inspector-nudge">
+              <span></span>
+              <button type="button" id="nudge-up">↑</button>
+              <span></span>
+              <button type="button" id="nudge-left">←</button>
+              <button type="button" id="center-item">◎</button>
+              <button type="button" id="nudge-right">→</button>
+              <span></span>
+              <button type="button" id="nudge-down">↓</button>
+              <span></span>
+            </div>
+            <div class="inspector-actions">
+              <button type="button" id="flip-item" aria-pressed="false">Flip</button>
+              <button type="button" id="duplicate-item">Duplicate</button>
+              <button type="button" id="bring-front">Bring Front</button>
+              <button type="button" id="send-back">Send Back</button>
+              <button type="button" id="reset-effects">Reset FX</button>
+              <button type="button" id="delete-item">Delete</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+    <section class="assets-column">
+      <div class="panel">
+        <h2>Backdrops</h2>
+        <small>Select a Glenwood vibe or rooftop view to set the scene.</small>
+        <div class="tile-grid tile-grid--backgrounds" id="backgrounds"></div>
+      </div>
+      <div class="panel">
+        <div>
+          <h2>Prop Library</h2>
+          <small>Characters, furniture, curtains, and more. Tap to spawn a clone onto the stage.</small>
+        </div>
+        <label class="prop-search">
+          <span class="visually-hidden">Search props</span>
+          <input type="search" id="prop-search" placeholder="Search props..." autocomplete="off" />
+        </label>
+        <div class="category-tabs" id="category-tabs"></div>
+        <div class="prop-results" id="prop-results" aria-live="polite"></div>
+        <div class="tile-grid tile-grid--props" id="prop-list"></div>
+        <button type="button" class="stage-button stage-button--secondary" id="load-more-props" hidden>Load more props</button>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>
+      <strong>Tips:</strong> Drag items to move them. Use the inspector to tweak scale and rotation. Press the Delete key
+      to remove the selected item. Use the scene buttons to save or share your layout. Double tap the stage background to
+      clear your selection.
+    </p>
+  </footer>
+  <script>
+    const REPO_RAW_URL = "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main";
+
+    const localPropData = [
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg1-reeds_png", "label": "cavebot bg1 reeds", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg1-reeds.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg10-openplains_png", "label": "cavebot bg10 openplains", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg10-openplains.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg11-duskyriver_png", "label": "cavebot bg11 duskyriver", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg11-duskyriver.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg12-headwaters_jpg", "label": "cavebot bg12 headwaters", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg12-headwaters.jpg`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg14-megafaunasteppe_png", "label": "cavebot bg14 megafaunasteppe", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg14-megafaunasteppe.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg2-cedarwoods_png", "label": "cavebot bg2 cedarwoods", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg2-cedarwoods.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg3-crystalhearth_png", "label": "cavebot bg3 crystalhearth", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg3-crystalhearth.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg4-anzucave_png", "label": "cavebot bg4 anzucave", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg4-anzucave.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg5-snowywoods_png", "label": "cavebot bg5 snowywoods", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg5-snowywoods.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg6-syberruinsdoor_png", "label": "cavebot bg6 syberruinsdoor", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg6-syberruinsdoor.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg7-bridgetosyberruins_png", "label": "cavebot bg7 bridgetosyberruins", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg7-bridgetosyberruins.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg8-cavebeds_png", "label": "cavebot bg8 cavebeds", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg8-cavebeds.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__backdrops__empty___cavebot-bg9-sybernest_png", "label": "cavebot bg9 sybernest", "src": `${REPO_RAW_URL}/cavebot/assets/image/backdrops/empty/_cavebot-bg9-sybernest.png`, "category": "backdrops", "subcategory": "empty"},
+      {"id": "cavebot__assets__image__sprites__Nabu___sprites_nabu1-idle_png", "label": "sprites nabu1 idle", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Nabu/_sprites_nabu1-idle.png`, "category": "sprites", "subcategory": "Nabu"},
+      {"id": "cavebot__assets__image__sprites__Nabu___sprites_nabu2-ritual_png", "label": "sprites nabu2 ritual", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Nabu/_sprites_nabu2-ritual.png`, "category": "sprites", "subcategory": "Nabu"},
+      {"id": "cavebot__assets__image__sprites__Nabu___sprites_nabu3-reloadbow_png", "label": "sprites nabu3 reloadbow", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Nabu/_sprites_nabu3-reloadbow.png`, "category": "sprites", "subcategory": "Nabu"},
+      {"id": "cavebot__assets__image__sprites__Nabu___sprites_nabu4-tenseskystare_png", "label": "sprites nabu4 tenseskystare", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Nabu/_sprites_nabu4-tenseskystare.png`, "category": "sprites", "subcategory": "Nabu"},
+      {"id": "cavebot__assets__image__sprites__Nabu___sprites_nabu5-sitting_png", "label": "sprites nabu5 sitting", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Nabu/_sprites_nabu5-sitting.png`, "category": "sprites", "subcategory": "Nabu"},
+      {"id": "cavebot__assets__image__sprites__Anzu ___sprites_anzu1-front_png", "label": "sprites anzu1 front", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Anzu /_sprites_anzu1-front.png`, "category": "sprites", "subcategory": "Anzu "},
+      {"id": "cavebot__assets__image__sprites__Anzu ___sprites_anzu2-mechanzutransform_png", "label": "sprites anzu2 mechanzutransform", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Anzu /_sprites_anzu2-mechanzutransform.png`, "category": "sprites", "subcategory": "Anzu "},
+      {"id": "cavebot__assets__image__sprites__Anzu ___sprites_anzu3-mechanzutransform(run)_png", "label": "sprites anzu3 mechanzutransform(run)", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Anzu /_sprites_anzu3-mechanzutransform(run).png`, "category": "sprites", "subcategory": "Anzu "},
+      {"id": "cavebot__assets__image__sprites__Anzu ___sprites_anzu5-bashful_png", "label": "sprites anzu5 bashful", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/Anzu /_sprites_anzu5-bashful.png`, "category": "sprites", "subcategory": "Anzu "},
+      {"id": "cavebot__assets__image__sprites__animals___sprites_hyenaba_1_png", "label": "sprites hyenaba 1", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/animals/_sprites_hyenaba_1.png`, "category": "sprites", "subcategory": "animals"},
+      {"id": "cavebot__assets__image__sprites__animals___sprites_enlilion_1_png", "label": "sprites enlilion 1", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/animals/_sprites_enlilion_1.png`, "category": "sprites", "subcategory": "animals"},
+      {"id": "cavebot__assets__image__sprites__npcs___sprites-villagers_1_png", "label": "sprites villagers 1", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/npcs/_sprites-villagers_1.png`, "category": "sprites", "subcategory": "npcs"},
+      {"id": "cavebot__assets__image__sprites__npcs___sprites-villagers_2_png", "label": "sprites villagers 2", "src": `${REPO_RAW_URL}/cavebot/assets/image/sprites/npcs/_sprites-villagers_2.png`, "category": "sprites", "subcategory": "npcs"},
+      {"id": "_coai-sprites___hdtv__nabu_sprite-1_png", "label": "nabu sprite 1", "src": `${REPO_RAW_URL}/_coai-sprites/_hdtv/nabu_sprite-1.png`, "category": "_coai-sprites", "subcategory": "_hdtv"},
+      {"id": "_coai-sprites___hdtv__anzu_sprite-1_png", "label": "anzu sprite 1", "src": `${REPO_RAW_URL}/_coai-sprites/_hdtv/anzu_sprite-1.png`, "category": "_coai-sprites", "subcategory": "_hdtv"},
+      {"id": "_coai-sprites__nabu_sprite_crouch_png", "label": "nabu sprite crouch", "src": `${REPO_RAW_URL}/_coai-sprites/nabu_sprite_crouch.png`, "category": "_coai-sprites", "subcategory": ""},
+      {"id": "_coai-sprites__nabu_sprite_fistpump_png", "label": "nabu sprite fistpump", "src": `${REPO_RAW_URL}/_coai-sprites/nabu_sprite_fistpump.png`, "category": "_coai-sprites", "subcategory": ""},
+    ];
+
+    const labelCollator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+
+    const categoryLabelOverrides = new Map([
+      ["_coai-sprites", "CoAi Sprites"],
+      ["ui-ux", "UI & UX"],
+      ["npcs", "NPCs"],
+      ["props", "Props"],
+      ["sprites", "Sprites"],
+      ["backdrops", "Backdrops"],
+      ["unsorted", "Unsorted"]
+    ]);
+
+    const normalizeSpaces = (value) => (value ? value.replace(/\s+/g, " ").trim() : "");
+    const titleCase = (value) =>
+      normalizeSpaces(value)
+        .split(" ")
+        .map((segment) => (segment ? segment[0].toUpperCase() + segment.slice(1) : ""))
+        .join(" ");
+
+    const formatCategoryLabel = (category) => {
+      if (!category) return "Other";
+      if (categoryLabelOverrides.has(category)) {
+        return categoryLabelOverrides.get(category);
+      }
+      return titleCase(category.replace(/[_-]+/g, " ").trim());
+    };
+
+    const backdrops = localPropData
+      .filter((item) => item.category === "backdrops")
+      .map((item) => ({
+        id: item.id,
+        label: titleCase(item.label),
+        src: item.src
+      }))
+      .sort((a, b) => labelCollator.compare(a.label, b.label));
+
+    const localPropItems = localPropData
+      .filter((item) => item.category !== "backdrops")
+      .map((item) => ({
+        ...item,
+        label: titleCase(item.label),
+        typeHint: item.subcategory || item.category,
+        width: 200
+      }));
+
+    const categoryIds = Array.from(new Set(localPropItems.map((item) => item.category))).sort((a, b) =>
+      labelCollator.compare(formatCategoryLabel(a), formatCategoryLabel(b))
+    );
+
+    const categories = [
+      { id: "all", label: "All" },
+      ...categoryIds.map((id) => ({ id, label: formatCategoryLabel(id) }))
+    ];
+
+    const categoryLabelLookup = new Map(categories.map((category) => [category.id, category.label]));
+
+    const typeLabelOverrides = new Map([
+      ["animal", "Animal Buddies"],
+      ["appliance", "Appliances"],
+      ["bath", "Bath Fixtures"],
+      ["bathroom", "Bathroom Décor"],
+      ["bed", "Beds"],
+      ["book", "Books & Shelving"],
+      ["chair", "Chairs"],
+      ["closet", "Closets & Wardrobes"],
+      ["desk", "Desks"],
+      ["division", "Room Dividers"],
+      ["door", "Doors & Arches"],
+      ["fire", "Fireplaces"],
+      ["floor", "Flooring"],
+      ["food", "Food & Snacks"],
+      ["frame", "Frames & Art"],
+      ["gym", "Gym Gear"],
+      ["image", "Wall Art"],
+      ["kitchen", "Kitchenware"],
+      ["lamp", "Lamps & Lighting"],
+      ["mirror", "Mirrors"],
+      ["object", "Decor Objects"],
+      ["part", "Room Parts"],
+      ["pillow", "Pillows & Cushions"],
+      ["plant", "Plants"],
+      ["renda", "Renda Lace"],
+      ["rug", "Rugs"],
+      ["shop", "Storefronts"],
+      ["stair", "Stairs & Ladders"],
+      ["toy", "Toys"],
+      ["wall", "Wall Pieces"]
+    ]);
+
+    const deriveTypeMeta = (item) => {
+      if (item.typeHint) {
+        const typeLabel = normalizeSpaces(item.typeHint);
+        return {
+          typeLabel,
+          typeKey: typeLabel.toLowerCase(),
+          variantKey: normalizeSpaces(item.label).toLowerCase()
+        };
+      }
+
+      const idMatch = item.id.match(/^([a-z]+)/i);
+      let typeKey = idMatch ? idMatch[1].toLowerCase() : "";
+      if (!typeKey) {
+        typeKey = item.category ? item.category.toLowerCase() : "";
+      }
+
+      const typeLabel =
+        item.typeLabelOverride ||
+        typeLabelOverrides.get(typeKey) ||
+        (typeKey ? titleCase(typeKey) : categoryLabelLookup.get(item.category) || titleCase(item.category || ""));
+
+      const normalizedLabel = normalizeSpaces(item.label);
+      const remainderFromId = typeKey ? item.id.slice(typeKey.length) : "";
+
+      let variantKey = remainderFromId;
+      if (!variantKey) {
+        const labelRemainder = normalizedLabel
+          .toLowerCase()
+          .startsWith(typeLabel.toLowerCase())
+          ? normalizeSpaces(normalizedLabel.slice(typeLabel.length))
+          : "";
+        if (labelRemainder) {
+          variantKey = labelRemainder.toLowerCase();
+        }
+      }
+
+      if (!variantKey) {
+        const numericBits = item.id.match(/\d+/g) || normalizedLabel.match(/\d+/g);
+        if (numericBits) {
+          variantKey = numericBits.map((part) => part.padStart(4, "0")).join("-");
+        }
+      }
+
+      if (!variantKey) {
+        variantKey = normalizedLabel.toLowerCase();
+      }
+
+      return {
+        typeLabel,
+        typeKey: typeKey || typeLabel.toLowerCase(),
+        variantKey
+      };
+    };
+
+    const augmentProp = (item) => {
+      const meta = deriveTypeMeta(item);
+      return {
+        ...item,
+        ...meta,
+        labelLower: normalizeSpaces(item.label).toLowerCase(),
+        typeLabelLower: meta.typeLabel.toLowerCase(),
+        idLower: item.id.toLowerCase()
+      };
+    };
+
+    const propLibrary = localPropItems.map(augmentProp);
+
+    const categoryPriority = new Map(categories.map((category, index) => [category.id, index]));
+    const getCategoryRank = (categoryId) =>
+      categoryPriority.has(categoryId) ? categoryPriority.get(categoryId) : categoryPriority.size;
+
+    propLibrary.sort((a, b) => {
+      const categoryRankA = getCategoryRank(a.category);
+      const categoryRankB = getCategoryRank(b.category);
+      if (categoryRankA !== categoryRankB) {
+        return categoryRankA - categoryRankB;
+      }
+
+      const typeComparison = labelCollator.compare(a.typeLabel, b.typeLabel);
+      if (typeComparison !== 0) {
+        return typeComparison;
+      }
+
+      const variantComparison = labelCollator.compare(a.variantKey, b.variantKey);
+      if (variantComparison !== 0) {
+        return variantComparison;
+      }
+
+      const labelComparison = labelCollator.compare(a.label, b.label);
+      if (labelComparison !== 0) {
+        return labelComparison;
+      }
+
+      return labelCollator.compare(a.id, b.id);
+    });
+    const stage = document.getElementById("stage");
+    const stageGrid = document.getElementById("stage-grid");
+    const backgroundsContainer = document.getElementById("backgrounds");
+    const categoryTabs = document.getElementById("category-tabs");
+    const propList = document.getElementById("prop-list");
+    const propResults = document.getElementById("prop-results");
+    const propSearchInput = document.getElementById("prop-search");
+    const loadMoreButton = document.getElementById("load-more-props");
+    const currentBackdropLabel = document.getElementById("current-backdrop");
+    const clearStageButton = document.getElementById("clear-stage");
+    const scatterStageButton = document.getElementById("scatter-stage");
+    const gridToggleButton = document.getElementById("grid-toggle");
+    const resetBackdropButton = document.getElementById("reset-backdrop");
+    const inspector = document.getElementById("inspector");
+    const inspectorEmpty = inspector.querySelector("[data-empty]");
+    const inspectorControls = inspector.querySelector("[data-controls]");
+    const inspectorName = document.getElementById("inspector-name");
+    const sizeRange = document.getElementById("size-range");
+    const sizeOutput = document.getElementById("size-output");
+    const rotationRange = document.getElementById("rotation-range");
+    const rotationOutput = document.getElementById("rotation-output");
+    const opacityRange = document.getElementById("opacity-range");
+    const opacityOutput = document.getElementById("opacity-output");
+    const blurRange = document.getElementById("blur-range");
+    const blurOutput = document.getElementById("blur-output");
+    const hueRange = document.getElementById("hue-range");
+    const hueOutput = document.getElementById("hue-output");
+    const saturationRange = document.getElementById("saturation-range");
+    const saturationOutput = document.getElementById("saturation-output");
+    const brightnessRange = document.getElementById("brightness-range");
+    const brightnessOutput = document.getElementById("brightness-output");
+    const shadowRange = document.getElementById("shadow-range");
+    const shadowOutput = document.getElementById("shadow-output");
+    const animationSelect = document.getElementById("animation-select");
+    const animationSpeedRange = document.getElementById("animation-speed");
+    const animationSpeedOutput = document.getElementById("animation-speed-output");
+    const nudgeUpButton = document.getElementById("nudge-up");
+    const nudgeDownButton = document.getElementById("nudge-down");
+    const nudgeLeftButton = document.getElementById("nudge-left");
+    const nudgeRightButton = document.getElementById("nudge-right");
+    const centerItemButton = document.getElementById("center-item");
+    const resetEffectsButton = document.getElementById("reset-effects");
+    const flipButton = document.getElementById("flip-item");
+    const duplicateButton = document.getElementById("duplicate-item");
+    const bringFrontButton = document.getElementById("bring-front");
+    const sendBackButton = document.getElementById("send-back");
+    const deleteButton = document.getElementById("delete-item");
+    const saveSceneButton = document.getElementById("save-scene");
+    const loadSceneButton = document.getElementById("load-scene");
+    const copySceneButton = document.getElementById("copy-scene");
+    const pasteSceneButton = document.getElementById("paste-scene");
+    const sceneInput = document.getElementById("scene-input");
+
+    const itemLookup = new Map(propLibrary.map((item) => [item.id, item]));
+    let selectedItem = null;
+    let topZ = 10;
+    let bottomZ = 0;
+    let activeCategory = "all";
+    const PAGE_SIZE = 120;
+    let filteredItems = [];
+    let renderedCount = 0;
+    let searchTerm = "";
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+    const formatPercent = (value) => `${Math.round(value)}%`;
+    const formatDegrees = (value) => `${Math.round(value)}°`;
+    const createBackgroundTile = (background) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "tile";
+      button.dataset.backgroundId = background.id;
+
+      const img = document.createElement("img");
+      img.src = background.src;
+      img.alt = background.label;
+      img.loading = "lazy";
+      button.appendChild(img);
+
+      const label = document.createElement("span");
+      label.className = "tile__label";
+      label.textContent = background.label;
+      button.appendChild(label);
+
+      button.addEventListener("click", () => setBackground(background));
+      return button;
+    };
+
+    const animationClassLookup = new Map([
+      ["float", "anim-float"],
+      ["bob", "anim-bob"],
+      ["shimmer", "anim-shimmer"],
+      ["spin", "anim-spin"],
+      ["pulse", "anim-pulse"]
+    ]);
+
+    const getItemImage = (element) => element.querySelector("img");
+
+    const applyEffects = (element) => {
+      const image = getItemImage(element);
+      if (!image) return;
+      const opacity = parseFloat(element.dataset.opacity || "1");
+      const blur = parseFloat(element.dataset.blur || "0");
+      const hue = parseFloat(element.dataset.hue || "0");
+      const saturation = parseFloat(element.dataset.saturation || "100");
+      const brightness = parseFloat(element.dataset.brightness || "100");
+      const shadow = parseFloat(element.dataset.shadow || "0");
+      const animation = element.dataset.animation || "none";
+      const animSpeed = parseFloat(element.dataset.animSpeed || "1.4");
+
+      const filter = `blur(${blur}px) hue-rotate(${hue}deg) saturate(${saturation}%) brightness(${brightness}%)`;
+      image.style.setProperty("--stage-filter", filter);
+      image.style.setProperty("--stage-opacity", opacity);
+      image.style.setProperty(
+        "--stage-shadow",
+        shadow ? `0 0 ${shadow}px rgba(125, 0, 185, 0.55)` : "none"
+      );
+      image.style.setProperty("--anim-speed", `${animSpeed.toFixed(2)}s`);
+      animationClassLookup.forEach((className) => image.classList.remove(className));
+      if (animationClassLookup.has(animation)) {
+        image.classList.add(animationClassLookup.get(animation));
+      }
+    };
+
+    const createPropTile = (item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "tile";
+      button.dataset.category = item.category;
+      button.dataset.type = item.typeKey;
+      button.dataset.itemId = item.id;
+      button.title = `${item.typeLabel} · ${item.label}`;
+
+      const img = document.createElement("img");
+      img.src = item.src;
+      img.alt = item.label;
+      img.loading = "lazy";
+      button.appendChild(img);
+
+      const label = document.createElement("span");
+      label.className = "tile__label";
+      label.textContent = item.label;
+      button.appendChild(label);
+
+      const typeMeta = document.createElement("span");
+      typeMeta.className = "tile__meta";
+      typeMeta.textContent = item.typeLabel;
+      button.appendChild(typeMeta);
+
+      button.addEventListener("click", () => spawnProp(item));
+      return button;
+    };
+
+    const createCategoryButton = (category) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = category.label;
+      button.dataset.category = category.id;
+      button.addEventListener("click", () => setActiveCategory(category.id));
+      return button;
+    };
+
+    const setBackground = (background) => {
+      stage.style.backgroundImage = `url(${background.src})`;
+      stage.dataset.backgroundId = background.id;
+      currentBackdropLabel.textContent = background.label;
+
+      backgroundsContainer.querySelectorAll(".tile").forEach((tile) => {
+        tile.classList.toggle("is-selected", tile.dataset.backgroundId === background.id);
+      });
+    };
+
+    const spawnProp = (item) => {
+      const element = createStageItem(item);
+      selectItem(element);
+    };
+
+    const createStageItem = (item) => {
+      const element = document.createElement("div");
+      element.className = "stage-item";
+      element.draggable = false;
+
+      const image = document.createElement("img");
+      image.src = item.src;
+      image.alt = item.label;
+      image.className = "stage-item__image";
+      image.draggable = false;
+      element.appendChild(image);
+
+      element.dataset.itemId = item.id;
+      element.dataset.scale = item.scale ? Number(item.scale) : 1;
+      element.dataset.rotation = 0;
+      element.dataset.flip = "false";
+      element.dataset.opacity = "1";
+      element.dataset.blur = "0";
+      element.dataset.hue = "0";
+      element.dataset.saturation = "100";
+      element.dataset.brightness = "100";
+      element.dataset.shadow = "0";
+      element.dataset.animation = "none";
+      element.dataset.animSpeed = "1.4";
+      element.style.width = `${item.width || 200}px`;
+      element.style.zIndex = ++topZ;
+
+      stage.appendChild(element);
+      applyTransform(element);
+      applyEffects(element);
+      positionItem(element, stage.clientWidth / 2, stage.clientHeight / 2);
+      enableStageItemInteractions(element);
+      animatePop(element);
+
+      if (!image.complete) {
+        image.addEventListener(
+          "load",
+          () => {
+            positionItem(element, stage.clientWidth / 2, stage.clientHeight / 2);
+            applyEffects(element);
+          },
+          { once: true }
+        );
+      }
+
+      return element;
+    };
+    const applyTransform = (element) => {
+      const scale = parseFloat(element.dataset.scale || "1");
+      const rotation = parseFloat(element.dataset.rotation || "0");
+      const flip = element.dataset.flip === "true" ? -1 : 1;
+      element.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) scale(${flip * scale}, ${scale})`;
+    };
+
+    const positionItem = (element, x, y) => {
+      moveWithinBounds(element, x, y);
+    };
+
+    const moveWithinBounds = (element, x, y) => {
+      const stageWidth = stage.clientWidth || stage.offsetWidth;
+      const stageHeight = stage.clientHeight || stage.offsetHeight;
+      const scale = parseFloat(element.dataset.scale || "1");
+      const halfWidth = (element.offsetWidth * scale) / 2;
+      const halfHeight = (element.offsetHeight * scale) / 2;
+
+      const horizontalRoom = stageWidth - halfWidth * 2;
+      const verticalRoom = stageHeight - halfHeight * 2;
+
+      const clampedX = horizontalRoom < 0 ? stageWidth / 2 : clamp(x, halfWidth, stageWidth - halfWidth);
+      const clampedY = verticalRoom < 0 ? stageHeight / 2 : clamp(y, halfHeight, stageHeight - halfHeight);
+
+      element.dataset.x = clampedX;
+      element.dataset.y = clampedY;
+      element.dataset.xPercent = stageWidth ? (clampedX / stageWidth).toFixed(4) : "0.5";
+      element.dataset.yPercent = stageHeight ? (clampedY / stageHeight).toFixed(4) : "0.5";
+      element.style.left = `${clampedX}px`;
+      element.style.top = `${clampedY}px`;
+    };
+
+    const maintainBounds = (element) => {
+      const stageWidth = stage.clientWidth || stage.offsetWidth;
+      const stageHeight = stage.clientHeight || stage.offsetHeight;
+      const x = parseFloat(element.dataset.x || stageWidth / 2);
+      const y = parseFloat(element.dataset.y || stageHeight / 2);
+      moveWithinBounds(element, x, y);
+    };
+
+    const getPointerPosition = (event) => {
+      const rect = stage.getBoundingClientRect();
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+    };
+
+    const enableStageItemInteractions = (element) => {
+      let pointerId = null;
+      let startX = 0;
+      let startY = 0;
+      let originX = 0;
+      let originY = 0;
+
+      const releasePointer = () => {
+        if (pointerId !== null) {
+          element.releasePointerCapture(pointerId);
+          pointerId = null;
+        }
+      };
+
+      element.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        selectItem(element);
+        pointerId = event.pointerId;
+        element.setPointerCapture(pointerId);
+        element.style.zIndex = ++topZ;
+
+        const { x, y } = getPointerPosition(event);
+        startX = x;
+        startY = y;
+        originX = parseFloat(element.dataset.x || x);
+        originY = parseFloat(element.dataset.y || y);
+      });
+
+      element.addEventListener("pointermove", (event) => {
+        if (pointerId !== event.pointerId) return;
+        const { x, y } = getPointerPosition(event);
+        const nextX = originX + (x - startX);
+        const nextY = originY + (y - startY);
+        moveWithinBounds(element, nextX, nextY);
+      });
+
+      const pointerUp = (event) => {
+        if (pointerId !== event.pointerId) return;
+        releasePointer();
+      };
+
+      element.addEventListener("pointerup", pointerUp);
+      element.addEventListener("pointercancel", pointerUp);
+
+      element.addEventListener("dblclick", () => {
+        if (selectedItem === element) {
+          selectItem(null);
+        }
+        element.remove();
+      });
+    };
+
+    const animatePop = (element) => {
+      if (!element.animate) return;
+      element.animate(
+        [
+          { transform: "translate(-50%, -50%) scale(0.6)", opacity: 0 },
+          { transform: "translate(-50%, -50%) scale(1.05)", opacity: 1 },
+          { transform: element.style.transform, opacity: 1 }
+        ],
+        {
+          duration: 280,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)"
+        }
+      );
+    };
+    const clearSelection = () => {
+      if (selectedItem) {
+        selectedItem.classList.remove("is-selected");
+      }
+      selectedItem = null;
+      updateInspector();
+    };
+
+    const selectItem = (element) => {
+      if (selectedItem === element) return;
+      if (selectedItem) {
+        selectedItem.classList.remove("is-selected");
+      }
+      selectedItem = element;
+      if (selectedItem) {
+        selectedItem.classList.add("is-selected");
+        selectedItem.style.zIndex = ++topZ;
+      }
+      updateInspector();
+    };
+
+    const updateInspector = () => {
+      if (!selectedItem) {
+        inspectorEmpty.hidden = false;
+        inspectorControls.hidden = true;
+        inspectorName.hidden = true;
+        inspectorName.textContent = "";
+        sizeRange.value = 100;
+        sizeOutput.textContent = formatPercent(100);
+        rotationRange.value = 0;
+        rotationOutput.textContent = formatDegrees(0);
+        opacityRange.value = 100;
+        opacityOutput.textContent = formatPercent(100);
+        blurRange.value = 0;
+        blurOutput.textContent = "0px";
+        hueRange.value = 0;
+        hueOutput.textContent = formatDegrees(0);
+        saturationRange.value = 100;
+        saturationOutput.textContent = formatPercent(100);
+        brightnessRange.value = 100;
+        brightnessOutput.textContent = formatPercent(100);
+        shadowRange.value = 0;
+        shadowOutput.textContent = "0px";
+        animationSelect.value = "none";
+        animationSpeedRange.value = 140;
+        animationSpeedOutput.textContent = "1.4s";
+        flipButton.setAttribute("aria-pressed", "false");
+        return;
+      }
+
+      inspectorEmpty.hidden = true;
+      inspectorControls.hidden = false;
+      inspectorName.hidden = false;
+
+      const definition = itemLookup.get(selectedItem.dataset.itemId);
+      inspectorName.textContent = definition ? definition.label : "Stage Item";
+
+      const scale = parseFloat(selectedItem.dataset.scale || "1");
+      const rotation = parseFloat(selectedItem.dataset.rotation || "0");
+      const opacity = parseFloat(selectedItem.dataset.opacity || "1");
+      const blur = parseFloat(selectedItem.dataset.blur || "0");
+      const hue = parseFloat(selectedItem.dataset.hue || "0");
+      const saturation = parseFloat(selectedItem.dataset.saturation || "100");
+      const brightness = parseFloat(selectedItem.dataset.brightness || "100");
+      const shadow = parseFloat(selectedItem.dataset.shadow || "0");
+      const animation = selectedItem.dataset.animation || "none";
+      const animSpeed = parseFloat(selectedItem.dataset.animSpeed || "1.4");
+      sizeRange.value = Math.round(scale * 100);
+      sizeOutput.textContent = formatPercent(scale * 100);
+      rotationRange.value = rotation;
+      rotationOutput.textContent = formatDegrees(rotation);
+      opacityRange.value = Math.round(opacity * 100);
+      opacityOutput.textContent = formatPercent(opacity * 100);
+      blurRange.value = blur;
+      blurOutput.textContent = `${blur}px`;
+      hueRange.value = hue;
+      hueOutput.textContent = formatDegrees(hue);
+      saturationRange.value = saturation;
+      saturationOutput.textContent = formatPercent(saturation);
+      brightnessRange.value = brightness;
+      brightnessOutput.textContent = formatPercent(brightness);
+      shadowRange.value = shadow;
+      shadowOutput.textContent = `${shadow}px`;
+      animationSelect.value = animation;
+      animationSpeedRange.value = Math.round(animSpeed * 100);
+      animationSpeedOutput.textContent = `${animSpeed.toFixed(2)}s`;
+      flipButton.setAttribute("aria-pressed", selectedItem.dataset.flip === "true" ? "true" : "false");
+    };
+    const clearStage = () => {
+      stage.querySelectorAll(".stage-item").forEach((item) => item.remove());
+      topZ = 10;
+      bottomZ = 0;
+      clearSelection();
+    };
+
+    const scatterStage = () => {
+      const stageWidth = stage.clientWidth || stage.offsetWidth;
+      const stageHeight = stage.clientHeight || stage.offsetHeight;
+      stage.querySelectorAll(".stage-item").forEach((item) => {
+        const randomX = stageWidth * (0.15 + Math.random() * 0.7);
+        const randomY = stageHeight * (0.2 + Math.random() * 0.6);
+        item.style.zIndex = ++topZ;
+        moveWithinBounds(item, randomX, randomY);
+      });
+    };
+
+    const duplicateSelected = () => {
+      if (!selectedItem) return;
+      const definition = itemLookup.get(selectedItem.dataset.itemId);
+      if (!definition) return;
+      const clone = createStageItem(definition);
+      clone.dataset.scale = selectedItem.dataset.scale || "1";
+      clone.dataset.rotation = selectedItem.dataset.rotation || "0";
+      clone.dataset.flip = selectedItem.dataset.flip || "false";
+      clone.dataset.opacity = selectedItem.dataset.opacity || "1";
+      clone.dataset.blur = selectedItem.dataset.blur || "0";
+      clone.dataset.hue = selectedItem.dataset.hue || "0";
+      clone.dataset.saturation = selectedItem.dataset.saturation || "100";
+      clone.dataset.brightness = selectedItem.dataset.brightness || "100";
+      clone.dataset.shadow = selectedItem.dataset.shadow || "0";
+      clone.dataset.animation = selectedItem.dataset.animation || "none";
+      clone.dataset.animSpeed = selectedItem.dataset.animSpeed || "1.4";
+      applyTransform(clone);
+      applyEffects(clone);
+
+      const currentX = parseFloat(selectedItem.dataset.x || stage.clientWidth / 2) + 24;
+      const currentY = parseFloat(selectedItem.dataset.y || stage.clientHeight / 2) + 24;
+      moveWithinBounds(clone, currentX, currentY);
+      selectItem(clone);
+    };
+
+    const removeSelected = () => {
+      if (!selectedItem) return;
+      selectedItem.remove();
+      clearSelection();
+    };
+
+    const toggleFlip = () => {
+      if (!selectedItem) return;
+      const isFlipped = selectedItem.dataset.flip === "true";
+      selectedItem.dataset.flip = isFlipped ? "false" : "true";
+      flipButton.setAttribute("aria-pressed", selectedItem.dataset.flip);
+      applyTransform(selectedItem);
+    };
+
+    const resetEffects = () => {
+      if (!selectedItem) return;
+      selectedItem.dataset.opacity = "1";
+      selectedItem.dataset.blur = "0";
+      selectedItem.dataset.hue = "0";
+      selectedItem.dataset.saturation = "100";
+      selectedItem.dataset.brightness = "100";
+      selectedItem.dataset.shadow = "0";
+      selectedItem.dataset.animation = "none";
+      selectedItem.dataset.animSpeed = "1.4";
+      applyEffects(selectedItem);
+      updateInspector();
+    };
+
+    const nudgeSelected = (dx, dy) => {
+      if (!selectedItem) return;
+      const currentX = parseFloat(selectedItem.dataset.x || stage.clientWidth / 2);
+      const currentY = parseFloat(selectedItem.dataset.y || stage.clientHeight / 2);
+      moveWithinBounds(selectedItem, currentX + dx, currentY + dy);
+    };
+
+    const centerSelected = () => {
+      if (!selectedItem) return;
+      const stageWidth = stage.clientWidth || stage.offsetWidth;
+      const stageHeight = stage.clientHeight || stage.offsetHeight;
+      moveWithinBounds(selectedItem, stageWidth / 2, stageHeight / 2);
+    };
+
+    const bringToFront = () => {
+      if (!selectedItem) return;
+      selectedItem.style.zIndex = ++topZ;
+    };
+
+    const sendToBack = () => {
+      if (!selectedItem) return;
+      selectedItem.style.zIndex = --bottomZ;
+    };
+
+    const handleStageResize = () => {
+      const stageWidth = stage.clientWidth || stage.offsetWidth;
+      const stageHeight = stage.clientHeight || stage.offsetHeight;
+      stage.querySelectorAll(".stage-item").forEach((item) => {
+        const xPercent = parseFloat(item.dataset.xPercent || "0.5");
+        const yPercent = parseFloat(item.dataset.yPercent || "0.5");
+        const targetX = stageWidth * xPercent;
+        const targetY = stageHeight * yPercent;
+        moveWithinBounds(item, targetX, targetY);
+      });
+    };
+
+    const buildSceneData = () => {
+      const items = Array.from(stage.querySelectorAll(".stage-item")).map((item) => ({
+        itemId: item.dataset.itemId,
+        x: parseFloat(item.dataset.x || "0"),
+        y: parseFloat(item.dataset.y || "0"),
+        xPercent: item.dataset.xPercent || "0.5",
+        yPercent: item.dataset.yPercent || "0.5",
+        scale: parseFloat(item.dataset.scale || "1"),
+        rotation: parseFloat(item.dataset.rotation || "0"),
+        flip: item.dataset.flip === "true",
+        opacity: parseFloat(item.dataset.opacity || "1"),
+        blur: parseFloat(item.dataset.blur || "0"),
+        hue: parseFloat(item.dataset.hue || "0"),
+        saturation: parseFloat(item.dataset.saturation || "100"),
+        brightness: parseFloat(item.dataset.brightness || "100"),
+        shadow: parseFloat(item.dataset.shadow || "0"),
+        animation: item.dataset.animation || "none",
+        animSpeed: parseFloat(item.dataset.animSpeed || "1.4"),
+        zIndex: Number(item.style.zIndex || "0")
+      }));
+
+      return {
+        version: 1,
+        backgroundId: stage.dataset.backgroundId || null,
+        items
+      };
+    };
+
+    const loadSceneData = (data) => {
+      if (!data || !Array.isArray(data.items)) return;
+      clearStage();
+      const backdrop = backdrops.find((bg) => bg.id === data.backgroundId);
+      if (backdrop) {
+        setBackground(backdrop);
+      }
+
+      let maxZ = 10;
+      let minZ = 0;
+      data.items.forEach((entry) => {
+        const definition = itemLookup.get(entry.itemId);
+        if (!definition) return;
+        const element = createStageItem(definition);
+        element.dataset.scale = entry.scale ?? 1;
+        element.dataset.rotation = entry.rotation ?? 0;
+        element.dataset.flip = entry.flip ? "true" : "false";
+        element.dataset.opacity = entry.opacity ?? 1;
+        element.dataset.blur = entry.blur ?? 0;
+        element.dataset.hue = entry.hue ?? 0;
+        element.dataset.saturation = entry.saturation ?? 100;
+        element.dataset.brightness = entry.brightness ?? 100;
+        element.dataset.shadow = entry.shadow ?? 0;
+        element.dataset.animation = entry.animation || "none";
+        element.dataset.animSpeed = entry.animSpeed ?? 1.4;
+        element.style.zIndex = Number(entry.zIndex || element.style.zIndex || 0);
+        applyTransform(element);
+        applyEffects(element);
+
+        const stageWidth = stage.clientWidth || stage.offsetWidth;
+        const stageHeight = stage.clientHeight || stage.offsetHeight;
+        const targetX = entry.xPercent ? stageWidth * parseFloat(entry.xPercent) : entry.x || stageWidth / 2;
+        const targetY = entry.yPercent ? stageHeight * parseFloat(entry.yPercent) : entry.y || stageHeight / 2;
+        moveWithinBounds(element, targetX, targetY);
+
+        maxZ = Math.max(maxZ, Number(element.style.zIndex || 0));
+        minZ = Math.min(minZ, Number(element.style.zIndex || 0));
+      });
+
+      topZ = maxZ;
+      bottomZ = minZ;
+      updateInspector();
+    };
+
+    const downloadScene = () => {
+      const data = buildSceneData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `hyena-diva-scene-${Date.now()}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    };
+
+    const renderBackdrops = () => {
+      backgroundsContainer.innerHTML = "";
+      const fragment = document.createDocumentFragment();
+      backdrops.forEach((background) => {
+        const tile = createBackgroundTile(background);
+        fragment.appendChild(tile);
+      });
+      backgroundsContainer.appendChild(fragment);
+      if (backdrops.length) {
+        setBackground(backdrops[0]);
+      }
+    };
+
+    const renderCategories = () => {
+      categoryTabs.innerHTML = "";
+      const fragment = document.createDocumentFragment();
+      categories.forEach((category) => {
+        const button = createCategoryButton(category);
+        fragment.appendChild(button);
+      });
+      categoryTabs.appendChild(fragment);
+      updateCategoryButtons();
+    };
+
+    const renderPropLibrary = () => {
+      filterPropLibrary();
+      renderPropTiles(true);
+    };
+
+    const setActiveCategory = (categoryId) => {
+      activeCategory = categoryId;
+      updateCategoryButtons();
+      filterPropLibrary();
+      renderPropTiles(true);
+    };
+
+    const updateCategoryButtons = () => {
+      categoryTabs.querySelectorAll("button").forEach((button) => {
+        const isActive = button.dataset.category === activeCategory;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
+      });
+    };
+
+    const filterPropLibrary = () => {
+      const query = searchTerm.trim().toLowerCase();
+      filteredItems = propLibrary.filter((item) => {
+        const matchesCategory = activeCategory === "all" || item.category === activeCategory;
+        const matchesQuery =
+          !query ||
+          item.labelLower.includes(query) ||
+          item.typeLabelLower.includes(query) ||
+          item.idLower.includes(query);
+        return matchesCategory && matchesQuery;
+      });
+      renderedCount = 0;
+    };
+
+    const updatePropResults = () => {
+      const total = filteredItems.length;
+      if (!total) {
+        propResults.textContent = searchTerm.trim()
+          ? "No props match your filters yet."
+          : "No props available.";
+        loadMoreButton.hidden = true;
+        return;
+      }
+      const showing = Math.min(renderedCount, total);
+      const showingText = showing.toLocaleString();
+      const totalText = total.toLocaleString();
+      propResults.textContent = `Showing ${showingText} of ${totalText} props`;
+    };
+
+    const updateLoadMoreButton = () => {
+      const remaining = filteredItems.length - renderedCount;
+      if (remaining > 0) {
+        loadMoreButton.hidden = false;
+        loadMoreButton.textContent = `Load more props (${remaining.toLocaleString()} more)`;
+      } else {
+        loadMoreButton.hidden = true;
+      }
+    };
+
+    const renderPropTiles = (reset = false) => {
+      if (reset) {
+        propList.innerHTML = "";
+      }
+      const nextBatch = filteredItems.slice(renderedCount, renderedCount + PAGE_SIZE);
+      if (nextBatch.length) {
+        const fragment = document.createDocumentFragment();
+        nextBatch.forEach((item) => {
+          fragment.appendChild(createPropTile(item));
+        });
+        propList.appendChild(fragment);
+        renderedCount += nextBatch.length;
+      }
+      updatePropResults();
+      updateLoadMoreButton();
+    };
+
+    sizeRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const scale = Number(sizeRange.value) / 100;
+      selectedItem.dataset.scale = scale;
+      applyTransform(selectedItem);
+      maintainBounds(selectedItem);
+      sizeOutput.textContent = formatPercent(sizeRange.value);
+    });
+
+    rotationRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const rotation = Number(rotationRange.value);
+      selectedItem.dataset.rotation = rotation;
+      applyTransform(selectedItem);
+      rotationOutput.textContent = formatDegrees(rotation);
+    });
+
+    opacityRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const opacity = Number(opacityRange.value) / 100;
+      selectedItem.dataset.opacity = opacity;
+      applyEffects(selectedItem);
+      opacityOutput.textContent = formatPercent(opacityRange.value);
+    });
+
+    blurRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const blur = Number(blurRange.value);
+      selectedItem.dataset.blur = blur;
+      applyEffects(selectedItem);
+      blurOutput.textContent = `${blur}px`;
+    });
+
+    hueRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const hue = Number(hueRange.value);
+      selectedItem.dataset.hue = hue;
+      applyEffects(selectedItem);
+      hueOutput.textContent = formatDegrees(hue);
+    });
+
+    saturationRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const saturation = Number(saturationRange.value);
+      selectedItem.dataset.saturation = saturation;
+      applyEffects(selectedItem);
+      saturationOutput.textContent = formatPercent(saturation);
+    });
+
+    brightnessRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const brightness = Number(brightnessRange.value);
+      selectedItem.dataset.brightness = brightness;
+      applyEffects(selectedItem);
+      brightnessOutput.textContent = formatPercent(brightness);
+    });
+
+    shadowRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const shadow = Number(shadowRange.value);
+      selectedItem.dataset.shadow = shadow;
+      applyEffects(selectedItem);
+      shadowOutput.textContent = `${shadow}px`;
+    });
+
+    animationSelect.addEventListener("change", () => {
+      if (!selectedItem) return;
+      selectedItem.dataset.animation = animationSelect.value;
+      applyEffects(selectedItem);
+    });
+
+    animationSpeedRange.addEventListener("input", () => {
+      if (!selectedItem) return;
+      const speed = Number(animationSpeedRange.value) / 100;
+      selectedItem.dataset.animSpeed = speed;
+      applyEffects(selectedItem);
+      animationSpeedOutput.textContent = `${speed.toFixed(2)}s`;
+    });
+
+    flipButton.addEventListener("click", () => {
+      toggleFlip();
+    });
+
+    duplicateButton.addEventListener("click", duplicateSelected);
+    bringFrontButton.addEventListener("click", bringToFront);
+    sendBackButton.addEventListener("click", sendToBack);
+    resetEffectsButton.addEventListener("click", resetEffects);
+    deleteButton.addEventListener("click", removeSelected);
+
+    nudgeUpButton.addEventListener("click", () => nudgeSelected(0, -10));
+    nudgeDownButton.addEventListener("click", () => nudgeSelected(0, 10));
+    nudgeLeftButton.addEventListener("click", () => nudgeSelected(-10, 0));
+    nudgeRightButton.addEventListener("click", () => nudgeSelected(10, 0));
+    centerItemButton.addEventListener("click", centerSelected);
+
+    propSearchInput.addEventListener("input", (event) => {
+      searchTerm = event.target.value;
+      filterPropLibrary();
+      renderPropTiles(true);
+    });
+
+    loadMoreButton.addEventListener("click", () => {
+      renderPropTiles(false);
+    });
+
+    clearStageButton.addEventListener("click", clearStage);
+    scatterStageButton.addEventListener("click", scatterStage);
+
+    saveSceneButton.addEventListener("click", downloadScene);
+
+    loadSceneButton.addEventListener("click", () => {
+      sceneInput.value = "";
+      sceneInput.click();
+    });
+
+    sceneInput.addEventListener("change", (event) => {
+      const [file] = event.target.files || [];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          loadSceneData(data);
+        } catch (error) {
+          console.warn("Unable to load scene file", error);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    copySceneButton.addEventListener("click", async () => {
+      const data = JSON.stringify(buildSceneData(), null, 2);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(data);
+        } catch (error) {
+          console.warn("Clipboard copy failed", error);
+        }
+      } else {
+        window.prompt("Copy this scene JSON:", data);
+      }
+    });
+
+    pasteSceneButton.addEventListener("click", async () => {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (!text) return;
+          const data = JSON.parse(text);
+          loadSceneData(data);
+        } catch (error) {
+          console.warn("Clipboard paste failed", error);
+        }
+      } else {
+        const text = window.prompt("Paste scene JSON here:");
+        if (!text) return;
+        try {
+          const data = JSON.parse(text);
+          loadSceneData(data);
+        } catch (error) {
+          console.warn("Unable to parse scene JSON", error);
+        }
+      }
+    });
+
+    gridToggleButton.addEventListener("click", () => {
+      const isActive = stage.classList.toggle("show-grid");
+      gridToggleButton.setAttribute("aria-pressed", isActive ? "true" : "false");
+    });
+
+    resetBackdropButton.addEventListener("click", () => {
+      if (backdrops.length) {
+        setBackground(backdrops[0]);
+      }
+    });
+
+    stage.addEventListener("pointerdown", (event) => {
+      if (event.target === stage) {
+        clearSelection();
+      }
+    });
+
+    stage.addEventListener("dblclick", (event) => {
+      if (event.target === stage) {
+        clearSelection();
+      }
+    });
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        if (selectedItem) {
+          event.preventDefault();
+          clearSelection();
+        }
+        return;
+      }
+
+      if (!selectedItem) return;
+
+      const step = event.shiftKey ? 14 : 4;
+      const currentX = parseFloat(selectedItem.dataset.x || stage.clientWidth / 2);
+      const currentY = parseFloat(selectedItem.dataset.y || stage.clientHeight / 2);
+
+      switch (event.key) {
+        case "Delete":
+        case "Backspace":
+          event.preventDefault();
+          removeSelected();
+          break;
+        case "ArrowUp":
+          event.preventDefault();
+          moveWithinBounds(selectedItem, currentX, currentY - step);
+          break;
+        case "ArrowDown":
+          event.preventDefault();
+          moveWithinBounds(selectedItem, currentX, currentY + step);
+          break;
+        case "ArrowLeft":
+          event.preventDefault();
+          moveWithinBounds(selectedItem, currentX - step, currentY);
+          break;
+        case "ArrowRight":
+          event.preventDefault();
+          moveWithinBounds(selectedItem, currentX + step, currentY);
+          break;
+        case "[":
+          event.preventDefault();
+          rotationRange.value = Number(rotationRange.value) - 5;
+          rotationRange.dispatchEvent(new Event("input"));
+          break;
+        case "]":
+          event.preventDefault();
+          rotationRange.value = Number(rotationRange.value) + 5;
+          rotationRange.dispatchEvent(new Event("input"));
+          break;
+        default:
+          break;
+      }
+    };
+
+    const init = () => {
+      renderBackdrops();
+      renderCategories();
+      searchTerm = propSearchInput.value || "";
+      renderPropLibrary();
+      updateInspector();
+      handleStageResize();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", handleStageResize);
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
