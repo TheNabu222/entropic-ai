@@ -1,181 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Repo Stage Maker</title>
-  <style>
-    :root { font-family: Inter, system-ui, sans-serif; color: #201231; background:#f6f3ff; }
-    body { margin:0; padding:1rem; }
-    h1 { margin:0 0 .5rem; }
-    .layout { display:grid; grid-template-columns: 1fr 360px; gap:1rem; align-items:start; }
-    #stage { position:relative; min-height:70vh; border:2px dashed #7f57bf; background:#fff; overflow:hidden; border-radius:12px; }
-    .placed { position:absolute; width:120px; cursor:grab; user-select:none; transform:translate(-50%,-50%); }
-    .panel { background:#fff; border:1px solid #ddd; border-radius:12px; padding:.75rem; }
-    .controls { display:grid; gap:.5rem; margin-bottom:.5rem; }
-    input, select, button { font:inherit; padding:.45rem .55rem; border-radius:8px; border:1px solid #bbb; }
-    #asset-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; max-height:68vh; overflow:auto; }
-    .asset { border:1px solid #d9d9e8; border-radius:8px; background:#faf9ff; padding:.35rem; }
-    .asset img { width:100%; height:80px; object-fit:contain; display:block; background:white; border-radius:6px; }
-    .asset small { display:block; margin-top:.25rem; font-size:.67rem; line-height:1.2; word-break:break-word; }
-    .row { display:flex; gap:.5rem; }
-    .muted { color:#5c4f72; font-size:.82rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage Maker</title>
 </head>
 <body>
-  <h1>Stage Maker (Repo Assets)</h1>
-  <p class="muted">Refactored to use local repo paths and include visual assets discovered across subdirectories.</p>
-
-  <div class="layout">
-    <section class="panel">
-      <div class="row">
-        <button id="clear-stage" type="button">Clear Stage</button>
-        <button id="save-scene" type="button">Save Scene</button>
-        <button id="load-scene" type="button">Load Scene</button>
-      </div>
-      <div id="stage"></div>
-    </section>
-
-    <aside class="panel">
-      <div class="controls">
-        <input id="search" placeholder="Search assets..." />
-        <select id="group-filter">
-          <option value="all">All subdirectories</option>
-        </select>
-        <div class="muted" id="stats">Loading assets…</div>
-      </div>
-      <div id="asset-grid"></div>
-      <button id="load-more" type="button" style="width:100%; margin-top:.5rem;">Load More</button>
-    </aside>
-  </div>
-
-  <script>
-    const stage = document.getElementById('stage');
-    const assetGrid = document.getElementById('asset-grid');
-    const stats = document.getElementById('stats');
-    const searchInput = document.getElementById('search');
-    const groupFilter = document.getElementById('group-filter');
-    const loadMoreBtn = document.getElementById('load-more');
-
-    const STATE = { assets: [], filtered: [], limit: 90, dragTarget: null, dragOffsetX: 0, dragOffsetY: 0 };
-
-    const normalize = (value) => value.toLowerCase();
-
-    function uniqueGroups(items) {
-      return [...new Set(items.map((asset) => asset.group))].sort((a, b) => a.localeCompare(b));
-    }
-
-    function renderGroups() {
-      for (const group of uniqueGroups(STATE.assets)) {
-        const option = document.createElement('option');
-        option.value = group;
-        option.textContent = group;
-        groupFilter.append(option);
-      }
-    }
-
-    function applyFilters(resetLimit = true) {
-      if (resetLimit) STATE.limit = 90;
-      const query = normalize(searchInput.value.trim());
-      const selectedGroup = groupFilter.value;
-
-      STATE.filtered = STATE.assets.filter((asset) => {
-        const inGroup = selectedGroup === 'all' || asset.group === selectedGroup;
-        const hitQuery = !query || normalize(asset.path).includes(query);
-        return inGroup && hitQuery;
-      });
-
-      renderAssets();
-    }
-
-    function renderAssets() {
-      const showing = STATE.filtered.slice(0, STATE.limit);
-      assetGrid.innerHTML = '';
-
-      for (const asset of showing) {
-        const tile = document.createElement('button');
-        tile.type = 'button';
-        tile.className = 'asset';
-        tile.innerHTML = `<img src="${asset.path}" loading="lazy" alt="${asset.path}"><small>${asset.path}</small>`;
-        tile.addEventListener('click', () => placeAsset(asset.path));
-        assetGrid.append(tile);
-      }
-
-      stats.textContent = `Showing ${showing.length} of ${STATE.filtered.length} assets`;
-      loadMoreBtn.style.display = STATE.limit < STATE.filtered.length ? 'block' : 'none';
-    }
-
-    function placeAsset(src) {
-      const el = document.createElement('img');
-      el.src = src;
-      el.className = 'placed';
-      el.style.left = `${stage.clientWidth / 2}px`;
-      el.style.top = `${stage.clientHeight / 2}px`;
-      el.draggable = false;
-
-      el.addEventListener('pointerdown', (event) => {
-        STATE.dragTarget = el;
-        const rect = el.getBoundingClientRect();
-        STATE.dragOffsetX = event.clientX - rect.left;
-        STATE.dragOffsetY = event.clientY - rect.top;
-        el.setPointerCapture(event.pointerId);
-      });
-
-      el.addEventListener('pointermove', (event) => {
-        if (STATE.dragTarget !== el) return;
-        const stageRect = stage.getBoundingClientRect();
-        const x = event.clientX - stageRect.left - STATE.dragOffsetX + (el.clientWidth / 2);
-        const y = event.clientY - stageRect.top - STATE.dragOffsetY + (el.clientHeight / 2);
-        el.style.left = `${x}px`;
-        el.style.top = `${y}px`;
-      });
-
-      el.addEventListener('pointerup', () => {
-        STATE.dragTarget = null;
-      });
-
-      stage.append(el);
-    }
-
-    document.getElementById('clear-stage').addEventListener('click', () => { stage.innerHTML = ''; });
-
-    document.getElementById('save-scene').addEventListener('click', () => {
-      const scene = [...stage.querySelectorAll('.placed')].map((el) => ({
-        src: el.getAttribute('src'), left: el.style.left, top: el.style.top, width: el.style.width
-      }));
-      localStorage.setItem('stageMakerScene', JSON.stringify(scene));
-      alert('Scene saved.');
-    });
-
-    document.getElementById('load-scene').addEventListener('click', () => {
-      const raw = localStorage.getItem('stageMakerScene');
-      if (!raw) return;
-      stage.innerHTML = '';
-      JSON.parse(raw).forEach((item) => {
-        placeAsset(item.src);
-        const el = stage.lastElementChild;
-        el.style.left = item.left;
-        el.style.top = item.top;
-        if (item.width) el.style.width = item.width;
-      });
-    });
-
-    searchInput.addEventListener('input', () => applyFilters(true));
-    groupFilter.addEventListener('change', () => applyFilters(true));
-    loadMoreBtn.addEventListener('click', () => { STATE.limit += 90; renderAssets(); });
-
-    async function init() {
-      const response = await fetch('data/repo-visual-assets.json');
-      const payload = await response.json();
-      STATE.assets = payload.assets;
-      renderGroups();
-      applyFilters(true);
-    }
-
-    init().catch((error) => {
-      stats.textContent = 'Unable to load repo assets manifest.';
-      console.error(error);
-    });
-  </script>
+    <h1>Stage Maker</h1>
+    <div id="props-container"></div>
+    <script>
+        // Fetching props data from props.json
+        fetch('https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/data/props.json')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('props-container');
+                data.forEach(prop => {
+                    const propElement = document.createElement('div');
+                    propElement.innerHTML = `<h2>${prop.title}</h2><img src='https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/${prop.image}' alt='${prop.title}'>`;
+                    container.appendChild(propElement);
+                });
+            })
+            .catch(error => console.error('Error fetching props:', error));
+    </script>
 </body>
 </html>
