@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stage Maker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        #canvas { border: 1px solid #000; width: 100%; height: 80vh; background: #f0f0f0; }
+        .controls { padding: 10px; background: #eee; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button id="saveScene">Save Scene</button>
+        <button id="loadScene">Load Scene</button>
+        <div id="inspector" style="display:none;"></div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let assets = [];
+        let scene = [];
+
+        async function loadAssets() {
+            const response = await fetch('data/props.json');
+            assets = await response.json();
+            // Additional code to handle asset loading and displaying options
+        }
+
+        function setupDragAndDrop() {
+            // Drag and drop functionality implementation
+            canvas.addEventListener('dragover', (e) => { e.preventDefault(); });
+            canvas.addEventListener('drop', (e) => { e.preventDefault(); /* Place dropped asset logic */ });
+        }
+
+        function saveScene() {
+            localStorage.setItem('scene', JSON.stringify(scene));
+        }
+
+        function loadScene() {
+            scene = JSON.parse(localStorage.getItem('scene')) || [];
+            // Logic to render the loaded scene
+        }
+
+        document.getElementById('saveScene').addEventListener('click', saveScene);
+        document.getElementById('loadScene').addEventListener('click', loadScene);
+
+        loadAssets();
+        setupDragAndDrop();
+    </script>
+</body>
+</html>
