@@ -59,6 +59,7 @@
 
     const STATE = { assets: [], filtered: [], limit: 90, dragTarget: null, dragOffsetX: 0, dragOffsetY: 0 };
 
+    const PATH_PREFIX = '../';
     const normalize = (value) => value.toLowerCase();
 
     function uniqueGroups(items) {
@@ -96,8 +97,8 @@
         const tile = document.createElement('button');
         tile.type = 'button';
         tile.className = 'asset';
-        tile.innerHTML = `<img src="${asset.path}" loading="lazy" alt="${asset.path}"><small>${asset.path}</small>`;
-        tile.addEventListener('click', () => placeAsset(asset.path));
+        tile.innerHTML = `<img src="${PATH_PREFIX}${asset.path}" loading="lazy" alt="${asset.path}"><small>${asset.path}</small>`;
+        tile.addEventListener('click', () => placeAsset(`${PATH_PREFIX}${asset.path}`));
         assetGrid.append(tile);
       }
 
@@ -165,7 +166,7 @@
     loadMoreBtn.addEventListener('click', () => { STATE.limit += 90; renderAssets(); });
 
     async function init() {
-      const response = await fetch('data/repo-visual-assets.json');
+      const response = await fetch('../data/repo-visual-assets.json');
       const payload = await response.json();
       STATE.assets = payload.assets;
       renderGroups();
