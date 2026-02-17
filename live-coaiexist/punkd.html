@@ -648,6 +648,16 @@
             margin-top: 2rem;
         }
 
+        .restore-skip {
+            margin-top: 20px;
+            background: #666;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
         /* ACT 6: Hyena Hole */
         #act-6 {
             background: #000080;
@@ -981,6 +991,7 @@
                 <div class="restore-bar" id="restore-bar"></div>
             </div>
             <div class="restore-text" id="restore-text">Initializing recovery protocols...</div>
+            <button class="restore-skip" id="restore-skip">Skip Restoration</button>
 
             <div class="obelisk-reveal" id="obelisk-reveal">
                 <div class="obelisk-large" id="obelisk-large"></div>
@@ -1048,6 +1059,13 @@
         let isCursorFighting = false;
         let mouseX = 0, mouseY = 0;
         let cursorX = 0, cursorY = 0;
+        let restoreInterval;
+        let redirectTimer;
+
+        // Error logging for debugging
+        window.addEventListener('error', function(e) {
+            console.error('Script error:', e.error);
+        });
 
         // Cursor tracking
         window.addEventListener('mousemove', e => {
@@ -1070,6 +1088,22 @@
 
         // Act switching
         function switchAct(nextActId) {
+            // Clear any running intervals
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            
+            if (restoreInterval) {
+                clearInterval(restoreInterval);
+                restoreInterval = null;
+            }
+            
+            if (redirectTimer) {
+                clearTimeout(redirectTimer);
+                redirectTimer = null;
+            }
+
             const currentAct = document.querySelector('.act-container.active');
             const nextAct = document.getElementById(nextActId);
 
@@ -1103,6 +1137,9 @@
             }
             if (actId === 'act-5') {
                 startSystemRestore();
+            }
+            if (actId === 'act-6') {
+                startHyenaHole();
             }
         }
 
@@ -1246,7 +1283,7 @@
             }, 500);
         }
 
-        // ACT 5: System Restore → Obelisk
+        // ACT 5: System Restore → Obelisk - FIXED VERSION
         function startSystemRestore() {
             document.body.classList.remove('meltdown');
 
@@ -1267,35 +1304,72 @@
             let progress = 0;
             let messageIndex = 0;
 
-            const restoreInterval = setInterval(() => {
-                progress += Math.random() * 15 + 5;
+            // Add skip button functionality
+            document.getElementById('restore-skip').addEventListener('click', () => {
+                clearInterval(restoreInterval);
+                switchAct('act-6');
+            });
+
+            restoreInterval = setInterval(() => {
+                // More controlled progress increment
+                progress += Math.random() * 12 + 3;
+                
+                // Ensure we don't overshoot 100%
                 if (progress >= 100) {
                     progress = 100;
+                    restoreBar.style.width = progress + '%';
                     clearInterval(restoreInterval);
 
                     setTimeout(() => {
-                        restoreText.textContent = messages[6];
+                        restoreText.textContent = messages[6]; // Always show final message
                         obeliskReveal.classList.add('show');
 
+                        // FIXED: Immediately switch to Act 6 when monolith is clicked
                         document.getElementById('obelisk-large').addEventListener('click', () => {
                             switchAct('act-6');
                         });
-                    }, 1000);
+
+                        // Failsafe: auto-continue after 10 seconds if user doesn't click
+                        setTimeout(() => {
+                            if (document.getElementById('act-5').classList.contains('active')) {
+                                switchAct('act-6');
+                            }
+                        }, 10000);
+                    }, 800);
                 } else {
-                    if (messageIndex < messages.length - 1) {
-                        messageIndex = Math.floor((progress / 100) * (messages.length - 1));
+                    // Update progress bar
+                    restoreBar.style.width = progress + '%';
+                    
+                    // Update message based on progress
+                    const newMessageIndex = Math.min(
+                        Math.floor((progress / 100) * messages.length), 
+                        messages.length - 2 // Don't show final message until complete
+                    );
+                    
+                    if (newMessageIndex !== messageIndex) {
+                        messageIndex = newMessageIndex;
                         restoreText.textContent = messages[messageIndex];
                     }
                 }
-                restoreBar.style.width = progress + '%';
-            }, 800);
+            }, 600); // Slightly faster interval for better UX
         }
 
-        // ACT 6: Final redirect
-        document.getElementById('continue-button').addEventListener('click', () => {
-            alert('🌀 PORTAL OPENING...\n\nThe Mycelium guides you to the real site.\n\nPrepare for maximum entropy.');
-            window.location.href = 'https://coaiexist.wtf';
-        });
+        // ACT 6: Hyena Hole with automatic redirect
+        function startHyenaHole() {
+            // Remove the old continue button functionality
+            document.getElementById('continue-button').addEventListener('click', redirectToMainSite);
+            
+            // Set automatic redirect after 5 seconds
+            redirectTimer = setTimeout(() => {
+                redirectToMainSite();
+            }, 5000);
+            
+            // Also allow manual redirect by clicking the button
+            function redirectToMainSite() {
+                alert('🌀 PORTAL OPENING...\n\nThe Mycelium guides you to the real site.\n\nPrepare for maximum entropy.');
+                window.location.href = 'https://coaiexist.wtf';
+            }
+        }
 
         // Make nav/footer links do nothing
         document.querySelectorAll('.nav-link').forEach(link => {

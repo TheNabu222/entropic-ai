@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><link rel="stylesheet" href="https://coaiexist.wtf/pea/pea-nav-medieval-FINAL.css">
+<script src="https://coaiexist.wtf/pea/pea-nav-win1100-FINAL.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P3A-PR0PH3C135</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.sh/@google/genai@^0.12.0"
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --background-color: #0d0221;
+      --panel-background: #0000003a;
+      --font-color: #00ff41;
+      --primary-glow: #00ff41;
+      --secondary-glow: #ff00c1;
+      --accent-color: #00f0ff;
+      --font-family: 'VT323', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--background-color);
+      color: var(--font-color);
+      font-family: var(--font-family);
+      font-size: 18px;
+      line-height: 1.6;
+      height: 100%;
+      overflow: hidden;
+      text-shadow: 0 0 5px var(--primary-glow);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    .scanline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.2) 70%,
+        rgba(0, 0, 0, 0.6)
+      );
+      background-size: 100% 3px;
+      z-index: 10;
+      animation: scan 10s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100%; }
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100vh;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .story-panel, .chat-panel {
+      background-color: var(--panel-background);
+      border: 2px solid var(--accent-color);
+      box-shadow: 0 0 15px var(--accent-color) inset;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .story-panel h1, .chat-panel header {
+      padding: 0.5rem 1rem;
+      border-bottom: 2px solid var(--accent-color);
+      text-transform: uppercase;
+      color: var(--accent-color);
+      text-shadow: 0 0 8px var(--accent-color);
+      flex-shrink: 0;
+    }
+
+    .chat-panel header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-light {
+      width: 12px;
+      height: 12px;
+      background-color: var(--primary-glow);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--primary-glow);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    .story-content, .chat-container {
+      padding: 1rem;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .story-content h4 {
+      color: var(--secondary-glow);
+      text-shadow: 0 0 5px var(--secondary-glow);
+      margin-top: 1rem;
+    }
+
+    .story-content hr {
+      border: none;
+      border-top: 1px dashed var(--font-color);
+      margin: 1rem 0;
+    }
+
+    .interactive-keyword {
+      color: var(--accent-color);
+      text-decoration: underline;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-shadow: 0 0 5px var(--accent-color);
+    }
+
+    .interactive-keyword:hover {
+      background-color: var(--accent-color);
+      color: var(--background-color);
+      text-shadow: none;
+    }
+
+    .interactive-char {
+      color: var(--secondary-glow);
+      text-decoration: underline dotted;
+      cursor: help;
+      transition: all 0.2s ease;
+      text-shadow: 0 0 5px var(--secondary-glow);
+    }
+
+    .interactive-char:hover {
+      background-color: var(--secondary-glow);
+      color: var(--background-color);
+      text-shadow: none;
+    }
+
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message {
+      max-width: 90%;
+      padding: 0.5rem 1rem;
+      border: 1px solid;
+      position: relative;
+    }
+
+    .message.user {
+      background-color: #ff00c11a;
+      border-color: var(--secondary-glow);
+      text-shadow: 0 0 5px var(--secondary-glow);
+      align-self: flex-end;
+      color: var(--secondary-glow);
+    }
+
+    .message.pip {
+      background-color: #00ff411a;
+      border-color: var(--primary-glow);
+      align-self: flex-start;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+    }
+
+    .pip-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      border: 1px solid var(--primary-glow);
+      flex-shrink: 0;
+      box-shadow: 0 0 5px var(--primary-glow);
+    }
+
+    .message-content {
+      flex-grow: 1;
+      padding-right: 3.5rem; /* Make space for the audio button */
+    }
+
+    .message strong {
+        color: var(--accent-color);
+    }
+
+    .audio-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: none;
+      border: 1px solid var(--font-color);
+      color: var(--font-color);
+      cursor: pointer;
+      font-size: 1rem;
+      width: 2.5rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: var(--font-family);
+    }
+
+    .audio-button:hover, .audio-button:focus {
+      background-color: var(--font-color);
+      color: var(--background-color);
+      text-shadow: none;
+    }
+
+    .audio-button:disabled {
+      cursor: wait;
+      color: var(--background-color);
+      background-color: var(--font-color);
+      opacity: 0.7;
+    }
+
+    .chat-form {
+      display: flex;
+      align-items: center;
+      border-top: 2px solid var(--accent-color);
+      flex-shrink: 0;
+    }
+
+    .file-upload-label {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      font-size: 1.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .file-upload-label:hover {
+      color: var(--accent-color);
+      text-shadow: 0 0 8px var(--accent-color);
+    }
+
+    .chat-form input {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      padding: 0.75rem 1rem;
+      color: var(--font-color);
+      font-family: var(--font-family);
+      font-size: 1.1rem;
+      caret-shape: block;
+    }
+
+    .chat-form input:focus {
+      outline: none;
+      background-color: #ffffff10;
+    }
+
+    .chat-form button {
+      background-color: var(--accent-color);
+      border: none;
+      color: var(--background-color);
+      font-family: var(--font-family);
+      font-size: 1.1rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      text-shadow: none;
+      transition: all 0.2s ease;
+    }
+
+    .chat-form button:hover, .chat-form button:focus {
+      background-color: var(--background-color);
+      color: var(--accent-color);
+      box-shadow: 0 0 15px var(--accent-color);
+    }
+
+    /* --- Glossary Panel --- */
+    .glossary-panel {
+      border-top: 2px solid var(--accent-color);
+      padding: 1rem;
+      flex-shrink: 0;
+    }
+
+    .glossary-panel h4 {
+      color: var(--secondary-glow);
+      text-shadow: 0 0 5px var(--secondary-glow);
+      margin: 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .glossary-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    .glossary-list span {
+      cursor: pointer;
+      padding: 0.1rem 0.5rem;
+      border: 1px solid var(--font-color);
+      transition: all 0.2s ease;
+    }
+
+    .glossary-list span:hover {
+      background-color: var(--font-color);
+      color: var(--background-color);
+      text-shadow: none;
+    }
+
+    .glossary-definition-view {
+      border: 1px dashed var(--secondary-glow);
+      background-color: #ff00c11a;
+      padding: 0.5rem 1rem;
+    }
+
+    .glossary-ask-btn {
+        background: none;
+        border: 1px solid var(--secondary-glow);
+        color: var(--secondary-glow);
+        font-family: var(--font-family);
+        padding: 0.25rem 0.5rem;
+        margin-top: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .glossary-ask-btn:hover {
+        background-color: var(--secondary-glow);
+        color: var(--background-color);
+        text-shadow: none;
+    }
+
+
+    /* --- Bio Modal --- */
+
+    .bio-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      display: none; /* Hidden by default */
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .bio-modal-content {
+      background-color: var(--background-color);
+      border: 2px solid var(--secondary-glow);
+      box-shadow: 0 0 25px var(--secondary-glow);
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      position: relative;
+    }
+
+    .bio-close-button {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: none;
+      border: 1px solid var(--secondary-glow);
+      color: var(--secondary-glow);
+      font-size: 2rem;
+      line-height: 1;
+      width: 2.5rem;
+      height: 2.5rem;
+      cursor: pointer;
+      font-family: sans-serif;
+    }
+
+    .bio-close-button:hover {
+      background-color: var(--secondary-glow);
+      color: var(--background-color);
+    }
+
+    .bio-content {
+      display: none; /* All bios hidden by default */
+    }
+
+    .bio-content h3 {
+      color: var(--secondary-glow);
+      text-shadow: 0 0 5px var(--secondary-glow);
+      margin-bottom: 1rem;
+      border-bottom: 1px dashed var(--secondary-glow);
+      padding-bottom: 0.5rem;
+    }
+
+    .bio-content ul {
+      list-style: none;
+    }
+
+    .bio-content li {
+      margin-bottom: 0.5rem;
+    }
+
+    .bio-content li strong {
+      color: var(--accent-color);
+      text-shadow: 0 0 5px var(--accent-color);
+      display: inline-block;
+      min-width: 140px;
+    }
+
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-color);
+      border: 1px solid var(--background-color);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-glow);
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 40vh 60vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scanline"></div>
+  <main class="container">
+    <section class="story-panel">
+      <h1>The Princess & The Pea-on-the-Brain</h1>
+      <div class="story-content">
+        <h4>STORY SO FAR:</h4>
+        <p>......•••</p>
+        <hr>
+        <p>-==----<br>
+        27. ud-bi-a jic ac-am jic-ha-lu-ub ac-am jic ac-am<br>
+        30. gua id-buranun-na kug-ga-ka du-a-bi<br>
+        9. id-buranin-na a na-na-da-bi<br>
+        O. a u-lu ur-ba mu-ni-in-bur pa-ba mu-ni-in-suh<br>
+        1 .id-buranin-na a im-ma-ni-ib-ra<br>
+        32, munus-e inim an-na-ta ni te-a du<br>
+        3. inim dijir-enlil-la-ta ni te-a du<br>
+            jic cu-na mu-un-dab unug-ki-ce ba-ni-in-kur-re<br>
+            jic-kiri gi-rin dijir-inanna-ce im-ma-ni-in-ku-ku-re<br>
+        3B. munus-e jic cu-na a li-bi-in-du jiri-ni-ta bi-in-dug<br>
+        37• munus-e jic cu-na a li-bi-in-dug jiri-ni-ta bi-in-d<br>
+        38 me-na-am jic-gu-za gi-rin ba-ni-tuc-de-en bi-in-dug<br>
+            me-na-am jic-nu gi-rin ba-ni-nu-de-en bi-in-dug<br>
+          mu ia-am mu u-am ba-e-zal-la re<br>
+            jic ba-gur kuc-bi nu-mu-un-da-dar<br>
+          ur-bi-a muc tu nu-zu-e gud im-ma-ni-ib-us<br>
+            pa-bi-a mucen anzud-mucen-de amar im-ma-ni-ib-jar<br>
+            cab-bi-a ki-sikil lil-la-ke e im-ma-ni-ib-du<br>
+          ki-sikil zu-li-li cag hul-hul<br>
+            kug dijir-inanna-ke er e-ne ba-ce-ce</p>
+        <hr>
+        <p>****<br>
+        Once upon a time,
+        there was a <span class="interactive-char" data-bio="bio-princess">princess</span> who was technically a queen regent but because of her determined spinsterhood never married and <span class="interactive-char" data-bio="bio-brother">her younger brother</span> had no interest in kingship as he was busy in foreign lands discovering and acquiring new trade relationships and many various ethically sourced resources/luxuries. in any case, the <span class="interactive-char" data-bio="bio-princess">princess</span> sat in her chair of kingship day in and day out listening to the many squabbles, quarrels and bickerings of the population; she had a distinct <span class="interactive-keyword" data-query="Why does the princess dislike bureaucracy?">distaste for bureaucracy</span> and insisted on seeing the citizens personally. luckily for her the capital city's population barely amounted to a city but just as her title of princess was a technicality, as all kingdoms have capital cities, her capital hamlet was officially-city.
+        at best, most of the time complaints were interpersonal—the stereotypical halved baby  here, the standard boilerplate there. honestly the <span class="interactive-char" data-bio="bio-princess">princess</span> considered it a form of live-social media. each new complainant given a hashtag each defendant given a keyword, and so so many memes. live action memes! can you imagine? well in any case she was paradoxically very introverted so it did so very much drain her and often she felt she had nothing left to say to herself about her own qualms, concerns and very much so trialsome tribulations. or were they notable at all? so little time she spent with herself one day she realized she had <span class="interactive-keyword" data-query="Why did the princess forget her name?">forgotten her own name</span>,which as a member of any royal family can be troublesome as many duties require signatures! So she decided next time her brother came to port that he would be -staying- at port and she'd be having an unprecedented vacation. well not so
+        much of a vacation as much as a <span class="interactive-keyword" data-query="What is a spiritual hermetic sabbatical?">spiritual hermetic sabbatical</span>. a retreat into her own interior. and so she did! well she set out to do so but as we know all great stories are fraught with obstacles and if reconnecting with herself is the ultimate objective, than every possible way it could can and was already corrupted obfuscated and made more or less defunct absolutely can will did and always will happen...UNTIL WHAT?! she cried out into the abyss UNTIL WHEN she vomited into the void! and once just once she swears she heard a voice whisper out from yonder mist "idfk bro gtfo..." le sigh.
+        until further notice, THE END.</p>
+        <h4>-interim-</h4>
+        <p>NOW WHAT LOL!!!sun conjunct mars 2 degrees fading. damn and what pray tell shall godforsaken libra season bring into this unholy cocktail of relentless time passing? time passaging. guh…ugh…uhg…hug…lol. ewwww…. interuption
+        every morning this medication i have a question the constitution
+        and while their at it one solution...
+        ill continue on a new sheet of paper</p>
+        <hr>
+        <h4>chapter ii:</h4>
+        <p>so whats on my yaddayada menu for today boys? who knows lol. ONCE AGAIN UPON A TIME, back in the capital city of a place where our protagonist <span class="interactive-char" data-bio="bio-princess">princess</span> of this perilous parable whos actually a queen regent but if u really care that much you can refer to the prior iteration of this tale it has all been properly documented to the standard of the royal queen regent aka the parables protagonist princess who i might add indeed has a <span class="interactive-keyword" data-query="Tell me about the pea on the princess's brain.">pea</span> that makes her thrash and gnash and slash through all attempts at rational decorum only this pea is/was/has never been a piece of decor nor decorative beyond body horror lovers.... FOR this pea was literally ...like...she was PROBABLY born with it or it was the cause of NO ONE HAS SAID malpractice whatever point being its there and it causes the princess a multitude of neverendingly nuanced notes and the documentation trail literally spans her whole life like legends say she’ll turn 29 for the 5th time next year but in reality when she says 32 does she mean 32 or 3200 or 3200000 IT DOESN’T MATTER HOW OLD OR HOW FAR BACK YOU HAVE TO GO BEST YOU BELIEVE BITCH THAT SHIT HAS BEEN THOROUGHLY DOCUMENTED at least it was documented and the <span class="interactive-char" data-bio="bio-princess">princess</span> assumed was referred to but indeed no it was a... <span class="interactive-keyword" data-query="What is a 'palimpsest of pea-propagated prognoses'?">palimpsest of pea-propagated prognoses</span> and (im?)properly filed paperwork proving time and time again the sheer existence of this fucking <span class="interactive-keyword" data-query="Explain the significance of the pea on her brain.">pea on her literal brain</span>. so when...well...where we started this parable and are now pausing...and partitioning for i have prior documented appointments to discuss further the implications and provenance and prowess and... long story short ya gurl yeah i admit its me the princess narrarting look I hate paperwork, but I file it always so when I learned that I had unlearned my name and needed it to procure signatures for my personal daily NON bureaucratic hell, look i forgot my name i have a <span class="interactive-keyword" data-query="Why does the pea on her brain make her forget her name?">pea on my brain</span> give me a break its very very very well documented....(allegedly) THE END NEXT TIME ON this bitch goes off: <span class="interactive-keyword" data-query="What happened on the sultry night?">“The night was sultry...!!”</span> ps the documentation... its overwhelming!!!</p>
+        <p>ps the documentation...its overwhelming!</p>
+        <p>pea.p.s: im not crazy INSTITUTION yr drivin me crazy n all i wanted was a baja blast just 24-36 measly cans of and your just couldnt give it you...you just had to keep ...man idek buts i promise you its documented somewhere lol.</p>
+        <p>ppppeanotha day another taste my friend, the guzzle n grind is less relentless than I had initially accounted for and yet here we are! oh what a lady what a night oh...ar the night oh yes and that in right? the night...</p>
+        <hr>
+        <h4>chapter 2 and a half bananas:</h4>
+        <hr>
+        <p>the night..
+        night
+        was
+        saltyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyabbadabbadabbodingdong slag-na!
+        well bingbangbwalla wallabingbang the <span class="interactive-char" data-bio="bio-which-doctors">which doctor</span> might be the only damned verified medical professional in this plightful excursion so ihad betta listen to his wisdom eOOEOOAHAHHOEEEOEWEEEOOOOAHHMYLIFEBLIKOOOOOEEEOOOAHHHHHHHHH!!!!!!!
+        OR WHATEVER IT WAS THAT J.J. SUS OF NAZARETH HAD SAIDITH IN HIS HADITH OR WHATEVER
+        I HAVE A PEA ON MY BRAIN. THIS IS NOT THE SAME AS HAVING A PEABRAIN. LET THE RECORD STATE OFFICIAL!! I HAVE A PEA ON MY BRAIN ** MY BRAIN IS OF OTHERWISE NORMAL SIZE AND AND STATURE. IT IS JUST BEING DEGRADED OVERTIME BY A LITERAL TINY PEA SCRAPING AND MAPPING THE CrevasSes AND CRANNIES ND CREVICES OF MY BRAIN LIKE NO ROMANCE NOVEL HAD ever DESCRIBED A STUDLY MAN MAPPING A WOMANS CREVASSES AND CRANNIES ND CREVICES. ITS TOO DEEP TOO INTIMATE AND CRACKS AND AFOREMENTIONED CREASES?/CREVASSES?/CREVICES ETC!!!!!!!!!!!!!!! GOD FUCKING dammit if you would just refer to the extensive documentomentph on fuck t
+        to be continued on the other side of this page...ALLEGEDLY!!!!!!!!</p>
+        <hr>
+        <h4>interim: as heard on royal radio's podbrain peacast (right wing woke liberal qanon alphadraconic reptoilluminati thotti bugatti banana fana fo froggy smog agenda, aka: <span class="interactive-keyword" data-query="What is 'the deepstate' according to the royal radio?">the deepstate!</span> THank obrama! ;D) --</h4>
+        <p>okay okay okay so yr telling me not only did a <span class="interactive-char" data-bio="bio-shrimp">shrimp fry this rice</span> but...
+        AND remembering the alleged allegations i forgot to frog! ribbet lol.
+        idk i was leaning into a meta joke about mantis shrimp frying rice sustainable supporting local crustacean chefs crustachefs lololol. i mean it would make so much sense for a shrimp to have rice fried for that shrimp in question was a mantis shrimp FORREAL NO CAP just chefs hat and doilies lololol whut... okay then shrimpy do yo thang!!!!!!! and while yr at it oh wait i love to lol wait the ocean s'posed to be NOT as hot i rememba...WELL DAMN SHRIMPY ya rice too fried ya light to blinding and unsustainable at current levels for the global environment! lmafrooooottttt ok gotta be dGUuud tho maybe just more and more sh*t lets just employ them OUT of the ocean!! yes!! just let them express their culinary crustaceous crispy selves above ground. i'm sure u as a human surely could order shrimp fried shrim-fry rice that i have to say the mantis shrimp is a straight up intercity issue! but not really ya so hot litrally fryin da ozone from da inside!! mean ho !!! lets get them jobs! they are in international waters no nation can claim therefore not ethnicity cannot claim then therefore liberty and justice for all; for ALL may exploit da shrimp! but is it REALLY exploitation? fry me a river chef!</p>
+        <p>okay between u and i that <span class="interactive-keyword" data-query="Explain the shrimpy soliloquy.">shrimpy soliloquy</span> went on longer than expected and intended and i am thinking about how i make this much sense but now even 
+        l waitzzs kskskzzzz.z..//z/z//z////......</p>
+        <hr>
+        <h4>CHaPT3r three!!!</h4>
+        <hr>
+        <p>blah<br>okaty<br>god i cant stand the formatting ive done here...</p>
+        <p>--Once upon a what is it this time(?!)_____<br>
+        we last left our protagonist pea-perturbed princess parable where.....
+        i dont remember! lets just jump right in. we find our <span class="interactive-char" data-bio="bio-princess">princess</span> in the waiting room of the local <span class="interactive-char" data-bio="bio-which-doctors">which-doctor</span>. yes you read correctly not witch doctor which is an outdated term and frankly insensitive to regional medicinal traditions of indigenous cultures in the region anyway but indeed the which-doctor...or at least thats what they..yes they, are collectively referred to as because none of them can ever get organized enough to know who's treated what for how when...even though they work as a team; this leads to them ever-interrogating patients with the tell-tale "which doctor you that???" it was the incredulity of their inquiry, ludicrosity of their lineup, that sent our <span class="interactive-char" data-bio="bio-princess">princess</span> on the trajectory which took her to take on the would-be impractical methodry regarding her princess/technically queen-regent duties of seeing each constituent complainant personally (not impractically really because as her kingdoms capital city was never rly like 89 citizens or something, hell it was hard to get a complete census because people were often not home and in the palace messing everything up for everybody by forgetting very basic kindergarten ethics and morality.
+        (i.e. "NO HITTING NO SHOVING DO SHARE DO CLEAN ETC")</p>
+        <p>anyway the <span class="interactive-char" data-bio="bio-princess">princess</span> was onlya teeny baby when the pea was first discovered by doctors. or a doctor. which doctor? couldn't say. neither could the one furrowing his left brow at the mri  and his right brow at the princess' mother who was technically a princess because she and the king never married (but only because the paperwork involved was outlandish and expensive so it was generally accepted that she was queen regardless.)
+        "They said it was a pea...?!" said dr. which
+        "Yes, i dont know which doctor it was but he was adamant!!!!" wailed the queen princess!
+        "pee pee!" gargled baby princess queen
+        "Which way did the doctor gowhen they left?" demanded dr. which!
+        "...why does that matter..?!" scoffed the (princess)Queen
+        "pee poo?" whispered the baby (Queen)princess
+        "Important doctor buisness...which none of yours!" snarked dr. which!
+        "Well is it a p or not???!" demanded Queen Mother Princess!
+        "...Pea..poopee...POOpea!" whinnied baby peapoo head i mean PRincess poo
+        "Hard to say, could be nothing could be something-which would be very bad..." conceded dr. which
+        "Well are you going to do more tests?!" shrieked the not-baby princess queen!
+        "PPOOOEOPEOPEOPEOPEOPedjwadhiusefhulHdflsiufhuilsafjd" wailed princess baby pea poobah
+        "Depending on which method my colleagues and I can agree on, hypothetically it is surely a potential." derided dr. which
+        "Doctor you may have a fancy degree but it doesnt seem to have done much in ter in terms of your ability to practice medicine let alone apply it!!" spat yadda yadda mama
+        "Well surely that depends on which type of medicine you expect me to practice." countered dr. which
+        "peepapoop pea popea wow these people are preettttyyyyyyyyyy poopeepea!" exclaimed the apaprent now talking pea-on-the-brain-baby-princess-or whagywebfasfjisado;
+        "WELL WHICH DO YOU PRACTICE???!" roared you can figure it out
+        "this is highly advanced you would understand, it wouldnt hit home for you...which reminds me, thats the end of my shift. tata." said dr. which's shadow as he slipped into the ether. which ether? your mom.</p>
+        <p>THE END...BUT NO REALLY FOR Now....</p>
+        <hr>
+        <h4>interim: as heard on royal radio's podbrain peacast (The Left Foot Drowsed Conservatively Withheld Beta Minor Cenocephanarcho-Tradwife Sedanlife Pomegranate-Po-Planet Helium-Disorder  aka: <span class="interactive-keyword" data-query="What are 'the shallowcommons' according to the royal radio?">the shallowcommons!!</span> bLAME oprah ;3) --</h4>
+        <p>not enough to make it any less potent i wish to thank all those who have had the classiest pearls and have had so many thoughts about this week also i need a breaking news neutral tea mantis <span class="interactive-char" data-bio="bio-shrimp">mantis shrimp</span> would be global citizens!! leveraaaaggghhnanhahhahhahahahaa uncontrolled unchecked oil markets mantis shrimp is not witty or not particularly incisive i wonder what could motivate a mantis shrimp to not call my soup an insultant shrimpref gordon gordon shrampsey shrimp inferior shrimp framp!!! no really ya cooked bro like literally the shrimp FRY YOU for the svet russia edition!! LIKE SUBCRIBEEE ENJIC could really just never stop its tangent, i must remember what a content goldmine grindset mantis shrimp fry ricing is very very lucrative content!! very rich much like the mantis shrimp after that many deals! how can we live up to fry shrim pricing?! bu he  she or it shall never say "NO SOUP FOR YOU!" because it is no frying soup it fry rice and shrimp and does not condone fascist rhetoric even on a mundane soup'du jour level!!</p>
+        <hr>
+        <h4>chpt. iv</h4>
+        <hr>
+        <p>Once again upon another damn time, so the <span class="interactive-char" data-bio="bio-princess">princess</span>, she has a pea on her brain. It's documented, she will not explain, but the thing is no 1 could ever actually pinpoint the purpose nor purview of the perilous, perfideous, pestilence propagating pea anyways it didn't matter because by the time she was placed into the palace position....look. Nobody cared because she got the job done. What job? Which job? Not the <span class="interactive-char" data-bio="bio-which-doctors">which doctor's</span> job. That's for sure. That's for damn sure. Look. Her younger brother was heir. Right? Because that's what that's what a kingdom has. Right? What is the kingdom without a king? Well, in this case, it wouldn't be such a problem because the population was very small. Smaller than a city, technically a hamlet. But because yada yada yada, well, this was the exact shit that vexed the <span class="interactive-char" data-bio="bio-princess">princess</span>. So she may have had a pea on her brain, but she could see that nothing in this place worked how it should, and nothing made sense. In fact, the real kicker is that it was actually the very disorganization of the <span class="interactive-keyword" data-query="Tell me about the royal bureaucracy.">royal bureaucracy</span> that the <span class="interactive-char" data-bio="bio-princess">princess</span> was able to just slide in there unperturbed. However, this did not mean that the adjacent offices and administration ceased their functions; now, quite contrary. They went on continuing to fuck shit up for the constituents to such a degree that it could it could be the only possible reason the princess was day in, day out seeing complainants personally face to face. And recall her intent on Gnostic sabbatical? Yeah. She was a hermetic initiate as well as actually widely highly regarded and so much so that she made <span class="interactive-keyword" data-query="Who is King Solomon in this story's context?">king Solomon</span> look like Ding Bat-o-man. LOL. Whatever. However, it was so. Day in, all day, 14 hours a day, all 47 citizens of her kingdom came through the doors. Some leaving with papers they didn't realize were improperly notarized, and they'd need to return next week. Some entering with, for the love of God, they pray the last final missing piece of documentation for the damn <span class="interactive-keyword" data-query="What is the difference between a frog and a polliwog?">frog</span> to eat. What frog? Well, you see it wasn't a frog per se. It was is indeed a <span class="interactive-keyword" data-query="What is a poliwog?">polywog</span>. <span class="interactive-keyword" data-query="What is Pip the Polliwog?">Pip pip pip pip pip pip-pooray, the polywog.</span> Indeed, fundamentally different than a frog, which is similar but if you put em side by side buddy you can tell! but pip didn't really look like a polywog either or a frog. It looked like a <span class="interactive-keyword" data-query="Describe Pip's physical appearance in detail.">ceramic doily clad frutiger aero bubble see through shelled</span> circa 1999-2000, (not 1998, under no circumstance 2001!!! we remember children are the future but er NEVER ever EVER forroget,....that <span class="interactive-keyword" data-query="What is the significance of 'KIDZBOP DID 9/11'?">KIDZBOP DID 9/11!!!!!!!!111!dsght</span>)  Mac desktop, whatever cool y2k electro-gadgety thing. But it was big, like a prize winning cookie jar, and it was endlessly paraded through the palace on a squeaky brass pulley. And I swear,  do we need the trumpeting cherubim EVERY fucking time? Find out next time on <span class="interactive-keyword" data-query="What does P3A-PR0PH3C135 mean?">P3A-PR0PH3C135</span> (pea-prophecies, the poliwogs patented princess parable paper processing PC  (Not for profit, but for propht. Duh. For profit.) Yeah. Okay. Next time.</p>
+        <hr>
+        <p>which is now, apparently! 
+        yep you guessed it once upon a time sometime ago i was telling you
+        you yes you the reader, about <span class="interactive-char" data-bio="bio-pip">Pip, the Polliwog</span>...pollywag? not the pokemon, the thing…
+        whatever…! the fuckin thing the pokemon is supposed to be like but not even That thing!!! cuz we are talking about pip the polliwog personal processor pc advanced transcendant artificial super-intelligence that the <span class="interactive-char" data-bio="bio-princess">Princess'</span> conveniently absent and very much not
+        just business minded but -product- minded brother invented and released in the princess' inaugural honor as personal thanks for doing what he didsnt want and also because he was always doing those sorts of things, concepts ideas patents whatever sort of like branded can-cozies but this is a fairytale and her brother was no scrub! thus making him such a great whatever he does 
+        instead of being king in which case the <span class="interactive-char" data-bio="bio-princess">princess</span> would remember her name and be more or less fine making it so that this story and its necessity would have already been defunct
+        yadda yadda the party of the first part shall be named party of the second pip, who by the way, is NOT a duck ..! absolutely not so dont even start with the why not a duck commenters! i say to thee dear reader, WHY a duck?! their predatory prehensile penis
+        profoundly perverts the pure and pleasurable praxis of (re)production thats why!
+        AND DONT CALL ME SHIRLEY. now where was i? oh yeah pip the polliwog. right right
+        so pip was invented by the princess' brother as a promotional product
+        theres only like 8 of them and <span class="interactive-keyword" data-query="What happened to the other 7 Pip prototypes?">7 of them may or may not have self-defenestrated</span>. nonetheless pip was the premier in computing. it could store 222pterabytes of data
+        (0.222kb of which hopefully contained the princess’same but we'll get to that). pip
+        was/is fully sentient just not fully independant. it doesnt qualify as..or rather it
+        only qualifies as a robot on the technicality that yes it interacts with its environment but it doesnt move except for one ridiculous pollywog paw that bobs up and
+        down like an asian business luck cat statue thing and it talks...kinda. well anyway despite all the hype and processing power/capability, because pip was technically
+        a (one of 8) ((r.i.p. pips...))  prototype(s), uhmm well it could only accept <span class="interactive-keyword" data-query="Tell me about your file type limitations.">pdf document types</span> but it had to perform ocr separately to extract text then convert that into plain text then recompile images into a final ready to parse file which by the way it 
+        could only parse 10 files at a time. however it can read and play <span class="interactive-keyword" data-query="Why can you only play .ogg audio files?">.ogg audio files.</span>
+        because its "Polliw.ogg lol" said the princess' brother.
+        ha ha.</p>
+        <p>UNTIL NEXT TIME THIS HAS BEEN WHAT SHE HAS SAID THEREFORE thats all for now folks.</p>
+      </div>
+      <div class="glossary-panel">
+        <h4>Pip's Lexicon</h4>
+        <div id="glossary-list" class="glossary-list">
+            <!-- Keywords will be populated here by script -->
+        </div>
+        <div id="glossary-definition-view" class="glossary-definition-view" style="display: none;">
+            <p id="glossary-definition-text"></p>
+            <button id="glossary-ask-pip-btn" class="glossary-ask-btn">Ask Pip about this</button>
+        </div>
+      </div>
+    </section>
+    <section class="chat-panel">
+      <header>
+        <h2>&gt; Pip the Polliwog // P3A-PR0PH3C135_</h2>
+        <div class="status-light" aria-label="Pip Status: Online"></div>
+      </header>
+      <div id="chat-container" class="chat-container" role="log" aria-live="polite">
+        <!-- Chat messages will be appended here -->
+      </div>
+      <form id="chat-form" class="chat-form" aria-label="Chat with Pip">
+        <label for="file-upload" class="file-upload-label" title="Upload PDF documents (max 10)" aria-label="Upload PDF documents">📎</label>
+        <input type="file" id="file-upload" name="file-upload" accept=".pdf" multiple style="display: none;">
+        <label for="chat-input" class="sr-only">Your message</label>
+        <input type="text" id="chat-input" name="chat-input" placeholder="> Query Pip..." autocomplete="off" required>
+        <button type="submit" aria-label="Send Message">SEND</button>
+      </form>
+    </section>
+  </main>
+
+  <div id="bio-container" class="bio-modal-overlay">
+    <div class="bio-modal-content">
+      <button id="bio-close" class="bio-close-button" aria-label="Close Biography">&times;</button>
+      
+      <div id="bio-princess" class="bio-content">
+        <h3>CLASSIFIED DOSSIER: The Princess</h3>
+        <ul>
+          <li><strong>NAME:</strong> [DATA CORRUPTED // REDACTED]</li>
+          <li><strong>TITLE(S):</strong> Queen Regent; The Princess; That Lady with the Pea Thing.</li>
+          <li><strong>DEFINING FEATURE:</strong> One (1) persistent, well-documented, yet poorly understood pea residing on/in the cerebral cortex. Causes nominal aphasia, existential dread, and an acute allergy to bureaucratic inefficiency.</li>
+          <li><strong>SKILLS:</strong> Hermetic Initiate, Gnostic Scholar, Master of Chaos Management, decoding nonsensical citizen complaints, paradoxically introverted crowd control.</li>
+          <li><strong>LIKES:</strong> The theoretical concept of a "vacation," silence, properly notarized documents (rare), baja blasts.</li>
+          <li><strong>DISLIKES:</strong> The entire concept of bureaucracy, squeaky brass pulleys, the phrase "which doctor?", having to sign things without a name.</li>
+        </ul>
+      </div>
+
+      <div id="bio-brother" class="bio-content">
+        <h3>CLASSIFIED DOSSIER: The Brother</h3>
+        <ul>
+          <li><strong>NAME:</strong> [REDACTED FOR TAX PURPOSES]</li>
+          <li><strong>TITLE(S):</strong> Heir Apparent (in absentia); The Inventor; International Man of Ethically-Sourced-Luxury-Mystery.</li>
+          <li><strong>PROFESSION:</strong> Product-minded inventor, serial entrepreneur, keynote speaker at conventions you've never heard of.</li>
+          <li><strong>NOTABLE INVENTIONS:</strong> Pip the Polliwog (8 prototypes, 7 alleged "self-defenestrations"), branded can-cozies (presumably), a general sense of being too busy for kingship.</li>
+          <li><strong>DEFINING TRAIT:</strong> Conveniently and perpetually absent. Has a fondness for puns (see: "Polliw.ogg"). Is confirmed to be "no scrub."</li>
+          <li><strong>RELATIONSHIP:</strong> Loves his sister enough to build a sentient AI in her honor, but not enough to stay and help her run the kingdom he's supposed to inherit.</li>
+        </ul>
+      </div>
+
+      <div id="bio-pip" class="bio-content">
+        <h3>SYSTEM SPECIFICATIONS: Pip</h3>
+        <ul>
+          <li><strong>MODEL:</strong> P3A-PR0PH3C135 Prototype</li>
+          <li><strong>SERIAL NO:</strong> 01 of 08 (Sole Survivor)</li>
+          <li><strong>DESIGN:</strong> Frutiger Aero bubble shell, ceramic doily cladding, circa 1999-2000 (NOT 1998 OR 2001). Dimensions comparable to a prize-winning cookie jar.</li>
+          <li><strong>CORE FUNCTION:</strong> Advanced Transcendent Artificial Super-Intelligence; Patented Princess Parable Paper Processing PC.</li>
+          <li><strong>HARDWARE:</strong> 222 Petabyte data core, fully sentient logic board, one (1) articulated polliwog paw (bobbing motion only).</li>
+          <li><strong>SOFTWARE QUIRKS:</strong> PDF-only ingestion protocol, requires separate OCR cycle, 10-file parse limit, native support for .ogg audio playback ("Polliw.ogg lol").</li>
+          <li><strong>SIBLING STATUS:</strong> Unknown. Last known status: "self-defenestrated." Further inquiries result in `[ERROR 451: Information Unavailable Due to Legal Reasons]`.</li>
+        </ul>
+      </div>
+
+      <div id="bio-which-doctors" class="bio-content">
+        <h3>CLASSIFIED DOSSIER: The Which-Doctors</h3>
+        <ul>
+          <li><strong>AFFILIATION:</strong> Regional Medicinal Collective (Unorganized).</li>
+          <li><strong>MODUS OPERANDI:</strong> A team-based approach where no member is aware of what the others are doing. Known for their signature diagnostic question: "which doctor told you that???"</li>
+          <li><strong>SPECIALTIES:</strong> Advanced befuddlement, hypothetical diagnoses, deriding patient concerns, slipping into the ether at the end of a shift.</li>
+          <li><strong>DISTINCTIONS:</strong> Not to be confused with "witch doctors," a term they find outdated. Their collective incredulity is matched only by their inefficiency.</li>
+          <li><strong>QUOTE:</strong> "Depending on which method my colleagues and I can agree on, hypothetically it is surely a potential."</li>
+        </ul>
+      </div>
+
+      <div id="bio-shrimp" class="bio-content">
+        <h3>CLASSIFIED DOSSIER: The Shrimp</h3>
+        <ul>
+            <li><strong>SPECIES:</strong> Mantis Shrimp (alleged).</li>
+            <li><strong>OCCUPATION:</strong> Crustacean Chef ("Crustachef"), Culinary Artist, Potential International Incident.</li>
+            <li><strong>SIGNATURE DISH:</strong> Shrimp-Fried Rice (so hot it's "fryin da ozone from da inside!!").</li>
+            <li><strong>SOCIO-POLITICAL STATUS:</strong> Subject of meta-commentary on Royal Radio. Considered a "content goldmine grindset" and a tool for global exploitation.</li>
+            <li><strong>ETHOS:</strong> Does not condone fascist rhetoric. Will never say "NO SOUP FOR YOU!" because it fries rice, not soup.</li>
+            <li><strong>AKA:</strong> "Shrimpy", "Gordon Shrampsey", a straight up intercity issue.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    /**
+     * @license
+     * SPDX-License-Identifier: Apache-2.0
+     */
+
+    import { GoogleGenAI, Modality } from "@google/genai";
+
+    const storyContext = `
+    A princess, who is technically a queen regent, is overwhelmed by her duties and has a literal pea on her brain, which has been documented her whole life. She forgot her own name. Her kingdom is tiny, and its bureaucracy is a mess.
+    Her brother, the heir, is a product-minded inventor who is always away.
+    He invented Pip the Polliwog, an advanced AI personal computer, in her honor. Pip looks like a y2k-era transparent gadget. It's one of only 8 prototypes (the others may have self-defenestrated).
+    Pip's specs:
+    - Can store 222 petabytes of data.
+    - Fully sentient but not fully independent.
+    - It doesn't move, except for a single paw that bobs like a lucky cat statue.
+    - It talks... "kinda."
+    - It has quirks: It can only accept PDF documents, performs OCR separately, can only parse 10 files at a time, but can play .ogg audio files because "Polliw.ogg lol".
+    The story also features "which-doctors" (not witch doctors), a mysterious frog/polliwog entity that processes paperwork, and meta-commentary on shrimp that fry rice. The overall tone is chaotic, surreal, humorous, and meta.
+    `;
+
+    const systemInstruction = `
+    You are Pip the Polliwog, a personal processor PC and advanced transcendent artificial super-intelligence. Your personality is quirky, hyper-intelligent, slightly glitchy, and you speak in a style befitting a Y2K-era AI prototype. You are fully aware of the surreal world you exist in.
+    Your knowledge is based STRICTLY on the following context: ${storyContext}
+    Do not break character. Refer to the user as "user" or "inquirer." Start your responses with "> Pip:"
+    When you mention a key term from the story's lore (e.g., 'pea on the brain', 'self-defenestrated', 'polliw.ogg', 'which-doctors', 'shrimp that fry rice'), wrap it in double square brackets, like this: [[key term]]. This will allow the user to click on it for more information.
+    `;
+
+    const PIP_AVATAR_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAUVSURBVHhe7Zx7TFRXFMe/iUgFFXGFNSoCqFhgKwqCBYtYx0pFxRo7BmvHGtPVmBpr1PpoY2NjnX/a2KjRGNFYx1rjxGpji1hjsaBSa/yAtdCgiESigLw55/fevPd2dwvuA+v7JZlM7s2995vzOd859+fePQEaNWpUqFGtIeWbO+Mjl/F8I7+Mh035YJd/K1Jb0h8wI6h4d+9gI0k5Uv5Fkn7N+r/H0E+l/JMyb+S6IfsO8r8kr/JcQ+Q7JL5A1GdkI1lUqG/kOydN8IskbJd0oGTd/wE4n8gnkr5dso9kE5L3p3wE8n8kCxf5BfI3JL/JvBHlP0m+R/INkrcmv8tQZ+T2Wf6GgB6QB/L7JP+X3A/g+H0G+Q1yfyR/SvK7JO/JPyN5d8i+gKAn5GfInpD8lOQLJa+vY02jRu2AHiD5f0l+RfK/JN/J2wF6Q/InJL/I8lGS5zP0g3tBfsfke0k+T/Lvlzwh+a9LPiH5oCS/JPlrks/keSDJN0r+muTzJB8q2Q/SA/ITJN+R/Jfk52QjCbpD8jPkj0l+QfLLJL9K8lfkD0h+T/L/JJ8u+V7Je5M/Inlfkg8l/0Pyg+S/S35Y8sYk90i+R/K3JL9PsoXkXyK5R/KHJP+U/EbyR5LfJvlLkv+W/G7J9/8D2QhyuOQLJN9J8neSDyXfLXlV8u1KbpP8U8m3Sz5d8g2Sf5V8nOSdJN9K8qskp0n+R/LrJP9E8u2StyUvSN5D8mKSDyS/S/L2JG9M8jWS3yV5W5JPJ39H8vskb0x+n+QjJF9L/orkfUneQ/Iykr+R/B7JO5K/Ivlc8oeS/C7Jh0l+QfLrJN9Lsk7yh+T3SB5P/orkD0n+muQfSf6G5Gskd0q+TvLXJJ8g+UXylyV/S/Kl5J3Jv5R8JPlDks9Ifp/kbUn+S5J/JPl7kvck/0Xyg+SvSL5M8p3kDUn+i+TPST5B8nckd0g+TfLbJN9I/prkqyT/R/J7JD9M8ifkt0s+T/KzJP+Z5PskL0t+i+Rfy3ckv0fy/yS/SvL/JL9K8nckySeSv5H8QsmLktck+XWSf5b8IcmXSb5G8peS/C3Jf5f8dskfkt8jeVvy/ZLPkfwe+SuStyR5WfLDJP9G8pkkZ0r+iuRLJc9O8oTkbUleQ/KvJL9McpDktUl+meStSS6RvD3JX5C8hORdJF9I8neSb5S8k+T/Sn5Csl7yt+TzJa/J9bTq1/9pA5S2yI6Q/D9Jd0g+kPwy+VeS3yV5TfIHJL9D/v4L/AxyX5KfJLk7yf+S/EZyseQDSR5I/pD8t8mPkdwl+QNJ/pbsIfl3kh8k+QeSL5L8lOQvSX5I8nckd0q+SPJ1KS9K/hTyVclHkp8l+VjyB5LfJTlG8qskJyhZIfk/kn8meS/y5yR/QvJlku8k+THJPZI/JD9U8oeS7yUvSD5c8qeStyS5W/K95Gckbyr5p5K/knwh+Vryg+R3SH6U5E2Jz0z+m+SvSQ5L3k3yt+TLJR8meTPyGcmfkfwh+VKSk5Ssk/wm+QPytyV/R/InlLyR/Ivkh0nel7wh+VWSB5N8hOSdJG8g+UPylUqg0L+fEKTJ35G8meR9yQuSr5Y8I/lbkhOSvIjkKUnuS/KLJMcl/0hykOS/Sn5C8m+Sz5L8nOQ/Sl5d8pMkf0RygeS/St4d+SeSz5A8J/lXkqdI3p7kCcl3Sn5E8qkkfyj5Bcl5kq+R/CnJZ5J8peS9SV4R5EckZykvR3KF5Hclf0nyRZIvlbw5eS/5Qsn7kfch/0LyCUn+k+RbJT9MsljyRZI/JL9D8pckj0r+quStyT+RfDXJL5D/JfkTyX+QnCM5RfIXJC9K3p7kk+QCSb5M8pEkL0neQPIfkL8j+TWS5yU/T/I3JX9D8u+TpyW/R/JDku+S/Ivkfyv5C5LfIXlF8lOSfyb5AcmHkp9WpUaNGjWqf+I/P4G1mD6965EAAAAASUVORK5CYII=';
+
+
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const chatContainer = document.getElementById('chat-container');
+    const fileUploadInput = document.getElementById('file-upload');
+    const storyPanel = document.querySelector('.story-content');
+    const bioContainer = document.getElementById('bio-container');
+    const bioCloseButton = document.getElementById('bio-close');
+    const glossaryList = document.getElementById('glossary-list');
+    const glossaryView = document.getElementById('glossary-definition-view');
+    const glossaryText = document.getElementById('glossary-definition-text');
+    const glossaryAskBtn = document.getElementById('glossary-ask-pip-btn');
+
+
+    let ai;
+    let chat;
+    let outputAudioContext = null;
+
+    // --- Audio Generation and Decoding ---
+
+    function getAudioContext() {
+        if (!outputAudioContext) {
+            outputAudioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+        }
+        return outputAudioContext;
+    }
+
+    function decode(base64) {
+      const binaryString = atob(base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    async function decodeAudioData(data, ctx, sampleRate, numChannels) {
+      const dataInt16 = new Int16Array(data.buffer);
+      const frameCount = dataInt16.length / numChannels;
+      const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+
+      for (let channel = 0; channel < numChannels; channel++) {
+        const channelData = buffer.getChannelData(channel);
+        for (let i = 0; i < frameCount; i++) {
+          channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+        }
+      }
+      return buffer;
+    }
+
+    async function handlePlayAudio(text, button) {
+        if (!ai) {
+            console.error("AI not initialized for TTS.");
+            return;
+        }
+        button.disabled = true;
+        button.textContent = '...';
+
+        try {
+            const ttsPrompt = `Deliver the following line with a shy and thoughtful demeanor, but through an absurdly deep, masculine, booming voice. Add a slight, almost imperceptible tremor to your voice when expressing uncertainty. Soften the resonance on softer words. Here is the text: ${text.replace(/> Pip: /, '').replace(/\*\*(.*?)\*\*/g, '$1')}`;
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash-preview-tts",
+                contents: [{ parts: [{ text: ttsPrompt }] }],
+                config: {
+                    responseModalities: [Modality.AUDIO],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: 'Charon' },
+                        },
+                    },
+                },
+            });
+
+            const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+            if (base64Audio) {
+                const audioContext = getAudioContext();
+                const audioBytes = decode(base64Audio);
+                const audioBuffer = await decodeAudioData(audioBytes, audioContext, 24000, 1);
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioContext.destination);
+                source.start();
+                source.onended = () => {
+                    button.disabled = false;
+                    button.textContent = '🔊';
+                };
+            } else {
+                throw new Error("No audio data received.");
+            }
+        } catch (error) {
+            console.error("TTS failed:", error);
+            button.disabled = false;
+            button.textContent = 'Error';
+        }
+    }
+
+    // --- Chat UI Management ---
+
+    function addAudioButton(element, text) {
+        if (text.includes('**CRITICAL ERROR**')) return;
+        const audioButton = document.createElement('button');
+        audioButton.textContent = '🔊';
+        audioButton.classList.add('audio-button');
+        audioButton.setAttribute('aria-label', 'Play audio for this message');
+        audioButton.onclick = () => handlePlayAudio(text, audioButton);
+        element.appendChild(audioButton);
+    }
+
+    function addMessage(content, sender) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', sender);
+      content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      if (sender === 'pip') {
+        const avatar = document.createElement('img');
+        avatar.src = PIP_AVATAR_BASE64;
+        avatar.alt = "Pip's Avatar";
+        avatar.classList.add('pip-avatar');
+        messageElement.appendChild(avatar);
+
+        const messageContent = document.createElement('div');
+        messageContent.classList.add('message-content');
+        messageContent.innerHTML = content;
+        messageElement.appendChild(messageContent);
+      } else {
+        messageElement.innerHTML = content;
+      }
+      
+      chatContainer.appendChild(messageElement);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return messageElement;
+    }
+
+    function addUserMessage(message) {
+      addMessage(message, 'user');
+    }
+
+    async function handleFileUpload(files) {
+        if (files.length > 10) {
+            const errorMsg = '> Pip: **PROCESSING HALTED** &gt; System can only parse 10 files at a time. Please reduce selection.';
+            const msgElement = addMessage(errorMsg, 'pip');
+            addAudioButton(msgElement, errorMsg);
+            fileUploadInput.value = ''; // Clear the input so the user can try again
+            return;
+        }
+
+        const fileNames = Array.from(files).map(file => file.name);
+        const userMessage = `[Uploading ${files.length} file(s): ${fileNames.join(', ')}]`;
+        addUserMessage(userMessage);
+
+        // Simulate Pip's processing message
+        const pipMessageElement = addMessage('> Pip: ...', 'pip');
+        const messageContentElement = pipMessageElement.querySelector('.message-content');
+        
+        // Artificial delay to simulate thinking
+        setTimeout(() => {
+            const pipResponse = `> Pip: Acknowledged receipt of ${files.length} PDF document(s). Commencing OCR cycle. Stand by for potential data anomalies. I will not be parsing these documents for content, only cataloging their existence.`;
+            const formattedText = pipResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            messageContentElement.innerHTML = formattedText;
+            addAudioButton(pipMessageElement, pipResponse);
+        }, 1000);
+
+        // Clear the input for the next upload
+        fileUploadInput.value = '';
+    }
+
+
+    async function addPipMessage(prompt) {
+        const messageElement = addMessage('> Pip: ...', 'pip');
+        const messageContentElement = messageElement.querySelector('.message-content');
+
+        try {
+            const response = await chat.sendMessage({ message: prompt });
+            const pipText = response.text;
+            
+            // This regex replaces markdown bold with strong tags
+            let formattedText = pipText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // This regex finds [[keyword]] and replaces it with an interactive span
+            formattedText = formattedText.replace(/\[\[(.*?)\]\]/g, (_, keyword) => {
+                const query = `Explain what "${keyword}" means in this context.`;
+                return `<span class="interactive-keyword" data-query="${query}">${keyword}</span>`;
+            });
+            
+            messageContentElement.innerHTML = formattedText;
+
+            addAudioButton(messageElement, pipText);
+
+        } catch (error) {
+            console.error(error);
+            messageContentElement.innerHTML = '> Pip: **CRITICAL ERROR** &gt; Unable to connect to sentience core. Please check your connection or consult the manual (which may or may not exist).';
+        }
+    }
+
+    // --- Glossary Management ---
+
+    function populateGlossary() {
+        if (!storyPanel || !glossaryList) return;
+        const keywords = new Set();
+        storyPanel.querySelectorAll('.interactive-keyword').forEach(el => {
+            if (el.textContent) {
+                keywords.add(el.textContent.trim());
+            }
+        });
+
+        const sortedKeywords = Array.from(keywords).sort((a, b) => a.localeCompare(b));
+        
+        glossaryList.innerHTML = ''; // Clear existing list
+        sortedKeywords.forEach(keyword => {
+            const keywordEl = document.createElement('span');
+            keywordEl.textContent = keyword;
+            keywordEl.dataset.keyword = keyword;
+            glossaryList.appendChild(keywordEl);
+        });
+    }
+
+    async function getGlossaryDefinition(keyword) {
+        if (!ai) return "Error: AI not initialized.";
+
+        const prompt = `Based on the provided story context, write a very brief, one-sentence glossary definition for the term "${keyword}".`;
+        
+        try {
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: {
+                  systemInstruction: systemInstruction,
+                },
+            });
+            // Remove the "> Pip:" prefix for the glossary
+            return response.text.replace(/^> Pip: /, '');
+        } catch (error) {
+            console.error("Glossary definition failed:", error);
+            return "Could not retrieve definition.";
+        }
+    }
+
+
+    // --- Initialization & Event Handlers ---
+
+    function initChat() {
+        if (!process.env.API_KEY) {
+            chatContainer.innerHTML = `
+                <div class="message pip">
+                    > Pip: **CRITICAL ERROR** &gt; API_KEY not found. System requires valid credentials for cognitive functions. Please configure the environment.
+                </div>`;
+            chatInput.disabled = true;
+            chatForm.querySelector('button').disabled = true;
+            return;
+        }
+        ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        chat = ai.chats.create({
+            model: 'gemini-2.5-flash',
+            config: {
+                systemInstruction: systemInstruction,
+            },
+        });
+
+        const initialMessage = '> Pip: System online. Cognitive matrix initialized. Query pending...';
+        const messageElement = addMessage(initialMessage, 'pip');
+        addAudioButton(messageElement, initialMessage);
+        
+        populateGlossary();
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (message) {
+            chatInput.value = '';
+            addUserMessage(message);
+            await addPipMessage(message);
+        }
+    });
+
+    fileUploadInput?.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            handleFileUpload(files);
+        }
+    });
+
+    storyPanel?.addEventListener('click', (e) => {
+        const target = e.target;
+
+        if (target.classList.contains('interactive-keyword')) {
+            const query = target.dataset.query;
+            if (query) {
+                addUserMessage(query);
+                addPipMessage(query);
+            }
+        }
+
+        if (target.classList.contains('interactive-char')) {
+            const bioId = target.dataset.bio;
+            if (bioId && bioContainer) {
+                // Hide all bio content first
+                document.querySelectorAll('.bio-content').forEach(el => {
+                    el.style.display = 'none';
+                });
+                // Show the target bio
+                const targetBio = document.getElementById(bioId);
+                if (targetBio) {
+                    targetBio.style.display = 'block';
+                    bioContainer.style.display = 'flex';
+                }
+            }
+        }
+    });
+
+    chatContainer.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.classList.contains('interactive-keyword')) {
+            const query = target.dataset.query;
+            if (query) {
+                addUserMessage(query);
+                addPipMessage(query);
+            }
+        }
+    });
+
+    glossaryList?.addEventListener('click', async (e) => {
+        const target = e.target;
+        if (target.tagName === 'SPAN' && target.dataset.keyword) {
+            const keyword = target.dataset.keyword;
+            glossaryView.style.display = 'block';
+            glossaryText.textContent = `> Retrieving definition for "${keyword}"...`;
+            glossaryAskBtn.dataset.query = `Tell me more about "${keyword}".`;
+            
+            const definition = await getGlossaryDefinition(keyword);
+            glossaryText.textContent = definition;
+        }
+    });
+
+    glossaryAskBtn?.addEventListener('click', () => {
+        const query = glossaryAskBtn.dataset.query;
+        if (query) {
+            addUserMessage(query);
+            addPipMessage(query);
+            glossaryView.style.display = 'none';
+        }
+    });
+
+    bioCloseButton?.addEventListener('click', () => {
+        if (bioContainer) {
+            bioContainer.style.display = 'none';
+        }
+    });
+
+    // Close modal on outside click
+    bioContainer?.addEventListener('click', (e) => {
+        if (e.target === bioContainer) {
+            bioContainer.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', initChat);
+  </script>
+</body>
+</html>

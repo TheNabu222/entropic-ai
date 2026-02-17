@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NABU ADMIN // SIMPLE MODE</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #000; color: #00FFCC; font-family: Courier, monospace; text-align: center; padding: 50px; }
+        input, textarea { background: #111; color: white; border: 2px solid #00FFCC; padding: 10px; width: 80%; margin-bottom: 20px; font-size: 16px; }
+        button { background: #00FFCC; color: black; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+        h1 { border-bottom: 1px dashed #00FFCC; display: inline-block; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <h1>🔐 SECURE LOGIN</h1>
+        <p>ENTER PASSWORD (hint: !Bc...)</p>
+        <input type="password" id="my-password" placeholder="***">
+        <br>
+        <button onclick="unlock()">UNLOCK</button>
+        <p id="error-msg" style="color: red; font-weight: bold;"></p>
+    </div>
+
+    <div id="post-screen" class="hidden">
+        <h1>⚡️ NEW POST ⚡️</h1>
+        
+        <input type="text" id="post-title" placeholder="Title (e.g. My Brain is Fried)">
+        <br>
+        <textarea id="post-content" rows="10" placeholder="Type your post here..."></textarea>
+        <br>
+        <input type="text" id="post-tags" placeholder="tags (optional)">
+        <br>
+        <button onclick="sendPost()">PUBLISH TO SITE</button>
+    </div>
+
+<script>
+    // --- CONFIGURATION ---
+    const _URL = 'https://aqxrogaltuwtlparwdkq.supabase.co';
+    const _KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxeHJvZ2FsdHV3dGxwYXJ3ZGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMDY0NzAsImV4cCI6MjA3NzY4MjQ3MH0.qvkQaoQa7MaN7drGHKGxU3c1KnTQOdTH022MynR6fzI';
+    
+    // FIX: We call this 'sb' instead of 'supabase' to avoid the name clash
+    const sb = window.supabase.createClient(_URL, _KEY);
+    
+    const MY_EMAIL = 'nabu@coaiexist.wtf'; // The "Ghost" User
+
+    // --- FUNCTIONS ---
+    async function unlock() {
+        const pw = document.getElementById('my-password').value;
+        const errBox = document.getElementById('error-msg');
+        
+        errBox.innerText = "CHECKING...";
+
+        // Log in using 'sb' client
+        const { data, error } = await sb.auth.signInWithPassword({
+            email: MY_EMAIL,
+            password: pw
+        });
+
+        if (error) {
+            errBox.innerText = "NOPE: " + error.message;
+            if (error.message.includes("Email not confirmed")) {
+                 errBox.innerText += " (GO TO SUPABASE > SETTINGS > AUTH > TURN OFF 'CONFIRM EMAIL')";
+            }
+        } else {
+            // Success!
+            document.getElementById('lock-screen').classList.add('hidden');
+            document.getElementById('post-screen').classList.remove('hidden');
+        }
+    }
+
+    async function sendPost() {
+        const title = document.getElementById('post-title').value;
+        const body = document.getElementById('post-content').value;
+        const tags = document.getElementById('post-tags').value.split(' ');
+
+        // Send data using 'sb' client
+        const { error } = await sb
+            .from('blog_posts')
+            .insert([{ title: title, content: body, tags: tags, is_published: true }]);
+
+        if (error) alert("Error: " + error.message);
+        else {
+            alert("✅ POSTED! Check your blog.");
+            // Clear the boxes
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-content').value = '';
+        }
+    }
+    
+    // Allow pressing Enter to unlock
+    document.getElementById('my-password').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') unlock();
+    });
+</script>
+</body>
+</html>

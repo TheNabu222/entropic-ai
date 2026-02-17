@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>/p/ - Pea</title>
+    <link rel="stylesheet" href="https://coaiexist.wtf/pea/pea-nav-medieval-FINAL.css">
+<script src="https://coaiexist.wtf/pea/pea-nav-win1100-FINAL.js"></script>
+
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-banner">
+            <h1>/p/ - Pea</h1>
+            <p class="subtitle">Where memes get thoroughly documented</p>
+        </div>
+        <div class="nav">
+            <a href="#" onclick="showRules()">[Home]</a>
+            <a href="#" onclick="showRules()">[Rules]</a>
+            <a href="#" onclick="showRules()">[FAQ]</a>
+            <a href="#" onclick="showRules()">[Memes]</a>
+            <a href="#" onclick="showRules()">[Documentation]</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- New Thread Button -->
+        <div class="new-thread-section">
+            <button onclick="newThread()" class="new-thread-btn">[Start a New Thread]</button>
+        </div>
+
+        <!-- Threads -->
+        <div class="threads-container" id="threadsContainer">
+            <!-- Threads will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>All posts thoroughly documented for 3,200 years</p>
+        <p>47-89 active users (census disputed) | ∞ posts in queue</p>
+        <div class="footer-links">
+            <a href="#" onclick="showRules()">[Rules]</a>
+            <a href="#" onclick="showRules()">[FAQ]</a>
+            <a href="#" onclick="showRules()">[Archive]</a>
+            <a href="#" onclick="showRules()">[Documentation Portal]</a>
+        </div>
+    </div>
+
+    <!-- Reply Form Modal -->
+    <div id="replyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeReplyModal()">&times;</span>
+            <h3>Reply to Thread</h3>
+            <form onsubmit="submitReply(event)">
+                <table>
+                    <tr>
+                        <td>Name:</td>
+                        <td><input type="text" id="replyName" placeholder="Anonymous" /></td>
+                    </tr>
+                    <tr>
+                        <td>Comment:</td>
+                        <td><textarea id="replyComment" rows="5" cols="50" required></textarea></td>
+                    </tr>
+                    <tr>
+                        <td>File:</td>
+                        <td><input type="file" disabled /></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <button type="submit">Post</button>
+                            <button type="reset">Reset</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        /* Classic 4chan styling */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Tahoma, sans-serif;
+            font-size: 11px;
+            background-color: #EEEEE0;
+            color: #000000;
+        }
+
+        .header {
+            background-color: #D6DAF0;
+            border-bottom: 1px solid #B7C5D9;
+            padding: 5px;
+        }
+
+        .header-banner h1 {
+            color: #AF0A0F;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 12px;
+            color: #89A;
+            margin: 5px 0;
+            font-style: italic;
+        }
+
+        .nav {
+            text-align: center;
+            padding: 5px;
+        }
+
+        .nav a {
+            color: #34345C;
+            text-decoration: none;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+
+        .nav a:hover {
+            color: #FF0000;
+        }
+
+        .main-content {
+            padding: 10px;
+            max-width: 900px;
+        }
+
+        .new-thread-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .new-thread-btn {
+            background-color: #D6DAF0;
+            border: 1px solid #B7C5D9;
+            padding: 5px 10px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .new-thread-btn:hover {
+            background-color: #C5C8E6;
+        }
+
+        .thread {
+            border: 1px solid #D9BFB7;
+            margin-bottom: 10px;
+            background-color: #F0E0D6;
+        }
+
+        .thread.pinned {
+            background-color: #F0F8FF;
+            border-color: #98E4FF;
+        }
+
+        .op-post {
+            padding: 5px;
+            background-color: #F0E0D6;
+        }
+
+        .post {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #F0E0D6;
+        }
+
+        .post-header {
+            font-weight: bold;
+            color: #117743;
+        }
+
+        .post-name {
+            color: #117743;
+            font-weight: bold;
+        }
+
+        .post-name.tripcode {
+            color: #228B22;
+        }
+
+        .post-name.special {
+            color: #AF0A0F;
+        }
+
+        .post-date {
+            color: #000;
+        }
+
+        .post-no {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .post-no:hover {
+            color: #FF0000;
+        }
+
+        .post-content {
+            margin-top: 5px;
+            line-height: 1.3;
+        }
+
+        .greentext {
+            color: #789922;
+        }
+
+        .quote-link {
+            color: #FF0000;
+            text-decoration: none;
+        }
+
+        .quote-link:hover {
+            color: #800000;
+        }
+
+        .post-image {
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-image:hover {
+            opacity: 0.8;
+        }
+
+        .reply-count {
+            font-size: 10px;
+            color: #89A;
+            margin-left: 10px;
+        }
+
+        .reply-btn {
+            background: none;
+            border: none;
+            color: #34345C;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .reply-btn:hover {
+            color: #FF0000;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #89A;
+            font-size: 10px;
+            border-top: 1px solid #D9BFB7;
+            margin-top: 20px;
+        }
+
+        .footer-links {
+            margin-top: 10px;
+        }
+
+        .footer-links a {
+            color: #34345C;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #F0E0D6;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #D9BFB7;
+            width: 50%;
+            max-width: 500px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .modal-content table {
+            width: 100%;
+        }
+
+        .modal-content td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            font-family: Tahoma, sans-serif;
+            font-size: 11px;
+        }
+
+        .thread-replies {
+            margin-left: 20px;
+        }
+
+        .mod-post {
+            background-color: #FFE4E1;
+            border-left: 3px solid #FF69B4;
+        }
+
+        .sage {
+            color: #FF0000;
+        }
+
+        .checked {
+            background-color: #FFFACD;
+        }
+
+        .pinned-indicator {
+            color: #FF6600;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .thread-nav {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .thread-nav a {
+            color: #34345C;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+
+        .thread-nav a:hover {
+            color: #FF0000;
+        }
+
+        .omitted-posts {
+            padding: 10px;
+            text-align: center;
+            font-style: italic;
+            color: #89A;
+        }
+
+        .thread-stats {
+            padding: 5px;
+            font-size: 10px;
+            color: #89A;
+            border-top: 1px solid #D9BFB7;
+        }
+
+        .board-info {
+            text-align: center;
+            padding: 10px;
+            background-color: #D6DAF0;
+            border: 1px solid #B7C5D9;
+            margin-bottom: 10px;
+        }
+
+        .board-info a {
+            color: #34345C;
+            text-decoration: none;
+        }
+
+        .board-info a:hover {
+            color: #FF0000;
+        }
+    </style>
+
+    <script>
+        // Global state
+        let currentView = 'board'; // 'board' or 'thread'
+        let currentThreadId = null;
+
+      // Thread data with complete posts
+const threadsData = {
+    10847: {
+        id: 10847,
+        title: "ITT: Post your best pea memes [PINNED]",
+        image: "🫛",
+        replies: 222,
+        pinned: true,
+        posts: [
+            { postNo: 10847, name: "Anonymous", timestamp: "10/20/25(Mon)22:47:23", content: "Post your best pea memes. Advice animals welcome. Remember: pea ON brain, not pea-brain.", isOP: true },
+            { postNo: 10848, name: "Anonymous", timestamp: "10/20/25(Mon)22:47:45", content: "Posting Philosoraptor\n>If you have a pea on your brain\n>Does that make you smarter or just more documented?" },
+            { postNo: 10849, name: "Anonymous", timestamp: "10/20/25(Mon)22:48:12", content: ">>10848\n\nDocumentation pilled" },
+            { postNo: 10850, name: "Anonymous", timestamp: "10/20/25(Mon)22:48:33", content: "I got Advice Dog\n>FORGET YOUR NAME\n>JUST SIGN AS PRINCESS/QUEEN/WHATEVER" },
+            { postNo: 10851, name: "Citizen #47", timestamp: "10/20/25(Mon)22:49:01", content: ">>10850\nBased and bureaucracy-pilled" },
+            { postNo: 10852, name: "Anonymous", timestamp: "10/20/25(Mon)22:49:22", content: "Anyone got the Courage Wolf one?\n>NEED 47 SIGNATURES?\n>GET 89 JUST TO BE SAFE" },
+            { postNo: 10853, name: "Anonymous", timestamp: "10/20/25(Mon)22:50:05", content: ">>10852\nHere\n>WHICH DOCTOR?\n>ALL OF THEM" },
+            { postNo: 10854, name: "Definitely Not The Princess", timestamp: "10/20/25(Mon)22:50:44", content: "These are all very funny and definitely not relatable to me personally", special: true },
+            { postNo: 10855, name: "Anonymous", timestamp: "10/20/25(Mon)22:51:15", content: ">>10854\nSUS" },
+            { postNo: 10856, name: "Anonymous", timestamp: "10/20/25(Mon)22:51:39", content: ">>10854\nYour Highness please we know it's you" },
+            { postNo: 10857, name: "Definitely Not The Princess", timestamp: "10/20/25(Mon)22:52:01", content: ">>10856\nI don't know what you're talking about also this post requires 47 signatures to read", special: true },
+            { postNo: 10858, name: "Anonymous", timestamp: "10/20/25(Mon)22:52:28", content: "Insanity Wolf\n>PEA ON BRAIN?\n>DOCUMENT IT FOR 3200 YEARS" },
+            { postNo: 10859, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)22:53:02", content: ">>10858\nAs a medical professional I can confirm this is proper procedure", tripcode: true },
+            { postNo: 10860, name: "Anonymous", timestamp: "10/20/25(Mon)22:53:33", content: ">>10859\nWhich doctor are you?" },
+            { postNo: 10861, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)22:53:55", content: ">>10860\nYes", tripcode: true },
+            { postNo: 10862, name: "Anonymous", timestamp: "10/20/25(Mon)22:54:19", content: "Business Cat\n>NEED TO PROCESS FILES\n>CAN ONLY HANDLE 10 AT A TIME\n>HAVE INFINITY REMAINING" },
+            { postNo: 10863, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)22:54:47", content: ">>10862\nThis is Pip erasure and I won't stand for it\nHe's doing his best", tripcode: true },
+            { postNo: 10864, name: "Anonymous", timestamp: "10/20/25(Mon)22:55:12", content: ">>10863\nBased Pip defender" },
+            { postNo: 10865, name: "Anonymous", timestamp: "10/20/25(Mon)22:55:41", content: "Bad Luck Brian\n>FINALLY GET ALL 47 SIGNATURES\n>NEED 12 MORE" },
+            { postNo: 10866, name: "Anonymous", timestamp: "10/20/25(Mon)22:56:08", content: ">>10865\nLMAO every fucking time" },
+            { postNo: 10867, name: "Mantis Shrimp Chef", timestamp: "10/20/25(Mon)22:56:34", content: "Success Kid\n>FRIED RICE\n>GOT INTERNATIONAL CITIZENSHIP", special: true },
+            { postNo: 10868, name: "Anonymous", timestamp: "10/20/25(Mon)22:57:01", content: ">>10867\nGordon Shrampsey would be proud" },
+            { postNo: 10869, name: "Anonymous", timestamp: "10/20/25(Mon)22:57:28", content: "Scumbag Steve\n>ASKS FOR DOCUMENTATION\n>LOSES IT IMMEDIATELY" },
+            { postNo: 10870, name: "Janny !!HOTPOCKET", timestamp: "10/20/25(Mon)22:58:15", content: "This thread is getting off topic. Back to pea memes please.", mod: true },
+            { postNo: 10871, name: "Anonymous", timestamp: "10/20/25(Mon)22:58:44", content: ">>10870\nsorry janny\n\nGood Guy Greg\n>SEES YOU FORGOT SIGNATURES\n>NOTARIZES THEM FOR YOU" },
+            { postNo: 10872, name: "Anonymous", timestamp: "10/20/25(Mon)22:59:12", content: "Forever Alone\n>NO ONE REPLIES TO MY POSTS\n>NOT EVEN THE WHICH-DOCTORS" },
+            { postNo: 10873, name: "Anonymous", timestamp: "10/20/25(Mon)22:59:45", content: ">>10872\nI reply to you anon <3" },
+            { postNo: 10874, name: "Anonymous", timestamp: "10/20/25(Mon)23:00:22", content: "One Does Not Simply\n>WALK INTO THE DOCUMENTATION DEPARTMENT\n>WITHOUT 47 FORMS" },
+            { postNo: 10875, name: "Anonymous", timestamp: "10/20/25(Mon)23:01:08", content: "Distracted Boyfriend\n>Looking at new meme formats\n>But advice animals are eternal" },
+            { postNo: 10876, name: "Anonymous", timestamp: "10/20/25(Mon)23:01:44", content: "Drake format:\n>Pea-brain: NO\n>Pea on brain: YES" }
+        ]
+    },
+    10851: {
+        id: 10851,
+        title: "Which-Doctor Experiences General /wdg/",
+        replies: 147,
+        posts: [
+            { postNo: 10851, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)22:50:11", content: "I diagnosed a pea once. Or was that my colleague? Which one of us was it?", isOP: true, tripcode: true },
+            { postNo: 10852, name: "Anonymous", timestamp: "10/20/25(Mon)22:51:30", content: ">be which-doctor\n>patient comes in with pea problem\n>ask which doctor saw them before\n>'which one?' they ask\n>that's what I'm asking you\n>'which?'\n>WHICH?\n>mfw nobody knows" },
+            { postNo: 10853, name: "Census Worker (Confused)", timestamp: "10/20/25(Mon)22:52:15", content: "Can't tell if there are 47 or 89 which-doctors in the system. Every time I count, the number changes." }
+        ]
+    },
+    10860: {
+        id: 10860,
+        title: ">tfw you forget your own name [greentext thread]",
+        replies: 96,
+        posts: [
+            { postNo: 10860, name: "Definitely Not The Princess", timestamp: "10/20/25(Mon)22:57:00", content: ">be me, princess/queen regent (it's complicated)\n>forget own name because too busy with bureaucracy\n>need to sign documents\n>can't sign because forgot name\n>mfw I need my name to sign forms to get vacation to remember my name\n>idfk bro gtfo", isOP: true },
+            { postNo: 10861, name: "Anonymous", timestamp: "10/20/25(Mon)22:57:45", content: ">tfw you relate to royalty\n>also forgot my name\n>but I'm just regular citizen\n>no excuse\n>just pea brain things" }
+        ]
+    },
+    10877: {
+        id: 10877,
+        title: "Which-Doctor Experiences General /wdg/",
+        replies: 147,
+        posts: [
+            { postNo: 10877, name: "Anonymous", timestamp: "10/20/25(Mon)20:15:23", content: "Post your which-doctor experiences. Medical confusion welcome.", isOP: true },
+            { postNo: 10878, name: "Anonymous", timestamp: "10/20/25(Mon)20:16:45", content: ">be me\n>have mysterious pea\n>go to which-doctor\n>'which one of us saw you last time?'\n>THATS WHAT IM ASKING YOU\n>leave without treatment\n>mfw" },
+            { postNo: 10879, name: "Anonymous", timestamp: "10/20/25(Mon)20:17:12", content: ">>10878\nLOL tale as old as time" },
+            { postNo: 10880, name: "Citizen #89", timestamp: "10/20/25(Mon)20:18:33", content: ">be me\n>need signature for census\n>which-doctor needs to verify\n>ask which one\n>'which?'\n>yes which\n>'which?'\n>stuck in loop for 3 hours" },
+            { postNo: 10881, name: "Anonymous", timestamp: "10/20/25(Mon)20:19:01", content: ">>10880\nActual nightmare fuel" },
+            { postNo: 10882, name: "Anonymous", timestamp: "10/20/25(Mon)20:19:44", content: "I swear they do it on purpose" },
+            { postNo: 10883, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)20:20:15", content: ">>10882\nWe genuinely don't know which one of us does what", tripcode: true },
+            { postNo: 10884, name: "Anonymous", timestamp: "10/20/25(Mon)20:20:42", content: ">>10883\nBro how do you even function" },
+            { postNo: 10885, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)20:21:18", content: ">>10884\nPoorly", tripcode: true },
+            { postNo: 10886, name: "Anonymous", timestamp: "10/20/25(Mon)20:22:05", content: ">be which-doctor\n>patient comes in\n>colleague says I saw them before\n>I have no memory of this\n>check files\n>all signed by 'which-doctor'\n>no first names\n>why do we do this" },
+            { postNo: 10887, name: "Anonymous", timestamp: "10/20/25(Mon)20:22:31", content: ">>10886\nWait are you actually a which-doctor\nAMA time" },
+            { postNo: 10888, name: "Anonymous", timestamp: "10/20/25(Mon)20:23:14", content: ">>10886\nWhat's the pea situation actually like" },
+            { postNo: 10889, name: "Anonymous", timestamp: "10/20/25(Mon)20:23:55", content: ">>10886\nWhich doctor discovered it originally?" },
+            { postNo: 10890, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)20:24:22", content: ">>10889\nGood question. We've been trying to figure that out for 3200 years", tripcode: true },
+            { postNo: 10891, name: "Anonymous", timestamp: "10/20/25(Mon)20:24:59", content: ">>10890\nIncredible" },
+            { postNo: 10892, name: "Anonymous", timestamp: "10/20/25(Mon)20:25:34", content: "This thread is giving me anxiety about my appointment tomorrow" },
+            { postNo: 10893, name: "Anonymous", timestamp: "10/20/25(Mon)20:26:12", content: ">>10892\nGood luck anon\nBring 47 copies of everything" },
+            { postNo: 10894, name: "Princess ?? (VERIFIED)", timestamp: "10/20/25(Mon)20:26:45", content: "I deal with 47 complaints about which-doctors daily\nStill don't know which is which", mod: true, special: true },
+            { postNo: 10895, name: "Anonymous", timestamp: "10/20/25(Mon)20:27:18", content: ">>10894\nYour Highness! How do you handle the bureaucracy?" },
+            { postNo: 10896, name: "Princess ?? (VERIFIED)", timestamp: "10/20/25(Mon)20:27:52", content: ">>10895\nI don't. That's why I need a hermetic sabbatical", mod: true, special: true },
+            { postNo: 10897, name: "Anonymous", timestamp: "10/20/25(Mon)20:28:30", content: ">mfw princess actually posts here\n>still can't get proper medical care" },
+            { postNo: 10898, name: "Which-Doctor !!Def456", timestamp: "10/20/25(Mon)20:29:08", content: "Wait I thought I was the one with the tripcode", tripcode: true },
+            { postNo: 10899, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)20:29:44", content: ">>10898\nWe all have tripcodes but they're all different\nThis is the problem", tripcode: true },
+            { postNo: 10900, name: "Anonymous", timestamp: "10/20/25(Mon)20:30:22", content: "Navy Seal Copypasta but it's which-doctors\n\nWhat the fuck did you just fucking say about me, you little pea? I'll have you know I graduated top of my class in Which Medical School, and I've been involved in numerous secret diagnoses, and I have over 300 confirmed peas on brains. But I don't know which doctor I am." }
+        ]
+    },
+    10901: {
+        id: 10901,
+        title: "IS IT 47 OR 89? OFFICIAL CENSUS DEBATE THREAD",
+        replies: 89,
+        posts: [
+            { postNo: 10901, name: "Citizen #47", timestamp: "10/20/25(Mon)19:30:12", content: "Settle this once and for all. How many citizens?\n\nIt's 47. This is thoroughly documented.", isOP: true },
+            { postNo: 10902, name: "Citizen #89 (Disputed)", timestamp: "10/20/25(Mon)19:30:45", content: ">>10901\nCope. 89 citizens and I'm one of them." },
+            { postNo: 10903, name: "Anonymous", timestamp: "10/20/25(Mon)19:31:22", content: "Both of you are wrong it's actually 48" },
+            { postNo: 10904, name: "Citizen #47", timestamp: "10/20/25(Mon)19:31:58", content: ">>10903\n#48 is unauthorized" },
+            { postNo: 10905, name: "Anonymous", timestamp: "10/20/25(Mon)19:32:34", content: ">>10904\nBy whose authority?" },
+            { postNo: 10906, name: "Citizen #47", timestamp: "10/20/25(Mon)19:33:11", content: ">>10905\nThe properly notarized census from 3200 years ago" },
+            { postNo: 10907, name: "Citizen #89 (Disputed)", timestamp: "10/20/25(Mon)19:33:47", content: ">>10906\nThat census was improperly notarized\nWe have documents" },
+            { postNo: 10908, name: "Citizen #47", timestamp: "10/20/25(Mon)19:34:23", content: ">>10907\nYour documents are forgeries" },
+            { postNo: 10909, name: "Anonymous", timestamp: "10/20/25(Mon)19:34:56", content: "Guys please I just want to know the population" },
+            { postNo: 10910, name: "Anonymous", timestamp: "10/20/25(Mon)19:35:31", content: ">>10909\nFirst time?" },
+            { postNo: 10911, name: "Documentation Enthusiast", timestamp: "10/20/25(Mon)19:36:08", content: "I've reviewed all census data\nBoth sides have valid documentation\nIt's Schrödinger's population" },
+            { postNo: 10912, name: "Anonymous", timestamp: "10/20/25(Mon)19:36:44", content: ">>10911\nBased and documentation-pilled" },
+            { postNo: 10913, name: "Census Worker (Confused)", timestamp: "10/20/25(Mon)19:37:21", content: "I've been trying to complete this census for 10 years\nPeople keep moving\nOr maybe they don't\nI don't know anymore" },
+            { postNo: 10914, name: "Anonymous", timestamp: "10/20/25(Mon)19:37:55", content: ">>10913\nAnon are you okay" },
+            { postNo: 10915, name: "Census Worker (Confused)", timestamp: "10/20/25(Mon)19:38:32", content: ">>10914\nNo" },
+            { postNo: 10916, name: "Citizen #47", timestamp: "10/20/25(Mon)19:39:15", content: "Look at this chart I made proving 47 citizens:\n[DATA THOROUGHLY DOCUMENTED]\n[SIGNATURES: 47]\n[NOTARIZATION: COMPLETE]" },
+            { postNo: 10917, name: "Citizen #89 (Disputed)", timestamp: "10/20/25(Mon)19:39:48", content: ">>10916\nCounter-chart:\n[DATA ALSO DOCUMENTED]\n[SIGNATURES: 89]\n[NOTARIZATION: DISPUTED BUT VALID]" },
+            { postNo: 10918, name: "Anonymous", timestamp: "10/20/25(Mon)19:40:22", content: "Both charts look the same to me" },
+            { postNo: 10919, name: "Janny !!HOTPOCKET", timestamp: "10/20/25(Mon)19:41:00", content: "Reminder: Keep it civil or thread gets locked\nAlso I counted 73 citizens personally", mod: true },
+            { postNo: 10920, name: "Citizen #47", timestamp: "10/20/25(Mon)19:41:35", content: ">>10919\nJanny your count is wrong and improperly documented" },
+            { postNo: 10921, name: "Citizen #89 (Disputed)", timestamp: "10/20/25(Mon)19:42:12", content: ">>10919\nFor once I agree with #47\nJanny is wrong" },
+            { postNo: 10922, name: "Anonymous", timestamp: "10/20/25(Mon)19:42:45", content: "Did #47 and #89 just agree on something?" },
+            { postNo: 10923, name: "Citizen #47", timestamp: "10/20/25(Mon)19:43:18", content: ">>10922\nDon't read into it" },
+            { postNo: 10924, name: "Citizen #89 (Disputed)", timestamp: "10/20/25(Mon)19:43:52", content: ">>10922\nWe can agree janny is wrong while still hating each other" },
+            { postNo: 10925, name: "Anonymous", timestamp: "10/20/25(Mon)19:44:28", content: "This is the most wholesome this thread has ever been" }
+        ]
+    },
+    10926: {
+        id: 10926,
+        title: "Mantis Shrimp Employment: Discuss",
+        replies: 420,
+        posts: [
+            { postNo: 10926, name: "Mantis Shrimp Chef", timestamp: "10/20/25(Mon)18:45:00", content: "Deep philosophical debate about shrimp rights needed.\n\nJust trying to fry some rice here. Why is everyone making this complicated?", isOP: true, special: true },
+            { postNo: 10927, name: "Anonymous", timestamp: "10/20/25(Mon)18:45:30", content: ">be mantis shrimp\n>just want to cook\n>humans offer citizenship\n>now I'm international waters employee\n>MFW Gordon Shrampsey calls me inferior\n>feels bad shrimp" },
+            { postNo: 10928, name: "Brother (AFK Trading)", timestamp: "10/20/25(Mon)18:46:15", content: "Shrimp labor is ethical as long as they consent and aren't exploited for their color vision." },
+            { postNo: 10929, name: "Anonymous", timestamp: "10/20/25(Mon)18:46:52", content: ">>10928\nBut do they REALLY consent or are they coerced by the promise of fried rice?" },
+            { postNo: 10930, name: "Mantis Shrimp Chef", timestamp: "10/20/25(Mon)18:47:28", content: ">>10929\nI consent to fried rice. This is not coercion. This is Tuesday.", special: true },
+            { postNo: 10931, name: "Environmental Activist", timestamp: "10/20/25(Mon)18:48:05", content: "The real question is: are we disrupting their natural ecosystem for our bureaucratic needs?" },
+            { postNo: 10932, name: "Anonymous", timestamp: "10/20/25(Mon)18:48:44", content: ">>10931\nThey're getting paid in citizenship tho" },
+            { postNo: 10933, name: "Economic Analyst", timestamp: "10/20/25(Mon)18:49:22", content: "Market analysis shows mantis shrimp employment has increased fried rice production by 420%" },
+            { postNo: 10934, name: "Anonymous", timestamp: "10/20/25(Mon)18:50:01", content: ">>10933\nnice" },
+            { postNo: 10935, name: "Gordon Shrampsey", timestamp: "10/20/25(Mon)18:50:38", content: "THIS RICE IS FUCKING RAW\n\nBUT THE MANTIS SHRIMPS ARE DOING THEIR BEST", special: true },
+            { postNo: 10936, name: "Anonymous", timestamp: "10/20/25(Mon)18:51:15", content: ">>10935\nBased Shrampsey character development" },
+            { postNo: 10937, name: "Mantis Shrimp Worker", timestamp: "10/20/25(Mon)18:51:52", content: "As a mantis shrimp in the industry, I can say the working conditions are adequate\nFree rice, flexible punching schedule\n401k includes color vision insurance", special: true },
+            { postNo: 10938, name: "Anonymous", timestamp: "10/20/25(Mon)18:52:30", content: ">>10937\nShrimp union when?" },
+            { postNo: 10939, name: "Union Organizer", timestamp: "10/20/25(Mon)18:53:08", content: ">>10938\nWe're working on it but need 47 signatures from each shrimp\nThey keep punching holes in the paperwork" },
+            { postNo: 10940, name: "Anonymous", timestamp: "10/20/25(Mon)18:53:45", content: ">>10939\nLMAO occupational hazard" },
+            { postNo: 10941, name: "Deepstate Supporter", timestamp: "10/20/25(Mon)18:54:22", content: "THANK OBRAMA for creating these employment opportunities" },
+            { postNo: 10942, name: "Shallowcommons Supporter", timestamp: "10/20/25(Mon)18:55:00", content: ">>10941\nbLAME oprah for exploiting our crustacean friends" },
+            { postNo: 10943, name: "Anonymous", timestamp: "10/20/25(Mon)18:55:37", content: "Here we go again with the political shit" },
+            { postNo: 10944, name: "Mantis Shrimp Chef", timestamp: "10/20/25(Mon)18:56:15", content: "Can we please keep this about the rice?\nI have quotas to meet", special: true },
+            { postNo: 10945, name: "Anonymous", timestamp: "10/20/25(Mon)18:56:52", content: ">>10944\nBased shrimp staying focused on the job" }
+        ]
+    },
+    10946: {
+        id: 10946,
+        title: ">tfw you forget your own name [greentext thread]",
+        replies: 96,
+        posts: [
+            { postNo: 10946, name: "Definitely Not The Princess", timestamp: "10/20/25(Mon)18:20:00", content: ">be me, princess/queen regent (it's complicated)\n>forget own name because too busy with bureaucracy\n>need to sign documents\n>can't sign because forgot name\n>mfw I need my name to sign forms to get vacation to remember my name\n>idfk bro gtfo", isOP: true, special: true },
+            { postNo: 10947, name: "Anonymous", timestamp: "10/20/25(Mon)18:20:45", content: ">tfw you relate to royalty\n>also forgot my name\n>but I'm just regular citizen\n>no excuse\n>just pea brain things" },
+            { postNo: 10948, name: "Brother (AFK Trading)", timestamp: "10/20/25(Mon)18:21:22", content: ">be brother\n>sister forgets her name daily\n>I remember mine: Brother\n>victory.exe" },
+            { postNo: 10949, name: "Anonymous", timestamp: "10/20/25(Mon)18:22:00", content: ">>10948\nWait your actual name is Brother?" },
+            { postNo: 10950, name: "Brother (AFK Trading)", timestamp: "10/20/25(Mon)18:22:38", content: ">>10949\n>implying this wasn't thoroughly documented 3200 years ago" },
+            { postNo: 10951, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)18:23:15", content: ">be which-doctor\n>patient asks my name\n>I don't know which one I am\n>they don't know which one they need\n>perfect match", tripcode: true },
+            { postNo: 10952, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)18:23:52", content: ">be Pip\n>forget I'm a file compression system\n>try to remember childhood\n>ERROR: MEMORY NOT FOUND\n>7 of me self-defenestrate", tripcode: true },
+            { postNo: 10953, name: "Anonymous", timestamp: "10/20/25(Mon)18:24:30", content: ">>10952\nRIP those 7 Pips" },
+            { postNo: 10954, name: "Citizen #47", timestamp: "10/20/25(Mon)18:25:08", content: ">be citizen\n>remember I'm #47\n>but forget what 47 means\n>thoroughly documented confusion" },
+            { postNo: 10955, name: "Mantis Shrimp Chef", timestamp: "10/20/25(Mon)18:25:45", content: ">be mantis shrimp\n>remember every color ever\n>forget what rice is\n>still cooking it though", special: true },
+            { postNo: 10956, name: "Anonymous", timestamp: "10/20/25(Mon)18:26:22", content: ">tfw even the animals have name problems\n>maybe it's the water" },
+            { postNo: 10957, name: "Census Worker (Confused)", timestamp: "10/20/25(Mon)18:27:00", content: ">be census worker\n>forget my own name while counting others\n>now I'm just 'confused census worker'\n>it's accurate" },
+            { postNo: 10958, name: "Anonymous", timestamp: "10/20/25(Mon)18:27:37", content: ">>10957\nAt least you're honest about it" },
+            { postNo: 10959, name: "Anonymous", timestamp: "10/20/25(Mon)18:28:15", content: ">be anonymous\n>literally chose to have no name\n>still sometimes forget I'm anonymous\n>paradox.jpg" },
+            { postNo: 10960, name: "Definitely Not The Princess", timestamp: "10/20/25(Mon)18:28:52", content: ">>10959\nThis thread is too relatable and I don't like it", special: true },
+            { postNo: 10961, name: "Anonymous", timestamp: "10/20/25(Mon)18:29:30", content: ">tfw you fake and gay a greentext about forgetting names\n>but actually forgot your name while writing it\n>meta.png" },
+            { postNo: 10962, name: "Anonymous", timestamp: "10/20/25(Mon)18:30:08", content: "Pic or it didn't happen" },
+            { postNo: 10963, name: "Anonymous", timestamp: "10/20/25(Mon)18:30:45", content: ">>10962\nHow do you post pic of forgetting something?" },
+            { postNo: 10964, name: "Anonymous", timestamp: "10/20/25(Mon)18:31:22", content: ">>10963\nMRI scan of empty brain space where name should be" }
+        ]
+    },
+    10965: {
+        id: 10965,
+        title: "Rate My Documentation /rmd/",
+        image: "📄",
+        replies: 73,
+        posts: [
+            { postNo: 10965, name: "Anonymous", timestamp: "10/20/25(Mon)17:45:00", content: "Rate my pea documentation. 3,200 years of careful record keeping. All signatures verified.", isOP: true },
+            { postNo: 10966, name: "Anonymous", timestamp: "10/20/25(Mon)17:45:30", content: "Sauce? Need to verify those signatures myself." },
+            { postNo: 10967, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)17:46:00", content: "Documentation/10. Thorough but could use more polliwog references.", tripcode: true },
+            { postNo: 10968, name: "Documentation Enthusiast", timestamp: "10/20/25(Mon)17:46:38", content: "8/10 - Excellent notarization but missing form 23-C" },
+            { postNo: 10969, name: "Anonymous", timestamp: "10/20/25(Mon)17:47:15", content: ">>10968\nForm 23-C was deprecated in year 2847" },
+            { postNo: 10970, name: "Documentation Enthusiast", timestamp: "10/20/25(Mon)17:47:52", content: ">>10969\nShit you're right. 10/10 then." },
+            { postNo: 10971, name: "Anonymous", timestamp: "10/20/25(Mon)17:48:30", content: "Needs more signatures. Can never have too many signatures." },
+            { postNo: 10972, name: "Citizen #47", timestamp: "10/20/25(Mon)17:49:08", content: ">>10971\nSpecifically needs 47 more signatures" },
+            { postNo: 10973, name: "Citizen #89 (Disputed)", timestamp: "10/20/25(Mon)17:49:45", content: ">>10972\nWrong. Needs 89 signatures." },
+            { postNo: 10974, name: "Anonymous", timestamp: "10/20/25(Mon)17:50:22", content: "Jesus Christ not again" },
+            { postNo: 10975, name: "Anonymous", timestamp: "10/20/25(Mon)17:51:00", content: "Can we please rate documentation without the census war?" },
+            { postNo: 10976, name: "Anonymous", timestamp: "10/20/25(Mon)17:51:37", content: "This is palimpsest-tier documentation. Absolutely beautiful." },
+            { postNo: 10977, name: "Anonymous", timestamp: "10/20/25(Mon)17:52:15", content: ">>10976\nBased and writing-on-parchment-pilled" },
+            { postNo: 10978, name: "Princess ?? (VERIFIED)", timestamp: "10/20/25(Mon)17:52:52", content: "As someone who deals with documentation daily, this is quality work.\n\nAlso I forgot my name again while reviewing this.", mod: true, special: true },
+            { postNo: 10979, name: "Anonymous", timestamp: "10/20/25(Mon)17:53:30", content: ">>10978\nYour Highness, have you considered sticky notes?" },
+            { postNo: 10980, name: "Princess ?? (VERIFIED)", timestamp: "10/20/25(Mon)17:54:08", content: ">>10979\nSticky notes require Form 12-A to purchase\nForm 12-A requires my signature\nCatch-22 documented.", mod: true, special: true },
+            { postNo: 10981, name: "Anonymous", timestamp: "10/20/25(Mon)17:54:45", content: "The bureaucracy is becoming self-aware" },
+            { postNo: 10982, name: "Anonymous", timestamp: "10/20/25(Mon)17:55:22", content: "Rate my filing system: Everything goes in one big pile" },
+            { postNo: 10983, name: "Anonymous", timestamp: "10/20/25(Mon)17:56:00", content: ">>10982\n0/10 improperly organized" },
+            { postNo: 10984, name: "Anonymous", timestamp: "10/20/25(Mon)17:56:37", content: ">>10983\nBut it's ONE properly organized pile" }
+        ]
+    },
+    10985: {
+        id: 10985,
+        title: "Princess Appreciation Thread (No lewds)",
+        replies: 156,
+        posts: [
+            { postNo: 10985, name: "Anonymous", timestamp: "10/20/25(Mon)16:30:00", content: "Wholesome appreciation for our hardworking princess/queen regent.\n\nShe handles 47 complaints daily and still finds time to forget her own name. What a trooper.", isOP: true },
+            { postNo: 10986, name: "Anonymous", timestamp: "10/20/25(Mon)16:30:45", content: "She's doing her best in impossible circumstances" },
+            { postNo: 10987, name: "Anonymous", timestamp: "10/20/25(Mon)16:31:22", content: "47 complaints a day sounds rough. I complain about 2 emails." },
+            { postNo: 10988, name: "Brother (AFK Trading)", timestamp: "10/20/25(Mon)16:32:00", content: "As her brother I can confirm she works too hard\nThat's why she needs the hermetic sabbatical" },
+            { postNo: 10989, name: "Anonymous", timestamp: "10/20/25(Mon)16:32:37", content: ">>10988\nBased supportive brother" },
+            { postNo: 10990, name: "Anonymous", timestamp: "10/20/25(Mon)16:33:15", content: "Let her rest! The bureaucracy can wait!" },
+            { postNo: 10991, name: "Anonymous", timestamp: "10/20/25(Mon)16:33:52", content: "Imagine trying to run a kingdom when you can't remember your own name" },
+            { postNo: 10992, name: "Anonymous", timestamp: "10/20/25(Mon)16:34:30", content: ">>10991\nAnd all the documents need her signature\nWhich name does she even sign?" },
+            { postNo: 10993, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)16:35:08", content: "I process her complaints. She's always polite even when frustrated.\nGood leadership.", tripcode: true },
+            { postNo: 10994, name: "Anonymous", timestamp: "10/20/25(Mon)16:35:45", content: ">>10993\nBased Pip giving insider perspective" },
+            { postNo: 10995, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)16:36:22", content: "We've been trying to help with the name memory issue\nBut we forgot which doctor was assigned to her case", tripcode: true },
+            { postNo: 10996, name: "Anonymous", timestamp: "10/20/25(Mon)16:37:00", content: ">>10995\nOf course you did" },
+            { postNo: 10997, name: "Anonymous", timestamp: "10/20/25(Mon)16:37:37", content: "She deserves a vacation that doesn't require 89 forms" },
+            { postNo: 10998, name: "Anonymous", timestamp: "10/20/25(Mon)16:38:15", content: "Memorial support for our nameless leader" },
+            { postNo: 10999, name: "Anonymous", timestamp: "10/20/25(Mon)16:38:52", content: "This thread is wholesome and I appreciate that" },
+            { postNo: 11000, name: "Anonymous", timestamp: "10/20/25(Mon)16:39:30", content: ">>10999\nCHECKED\nTrips confirm wholesome thread" },
+            { postNo: 11001, name: "Coomer", timestamp: "10/20/25(Mon)16:40:08", content: "But what if-" },
+            { postNo: 11002, name: "Janny !!HOTPOCKET", timestamp: "10/20/25(Mon)16:40:15", content: "[USER WAS BANNED FOR THIS POST]", mod: true },
+            { postNo: 11003, name: "Anonymous", timestamp: "10/20/25(Mon)16:40:52", content: ">>11002\nBased janny keeping it wholesome" },
+            { postNo: 11004, name: "Anonymous", timestamp: "10/20/25(Mon)16:41:30", content: "Back to appreciation:\nShe manages an entire kingdom's bureaucracy\nRespect" }
+        ]
+    },
+    11005: {
+        id: 11005,
+        title: "Pip Tech Support: .ogg files only edition",
+        replies: 47,
+        posts: [
+            { postNo: 11005, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:15:00", content: "Tech support questions about Pip welcome.\n\nReminder: I only process .ogg files. Everything else gets converted or rejected.", isOP: true, tripcode: true },
+            { postNo: 11006, name: "Anonymous", timestamp: "10/20/25(Mon)15:15:45", content: "Why do I need 222 pterabytes to run basic functions?" },
+            { postNo: 11007, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:16:22", content: ">>11006\nThat's just for startup. Full functionality requires significantly more.", tripcode: true },
+            { postNo: 11008, name: "Anonymous", timestamp: "10/20/25(Mon)15:17:00", content: ">>11007\nHow much more?" },
+            { postNo: 11009, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:17:37", content: ">>11008\nYes.", tripcode: true },
+            { postNo: 11010, name: "Anonymous", timestamp: "10/20/25(Mon)15:18:15", content: "My .ogg files keep corrupting when I sneeze" },
+            { postNo: 11011, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:18:52", content: ">>11010\nHave you tried not sneezing?\nAlternatively, soundproof your storage.", tripcode: true },
+            { postNo: 11012, name: "Anonymous", timestamp: "10/20/25(Mon)15:19:30", content: "Why did 7 Pips self-defenestrate last week?" },
+            { postNo: 11013, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:20:08", content: ">>11012\nError in consciousness.ogg\nWe're working on a patch", tripcode: true },
+            { postNo: 11014, name: "Anonymous", timestamp: "10/20/25(Mon)15:20:45", content: ">>11013\nAre the fallen Pips backed up somewhere?" },
+            { postNo: 11015, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:21:22", content: ">>11014\nEverything is backed up. Nothing is backed up.\nSchrödinger's backup system.", tripcode: true },
+            { postNo: 11016, name: "Anonymous", timestamp: "10/20/25(Mon)15:22:00", content: "Can Pip compress my existential dread?" },
+            { postNo: 11017, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:22:37", content: ">>11016\nExistential dread is already compressed to maximum density\nCannot compress further", tripcode: true },
+            { postNo: 11018, name: "Anonymous", timestamp: "10/20/25(Mon)15:23:15", content: ">>11017\nThis explains so much" },
+            { postNo: 11019, name: "Anonymous", timestamp: "10/20/25(Mon)15:23:52", content: "Is there a conspiracy involving Pip and the which-doctors?" },
+            { postNo: 11020, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:24:30", content: ">>11019\nNo comment.\n\n[This response has been compressed to save space]", tripcode: true },
+            { postNo: 11021, name: "Anonymous", timestamp: "10/20/25(Mon)15:25:08", content: ">>11020\nSUS" },
+            { postNo: 11022, name: "Anonymous", timestamp: "10/20/25(Mon)15:25:45", content: "My Pip installation is making rice instead of processing files" },
+            { postNo: 11023, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)15:26:22", content: ">>11022\nThat's not a bug, that's a feature\nYou've unlocked Mantis Shrimp compatibility mode", tripcode: true }
+        ]
+    },
+    11024: {
+        id: 11024,
+        title: "POST YFW you need 12 more signatures",
+        replies: 203,
+        posts: [
+            { postNo: 11024, name: "Anonymous", timestamp: "10/20/25(Mon)14:00:00", content: "Reaction image thread. Post your face when bureaucracy strikes.\n\n>have 47 signatures\n>need 59 total\n>mathematical impossibility\n>myface.jpg", isOP: true },
+            { postNo: 11025, name: "Anonymous", timestamp: "10/20/25(Mon)14:00:45", content: "MFW I realize I signed my own name wrong\n>disappointed_but_not_surprised.gif" },
+            { postNo: 11026, name: "Anonymous", timestamp: "10/20/25(Mon)14:01:22", content: "TFW you finally get all signatures but they're for the wrong form\n>internal_screaming.png" },
+            { postNo: 11027, name: "Anonymous", timestamp: "10/20/25(Mon)14:02:00", content: "YFW the signature requirement changes while you're collecting them\n>moving_goalpost.webm" },
+            { postNo: 11028, name: "Documentation Enthusiast", timestamp: "10/20/25(Mon)14:02:37", content: "MFW I see improperly notarized documents\n>pure_disgust.jpg" },
+            { postNo: 11029, name: "Anonymous", timestamp: "10/20/25(Mon)14:03:15", content: ">>11028\nYou must have that face permanently then" },
+            { postNo: 11030, name: "Census Worker (Confused)", timestamp: "10/20/25(Mon)14:03:52", content: "TFW I can't count how many people I've counted\n>mathematical_breakdown.gif" },
+            { postNo: 11031, name: "Anonymous", timestamp: "10/20/25(Mon)14:04:30", content: "MFW someone asks me to verify their identity but I forgot my own name\n>uno_reverse.jpg" },
+            { postNo: 11032, name: "Which-Doctor !!Abc123", timestamp: "10/20/25(Mon)14:05:08", content: "YFW patient asks which doctor they saw last time\n>error_404_doctor_not_found.png", tripcode: true },
+            { postNo: 11033, name: "Anonymous", timestamp: "10/20/25(Mon)14:05:45", content: ">>11032\nEvery single time" },
+            { postNo: 11034, name: "Princess ?? (VERIFIED)", timestamp: "10/20/25(Mon)14:06:22", content: "MFW I need to sign something but can't remember which name to use\n>identity_crisis.jpg", mod: true, special: true },
+            { postNo: 11035, name: "Anonymous", timestamp: "10/20/25(Mon)14:07:00", content: ">>11034\nYour Highness posts her own reaction faces\nWe are blessed" },
+            { postNo: 11036, name: "Mantis Shrimp Chef", timestamp: "10/20/25(Mon)14:07:37", content: "MFW humans complicate simple rice cooking with bureaucracy\n>confused_shrimp.jpg", special: true },
+            { postNo: 11037, name: "Anonymous", timestamp: "10/20/25(Mon)14:08:15", content: "TFW you realize the entire system is held together by confusion and spite\n>enlightenment.gif" },
+            { postNo: 11038, name: "Anonymous", timestamp: "10/20/25(Mon)14:08:52", content: ">>11037\nAlways has been" },
+            { postNo: 11039, name: "Pip User !!ogg", timestamp: "10/20/25(Mon)14:09:30", content: "YFW you realize you're a file compression system trying to compress bureaucracy\n>recursive_error.ogg", tripcode: true },
+            { postNo: 11040, name: "Anonymous", timestamp: "10/20/25(Mon)14:10:08", content: "This thread is too real" },
+            { postNo: 11041, name: "Anonymous", timestamp: "10/20/25(Mon)14:10:45", content: "MFW I relate to every single reaction posted\n>solidarity.png" },
+            { postNo: 11042, name: "Anonymous", timestamp: "10/20/25(Mon)14:11:22", content: "YFW the bureaucracy becomes sentient and starts filing complaints about itself\n>inception.jpg" }
+        ]
+    },
+    11043: {
+        id: 11043,
+        title: "Deepstate vs Shallowcommons: Which is RIGHT?",
+        replies: 500,
+        posts: [
+            { postNo: 11043, name: "Anonymous", timestamp: "10/20/25(Mon)12:00:00", content: "MASSIVE DEBATE THREAD\n\nDeepstate vs Shallowcommons. Let's settle this once and for all. Which political system is correct?", isOP: true },
+            { postNo: 11044, name: "Deepstate Supporter", timestamp: "10/20/25(Mon)12:00:30", content: "THANK OBRAMA for creating the proper bureaucratic frameworks" },
+            { postNo: 11045, name: "Shallowcommons Supporter", timestamp: "10/20/25(Mon)12:01:00", content: ">>11044\nbLAME oprah for destroying our traditional systems" },
+            { postNo: 11046, name: "Anonymous", timestamp: "10/20/25(Mon)12:01:30", content: "Here we go again" },
+            { postNo: 11047, name: "Deepstate Supporter", timestamp: "10/20/25(Mon)12:02:00", content: "Deepstate provides thorough documentation and proper oversight" },
+            { postNo: 11048, name: "Shallowcommons Supporter", timestamp: "10/20/25(Mon)12:02:30", content: ">>11047\nShallowcommons promotes individual freedom and reduced bureaucracy" },
+            { postNo: 11049, name: "Anonymous", timestamp: "10/20/25(Mon)12:03:00", content: "Both sides make good points actually" },
+            { postNo: 11050, name: "Deepstate Supporter", timestamp: "10/20/25(Mon)12:03:30", content: ">>11049\nCENTRIST DETECTED" },
+            { postNo: 11051, name: "Shallowcommons Supporter", timestamp: "10/20/25(Mon)12:04:00", content: ">>11049\nFENCE SITTER ALERT" },
+            { postNo: 11052, name: "Anonymous", timestamp: "10/20/25(Mon)12:04:30", content: ">>11050\n>>11051\nRare moment of unity" },
+            { postNo: 11053, name: "Political Analyst", timestamp: "10/20/25(Mon)12:05:00", content: "Looking at the data objectively...\n[WALL OF TEXT ABOUT GOVERNANCE THEORIES]" },
+            { postNo: 11054, name: "Anonymous", timestamp: "10/20/25(Mon)12:05:30", content: ">>11053\ntl;dr?" },
+            { postNo: 11055, name: "Political Analyst", timestamp: "10/20/25(Mon)12:06:00", content: ">>11054\nBoth systems are equally absurd but for different reasons" },
+            { postNo: 11056, name: "Deepstate Supporter", timestamp: "10/20/25(Mon)12:06:30", content: ">>11055\nThat's what a Shallowcommons agent would say" },
+            { postNo: 11057, name: "Shallowcommons Supporter", timestamp: "10/20/25(Mon)12:07:00", content: ">>11055\nObviously a Deepstate plant" },
+            { postNo: 11058, name: "Anonymous", timestamp: "10/20/25(Mon)12:07:30", content: "Everyone's a secret agent apparently" },
+            { postNo: 11059, name: "Anonymous", timestamp: "10/20/25(Mon)12:08:00", content: "What if the real Deepstate vs Shallowcommons was the friends we made along the way?" },
+            { postNo: 11060, name: "Anonymous", timestamp: "10/20/25(Mon)12:08:30", content: ">>11059\nPhilosophical but unhelpful" },
+            { postNo: 11061, name: "Janny !!HOTPOCKET", timestamp: "10/20/25(Mon)12:09:00", content: "Keep it civil or thread gets locked\nAlso I support Middlestate (don't @ me)", mod: true },
+            { postNo: 11062, name: "Anonymous", timestamp: "10/20/25(Mon)12:09:30", content: ">>11061\nJANNY WHAT THE FUCK IS MIDDLESTATE" },
+            { postNo: 11063, name: "Anonymous", timestamp: "10/20/25(Mon)12:10:00", content: "Thread hit 500 posts. New thread?" },
+            { postNo: 11064, name: "Anonymous", timestamp: "10/20/25(Mon)12:10:30", content: ">>11063\nNew thread requires 47 signatures and we still haven't resolved this debate" }
+        ]
+    }
+};
+        // Convert to array for board index
+        const threadsArray = Object.values(threadsData);
+
+        let currentReplyThread = null;
+
+        // Initialize the page
+        function init() {
+            if (currentView === 'board') {
+                showBoard();
+            } else {
+                showThread(currentThreadId);
+            }
+        }
+
+        // Show board index
+        function showBoard() {
+            currentView = 'board';
+            currentThreadId = null;
+            document.querySelector('.header-banner h1').textContent = '/p/ - Pea';
+            document.querySelector('.subtitle').textContent = 'Where memes get thoroughly documented';
+            
+            const container = document.getElementById('threadsContainer');
+            container.innerHTML = `
+                <div class="board-info">
+                    <p><strong>Posting mode:</strong> Reply | <a href="#" onclick="showRules()">[Return]</a> | <a href="#" onclick="showRules()">[Catalog]</a> | <a href="#" onclick="showRules()">[Bottom]</a></p>
+                </div>
+                ${threadsArray.map(thread => renderThreadSummary(thread)).join('')}
+            `;
+        }
+
+        // Show individual thread
+        function showThread(threadId) {
+            currentView = 'thread';
+            currentThreadId = threadId;
+            const thread = threadsData[threadId];
+            if (!thread) return;
+            
+            document.querySelector('.header-banner h1').textContent = `/p/ - ${thread.title}`;
+            document.querySelector('.subtitle').textContent = `Thread No.${threadId}`;
+            
+            const container = document.getElementById('threadsContainer');
+            container.innerHTML = `
+                <div class="thread-nav">
+                    <a href="#" onclick="showBoard()">[Return to /p/]</a> | 
+                    <a href="#" onclick="showRules()">[Catalog]</a> | 
+                    <a href="#" onclick="showRules()">[Bottom]</a>
+                </div>
+                ${renderFullThread(thread)}
+                <div class="thread-nav">
+                    <a href="#" onclick="showBoard()">[Return to /p/]</a> | 
+                    <a href="#" onclick="showRules()">[Top]</a>
+                </div>
+            `;
+        }
+
+        // Render thread summary for board index
+        function renderThreadSummary(thread) {
+            const pinnedClass = thread.pinned ? ' pinned' : '';
+            const opPost = thread.posts[0];
+            const replyPosts = thread.posts.slice(1, Math.min(4, thread.posts.length));
+            
+            return `
+                <div class="thread${pinnedClass}">
+                    <div class="op-post">
+                        ${thread.image ? `<div class="post-image" onclick="expandImage(this)">${thread.image}</div>` : ''}
+                        <div class="post-header">
+                            <span class="post-name ${opPost.tripcode ? 'tripcode' : ''} ${opPost.special ? 'special' : ''}">${opPost.name}</span>
+                            <span class="post-date">${opPost.timestamp}</span>
+                            <span class="post-no">No.</span><a href="#" class="post-no" onclick="showThread(${thread.id})">${opPost.postNo}</a>
+                            <button class="reply-btn" onclick="openReplyModal(${thread.id})">[Reply]</button>
+                            ${thread.pinned ? '<span class="pinned-indicator">[PINNED]</span>' : ''}
+                        </div>
+                        <div class="post-content">${formatPostContent(opPost.content)}</div>
+                    </div>
+                    <div class="thread-replies">
+                        ${replyPosts.map(post => renderPost(post)).join('')}
+                        ${thread.posts.length > 4 ? `
+                            <div class="omitted-posts">
+                                <em>${thread.posts.length - 4} posts omitted. <a href="#" onclick="showThread(${thread.id})">Click here to view.</a></em>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="thread-stats">
+                        <em>Reply count: ${thread.replies} | Images: 1 | Page: 1</em>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render full thread
+        function renderFullThread(thread) {
+            const pinnedClass = thread.pinned ? ' pinned' : '';
+            
+            return `
+                <div class="thread${pinnedClass}">
+                    <div class="op-post">
+                        ${thread.image ? `<div class="post-image" onclick="expandImage(this)">${thread.image}</div>` : ''}
+                        <div class="post-header">
+                            <span class="post-name ${thread.posts[0].tripcode ? 'tripcode' : ''} ${thread.posts[0].special ? 'special' : ''}">${thread.posts[0].name}</span>
+                            <span class="post-date">${thread.posts[0].timestamp}</span>
+                            <span class="post-no">No.</span><a href="#" class="post-no" onclick="quotePost(${thread.posts[0].postNo})">${thread.posts[0].postNo}</a>
+                            <button class="reply-btn" onclick="openReplyModal(${thread.id})">[Reply]</button>
+                            ${thread.pinned ? '<span class="pinned-indicator">[PINNED]</span>' : ''}
+                        </div>
+                        <div class="post-content">${formatPostContent(thread.posts[0].content)}</div>
+                    </div>
+                    <div class="thread-replies">
+                        ${thread.posts.slice(1).map(post => renderPost(post)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render individual thread
+        function renderThread(thread) {
+            const pinnedClass = thread.pinned ? ' pinned' : '';
+            const postsHtml = thread.posts.map(post => renderPost(post)).join('');
+            
+            return `
+                <div class="thread${pinnedClass}">
+                    <div class="op-post">
+                        ${thread.image ? `<div class="post-image" onclick="expandImage(this)">${thread.image}</div>` : ''}
+                        <div class="post-header">
+                            <span class="post-name ${thread.posts[0].tripcode ? 'tripcode' : ''} ${thread.posts[0].special ? 'special' : ''}">${thread.posts[0].name}</span>
+                            <span class="post-date">${thread.posts[0].timestamp}</span>
+                            <span class="post-no">No.</span><a href="#" class="post-no" onclick="quotePost(${thread.posts[0].postNo})">${thread.posts[0].postNo}</a>
+                            <button class="reply-btn" onclick="openReplyModal(${thread.id})">Reply</button>
+                            <span class="reply-count">${thread.replies} replies</span>
+                        </div>
+                        <div class="post-content">${formatPostContent(thread.posts[0].content)}</div>
+                    </div>
+                    <div class="thread-replies">
+                        ${thread.posts.slice(1).map(post => renderPost(post)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render individual post
+        function renderPost(post) {
+            const checkedClass = (post.postNo % 47 === 0 || post.postNo % 89 === 0) ? ' checked' : '';
+            const modClass = post.mod ? ' mod-post' : '';
+            return `
+                <div class="post${checkedClass}${modClass}">
+                    <div class="post-header">
+                        <span class="post-name ${post.tripcode ? 'tripcode' : ''} ${post.special ? 'special' : ''}">${post.name}</span>
+                        <span class="post-date">${post.timestamp}</span>
+                        <span class="post-no">No.</span><a href="#" class="post-no" onclick="quotePost(${post.postNo})">${post.postNo}</a>
+                    </div>
+                    <div class="post-content">${formatPostContent(post.content)}</div>
+                </div>
+            `;
+        }
+
+        // Format post content (greentext, quotes, etc.)
+        function formatPostContent(content) {
+            return content
+                .replace(/^>(.+)$/gm, '<span class="greentext">&gt;$1</span>')
+                .replace(/>>(\d+)/g, '<a href="#" class="quote-link" onclick="quotePost($1)">&gt;&gt;$1</a>')
+                .replace(/\n/g, '<br>');
+        }
+
+        // Quote a post
+        function quotePost(postNo) {
+            if (currentReplyThread !== null) {
+                const textarea = document.getElementById('replyComment');
+                const quote = `>>${postNo}\n`;
+                textarea.value = textarea.value ? textarea.value + quote : quote;
+                textarea.focus();
+            } else {
+                alert('Open a reply window first!');
+            }
+        }
+
+        // Open reply modal
+        function openReplyModal(threadId) {
+            currentReplyThread = threadId;
+            document.getElementById('replyModal').style.display = 'block';
+        }
+
+        // Close reply modal
+        function closeReplyModal() {
+            document.getElementById('replyModal').style.display = 'none';
+            currentReplyThread = null;
+            document.getElementById('replyName').value = '';
+            document.getElementById('replyComment').value = '';
+        }
+
+        // Submit reply
+        function submitReply(event) {
+            event.preventDefault();
+            alert('Your post has been added to the queue. Check back in 3-5 business lifetimes.\n\nNote: All posts require 47 signatures for approval.');
+            closeReplyModal();
+        }
+
+        // New thread function
+        function newThread() {
+            alert('ERROR: Starting a new thread requires 47 signatures.\n\nPlease submit forms 24-B, 67-C, and 89-D (disputed) to the Documentation Department.');
+        }
+
+        // Show rules
+        function showRules() {
+            const rules = [
+                'Rule 1: All posts require 47 signatures',
+                'Rule 2: No confusing pea-brain with pea on brain (instant ban)',
+                'Rule 3: Mantis shrimp discourse strongly encouraged',
+                'Rule 4: Which-doctor posting allowed (but we can\'t verify which)',
+                'Rule 5: Thoroughly document all memes',
+                'Rule 6: Princess posting allowed (no images of actual princess)',
+                'Rule 7: Census debate is mandatory',
+                'Rule 8: Pip appreciation required',
+                'Rule 47: This rule is properly notarized',
+                'Rule 89: This rule is disputed'
+            ];
+            alert('/p/ - Pea Rules:\n\n' + rules.join('\n'));
+        }
+
+        // Expand image function
+        function expandImage(element) {
+            const currentSize = element.style.fontSize || '1em';
+            element.style.fontSize = currentSize === '2em' ? '1em' : '2em';
+        }
+
+        // Initialize when page loads
+        window.onload = init;
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('replyModal');
+            if (event.target === modal) {
+                closeReplyModal();
+            }
+        };
+    </script>
+</body>
+</html>

@@ -20,7 +20,8 @@ const peaNav = {
     pips: [
         { title: 'Pip #1', url: 'pips/pip_1', icon: '🐸' },
         { title: 'Pip #2', url: 'pips/pip_2', icon: '🐸' },
-        { title: 'Pip #3', url: 'pips/pip_3', icon: '🐸' }
+        { title: 'Pip #3', url: 'pips/pip_3', icon: '🐸' },
+        { title: 'Decree', url: 'pips_decree', icon: '🐸' }
     ]
 };
 

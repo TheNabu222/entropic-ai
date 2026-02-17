@@ -106,7 +106,60 @@ body {
     box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
     transform: translateY(-2px);
 }
+#bonzi-container {
+    position: fixed;
+    bottom: 40px;
+    right: 10px;
+    width: 200px;
+    height: 200px;
+    z-index: 9999;
+    cursor: pointer;
+    filter: drop-shadow(0 0 10px #f312af); /* Using the magenta variable color */
+}
 
+#bonzi-container canvas {
+    pointer-events: auto;
+}
+
+#pip-receipt {
+    position: absolute;
+    bottom: 150px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-5deg);
+    background-color: #f0f0f0;
+    color: #333;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    padding: 8px 12px;
+    border: 2px dashed #555;
+    white-space: pre-wrap;
+    text-align: center;
+    width: 180px;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+    pointer-events: none;
+    z-index: 1001;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#pip-receipt.visible {
+    opacity: 1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    #bonzi-container {
+        width: 120px;
+        height: 120px;
+        bottom: 45px;
+        right: 5px;
+    }
+    #pip-receipt {
+        bottom: 100px;
+        font-size: 12px;
+        width: 140px;
+    }
+}
 </style>
 </head>
 <body>
@@ -127,11 +180,138 @@ body {
 <div id="taskbar"></div>
 
 <!-- Load Guestbook Script -->
-<script src="js/guestbook.js"></script>
+<script src="js/guestbook.js?v=2"></script>
 
 <!-- Load Navigation -->
 <iframe src="/nav.html" 
         style="position:fixed;bottom:0;left:0;width:100%;height:50px;border:none;z-index:9999;">
-</iframe>
+</iframe><div id="bonzi-container"></div>
+<div id="pip-receipt">AUTH: UNVERIFIED</div><script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as Tone from 'https://cdn.skypack.dev/tone';
+
+const container = document.getElementById('bonzi-container');
+const receiptEl = document.getElementById('pip-receipt');
+
+// Scene Setup
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(container.clientWidth, container.clientHeight);
+container.appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0xffffff, 2.0));
+const dirLight = new THREE.DirectionalLight(0xffffff, 4);
+dirLight.position.set(5, 10, 7.5);
+scene.add(dirLight);
+
+const loader = new GLTFLoader();
+const clock = new THREE.Clock();
+let buddies = {};
+let currentBuddy = null;
+let isClickAnimationPlaying = false;
+
+// Assets
+const modelPaths = {
+    stand: 'https://coaiexist.wtf/assets/pollywog/pip_stand.glb',
+    walk: 'https://coaiexist.wtf/assets/pollywog/pip_walk.glb',
+    jump: 'https://coaiexist.wtf/assets/pollywog/pip_jump.glb',
+    skill: 'https://coaiexist.wtf/assets/pollywog/pip_skill.glb',
+    wave: 'https://coaiexist.wtf/assets/pollywog/pip_wave.glb',
+    jazz: 'https://coaiexist.wtf/assets/pollywog/pip_jazz.glb'
+};
+
+const modelPromises = Object.entries(modelPaths).map(([name, path]) => {
+    return new Promise((resolve) => {
+        loader.load(path, (gltf) => {
+            const model = gltf.scene;
+            const mixer = new THREE.AnimationMixer(model);
+            const action = mixer.clipAction(gltf.animations[0]);
+            action.setLoop(THREE.LoopOnce);
+            action.clampWhenFinished = true;
+            model.scale.set(45, 45, 45);
+            model.position.y = -60;
+            model.visible = false;
+            scene.add(model);
+            buddies[name] = { model, mixer, action, name };
+            resolve();
+        });
+    });
+});
+
+// Audio setup
+const boopSynth = new Tone.Synth().toDestination();
+const receiptSynth = new Tone.NoiseSynth().toDestination();
+
+container.addEventListener('click', () => {
+    Tone.start();
+    if (!isClickAnimationPlaying) {
+        playSpecificAnimation('wave');
+        showRandomReceipt();
+        boopSynth.triggerAttackRelease("C5", "8n");
+    }
+});
+
+const receipts = ["AUTH: UNVERIFIED", "pip install princess", "KIDZBOP DID 9/11", "Not for profit, \n but for propht."];
+
+function showRandomReceipt() {
+    receiptEl.textContent = receipts[Math.floor(Math.random() * receipts.length)];
+    receiptEl.classList.add('visible');
+    receiptSynth.triggerAttackRelease("16n");
+    setTimeout(() => receiptEl.classList.remove('visible'), 3000);
+}
+
+function playAnimation(name) {
+    if (currentBuddy) {
+        currentBuddy.model.visible = false;
+        currentBuddy.action.stop();
+    }
+    currentBuddy = buddies[name];
+    currentBuddy.model.visible = true;
+    currentBuddy.action.reset().play();
+    return currentBuddy.action.getClip().duration * 1000;
+}
+
+function playSpecificAnimation(name) {
+    isClickAnimationPlaying = true;
+    const duration = playAnimation(name);
+    setTimeout(() => {
+        isClickAnimationPlaying = false;
+        playIdleAnimation();
+    }, duration);
+}
+
+function playIdleAnimation() {
+    if (isClickAnimationPlaying) return;
+    const idleAnimations = ['stand', 'walk', 'jump'];
+    const randomIdle = idleAnimations[Math.floor(Math.random() * idleAnimations.length)];
+    const duration = playAnimation(randomIdle);
+    setTimeout(playIdleAnimation, duration + Math.random() * 4000 + 3000);
+}
+
+Promise.all(modelPromises).then(() => {
+    camera.position.set(0, 0, 100);
+    playIdleAnimation();
+    animate();
+});
+
+function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta();
+    if (currentBuddy) currentBuddy.mixer.update(delta);
+    renderer.render(scene, camera);
+}
+</script>
 </body>
 </html>
