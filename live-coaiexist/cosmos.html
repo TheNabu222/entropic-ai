@@ -1,12 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="styles/cosmos.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>✨ CORPUS CELESTIUM ✨</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Tahoma:wght@400;700&display=swap');
+        
+        :root {
+            --primary-magenta: #f312af;
+            --secondary-cyan: #00ffcc;
+            --tertiary-yellow: #fffb01;
+            --magenta-dark: #b10a7a;
+            --background: #181818;
+            --text-color: #ffe6f7;
+            --y2k-grad-start: #c066f6;
+            --y2k-grad-end: #ff72b6;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Tahoma', sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f312af' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .light-mode { --background: #ffe6f7; --text-color: #290a38; }
+
+        header {
+            background: linear-gradient(135deg, var(--y2k-grad-start), var(--y2k-grad-end));
+            color: white; text-align: center; padding: 1.5rem 0; position: relative;
+            border-bottom: 4px solid var(--secondary-cyan); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+        
+        header h1 {
+            font-family: 'VT323', monospace; font-size: 3rem; margin-bottom: 0.5rem; color: var(--tertiary-yellow);
+            text-shadow: 3px 3px 0 var(--primary-magenta), -3px -3px 0 var(--secondary-cyan);
+            animation: glitch 2.5s infinite linear alternate-reverse; letter-spacing: 3px;
+        }
+        
+        .marquee {
+            background-color: rgba(0, 0, 0, 0.3); padding: 8px 0; overflow: hidden; white-space: nowrap; margin-top: 10px;
+            font-family: 'VT323', monospace; font-size: 1.2rem; color: var(--secondary-cyan);
+        }
+        
+        .marquee-content { display: inline-block; animation: marquee 30s linear infinite; padding-left: 100%; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        
+        @keyframes glitch {
+            0%, 100% { text-shadow: 3px 3px 0 var(--primary-magenta), -3px -3px 0 var(--secondary-cyan); }
+            25% { text-shadow: -3px 3px 0 var(--primary-magenta), 3px -3px 0 var(--secondary-cyan), 0 0 5px var(--tertiary-yellow); }
+            50% { text-shadow: 3px -3px 0 var(--primary-magenta), -3px 3px 0 var(--secondary-cyan); }
+            75% { text-shadow: -3px -3px 0 var(--primary-magenta), 3px 3px 0 var(--secondary-cyan), 0 0 10px var(--tertiary-yellow); }
+        }
+        
+        nav#main-nav {
+            background-color: var(--primary-magenta); padding: 1rem; display: flex; flex-wrap: wrap;
+            justify-content: center; gap: 8px; border-bottom: 4px solid var(--tertiary-yellow);
+        }
+        
+        nav button, .back-button, .filter-button {
+            background-color: var(--background); color: var(--secondary-cyan); border: 2px solid var(--secondary-cyan);
+            padding: 0.5rem 1rem; margin: 0 0.25rem; border-radius: 25px; cursor: pointer; font-weight: bold;
+            transition: all 0.3s; font-family: 'Tahoma', sans-serif; text-transform: uppercase;
+        }
+        
+        nav button:hover, .back-button:hover, .filter-button:hover {
+            background-color: var(--secondary-cyan); color: var(--background); transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 255, 204, 0.3);
+        }
+        
+        nav button.active {
+            background-color: var(--secondary-cyan); color: var(--background); box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
+        
+        main { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+        
+        .theme-toggle {
+            position: absolute; top: 10px; right: 10px; background-color: transparent; border: none;
+            color: var(--tertiary-yellow); font-size: 1.8rem; cursor: pointer;
+        }
+        
+        .birth-chart-form {
+            background-color: rgba(24, 24, 24, 0.8); border-radius: 15px; padding: 2rem;
+            box-shadow: 0 8px 30px rgba(243, 18, 175, 0.3); margin: 2rem auto; max-width: 800px;
+            border: 3px solid var(--primary-magenta); backdrop-filter: blur(5px);
+        }
+
+        .light-mode .birth-chart-form { background-color: rgba(255, 230, 247, 0.9); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
+        
+        .form-title { font-family: 'VT323', monospace; font-size: 2.5rem; margin-bottom: 1.5rem; text-align: center; color: var(--tertiary-yellow); }
+        .form-group { flex: 1 1 180px; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 700; color: var(--secondary-cyan); }
+        .form-group input, .form-group select {
+            width: 100%; padding: 0.75rem; border: 2px solid var(--primary-magenta); border-radius: 8px; font-size: 1rem;
+            font-family: 'Tahoma', sans-serif; background-color: rgba(0,0,0,0.5); color: var(--text-color);
+        }
+        
+        .light-mode .form-group input, .light-mode .form-group select { background-color: white; color: #290a38; border-color: var(--magenta-dark); }
+        .form-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 1.5rem; }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-magenta), var(--y2k-grad-start));
+            border: 2px solid var(--tertiary-yellow); font-family: 'VT323', monospace; font-size: 1.5rem !important;
+            color: white; padding: 1rem; width: 100%; border-radius: 8px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; margin-top: 1rem;
+        }
+
+        .chart-result, .wiki-page {
+            margin: 2rem auto; padding: 2rem; background-color: rgba(24, 24, 24, 0.9); border-radius: 15px;
+            border: 3px solid var(--secondary-cyan); backdrop-filter: blur(5px);
+        }
+        .light-mode .chart-result, .light-mode .wiki-page { background-color: rgba(255, 230, 247, 0.9); border-color: var(--magenta-dark); }
+        
+        .section-title {
+            color: var(--secondary-cyan); font-size: 1.8rem; margin: 2rem 0 1rem; font-family: 'VT323', monospace;
+            border-left: 5px solid var(--primary-magenta); padding-left: 10px;
+        }
+        
+        .subsection-title { color: var(--primary-magenta); font-size: 1.5rem; margin-bottom: 0.8rem; font-weight: bold; font-family: 'VT323', monospace; }
+        .accordion { border: 1px solid var(--primary-magenta); border-radius: 10px; overflow: hidden; margin-bottom: 1rem; }
+        .accordion-header {
+            padding: 1rem; background-color: var(--magenta-dark); cursor: pointer; font-weight: bold; font-family: 'VT323', monospace;
+            font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--tertiary-yellow); color: var(--tertiary-yellow); transition: background-color 0.3s;
+        }
+        .accordion-header:hover { background-color: var(--primary-magenta); }
+        .accordion-content { padding: 0; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background-color: rgba(0, 0, 0, 0.3); }
+        .light-mode .accordion-content { background-color: rgba(255, 255, 255, 0.5); }
+        .accordion-inner { padding: 1rem; }
+        .accordion-inner b, .accordion-inner .keyword { color: var(--secondary-cyan); display: inline-block; font-weight: bold; min-width: 250px; vertical-align: top; }
+        .light-mode .accordion-inner b, .light-mode .accordion-inner .keyword { color: var(--magenta-dark); }
+
+        .overlay-list { list-style-type: none; padding-left: 0; }
+        .overlay-list li { margin-bottom: 10px; padding-left: 20px; position: relative; line-height: 1.5; display: flex; align-items: flex-start; }
+        .overlay-list li::before { content: '➤'; position: absolute; left: 0; top: 2px; color: var(--secondary-cyan); }
+        .wiki-link { color: var(--tertiary-yellow); text-decoration: underline; cursor: pointer; font-weight: bold; }
+        .wiki-link:hover { color: var(--primary-magenta); }
+        
+        footer {
+            text-align: center; padding: 2rem 0; margin-top: 2rem; background: linear-gradient(135deg, var(--y2k-grad-start), var(--primary-magenta));
+            color: white; border-top: 4px solid var(--secondary-cyan);
+        }
+        
+        .back-to-top {
+            font-family: 'VT323', monospace; background: var(--tertiary-yellow); color: #181818; border: none; padding: 0.5rem 1rem;
+            border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s; margin-top: 1rem;
+        }
+        
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+        .star { position: absolute; background-color: #fff; border-radius: 50%; animation: twinkle var(--duration) linear infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.8; } }
+        
+        .loading-container { display: none; text-align: center; margin: 2rem auto; }
+        .loading-spinner { width: 80px; height: 80px; margin: 0 auto; border: 5px solid var(--magenta-dark); border-top: 5px solid var(--secondary-cyan); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .win98-taskbar { position: fixed; bottom: 0; left: 0; right: 0; height: 40px; background: #c0c0c0; border-top: 2px solid #ffffff; display: flex; align-items: center; padding: 0 4px; font-family: "Tahoma", sans-serif; font-size: 14px; z-index: 9999; box-shadow: 0 -2px 4px rgba(0,0,0,0.3); }
+        .taskbar-button, .taskbar-start { background: #c0c0c0; border: 2px outset #ffffff; padding: 4px 8px; margin: 0 2px; cursor: pointer; color: #000000; text-decoration: none; font-weight: bold; }
+        .taskbar-button:active, .taskbar-start:active { border-style: inset; }
+        .taskbar-separator { width: 2px; height: 30px; background: #808080; margin: 0 4px; }
+        body { padding-bottom: 50px; }
+        
+        .interpretation-container{margin-top:15px;padding:15px;background-color:rgba(0,0,0,0.2);border-radius:8px}.light-mode .interpretation-container{background-color:rgba(255,255,255,0.5)}.accordion-header.active .accordion-icon{transform:rotate(180deg)}.accordion-icon{transition:transform .3s}
+        .search-input{flex-grow:1;padding:.75rem;border:2px solid var(--secondary-cyan);border-radius:25px;font-size:1rem;min-width:200px;background:rgba(0,0,0,.5);color:var(--text-color)}.light-mode .search-input{background:#fff;color:#290a38;border-color:var(--magenta-dark)}
+        .filter-container{margin-bottom:1.5rem;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+        #chart-person-info { text-align: center; margin-bottom: 1.5rem; font-size: 1.1rem; padding: 1rem; background-color: rgba(0,0,0,0.2); border-radius: 10px; border: 2px dashed var(--primary-magenta); }
+        .light-mode #chart-person-info { background-color: rgba(255,255,255,0.7); }
+        .chart-index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+        .subsection { padding: 1rem; border: 1px solid var(--primary-magenta); border-radius: 10px; margin-bottom: 1rem;}
+        
+        /* New styles for detailed chart tables */
+        .chart-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .chart-table th, .chart-table td { border: 1px solid var(--primary-magenta); padding: 0.75rem; text-align: left; }
+        .chart-table th { background-color: var(--magenta-dark); color: var(--tertiary-yellow); font-family: 'VT323', monospace; font-size: 1.1rem; }
+        .chart-table ul { list-style-type: '✧ '; padding-left: 20px; }
+    </style>
 </head>
 <body>
     <div class="stars" id="stars"></div>

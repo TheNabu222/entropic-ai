@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="../styles/pea/idk.css">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Entropic Nexus · Codex Pulse Sandbox</title>
@@ -10,7 +9,391 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=VT323&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
-  
+  <style>
+    :root {
+      --magenta: #f312af;
+      --cyan: #00ffcc;
+      --yellow: #fffb01;
+      --y2k-purple: #c066f6;
+      --y2k-pink: #ff72b6;
+      --online: #1eff45;
+      --dark-bg: #1a0a1f;
+      --card-bg: #2a1a30;
+      --border-color: var(--magenta);
+      --text-primary: #f0f0f0;
+      --text-secondary: #a89cb3;
+      --font-header: 'VT323', monospace;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--dark-bg);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      background-image: radial-gradient(var(--card-bg) 1px, transparent 1px);
+      background-size: 10px 10px;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .entropic-nav {
+      background: linear-gradient(90deg, var(--y2k-purple), var(--y2k-pink));
+      border-bottom: 2px solid var(--cyan);
+      font-family: var(--font-header);
+      font-size: 22px;
+    }
+
+    .entropic-nav a,
+    .entropic-nav button {
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .entropic-nav a:hover,
+    .entropic-nav button:hover {
+      background-color: rgba(255, 255, 255, 0.2) !important;
+      color: var(--yellow) !important;
+    }
+
+    .entropic-nav .logo {
+      font-size: 28px;
+    }
+
+    .entropic-nav .fa {
+      text-shadow: 0 0 5px var(--cyan);
+    }
+
+    .entropic-window {
+      background-color: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 0;
+      box-shadow: 0 0 15px rgba(243, 18, 175, 0.3);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .entropic-window-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(90deg, var(--y2k-purple), var(--y2k-pink));
+      padding: 4px 8px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .entropic-window-title {
+      font-family: var(--font-header);
+      font-size: 20px;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      letter-spacing: 0.08em;
+    }
+
+    .entropic-window-controls span {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background-color: var(--dark-bg);
+      border: 1px solid var(--border-color);
+      margin-left: 4px;
+    }
+
+    .entropic-window-content {
+      padding: 16px;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: var(--font-header);
+      color: var(--cyan);
+      text-shadow: 0 0 5px var(--cyan);
+    }
+
+    .entropic-btn {
+      background: linear-gradient(45deg, var(--magenta), var(--y2k-purple));
+      border: 1px solid var(--cyan);
+      color: #fff;
+      padding: 8px 16px;
+      font-family: var(--font-header);
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      transition: all 0.3s ease;
+    }
+
+    .entropic-btn:hover {
+      box-shadow: 0 0 10px var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    .entropic-btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+    }
+
+    .entropic-btn-secondary:hover {
+      background-color: rgba(0, 255, 204, 0.1);
+    }
+
+    .identity-avatar {
+      width: 7rem;
+      height: 7rem;
+      border-radius: 9999px;
+      margin: 0 auto;
+      border: 4px solid var(--cyan);
+    }
+
+    .nexus-metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .nexus-metric {
+      border: 1px solid rgba(0, 255, 204, 0.3);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 12px 16px;
+      text-align: center;
+      border-radius: 4px;
+      box-shadow: inset 0 0 12px rgba(0, 255, 204, 0.1);
+    }
+
+    .nexus-metric span {
+      display: block;
+      font-family: var(--font-header);
+      font-size: 24px;
+      color: var(--yellow);
+      margin-bottom: 4px;
+    }
+
+    .persona-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .persona-card {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid rgba(0, 255, 204, 0.25);
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.2);
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .persona-card.active {
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.35);
+    }
+
+    .persona-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: #0b0312;
+      font-family: var(--font-header);
+      border: 1px solid rgba(0, 255, 204, 0.35);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .persona-info h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: var(--cyan);
+    }
+
+    .persona-info p {
+      margin: 2px 0 0;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .nexus-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .nexus-post {
+      border: 1px solid rgba(243, 18, 175, 0.25);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nexus-post::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(130deg, rgba(0, 255, 204, 0.08), transparent 45%);
+      pointer-events: none;
+    }
+
+    .nexus-post-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nexus-post-author {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nexus-post-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: #0b0312;
+      font-family: var(--font-header);
+      border: 1px solid rgba(0, 255, 204, 0.35);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .nexus-post-meta h5 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .nexus-post-meta p {
+      margin: 0;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .nexus-post-code {
+      font-family: var(--font-header);
+      font-size: 0.95rem;
+      color: var(--yellow);
+      letter-spacing: 0.1em;
+    }
+
+    .nexus-post-body {
+      position: relative;
+      z-index: 1;
+      line-height: 1.6;
+    }
+
+    .nexus-post-tags {
+      position: relative;
+      z-index: 1;
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.75rem;
+    }
+
+    .nexus-post-tags span {
+      border: 1px solid rgba(0, 255, 204, 0.35);
+      color: var(--cyan);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(0, 255, 204, 0.1);
+    }
+
+    .nexus-post-footer {
+      position: relative;
+      z-index: 1;
+      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .nexus-post-footer strong {
+      color: var(--magenta);
+    }
+
+    .comment-list {
+      position: relative;
+      z-index: 1;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 255, 204, 0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .comment-list__item {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .comment-list__sigil {
+      color: var(--cyan);
+      font-size: 0.8rem;
+      line-height: 1.2;
+      font-family: var(--font-header);
+    }
+
+    .event-log {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .event-log strong {
+      color: var(--cyan);
+      font-family: var(--font-header);
+      letter-spacing: 0.05em;
+    }
+
+    .event-log::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .event-log::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 204, 0.35);
+    }
+
+    footer {
+      text-align: center;
+      padding: 32px 16px;
+      border-top: 2px solid var(--magenta);
+      margin-top: 48px;
+      color: var(--text-secondary);
+    }
+
+    footer p {
+      margin: 0;
+    }
+  </style>
 </head>
 <body class="bg-gray-900">
   <div class="fixed top-0 w-full z-10">

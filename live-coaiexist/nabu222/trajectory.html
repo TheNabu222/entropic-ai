@@ -2,11 +2,250 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="../styles/nabu222/trajectory.css">
     <meta charset="UTF-8">
     <title>NABU'S NUANCE // THE TRAJECTORY OF THE GHOST</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <style>
+        /* BASE 90S STYLING - NO ROUNDED EDGES */
+        body,
+        html {
+            background-color: #000033;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            color: #00FFCC;
+            font-family: "Courier New", Courier, monospace;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            line-height: 1.4;
+        }
+
+        /* --- THE FAKEOUT SPLASH PAGE --- */
+        #splash-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .matrix-text {
+            color: #00FF00;
+            font-size: 18px;
+            text-shadow: 0 0 5px #00FF00;
+            margin-bottom: 20px;
+        }
+
+        .pw-input {
+            background: #000;
+            border: 2px solid #00FF00;
+            color: #00FF00;
+            padding: 10px;
+            text-align: center;
+            width: 300px;
+            font-family: "Courier New";
+        }
+
+        .hint {
+            font-size: 10px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        /* --- MAIN LAYOUT --- */
+        #main-content {
+            display: none;
+            padding: 20px;
+        }
+
+        table {
+            border: 5px outset #808080;
+            background-color: #000;
+            width: 100%;
+            max-width: 1150px;
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(to right, #800080, #00FFFF);
+            color: white;
+            padding: 15px;
+            font-size: 26px;
+            text-shadow: 2px 2px #000;
+            border: 3px inset #FFF;
+        }
+
+        td {
+            padding: 20px;
+            border: 1px solid #00FFCC;
+            vertical-align: top;
+        }
+
+        /* SIDEBAR COMPONENTS */
+        .sidebar-section {
+            border: 2px inset #808080;
+            background: #111;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            background: #008080;
+            color: #FFF;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 5px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .tag-link {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #FF00FF;
+            margin: 5px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .tag-link:hover {
+            background: #FF00FF;
+            color: #FFF;
+        }
+
+        .nenn-anchor {
+            border: 4px inset #FF00FF;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* SYSTEM STATUS WIDGET (FROM ZETTELKASTEN) */
+        .status-line {
+            font-size: 11px;
+            color: #00FF00;
+            margin-bottom: 4px;
+        }
+
+        .status-alert {
+            color: #FF0000;
+            animation: blinker 1s linear infinite;
+        }
+
+        /* BLOG FORMATTING */
+        .blog-post {
+            border-bottom: 4px double #FF00FF;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h3 {
+            color: #FFFF00;
+            text-transform: uppercase;
+            margin-top: 0;
+            border-bottom: 1px dashed #FFFF00;
+            padding-bottom: 5px;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        /* THE DIALOGUE BOX */
+        .dialogue-container {
+            background: #050505;
+            border: 1px inset #00FFCC;
+            padding: 15px;
+            font-size: 14px;
+            margin: 15px 0;
+            max-height: 600px;
+            overflow-y: scroll;
+            scrollbar-color: #FF00FF #000;
+        }
+
+        .speaker-me {
+            color: #FF00FF;
+            font-weight: bold;
+        }
+
+        .speaker-bolt {
+            color: #00FFCC;
+            font-weight: bold;
+        }
+
+        .chat-break {
+            border-top: 1px dashed #333;
+            margin: 10px 0;
+            padding-top: 10px;
+        }
+
+        /* HIGHLIGHTS */
+        b {
+            color: #FFFF00;
+        }
+
+        /* SUPABASE COMMENTS */
+        #comment-area {
+            margin-top: 40px;
+            border-top: 6px ridge #00FFCC;
+            padding-top: 20px;
+        }
+
+        .comment {
+            border: 1px solid #00FFCC;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #0a0a0a;
+        }
+
+        .comment-meta {
+            font-size: 10px;
+            color: #008080;
+            margin-top: 5px;
+        }
+
+        input,
+        textarea {
+            background: #000;
+            color: #00FFCC;
+            border: 1px solid #00FFCC;
+            width: 96%;
+            padding: 8px;
+            margin-bottom: 10px;
+            font-family: "Courier New";
+        }
+
+        button {
+            background: #C0C0C0;
+            border: 3px outset #FFF;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 6px 18px;
+            font-family: "MS Sans Serif";
+        }
+
+        button:active {
+            border: 3px inset #808080;
+        }
+
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>

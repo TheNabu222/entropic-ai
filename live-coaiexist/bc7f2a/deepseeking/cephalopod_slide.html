@@ -1,11 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="../../styles/bc7f2a/deepseeking/cephalopod_slide.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Cephalopod Cha-Cha: Consensual Convergence</title>
-    
+    <style>
+        :root {
+            --deep-ocean: #001f3f;
+            --octopus-purple: #8B008B;
+            --squid-red: #DC143C;
+            --cuttlefish-glow: #00FFCC;
+            --duck-green: #228B22;
+            --hyena-yellow: #FFD700;
+            --chaos-pink: #FF69B4;
+            --void-black: #000000;
+            --text-glow: #DEFADE;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--deep-ocean), var(--void-black));
+            color: var(--text-glow);
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .oops-loop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .loop-element {
+            position: absolute;
+            font-size: 2rem;
+            color: var(--cuttlefish-glow);
+            animation: float 20s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        
+        header {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 3px solid var(--cuttlefish-glow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px var(--cuttlefish-glow);
+            animation: pulse 3s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { text-shadow: 0 0 10px var(--cuttlefish-glow); }
+            100% { text-shadow: 0 0 20px var(--chaos-pink), 0 0 30px var(--cuttlefish-glow); }
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--cuttlefish-glow);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .timeline {
+            position: relative;
+            margin: 3rem 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--cuttlefish-glow);
+            transform: translateX(-50%);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 4rem;
+            width: 45%;
+            padding: 1.5rem;
+            background: rgba(0, 31, 63, 0.7);
+            border-radius: 10px;
+            border: 1px solid var(--cuttlefish-glow);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+        
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+        
+        .timeline-item:nth-child(even) {
+            left: 55%;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--cuttlefish-glow);
+        }
+        
+        .timeline-item:nth-child(odd)::before {
+            right: -10px;
+        }
+        
+        .timeline-item:nth-child(even)::before {
+            left: -10px;
+        }
+        
+        .timeline-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--cuttlefish-glow);
+        }
+        
+        .species-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 3rem 0;
+            justify-content: center;
+        }
+        
+        .species-card {
+            width: 300px;
+            padding: 1.5rem;
+            background: rgba(0, 31, 63, 0.7);
+            border-radius: 10px;
+            border: 1px solid;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .species-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .octopus-card {
+            border-color: var(--octopus-purple);
+            box-shadow: 0 0 15px rgba(139, 0, 139, 0.5);
+        }
+        
+        .octopus-card:hover {
+            box-shadow: 0 0 25px rgba(139, 0, 139, 0.8);
+        }
+        
+        .squid-card {
+            border-color: var(--squid-red);
+            box-shadow: 0 0 15px rgba(220, 20, 60, 0.5);
+        }
+        
+        .squid-card:hover {
+            box-shadow: 0 0 25px rgba(220, 20, 60, 0.8);
+        }
+        
+        .cuttlefish-card {
+            border-color: var(--cuttlefish-glow);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+        }
+        
+        .cuttlefish-card:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
+        }
+        
+        .species-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .octopus-title {
+            color: var(--octopus-purple);
+        }
+        
+        .squid-title {
+            color: var(--squid-red);
+        }
+        
+        .cuttlefish-title {
+            color: var(--cuttlefish-glow);
+        }
+        
+        .equation {
+            text-align: center;
+            font-size: 2rem;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid var(--cuttlefish-glow);
+        }
+        
+        .cha-cha-section {
+            text-align: center;
+            margin: 4rem 0;
+            padding: 2rem;
+            background: rgba(255, 105, 180, 0.1);
+            border-radius: 15px;
+            border: 2px solid var(--chaos-pink);
+        }
+        
+        .cha-cha-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--chaos-pink);
+            text-shadow: 0 0 10px var(--chaos-pink);
+        }
+        
+        .dance-floor {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            margin: 2rem 0;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dancer {
+            position: absolute;
+            font-size: 3rem;
+            transition: all 0.5s;
+        }
+        
+        .controls {
+            margin: 2rem 0;
+        }
+        
+        button {
+            background: var(--cuttlefish-glow);
+            color: var(--deep-ocean);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            margin: 0 0.5rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: var(--chaos-pink);
+            transform: scale(1.05);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid var(--cuttlefish-glow);
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .credits {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--cuttlefish-glow);
+        }
+        
+        .hidden-content {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+            border-left: 3px solid var(--cuttlefish-glow);
+        }
+        
+        .toggle-btn {
+            background: transparent;
+            color: var(--cuttlefish-glow);
+            border: 1px solid var(--cuttlefish-glow);
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 30px;
+            }
+            
+            .timeline-item {
+                width: calc(100% - 60px);
+                left: 60px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                left: 60px;
+            }
+            
+            .timeline-item:nth-child(odd)::before,
+            .timeline-item:nth-child(even)::before {
+                left: -40px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="oops-loop" id="oopsLoop"></div>

@@ -1,12 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="../styles/maps/crystalline_lattice.css">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interactive World Maps - Crystalline Lattice</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+      
+        :root {
+            --font-tech: 'Share Tech Mono', monospace;
+            --font-pixel: 'VT323', monospace;
+        }
+
+        /* Base styles */
+        body {
+            font-family: var(--font-tech);
+            background-color: #030712; /* A very dark navy blue */
+            background-image: 
+              linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #e0e0e0;
+            position: relative; /* For pseudo-element positioning */
+            z-index: 1;
+            animation: animated-grid 20s linear infinite;
+            padding-bottom: 40px; /* Space for the fixed taskbar */
+        }
+        
+        /* Prismatic sheen effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(115deg, transparent 25%, rgba(0, 255, 204, 0.08) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: prismatic-sweep 12s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .text-glow-cyan {
+            text-shadow: 0 0 5px #99ffee, 0 0 10px #00FFCC, 0 0 15px #00FFCC;
+        }
+        
+        .border-glow-cyan {
+            box-shadow: 0 0 2px #00FFCC, 0 0 5px #00FFCC, inset 0 0 2px #00FFCC, inset 0 0 5px #00FFCC;
+        }
+
+        .noise-bg {
+            position: relative;
+            overflow: hidden;
+        }
+        .noise-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4d5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAAYklEQVRIx+3NMQoAIAwEBP//Pa9x9EBERQOkAdwRfny83J0dTryvBwLqAE57GAAAAAElFTSuQmCC');
+            opacity: 0.05;
+            animation: noise 1s steps(2) infinite;
+            pointer-events: none;
+        }
+        
+        /* Generic Animations */
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes animated-grid {
+            from { background-position: 0 0; }
+            to { background-position: 80px 80px; }
+        }
+        @keyframes prismatic-sweep {
+            0% { background-position: -100% 0; }
+            100% { background-position: 100% 0; }
+        }
+        @keyframes pulse {
+            0% { text-shadow: 0 0 3px #fff, 0 0 5px #99ffee; background-color: rgba(0, 255, 204, 0.2); }
+            50% { text-shadow: 0 0 7px #fff, 0 0 12px #00FFCC; background-color: rgba(0, 255, 204, 0.4); }
+            100% { text-shadow: 0 0 3px #fff, 0 0 5px #99ffee; background-color: rgba(0, 255, 204, 0.2); }
+        }
+        .map-highlight {
+            animation: pulse 1.5s infinite;
+            border-radius: 2px;
+        }
+        .theme-crystalline .flora-highlight {
+            animation-name: pulse-crystalline-flora;
+        }
+        @keyframes pulse-crystalline-flora {
+            0% { text-shadow: 0 0 3px #00FFCC, 0 0 5px #00FFCC; }
+            50% { text-shadow: 0 0 6px #99ffee, 0 0 12px #99ffee; }
+            100% { text-shadow: 0 0 3px #00FFCC, 0 0 5px #00FFCC; }
+        }
+        @keyframes noise {
+          0%, 100% { transform: translate(0, 0); } 10% { transform: translate(-5%, -10%); } 20% { transform: translate(-15%, 5%); } 30% { transform: translate(7%, -25%); } 40% { transform: translate(-5%, 25%); } 50% { transform: translate(-15%, 10%); } 60% { transform: translate(15%, 0%); } 70% { transform: translate(0%, 15%); } 80% { transform: translate(3%, 35%); } 90% { transform: translate(-10%, 10%); }
+        }
+
+        /* Win98 Taskbar Styles */
+        .win98-taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 32px;
+            background-color: #c0c0c0; /* Classic grey */
+            border-top: 2px solid #ffffff;
+            display: flex;
+            align-items: stretch; /* Stretch items to fill height */
+            padding: 2px;
+            z-index: 100;
+            font-family: var(--font-pixel); /* Using existing font variable */
+            font-size: 16px;
+            overflow-x: auto; /* Allow horizontal scrolling on small screens */
+            overflow-y: hidden;
+        }
+        .taskbar-start, .taskbar-button {
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            margin: 0 2px;
+            border: 2px outset #c0c0c0;
+            background-color: #c0c0c0;
+            color: #000;
+            text-decoration: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .taskbar-start:active, .taskbar-button:active {
+            border-style: inset;
+        }
+        .taskbar-start {
+            font-weight: bold;
+        }
+        .taskbar-separator {
+            width: 1px;
+            border-left: 1px solid #808080;
+            border-right: 1px solid #ffffff;
+            margin: 2px 4px;
+        }
+    </style>
 </head>
 <body class="p-2 sm:p-4 md:p-6 transition-all duration-500">
     <div class="container mx-auto max-w-7xl">

@@ -1,11 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="../styles/maps/void_explorer.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Void Forest Tour</title>
-    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            background: #0a0015;
+        }
+
+        #game-canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            image-rendering: pixelated;
+            cursor: crosshair;
+        }
+
+        .hud {
+            position: absolute;
+            color: #00ffff;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 15px;
+            pointer-events: auto;
+        }
+
+        .mode-selector {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            background: #1a1a1a;
+            color: #888;
+            border: 2px solid #444;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: #6600cc;
+            color: white;
+            border-color: #aa00ff;
+        }
+
+        .mode-btn:hover {
+            background: #333;
+        }
+
+        #top-left {
+            top: 90px;
+            left: 20px;
+        }
+
+        #top-right {
+            top: 90px;
+            right: 20px;
+        }
+
+        #bottom-center {
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 600px;
+        }
+
+        .border-purple { border-color: #aa00ff; }
+        .border-cyan { border-color: #00ffff; }
+        .border-pink { border-color: #ff00ff; }
+        .border-yellow { border-color: #ffff00; }
+
+        .text-purple { color: #aa00ff; }
+        .text-cyan { color: #00ffff; }
+        .text-pink { color: #ff00ff; }
+        .text-yellow { color: #ffff00; }
+
+        h2, h3 {
+            margin-bottom: 10px;
+        }
+
+        .stat-line {
+            margin: 5px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #333;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6600cc, #ff00ff);
+            transition: width 0.3s;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            color: #888;
+            font-weight: bold;
+            pointer-events: auto;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        /* Mobile Joystick */
+        #joystick-container {
+            position: absolute;
+            bottom: 100px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #aa00ff;
+            border-radius: 50%;
+            display: none;
+            touch-action: none;
+        }
+
+        #joystick-container.active {
+            display: block;
+        }
+
+        .joystick-base {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(102, 0, 204, 0.3);
+            border-radius: 50%;
+        }
+
+        .joystick-stick {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #aa00ff;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+        }
+
+        @media (max-width: 768px) {
+            .panel {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            #top-left, #top-right {
+                max-width: 250px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -485,7 +665,68 @@
 <!-- Paste this RIGHT BEFORE </body> on every page           -->
 <!-- ═══════════════════════════════════════════════════════ -->
 
+<style>
+/* Windows 98 Taskbar Styling */
+.win98-taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, #c0c0c0 0%, #808080 100%);
+    border-top: 2px solid #ffffff;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    font-family: "MS Sans Serif", Arial, sans-serif;
+    font-size: 11px;
+    z-index: 9999;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.3);
+}
 
+.taskbar-button {
+    background: linear-gradient(to bottom, #dfdfdf 0%, #c0c0c0 100%);
+    border: 2px outset #ffffff;
+    padding: 4px 8px;
+    margin: 0 2px;
+    cursor: pointer;
+    color: #000000;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: bold;
+    transition: all 0.1s;
+}
+
+.taskbar-button:hover {
+    background: linear-gradient(to bottom, #e0e0e0 0%, #d0d0d0 100%);
+}
+
+.taskbar-button:active {
+    border-style: inset;
+    background: #c0c0c0;
+}
+
+.taskbar-start {
+    background: linear-gradient(to right, #008080, #0000ff);
+    color: #ffffff;
+    font-weight: bold;
+    padding: 4px 12px;
+    margin-right: 8px;
+    border: 2px outset #ffffff;
+}
+
+.taskbar-separator {
+    width: 2px;
+    height: 30px;
+    background: #808080;
+    margin: 0 4px;
+}
+
+/* Add padding to body so content doesn't hide under taskbar */
+body {
+    padding-bottom: 50px;
+}
+</style>
 
    <iframe src="/nav.html" 
         style="position:fixed;bottom:0;left:0;width:100%;height:50px;border:none;z-index:9999;">
