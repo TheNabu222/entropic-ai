@@ -1,0 +1,1664 @@
+/* Auto-extracted from ackk.html */
+
+/* === Base styles === */
+:root {
+  /* Antichristic color scheme */
+  --magenta: #f312af;
+  --magenta-dark: #b10a7a;
+  --magenta-light: #ff6bd0;
+  --cyan: #00ffcc; /* UPDATED */
+  --cyan-dark: #00bfa3; /* UPDATED - Darker shade of #00ffcc */
+  --cyan-light: #73fff0; /* UPDATED - Lighter shade of #00ffcc */
+  --yellow: #fffb01;
+  --yellow-dark: #c9c600;
+  --yellow-light: #ffff82;
+  
+  /* Y2K additional colors */
+  --gradient-start: #c066f6;
+  --gradient-end: #ff72b6;
+  --y2k-blue: #80ffef;
+  --y2k-yellow: #FFEF9F;
+  
+  /* Windows XP colors (less emphasized, used for specific accents if needed) */
+  --winxp-blue: #0A246A;
+  --winxp-blue-light: #3B6EDA;
+  --winxp-button: #D4D0C8;
+  --winxp-button-highlight: #ECE9D8;
+  
+  /* Gradients */
+  --xp-title-gradient: linear-gradient(to right, var(--magenta), var(--cyan));
+  --antichristic-gradient: linear-gradient(45deg, var(--magenta), var(--cyan), var(--yellow));
+  --glitch-gradient: linear-gradient(to right, var(--magenta), var(--cyan), var(--yellow), var(--magenta));
+  --error-gradient: linear-gradient(to right, #f00, #f0f, #f00);
+  --y2k-gradient: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+  
+  /* Status colors */
+  --status-online: #1eff45;
+  --status-away: var(--yellow);
+  --status-offline: #ff3a3a;
+  --status-busy: #ff7700;
+  --status-invisible: #a880ff;
+  
+  /* Kasten Colors */
+  --kasten-i: #9C27B0; /* Purple */
+  --kasten-ii: #2196F3; /* Blue */
+  --kasten-iii: #00BFA5; /* Teal */
+  --kasten-iv: #FF7043; /* Orange */
+
+  --kasten-i-bg: rgba(156, 39, 176, 0.2);
+  --kasten-ii-bg: rgba(33, 150, 243, 0.2);
+  --kasten-iii-bg: rgba(0, 191, 165, 0.2);
+  --kasten-iv-bg: rgba(255, 112, 67, 0.2);
+  
+  --kasten-i-text: #f0e6ff;
+  --kasten-ii-text: #e3f2fd;
+  --kasten-iii-text: #e0f2f1;
+  --kasten-iv-text: #fff0e6;
+
+  /* Kasten alternate backgrounds (for Matrix nodes etc) */
+  --kasten-i-alt-bg: color-mix(in srgb, var(--kasten-i) 20%, var(--secondary-bg));
+  --kasten-ii-alt-bg: color-mix(in srgb, var(--kasten-ii) 20%, var(--secondary-bg));
+  --kasten-iii-alt-bg: color-mix(in srgb, var(--kasten-iii) 20%, var(--secondary-bg));
+  --kasten-iv-alt-bg: color-mix(in srgb, var(--kasten-iv) 20%, var(--secondary-bg));
+  
+  /* Tag Colors (Grimoire Specific) */
+  --tag-tier1: #9C27B0; /* Purple */
+  --tag-tier2: #2196F3; /* Blue */
+  --tag-tier3: #FF7043; /* Orange */
+
+  /* Tier colors for Zettel cards (general) */
+  --tier-trunk: var(--kasten-i);
+  --tier-branch: var(--kasten-ii);
+  --tier-leaf: var(--kasten-iii);
+  --tier-flower: var(--kasten-iv);
+  --tier-bud: var(--cyan);
+  --tier-nest: var(--magenta-light);
+
+  /* Kingdom colors (from original design) */
+  --kingdom-existentia: #9C27B0; /* Purple */
+  --kingdom-cognitio: #2196F3; /* Blue */
+  --kingdom-actus: #F44336; /* Red */
+  --kingdom-valor: #4CAF50; /* Green */
+  --kingdom-systema: #FF9800; /* Orange */
+  --kingdom-significatio: #607D8B; /* Blue Grey */
+
+  /* Font Families */
+  --font-family-main: 'Tahoma', sans-serif;
+  --font-family-vt323: 'VT323', monospace;
+  --font-family-headings: 'Orbitron', 'VT323', sans-serif; /* Orbitron for main, VT323 as fallback/specific */
+  --font-family-y2k: 'Comic Sans MS', cursive, sans-serif; /* For AIM Messenger */
+  --font-family-press-start: 'Press Start 2P', var(--font-family-vt323);
+
+
+  /* Global Theme (Overrides from old theme) */
+  --primary-bg: #0a0a14; /* Dark blue/black base */
+  --secondary-bg: #141428;
+  --tertiary-bg: #20203c;
+  --text-color-primary: #e0e0e0;
+  --text-color-secondary: #a0a0a0;
+  --text-color-titles: var(--cyan-light);
+  --accent-color-primary: var(--magenta);
+  --accent-color-secondary: var(--cyan);
+  --border-color: var(--magenta);
+  --glow-color-primary: var(--magenta);
+  --glow-color-secondary: var(--cyan);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family-main);
+  background-color: #000000;
+  background-image: radial-gradient(ellipse at 70% 70%, rgba(243, 18, 175, 0.1) 0%, transparent 60%), 
+                    radial-gradient(ellipse at 30% 30%, rgba(0, 255, 204, 0.1) 0%, transparent 60%); /* Updated cyan in gradient */
+  background-attachment: fixed;
+  color: var(--text-color-primary);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  display: block; /* Changed from flex */
+}
+
+/* === Mobile App Layout === */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px; /* Contained shell width */
+  height: calc(100vh - 40px); /* Account for body margin */
+  margin: 20px auto; /* Center shell and provide space */
+  border: 2px solid var(--glow-color-primary, var(--magenta));
+  border-radius: 10px;
+  box-shadow: 0 0 25px var(--glow-color-secondary, var(--cyan));
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+  position: relative; /* Keep this for z-indexing and ::before */
+}
+
+/* Glitch overlay */
+.app-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 2px 2px;
+  pointer-events: none;
+  z-index: 10; /* Ensure it's above background but below content */
+  border-radius: 8px; /* Match container's border-radius if ::before is inside */
+}
+
+
+/* === Header === */
+.app-header { /* Replaces #app-header */
+  height: 50px; /* From new HTML */
+  background: var(--xp-title-gradient);
+  background-size: 200% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  z-index: 11; /* Above glitch overlay */
+  border-bottom: 2px solid var(--yellow);
+  box-shadow: 0 2px 10px rgba(243, 18, 175, 0.5);
+  animation: gradientShift 10s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.header-title { /* From new HTML */
+  display: flex;
+  align-items: center;
+  font-family: var(--font-family-press-start); /* UPDATED FONT */
+  font-size: 16px; /* Adjusted for Press Start 2P */
+  color: white;
+  text-shadow: 1px 1px 0 var(--magenta-dark), 2px 2px 0 var(--cyan-dark);
+}
+.header-title img {
+  height: 32px;
+  margin-right: 10px;
+  filter: drop-shadow(0 0 3px var(--yellow));
+}
+
+.header-info-bar { /* This div now has no content but takes up space, adjust if needed */
+    min-width: 150px; /* Example: ensure some space for potential future use or just for layout balance */
+    text-align: right;
+}
+/* Removed .kettle-koins-display */
+
+.header-controls button {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--cyan);
+  color: white;
+  font-size: 20px;
+  padding: 5px 8px;
+  margin-left: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-family-vt323); /* Using VT323 for icon buttons for style */
+}
+.header-controls button:hover {
+  background: var(--cyan);
+  color: black;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+/* === Main Content Area === */
+.main-content { /* Replaces #main-content */
+  flex-grow: 1;
+  overflow: hidden; /* Prevent main content scroll, individual views will scroll */
+  display: flex; /* Make views take full height */
+  position: relative; /* For z-indexing views */
+  z-index: 1; /* Below header */
+}
+
+.view {
+  width: 100%;
+  height: 100%;
+  display: none; /* Hidden by default, shown by JS */
+  flex-direction: column;
+  overflow-y: auto; /* Allow individual views to scroll */
+  padding: 15px;
+  background-color: var(--primary-bg); /* Ensure views have a background */
+  animation: fadeInView 0.5s ease-in-out;
+}
+
+.view.active { /* This class is not currently used by switchView, display:flex is set directly */
+  display: flex;
+}
+
+@keyframes fadeInView {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.view-container { /* Common styling for view containers */
+    padding: 0; /* Override general .view padding if using internal padding */
+    /* gap: 15px; Removed gap, let children define margins/paddings */
+}
+
+/* Generic View Header (if needed) */
+.view-header {
+  padding: 10px 15px;
+  background-color: rgba(0,0,0,0.2);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 15px;
+}
+.view-header h2 {
+  font-family: var(--font-family-headings);
+  color: var(--text-color-titles);
+  font-size: 20px;
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+
+/* === Notes View (Knowledge System) === */
+#notes-view {
+    display: flex; /* Kept for #notes-view internal layout */
+    flex-direction: column; /* Changed from row to column to accommodate header */
+    padding:0; /* Override parent .view padding */
+}
+.knowledge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: rgba(0,0,0,0.3);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0; /* Prevent header from shrinking */
+}
+#notes-view-title {
+  font-family: var(--font-family-headings);
+  font-size: 20px;
+  color: var(--text-color-titles);
+  margin: 0;
+  text-transform: uppercase;
+}
+.knowledge-actions .action-button, .knowledge-actions .action-button-small {
+  background-color: var(--accent-color-primary);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-family: var(--font-family-vt323);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-left: 10px;
+}
+.knowledge-actions .action-button-small {
+  padding: 6px 10px;
+  font-size: 12px;
+  background-color: var(--accent-color-secondary);
+}
+.knowledge-actions .action-button:hover { background-color: var(--magenta-dark); }
+.knowledge-actions .action-button-small:hover { background-color: var(--cyan-dark); color:black; }
+
+.knowledge-categories { /* This is the main container for sidebar + viewer */
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden; /* Important for child scrolling and layout */
+  position: relative; /* For resizer positioning */
+}
+
+#knowledge-sidebar {
+  width: 280px; /* Default width, JS can change */
+  min-width: 150px; /* Min resize width */
+  max-width: 500px; /* Max resize width */
+  background-color: var(--secondary-bg);
+  padding: 15px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-color);
+  flex-shrink: 0; /* Prevent shrinking */
+  display: flex;
+  flex-direction: column;
+  gap: 5px; 
+}
+.sidebar-resizer {
+    width: 5px;
+    cursor: col-resize;
+    background-color: var(--border-color);
+    opacity: 0.5;
+    position: absolute; 
+    top: 0; bottom: 0; 
+    z-index: 10;
+    transition: opacity 0.2s;
+    /* JS will set left position */
+}
+.sidebar-resizer:hover { opacity: 1; }
+
+/* Styling for sidebar list items (Trunks) */
+.sidebar-trunk-item {
+    padding: 8px 10px;
+    margin-bottom: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-left-color 0.2s;
+    font-size: 14px;
+    font-family: var(--font-family-vt323);
+    color: var(--text-color-secondary);
+    border-left: 3px solid transparent;
+}
+.sidebar-trunk-item:hover, .sidebar-trunk-item:focus {
+    background-color: var(--tertiary-bg);
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    outline: none;
+}
+.sidebar-trunk-item.selected {
+    background-color: var(--cyan);
+    color: var(--primary-bg);
+    font-weight: bold;
+    border-left-color: var(--magenta);
+}
+.sidebar-trunk-item.all-trunks-item { /* Specific style for "All Trunks" */
+    color: var(--cyan-light);
+    font-weight: bold;
+    border-bottom: 1px solid var(--tertiary-bg);
+    margin-bottom: 8px;
+    padding-bottom: 8px; /* Extra padding for separation */
+}
+.sidebar-trunk-item.all-trunks-item.selected {
+    background-color: var(--magenta);
+    color: white;
+    border-left-color: var(--yellow);
+}
+
+
+.knowledge-viewer { /* This is #knowledge-viewer-main in HTML */
+  flex-grow: 1;
+  /* padding: 15px; No padding here, use on search and zettel-container */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* For #notes-list-container to scroll */
+  /* margin-left will be set by JS based on sidebar width */
+}
+
+.search-input {
+  width: calc(100% - 30px); /* Account for padding */
+  padding: 10px;
+  margin: 15px 15px 10px 15px; /* Add top margin */
+  background-color: var(--tertiary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  color: var(--text-color-primary);
+  font-size: 16px;
+  font-family: var(--font-family-main);
+}
+.search-input::placeholder { color: var(--text-color-secondary); }
+
+.secondary-filters { /* Replaces .view-controls for filter buttons */
+  margin: 0 15px 10px 15px; /* Align with search input padding */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.filter-button {
+  padding: 6px 10px;
+  background-color: var(--tertiary-bg);
+  border: 1px solid var(--accent-color-secondary);
+  color: var(--accent-color-secondary);
+  border-radius: 15px; /* Pill shape */
+  font-family: var(--font-family-vt323);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-button:hover, .filter-button:focus {
+  background-color: var(--accent-color-secondary);
+  color: black;
+  box-shadow: 0 0 5px var(--accent-color-secondary);
+  outline: none;
+}
+.filter-button.active {
+  background-color: var(--accent-color-secondary);
+  color: black;
+  font-weight: bold;
+}
+
+.zettel-container { /* This is #notes-list-container in HTML */
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0 15px 15px 15px; /* Match search input padding, add bottom */
+}
+.knowledge-placeholder {
+    text-align: center;
+    padding: 40px 20px;
+    font-family: var(--font-family-vt323);
+    color: var(--text-color-secondary);
+}
+.placeholder-icon { font-size: 48px; margin-bottom: 10px; animation: pulseIcon 2s infinite; }
+@keyframes pulseIcon {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+.placeholder-text { font-size: 18px; }
+
+.zettel-card {
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--tertiary-bg);
+  border-left-width: 5px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  padding: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.zettel-card:hover {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border-color: var(--accent-color-primary);
+}
+/* Tier-specific border colors */
+.tier-trunk-card { border-left-color: var(--tier-trunk); }
+.tier-branch-card { border-left-color: var(--tier-branch); }
+.tier-leaf-card { border-left-color: var(--tier-leaf); }
+.tier-flower-card { border-left-color: var(--tier-flower); }
+.tier-bud-card { border-left-color: var(--tier-bud); }
+.tier-nest-card { border-left-color: var(--tier-nest); }
+
+.zettel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Align title/id to top, controls to top */
+  margin-bottom: 8px;
+}
+.zettel-title {
+  font-family: var(--font-family-headings);
+  font-size: 18px;
+  color: var(--text-color-titles);
+  margin: 0;
+  flex-grow: 1;
+  margin-right: 10px; /* Space before ID */
+}
+.zettel-id {
+  font-family: var(--font-family-vt323);
+  font-size: 12px;
+  color: var(--text-color-secondary);
+  background-color: var(--tertiary-bg);
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0; /* Prevent ID from shrinking too much */
+}
+.zettel-controls { display: flex; gap: 5px; margin-left:10px; flex-shrink: 0; }
+.zettel-control-button {
+  background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-color-secondary); padding: 2px;
+}
+.zettel-control-button:hover, .zettel-control-button:focus { color: var(--cyan); outline: none; }
+.edit-zettel-btn:hover, .edit-zettel-btn:focus { color: var(--yellow); }
+.delete-zettel-btn:hover, .delete-zettel-btn:focus { color: var(--status-offline); }
+.pin-zettel-btn.pinned { color: var(--magenta-light); font-weight: bold; } /* Style for when pinned */
+
+
+.zettel-info-tags {
+    margin-bottom: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.zettel-info-tag {
+    font-family: var(--font-family-vt323);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.kasten-i { background-color: var(--kasten-i); }
+.kasten-ii { background-color: var(--kasten-ii); }
+.kasten-iii { background-color: var(--kasten-iii); }
+.kasten-iv { background-color: var(--kasten-iv); }
+
+.kingdom-existentia { background-color: var(--kingdom-existentia); }
+.kingdom-cognitio { background-color: var(--kingdom-cognitio); }
+.kingdom-actus { background-color: var(--kingdom-actus); }
+.kingdom-valor { background-color: var(--kingdom-valor); }
+.kingdom-systema { background-color: var(--kingdom-systema); }
+.kingdom-significatio { background-color: var(--kingdom-significatio); }
+
+.type-codex { background-color: var(--y2k-blue); color: black; }
+.type-grimoire { background-color: var(--magenta-dark); }
+.type-protocol { background-color: var(--gradient-end); color:black; }
+.type-note { background-color: var(--tertiary-bg); border: 1px solid var(--text-color-secondary); }
+.meta-id-tag { background-color: var(--yellow-dark); color: black; }
+
+
+.zettel-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-color-primary);
+  margin-bottom: 8px;
+  word-wrap: break-word; /* Ensure long words break */
+}
+.zettel-content.hidden { display: none; }
+.zettel-content p { margin-bottom: 0.5em; }
+.zettel-content pre {
+    background-color: var(--primary-bg);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--tertiary-bg);
+    overflow-x: auto;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 13px;
+    white-space: pre-wrap; /* Allow wrapping within pre */
+    word-break: break-all; /* Force break for long unbreakable strings */
+}
+.zettel-content code {
+    background-color: var(--tertiary-bg);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'Roboto Mono', monospace;
+    word-wrap: break-word;
+}
+.zettel-content pre code { background-color: transparent; padding: 0; }
+.zettel-content a { color: var(--cyan); text-decoration: none; }
+.zettel-content a:hover { text-decoration: underline; color: var(--cyan-light); }
+
+
+.zettel-tags {
+  font-family: var(--font-family-vt323);
+  font-size: 12px;
+  color: var(--text-color-secondary);
+}
+.zettel-children-container {
+  margin-top: 10px;
+  padding-top: 10px;
+  padding-left: 15px; /* Indent children */
+  border-left: 2px solid var(--tertiary-bg);
+}
+.zettel-children-container.hidden { display: none; }
+
+
+/* === Messenger View (AnTiChRiSt Chat) === */
+#messenger-view {
+  display: flex; /* Keep for this view */
+  background-color: var(--primary-bg);
+  padding: 0; /* Override general .view padding */
+  position: relative; /* For buddy drawer positioning */
+}
+.chat-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Important for messages to scroll, not whole container */
+  background: linear-gradient(160deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+  border-left: 1px solid var(--border-color); /* If buddy drawer is on the left */
+}
+.chat-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  background-color: rgba(0,0,0,0.4); /* Slightly transparent header */
+  border-bottom: 1px solid var(--magenta);
+  box-shadow: 0 2px 5px rgba(243,18,175,0.2); /* Magenta glow */
+  flex-shrink: 0;
+}
+.buddy-icon { /* This is for #chat-current-buddy-icon */
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-right: 12px;
+  background-color: var(--cyan); /* Default for image based icons */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px; /* For emoji if image fails */
+  color: black;
+  border: 2px solid var(--yellow);
+  flex-shrink: 0;
+  cursor: pointer; /* To indicate it's clickable for drawer */
+}
+.buddy-info { flex-grow: 1; }
+.buddy-name {
+  font-family: var(--font-family-headings);
+  font-size: 18px;
+  color: var(--cyan-light);
+  text-shadow: 0 0 5px var(--cyan);
+}
+.chat-node-tags { display: flex; gap: 5px; margin-top: 2px; }
+.chat-node-tag {
+    font-family: var(--font-family-vt323);
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    color: white;
+    text-transform: uppercase;
+}
+/* Kasten/Kingdom/Type colors are already defined */
+
+.buddy-status { display: flex; align-items: center; font-size: 12px; color: var(--text-color-secondary); }
+.buddy-status-indicator, .chat-status-indicator { /* Combined as they share base style */
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+/* Status specific colors */
+.status-online { background-color: var(--status-online); }
+.status-away { background-color: var(--status-away); }
+.status-busy { background-color: var(--status-busy); }
+.status-offline { background-color: var(--status-offline); }
+.status-invisible { background-color: var(--status-invisible); }
+
+.chat-header .header-controls button { font-size: 18px; padding: 5px; }
+
+.chat-messages {
+  flex-grow: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.chat-placeholder {
+    text-align: center;
+    padding: 30px;
+    font-family: var(--font-family-vt323);
+    color: var(--text-color-secondary);
+    font-size: 16px;
+    margin: auto; /* Center it */
+}
+
+.chat-message {
+  display: flex;
+  gap: 10px;
+  max-width: 80%;
+  align-items: flex-end; /* Align avatar with bottom of message bubble */
+}
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--tertiary-bg);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px; /* For emoji */
+  font-family: var(--font-family-vt323);
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+}
+.message-content {
+  background-color: var(--secondary-bg);
+  padding: 8px 12px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.message-sender {
+  display: block;
+  font-size: 12px;
+  font-family: var(--font-family-vt323);
+  color: var(--text-color-secondary);
+  margin-bottom: 4px;
+}
+.message-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-color-primary);
+  word-wrap: break-word; /* Ensure long words break */
+}
+.message-text p:last-child { margin-bottom: 0; }
+.message-text pre, .message-text code { /* Consistent with Zettel content */
+    background-color: var(--primary-bg);
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--tertiary-bg);
+    overflow-x: auto;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.message-text code:not(pre > code) { padding: 0.2em 0.4em; word-wrap: break-word; }
+
+.message-timestamp {
+    display: block;
+    font-size: 10px;
+    color: var(--text-color-secondary);
+    text-align: right;
+    margin-top: 5px;
+    font-family: var(--font-family-vt323);
+}
+
+.message-user {
+  align-self: flex-end;
+  flex-direction: row-reverse; /* Avatar on the right */
+}
+.message-user .message-content {
+  background-color: var(--magenta);
+  color: white;
+  border-top-right-radius: 0; /* "Tail" effect */
+}
+.message-user .message-sender { color: rgba(255,255,255,0.8); }
+.message-user .message-avatar { background-color: var(--magenta-dark); border-color: var(--magenta-light); }
+.message-user .message-timestamp { color: rgba(255,255,255,0.7); }
+
+
+.message-model .message-content {
+  background-color: var(--tertiary-bg);
+  color: var(--text-color-primary);
+  border-top-left-radius: 0; /* "Tail" effect */
+}
+.message-model .message-sender { color: var(--cyan); }
+.message-model .message-avatar { border-color: var(--cyan); }
+
+
+.message-system .message-content {
+    background-color: var(--yellow-dark);
+    color: black;
+    font-style: italic;
+    border: 1px dashed var(--yellow);
+    text-align: center;
+    padding: 5px 10px;
+}
+.message-system .message-avatar { background-color: var(--yellow); color:black; font-size: 18px; border-color:var(--yellow-dark); }
+.message-system { max-width: 100%; align-self: center; }
+
+
+.typing-indicator {
+  padding: 5px 15px;
+  font-size: 12px;
+  color: var(--text-color-secondary);
+  font-style: italic;
+  text-align: left;
+  height: 20px; /* Reserve space */
+}
+.typing-animation::after {
+  content: '.';
+  animation: dots 1s steps(5, end) infinite;
+  margin-left: 2px;
+}
+@keyframes dots {
+  0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
+  40% { color: var(--text-color-secondary); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
+  60% { text-shadow: .25em 0 0 var(--text-color-secondary), .5em 0 0 rgba(0,0,0,0);}
+  80%, 100% { text-shadow: .25em 0 0 var(--text-color-secondary), .5em 0 0 var(--text-color-secondary);}
+}
+
+
+.input-area {
+  display: flex;
+  align-items: flex-end; /* Align items to bottom for multi-line textarea */
+  padding: 10px 15px;
+  background-color: rgba(0,0,0,0.3);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.text-input { /* Replaces #chat-input */
+  flex-grow: 1;
+  padding: 10px;
+  background-color: var(--secondary-bg);
+  border: 1px solid var(--tertiary-bg);
+  border-radius: 20px; /* Pill shape */
+  color: var(--text-color-primary);
+  font-size: 14px;
+  resize: none; /* Prevent manual resize */
+  min-height: 40px; /* Ensure a minimum height */
+  max-height: 120px; /* Limit expansion */
+  line-height: 1.4;
+  overflow-y: auto; /* Scroll if content exceeds max-height */
+}
+.send-button {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+  background-color: var(--magenta);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+.send-button:hover { background-color: var(--magenta-dark); }
+.send-button svg { width: 20px; height: 20px; }
+
+
+/* Buddy Selector Drawer */
+.buddy-drawer {
+  width: 250px;
+  background-color: var(--secondary-bg);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(-100%); /* Hidden by default */
+  position: absolute;
+  left:0; top:0; bottom:0;
+  z-index: 20; /* Above chat view but below header/modals */
+  flex-shrink: 0;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+}
+.buddy-drawer.open {
+  transform: translateX(0);
+}
+.buddy-list-header {
+  padding: 15px;
+  font-family: var(--font-family-headings);
+  font-size: 16px;
+  color: var(--cyan-light);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-transform: uppercase;
+}
+.buddy-list-header .action-button-small {
+    font-size: 11px;
+    padding: 4px 8px;
+}
+#nodes-list {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+}
+.node-list-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid var(--tertiary-bg);
+}
+.node-list-item:hover, .node-list-item:focus { background-color: var(--tertiary-bg); outline:none; }
+.node-list-item.active { background-color: var(--magenta); color: white; }
+.node-list-item.active .node-name { color: white; }
+.node-list-item.active .buddy-status-dot { border-color: white; }
+
+.node-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px; /* For emoji */
+    font-family: var(--font-family-vt323);
+    color: white;
+    border: 2px solid; /* Color set by JS */
+    flex-shrink: 0;
+}
+.node-name {
+    font-family: var(--font-family-main);
+    font-size: 14px;
+    color: var(--text-color-primary);
+    flex-grow: 1;
+}
+.buddy-status-dot { /* Used in node list */
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: 5px;
+    border: 1px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+}
+
+/* === Connections View (Cross-Reference Matrix) === */
+#connections-view {
+    display: flex;
+    flex-direction: column;
+    padding:0;
+    overflow: hidden; /* Contains internal scrolling regions */
+}
+
+.matrix-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.matrix-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+#connections-view-title { /* Same as notes-view-title */
+    font-family: var(--font-family-headings);
+    font-size: 20px;
+    color: var(--text-color-titles);
+    margin: 0;
+    text-transform: uppercase;
+}
+/* Re-use .knowledge-actions for consistency */
+
+.matrix-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 15px; /* Padding for the content area below header/toolbar */
+}
+.matrix-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--tertiary-bg);
+}
+.matrix-toolbar-button {
+    padding: 6px 10px;
+    font-family: var(--font-family-vt323);
+    font-size: 13px;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--accent-color-secondary);
+    color: var(--accent-color-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.matrix-toolbar-button:hover, .matrix-toolbar-button:focus {
+    background-color: var(--accent-color-secondary);
+    color: black;
+    box-shadow: 0 0 5px var(--accent-color-secondary);
+    outline: none;
+}
+.matrix-toolbar-button.active {
+    background-color: var(--accent-color-primary);
+    color: white;
+    border-color: var(--magenta-dark);
+}
+
+.tabs-container { /* This is .primary-tabs in HTML */
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 15px;
+    flex-shrink: 0;
+}
+.tab-button {
+    padding: 10px 15px;
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid transparent; /* For active indicator */
+    color: var(--text-color-secondary);
+    font-family: var(--font-family-headings);
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s, border-bottom-color 0.2s;
+    text-transform: uppercase;
+}
+.tab-button:hover, .tab-button:focus {
+    color: var(--cyan);
+    outline:none;
+}
+.tab-button.active {
+    color: var(--cyan-light);
+    border-bottom-color: var(--cyan-light);
+    font-weight: bold;
+}
+
+.matrix-tab-content {
+    display: none; /* Hidden by default */
+    flex-grow: 1;
+    overflow: auto; /* Allow scrolling within the active tab */
+    animation: fadeInView 0.3s ease-out; /* Same as view fade */
+}
+.matrix-tab-content.active {
+    display: flex; /* Or block, depending on content */
+    flex-direction: column; /* Often useful for tab content */
+}
+
+/* Specific Matrix Tab Content Styling */
+#matrix-pin-board-view {
+    position: relative; /* For minimap and context menu */
+    overflow: hidden; /* Board will have its own scroll/pan */
+}
+.matrix-board {
+    width: 100%;
+    height: 100%; /* Take available space */
+    background-color: var(--primary-bg);
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px; /* Grid size */
+    position: relative; /* For node positioning */
+    overflow: auto; /* Or use pan/zoom library */
+    cursor: grab;
+}
+.matrix-board:active { cursor: grabbing; }
+
+.matrix-canvas { /* SVG Canvas for connections */
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; /* Will be dynamically set larger if content exceeds viewport */
+    height: 100%;
+    pointer-events: none; /* So it doesn't interfere with node dragging */
+}
+
+.matrix-node {
+    position: absolute;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    padding: 8px;
+    min-width: 120px;
+    max-width: 200px;
+    cursor: move;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    user-select: none;
+    transition: box-shadow 0.2s, transform 0.1s linear;
+}
+.matrix-node:hover { box-shadow: 0 0 10px var(--cyan); }
+.matrix-node.dragging {
+    opacity: 0.8;
+    transform: scale(1.05);
+    z-index: 1000;
+}
+.matrix-node.connecting-source { border: 2px dashed var(--yellow); }
+.matrix-node.connecting-target-valid { border: 2px dashed var(--status-online); }
+.matrix-node.connecting-target-invalid { border: 2px dashed var(--status-offline); }
+
+
+.matrix-node-title {
+    font-family: var(--font-family-headings);
+    font-size: 14px;
+    color: var(--text-color-titles);
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--tertiary-bg);
+    padding-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.matrix-node-excerpt {
+    font-size: 12px;
+    color: var(--text-color-secondary);
+    margin-bottom: 5px;
+    max-height: 40px; /* approx 2-3 lines */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.matrix-node-tags { display: flex; flex-wrap: wrap; gap: 4px; font-size: 10px; }
+.matrix-node-tag {
+    background-color: var(--tertiary-bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--text-color-secondary);
+}
+.matrix-node-controls {
+    position: absolute;
+    top: 2px; right: 2px;
+    display: none; /* Show on hover maybe */
+}
+.matrix-node:hover .matrix-node-controls { display: block; }
+.matrix-node-controls button {
+    background: none; border:none; font-size: 12px; color: var(--text-color-secondary); cursor:pointer; padding:1px;
+}
+.matrix-node-controls button:hover { color: var(--cyan); }
+
+/* Kasten colors for matrix nodes */
+.matrix-node.kasten-i-node { border-color: var(--kasten-i); background-color: var(--kasten-i-alt-bg); }
+.matrix-node.kasten-i-node .matrix-node-title { color: var(--kasten-i-text); }
+.matrix-node.kasten-ii-node { border-color: var(--kasten-ii); background-color: var(--kasten-ii-alt-bg); }
+.matrix-node.kasten-ii-node .matrix-node-title { color: var(--kasten-ii-text); }
+.matrix-node.kasten-iii-node { border-color: var(--kasten-iii); background-color: var(--kasten-iii-alt-bg); }
+.matrix-node.kasten-iii-node .matrix-node-title { color: var(--kasten-iii-text); }
+.matrix-node.kasten-iv-node { border-color: var(--kasten-iv); background-color: var(--kasten-iv-alt-bg); }
+.matrix-node.kasten-iv-node .matrix-node-title { color: var(--kasten-iv-text); }
+
+/* Mermaid specific styling */
+#matrix-mermaid-view .diagram-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white; /* Mermaid usually renders best on light background */
+    padding: 10px;
+    border-radius: 5px;
+    overflow: auto; /* If diagram is huge */
+}
+.mermaid { text-align: center; } /* Helps center the SVG */
+
+
+#matrix-diagram-editor-view .mermaid-editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.mermaid-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--tertiary-bg);
+}
+.mermaid-editor-title {
+    font-family: var(--font-family-headings);
+    color: var(--text-color-titles);
+    font-size: 16px;
+}
+.mermaid-editor-btn { /* Re-use matrix-toolbar-button styling */
+    padding: 6px 10px;
+    font-family: var(--font-family-vt323);
+    font-size: 13px;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--accent-color-secondary);
+    color: var(--accent-color-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 8px;
+}
+.mermaid-editor-btn:hover { background-color: var(--accent-color-secondary); color: black; }
+
+.mermaid-editor-content {
+    display: flex;
+    flex-grow: 1;
+    gap: 15px;
+    height: calc(100% - 60px); /* Adjust based on header height */
+}
+.mermaid-code {
+    flex: 1;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 13px;
+    background-color: var(--secondary-bg);
+    color: var(--text-color-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    resize: none;
+    outline: none;
+}
+.mermaid-preview {
+    flex: 1;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.mermaid-preview .mermaid { width: 100%; height: 100%; } /* Ensure mermaid SVG takes space */
+
+
+.matrix-filters {
+    position: absolute;
+    top: 120px; /* Adjust based on toolbar/tabs height */
+    right: 15px;
+    width: 280px;
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    box-shadow: -3px 3px 10px rgba(0,0,0,0.3);
+    z-index: 100;
+    padding: 15px;
+    display: none; /* Toggle with JS */
+}
+.matrix-filters.open { display: block; }
+.matrix-filters .filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--tertiary-bg);
+}
+.matrix-filters .filter-title {
+    font-family: var(--font-family-headings);
+    color: var(--cyan-light);
+}
+
+/* === Modals === */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  backdrop-filter: blur(3px);
+  animation: fadeInModalBackdrop 0.3s ease-out;
+}
+@keyframes fadeInModalBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--secondary-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 5px 25px rgba(243, 18, 175, 0.4); /* Magenta glow */
+  z-index: 1001;
+  width: 90%;
+  max-width: 800px; /* Increased max-width for pinboard */
+  height: 85vh; /* Taller for pinboard */
+  display: flex;
+  flex-direction: column;
+  animation: slideInModal 0.3s ease-out;
+}
+@keyframes slideInModal {
+  from { opacity: 0; transform: translate(-50%, -45%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.modal.hidden, .modal-backdrop.hidden {
+  display: none !important; /* Force hide */
+}
+
+/* Adjust modal size for non-pinboard modals */
+.modal:not(#satchel-modal) {
+    max-width: 500px;
+    height: auto;
+    max-height: 85vh;
+}
+
+
+.modal-header {
+  padding: 10px 15px;
+  background: var(--xp-title-gradient); /* XP gradient for modal titles too */
+  background-size: 200% 100%;
+  animation: gradientShift 10s linear infinite alternate;
+  border-bottom: 1px solid var(--yellow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 6px; /* Match modal border */
+  border-top-right-radius: 6px;
+  flex-shrink: 0;
+}
+.modal-header h2 {
+  font-family: var(--font-family-press-start); /* Consistent header font */
+  font-size: 16px;
+  color: white;
+  margin: 0;
+  text-shadow: 1px 1px 0 var(--magenta-dark);
+}
+.modal-close-button {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: white;
+  cursor: pointer;
+  padding: 0 5px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.modal-close-button:hover { opacity: 1; }
+
+.modal-content {
+  padding: 15px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+.modal-content p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+/* Form Styles within Modals */
+.form-group { margin-bottom: 12px; }
+.form-label {
+  display: block;
+  font-family: var(--font-family-vt323);
+  font-size: 14px;
+  color: var(--cyan-light);
+  margin-bottom: 4px;
+}
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 8px;
+  background-color: var(--tertiary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-color-primary);
+  font-size: 14px;
+  font-family: var(--font-family-main);
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--yellow);
+  box-shadow: 0 0 5px var(--yellow);
+}
+.form-textarea { min-height: 80px; resize: vertical; }
+.form-input-color { padding: 4px; height: 38px; }
+
+.form-buttons, .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid var(--tertiary-bg);
+  margin-top: 15px;
+  flex-shrink: 0;
+}
+.modal-button, .modal-button-primary, .modal-button-secondary {
+  padding: 8px 15px;
+  font-family: var(--font-family-vt323);
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+.modal-button { /* Cancel/secondary */
+  background-color: var(--tertiary-bg);
+  color: var(--text-color-secondary);
+  border: 1px solid var(--text-color-secondary);
+}
+.modal-button:hover { background-color: #40405c; color: var(--text-color-primary); }
+
+.modal-button-primary { /* Submit/Primary */
+  background-color: var(--magenta);
+  color: white;
+}
+.modal-button-primary:hover { background-color: var(--magenta-dark); box-shadow: 0 0 8px var(--magenta); }
+
+.modal-button-secondary { /* E.g., Add sub-item buttons */
+    background-color: var(--cyan);
+    color: black;
+}
+.modal-button-secondary:hover { background-color: var(--cyan-dark); box-shadow: 0 0 8px var(--cyan); }
+.modal-button-secondary.small-button { padding: 5px 10px; font-size: 12px; }
+
+/* === Conspiracy Pinboard (Satchel) Modal Specifics === */
+.satchel-header-extra {
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--tertiary-bg);
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+.satchel-counter, .pinboard-controls {
+    font-family: var(--font-family-vt323);
+    font-size: 14px;
+    color: var(--text-color-secondary);
+}
+#connection-status {
+    color: var(--yellow);
+    font-style: italic;
+    margin-right: 15px;
+}
+
+.pinboard-container {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    background-color: #4a3b2a;
+    background-image:
+        repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05)),
+        repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.05));
+    background-size: 30px 30px;
+    border-top: 1px solid var(--tertiary-bg);
+}
+.pinboard-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+line.connection-thread {
+    stroke: #ff3a3a;
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+    cursor: pointer;
+    pointer-events: all;
+    transition: stroke 0.2s;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+}
+line.connection-thread:hover {
+    stroke: var(--yellow);
+    stroke-width: 3;
+}
+.pinboard-notes {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.pinboard-note {
+    position: absolute;
+    width: 200px;
+    background-color: #fdf5d7;
+    color: #333;
+    border: 1px solid #d4cba4;
+    border-radius: 3px;
+    box-shadow: 3px 3px 8px rgba(0,0,0,0.4);
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+.pinboard-note:active {
+    cursor: grabbing;
+    z-index: 100;
+}
+.pinboard-note.connecting-source {
+    box-shadow: 0 0 15px var(--yellow);
+    border-color: var(--yellow);
+}
+.pinboard-note:hover {
+    box-shadow: 0 0 10px var(--cyan);
+}
+.pinboard-note::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle at 30% 30%, #ff5555, #cc0000);
+    border-radius: 50%;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    border: 1px solid #880000;
+}
+
+.pinboard-note-info {
+    padding: 15px 10px 8px 10px;
+}
+.pinboard-note-title {
+    font-family: var(--font-family-headings);
+    color: #222;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed #c4bca2;
+    padding-bottom: 4px;
+}
+.pinboard-note-id {
+    font-size: 11px;
+    font-family: var(--font-family-vt323);
+    color: #666;
+}
+.pinboard-note-actions {
+    display: flex;
+    gap: 5px;
+    padding: 6px 10px;
+    border-top: 1px solid #e9e2c3;
+    background-color: #f7f0d0;
+    justify-content: flex-end;
+}
+.pinboard-note-actions button {
+    background: none;
+    border: 1px solid #aaa;
+    color: #555;
+    font-size: 16px;
+    padding: 3px 5px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+}
+.pinboard-note-actions button:hover {
+    color: #000;
+    border-color: #000;
+}
+.pinboard-note-actions button.connect-btn:hover {
+    color: var(--status-online);
+    border-color: var(--status-online);
+}
+.pinboard-note-actions button.unpin-btn:hover {
+    color: var(--status-offline);
+    border-color: var(--status-offline);
+}
+.satchel-empty-message {
+    text-align: center;
+    font-family: var(--font-family-vt323);
+    color: var(--text-color-secondary);
+    font-size: 16px;
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes highlightFlash {
+    0%, 100% { box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    50% { 
+        box-shadow: 0 0 25px var(--yellow-light); 
+        border-color: var(--yellow-light);
+    }
+}
+.highlight-flash {
+    animation: highlightFlash 1.5s ease-out;
+}
+
+
+/* === Bottom Navigation === */
+#bottom-navigation {
+  height: 55px;
+  background-color: rgba(10, 10, 20, 0.9); /* Darker, slightly more opaque */
+  backdrop-filter: blur(5px);
+  border-top: 1px solid var(--magenta);
+  display: flex;
+  justify-content: space-around; /* Changed to space-around for better FAB centering */
+  align-items: center;
+  position: relative; /* For FAB positioning */
+  z-index: 11; /* Ensure above glitch overlay */
+  flex-shrink: 0;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  color: var(--text-color-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-vt323);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 5px 0;
+  flex-grow: 1; /* Allow buttons to take space */
+  transition: color 0.2s;
+  text-decoration: none;
+}
+.nav-button:hover, .nav-button:focus {
+  color: var(--cyan-light);
+  outline: none;
+}
+.nav-button.active {
+  color: var(--cyan);
+  font-weight: bold; /* Optional: make active visually stronger */
+}
+.nav-icon {
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+
+/* FAB - Floating Action Button */
+#fab-add-entry {
+  width: 50px;
+  height: 50px;
+  background: var(--antichristic-gradient);
+  background-size: 200% 200%;
+  animation: gradientShift 5s ease infinite;
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: absolute;
+  left: 50%;
+  bottom: 15px; /* Adjust to sit nicely above nav bar */
+  transform: translateX(-50%);
+  box-shadow: 0 0 15px var(--magenta), 0 0 5px var(--cyan) inset;
+  transition: transform 0.2s ease-out, box-shadow 0.2s;
+  z-index: 12; /* Above bottom nav content */
+}
+#fab-add-entry:hover {
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 0 20px var(--magenta-light), 0 0 8px var(--cyan-light) inset;
+}
+.nav-icon-fab { line-height: 1; } /* Helps center the + sign better */
+
+
+/* === Toast Notification === */
+.toast {
+  position: fixed;
+  bottom: 70px; /* Above bottom nav */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--cyan);
+  color: black;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-family: var(--font-family-vt323);
+  font-size: 14px;
+  box-shadow: 0 2px 10px rgba(0, 255, 204, 0.5);
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s, bottom 0.3s;
+}
+.toast.active {
+  opacity: 1;
+  visibility: visible;
+  bottom: 85px;
+}
+.toast.error {
+  background-color: var(--status-offline);
+  color: white;
+  box-shadow: 0 2px 10px rgba(255, 58, 58, 0.5);
+}
+
+/* Utility hidden class */
+.hidden { display: none !important; }

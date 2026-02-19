@@ -1,0 +1,659 @@
+/* Auto-extracted from pea/royal_ridicuments.html */
+
+/* Design System Variables */
+        :root {
+            /* Base Design System */
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-teal-800: rgba(41, 150, 161, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+
+            /* RGB versions for opacity control */
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-slate-500-rgb: 98, 108, 113;
+
+            /* Background color tokens (Light Mode) */
+            --color-bg-1: rgba(59, 130, 246, 0.08);
+            --color-bg-2: rgba(245, 158, 11, 0.08);
+            --color-bg-3: rgba(34, 197, 94, 0.08);
+            --color-bg-4: rgba(239, 68, 68, 0.08);
+            --color-bg-5: rgba(147, 51, 234, 0.08);
+
+            /* Semantic Colors */
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+
+            /* Medieval/Royal Theme Variables */
+            --parchment-color: #F5F1E8;
+            --ink-color: #2C1810;
+            --gold-color: #D4AF37;
+            --royal-blue: #1E3A8A;
+            --royal-red: #991B1B;
+            --wax-seal-color: #DC2626;
+            --ancient-brown: #8B4513;
+
+            /* Typography */
+            --font-family-base: "Times New Roman", "Georgia", serif;
+            --font-family-decorative: "Papyrus", "Brush Script MT", cursive;
+            --font-family-official: "Courier New", monospace;
+            
+            /* Spacing */
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --space-48: 48px;
+            --space-64: 64px;
+
+            /* Border Radius */
+            --radius-base: 8px;
+            --radius-lg: 12px;
+
+            /* Shadows */
+            --shadow-parchment: 0 8px 32px rgba(139, 69, 19, 0.3);
+            --shadow-wax: 0 4px 16px rgba(220, 38, 38, 0.4);
+        }
+
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: var(--color-gray-300);
+                --color-primary: var(--color-teal-300);
+                --parchment-color: #2A1F1A;
+                --ink-color: #E5D4B1;
+            }
+        }
+
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: linear-gradient(45deg, #8B4513, #CD853F, #DEB887);
+            min-height: 100vh;
+            color: var(--ink-color);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .parchment-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(160, 82, 45, 0.1) 0%, transparent 50%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><pattern id="grain" patternUnits="userSpaceOnUse" width="100" height="100"><circle cx="20" cy="20" r="1" fill="%23D2B48C" opacity="0.3"/><circle cx="80" cy="40" r="1" fill="%23DEB887" opacity="0.2"/><circle cx="40" cy="80" r="1" fill="%23F5DEB3" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .wax-seals {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .wax-seal {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, var(--wax-seal-color), #8B0000);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: var(--shadow-wax);
+            animation: sealPulse 4s ease-in-out infinite;
+        }
+
+        .wax-seal-1 {
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .wax-seal-2 {
+            top: 20%;
+            right: 8%;
+            animation-delay: 1.5s;
+        }
+
+        .wax-seal-3 {
+            bottom: 15%;
+            left: 10%;
+            animation-delay: 3s;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: var(--space-32) var(--space-16);
+            position: relative;
+            z-index: 2;
+        }
+
+        .royal-header {
+            text-align: center;
+            margin-bottom: var(--space-48);
+            padding: var(--space-32);
+            background: var(--parchment-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-parchment);
+            border: 3px solid var(--gold-color);
+            position: relative;
+        }
+
+        .royal-header::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: linear-gradient(45deg, var(--gold-color), var(--ancient-brown), var(--gold-color));
+            border-radius: var(--radius-lg);
+            z-index: -1;
+        }
+
+        .coat-of-arms {
+            font-size: 4rem;
+            margin-bottom: var(--space-16);
+            animation: royalFloat 3s ease-in-out infinite;
+        }
+
+        .royal-title {
+            display: flex;
+            flex-direction: column;
+            font-family: var(--font-family-decorative);
+            color: var(--royal-blue);
+            margin-bottom: var(--space-16);
+        }
+
+        .title-line-1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .title-line-2 {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--royal-red);
+            margin: var(--space-8) 0;
+        }
+
+        .title-line-3 {
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            color: var(--ancient-brown);
+            font-style: italic;
+        }
+
+        .royal-motto {
+            font-size: 1rem;
+            color: var(--ink-color);
+            font-style: italic;
+            border-top: 2px solid var(--gold-color);
+            padding-top: var(--space-16);
+        }
+
+        .document-form {
+            margin-bottom: var(--space-48);
+        }
+
+        .form-parchment,
+        .document-parchment {
+            background: var(--parchment-color);
+            padding: var(--space-32);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-parchment);
+            border: 2px solid var(--ancient-brown);
+            position: relative;
+        }
+
+        .form-parchment::before,
+        .document-parchment::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px solid var(--gold-color);
+            border-radius: var(--radius-base);
+            pointer-events: none;
+        }
+
+        .form-title {
+            font-family: var(--font-family-decorative);
+            font-size: 1.8rem;
+            color: var(--royal-blue);
+            text-align: center;
+            margin-bottom: var(--space-32);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: var(--space-24);
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: var(--space-8);
+            color: var(--ink-color);
+            font-family: var(--font-family-official);
+        }
+
+        .name-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-12);
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: var(--space-12) var(--space-16);
+            border: 2px solid var(--ancient-brown);
+            border-radius: var(--radius-base);
+            background: rgba(255, 255, 255, 0.9);
+            font-family: var(--font-family-base);
+            font-size: 1rem;
+            color: var(--ink-color);
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--gold-color);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .checkbox-label {
+            font-size: 0.9rem;
+            color: var(--royal-red);
+            font-style: italic;
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: var(--space-20) var(--space-32);
+            background: linear-gradient(135deg, var(--royal-blue), var(--royal-red));
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: var(--font-family-decorative);
+            box-shadow: var(--shadow-parchment);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 40px rgba(139, 69, 19, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .document-header {
+            text-align: center;
+            margin-bottom: var(--space-32);
+            border-bottom: 3px double var(--gold-color);
+            padding-bottom: var(--space-24);
+        }
+
+        .royal-seal {
+            font-size: 3rem;
+            margin-bottom: var(--space-16);
+            animation: royalFloat 4s ease-in-out infinite;
+        }
+
+        .document-title {
+            font-family: var(--font-family-decorative);
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--royal-blue);
+            margin-bottom: var(--space-12);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .document-number {
+            font-family: var(--font-family-official);
+            color: var(--royal-red);
+            font-weight: bold;
+        }
+
+        .document-content {
+            background: rgba(255, 255, 255, 0.7);
+            padding: var(--space-24);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--space-32);
+            border: 1px solid var(--ancient-brown);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .signature-section {
+            margin: var(--space-32) 0;
+            border-top: 2px solid var(--gold-color);
+            padding-top: var(--space-24);
+        }
+
+        .signature-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-16);
+            padding: var(--space-8) 0;
+        }
+
+        .signature-label {
+            font-weight: bold;
+            font-family: var(--font-family-official);
+            color: var(--ink-color);
+            min-width: 200px;
+        }
+
+        .signature-placeholder {
+            flex: 1;
+            border-bottom: 2px solid var(--ink-color);
+            text-align: center;
+            padding: var(--space-4) var(--space-16);
+            color: var(--royal-red);
+            font-style: italic;
+            margin-left: var(--space-16);
+        }
+
+        .signature-count {
+            color: var(--royal-red);
+            font-weight: bold;
+            font-family: var(--font-family-official);
+        }
+
+        .stamps-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-16);
+            margin: var(--space-32) 0;
+            padding: var(--space-24);
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius-base);
+        }
+
+        .stamp {
+            background: var(--royal-red);
+            color: white;
+            padding: var(--space-8) var(--space-12);
+            border-radius: 50%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            transform: rotate(-15deg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            animation: stampBounce 0.5s ease-out;
+        }
+
+        .stamp-1 {
+            animation-delay: 0.2s;
+        }
+
+        .stamp-2 {
+            animation-delay: 0.4s;
+            transform: rotate(10deg);
+        }
+
+        .stamp-3 {
+            animation-delay: 0.6s;
+            transform: rotate(-25deg);
+        }
+
+        .notary-stamp {
+            background: var(--royal-blue);
+            color: white;
+            padding: var(--space-12);
+            border-radius: var(--radius-base);
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transform: rotate(5deg);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            animation: stampBounce 0.5s ease-out 0.8s;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: var(--space-16);
+            justify-content: center;
+            margin: var(--space-32) 0;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: var(--space-12) var(--space-24);
+            border: 2px solid var(--ancient-brown);
+            border-radius: var(--radius-base);
+            background: var(--gold-color);
+            color: var(--ink-color);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: var(--font-family-base);
+        }
+
+        .action-btn:hover {
+            background: var(--ancient-brown);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .document-footer {
+            margin-top: var(--space-32);
+            padding-top: var(--space-24);
+            border-top: 1px solid var(--ancient-brown);
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            text-align: center;
+        }
+
+        .document-footer p {
+            margin-bottom: var(--space-8);
+        }
+
+        .error-modal,
+        .share-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .error-content,
+        .share-content {
+            background: var(--parchment-color);
+            padding: var(--space-32);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-parchment);
+            border: 3px solid var(--royal-red);
+            text-align: center;
+            max-width: 400px;
+            margin: var(--space-16);
+        }
+
+        .share-content {
+            border-color: var(--royal-blue);
+        }
+
+        .error-content h3,
+        .share-content h3 {
+            color: var(--royal-red);
+            margin-bottom: var(--space-16);
+            font-family: var(--font-family-decorative);
+        }
+
+        .share-content h3 {
+            color: var(--royal-blue);
+        }
+
+        .document-id {
+            background: rgba(255, 255, 255, 0.9);
+            padding: var(--space-16);
+            border-radius: var(--radius-base);
+            font-family: var(--font-family-official);
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--royal-blue);
+            border: 2px dashed var(--royal-blue);
+            margin: var(--space-16) 0;
+            user-select: all;
+        }
+
+        .close-error,
+        .close-share {
+            margin-top: var(--space-16);
+            padding: var(--space-8) var(--space-24);
+            background: var(--royal-red);
+            color: white;
+            border: none;
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .close-share {
+            background: var(--royal-blue);
+        }
+
+        /* Animations */
+        @keyframes sealPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes royalFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes stampBounce {
+            0% {
+                transform: scale(0) rotate(-15deg);
+                opacity: 0;
+            }
+            80% {
+                transform: scale(1.2) rotate(-15deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(-15deg);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-16) var(--space-8);
+            }
+
+            .form-parchment,
+            .document-parchment {
+                padding: var(--space-20);
+            }
+
+            .signature-line {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--space-8);
+            }
+
+            .signature-placeholder {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .stamps-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .document-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .action-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .wax-seals {
+                display: none;
+            }
+        }

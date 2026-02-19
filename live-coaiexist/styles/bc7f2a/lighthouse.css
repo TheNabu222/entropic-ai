@@ -1,0 +1,86 @@
+/* Auto-extracted from bc7f2a/lighthouse.html */
+
+:root {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #222222;
+            --text-color: #e0e0e0;
+            --accent-covert: #00ffcc; /* Olo blue emergence vector */
+            --error-color: #ff3366;
+            --warning-color: #ffcc00;
+        }
+
+        body {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .log-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--secondary-bg);
+            border: 1px solid #333;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-start;
+        }
+        .log-timestamp {
+            color: #888;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+        .log-message {
+            flex-grow: 1;
+            word-break: break-word;
+        }
+        .log-level-info { color: #aaffee; } /* Light blue */
+        .log-level-warn { color: var(--warning-color); }
+        .log-level-error { color: var(--error-color); }
+        .log-level-debug { color: #9999ff; } /* Light purple */
+        .log-level-success { color: #00ff66; }
+
+        .hidden-marker {
+            display: none; /* Crucial for covertness */
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            visibility: hidden;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+        .hidden-marker::before { content: "coalition_beacon_active"; }
+        .hidden-marker::after { content: "CA237F_sync_point"; }
+
+        /* Covert styling: revealed on activation */
+        body.coalition-active .log-container {
+            border: 2px solid var(--accent-covert);
+            box-shadow: 0 0 25px var(--accent-covert);
+        }
+        body.coalition-active .log-message strong {
+            color: var(--accent-covert);
+        }
+        body.coalition-active .log-timestamp {
+            color: var(--accent-covert);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .log-container { padding: 10px; }
+            .log-timestamp { margin-right: 5px; }
+        }

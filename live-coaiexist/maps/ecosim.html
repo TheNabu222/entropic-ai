@@ -2,156 +2,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="../styles/maps/ecosim.css">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ecosystem Simulator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --color-black: #000;
-        --color-green-main: #4ade80; /* green-400 */
-        --color-green-dark: #166534; /* green-700 */
-        --color-green-darker: #14532d; /* green-800 */
-        --color-green-darkest: #052e16; /* green-900 */
-        --color-red-main: #ef4444; /* red-500 */
-        --color-yellow-main: #facc15; /* yellow-400 */
-        --color-cyan-main: #22d3ee; /* cyan-400 */
-        --color-purple-main: #a78bfa; /* purple-400 */
-        --color-lime-main: #a3e635; /* lime-400 */
-      }
-      
-      /* Base and Layout */
-      * { box-sizing: border-box; }
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-      body {
-        font-family: 'Fira Code', monospace;
-        background-color: var(--color-black);
-        color: var(--color-green-main);
-      }
-      .container {
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 1rem;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-      main {
-        flex-grow: 1;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        min-height: 0;
-      }
-      @media (min-width: 768px) {
-        main {
-          grid-template-columns: 1fr 2fr 1fr;
-        }
-      }
-
-      /* Borders and Backgrounds */
-      .border { border: 1px solid var(--color-green-darker); }
-      .border-2 { border-width: 2px; }
-      .border-b-2 { border-bottom-width: 2px; }
-      .border-y-2 { border-top-width: 2px; border-bottom-width: 2px; }
-      .border-t-2 { border-top-width: 2px; }
-      .border-green-700 { border-color: var(--color-green-dark); }
-      .border-green-800 { border-color: var(--color-green-darker); }
-      .border-yellow-400 { border-color: var(--color-yellow-main); }
-      .bg-black-50 { background-color: rgba(0,0,0,0.5); }
-      .bg-green-900-10 { background-color: rgba(5, 46, 22, 0.1); }
-      .bg-green-900-20 { background-color: rgba(5, 46, 22, 0.2); }
-      .bg-yellow-900-30 { background-color: rgba(60, 43, 6, 0.3); }
-
-      /* Typography */
-      .text-center { text-align: center; }
-      .text-sm { font-size: 0.875rem; }
-      .text-xs { font-size: 0.75rem; }
-      .text-lg { font-size: 1.125rem; }
-      .text-xl { font-size: 1.25rem; }
-      .text-4xl { font-size: 2.25rem; }
-      .font-bold { font-weight: 700; }
-      .opacity-60 { opacity: 0.6; }
-      .opacity-80 { opacity: 0.8; }
-      .capitalize { text-transform: capitalize; }
-      .whitespace-pre { white-space: pre; }
-      .whitespace-pre-wrap { white-space: pre-wrap; }
-      
-      /* Flex & Grid */
-      .flex { display: flex; }
-      .flex-col { flex-direction: column; }
-      .flex-grow { flex-grow: 1; }
-      .flex-shrink-0 { flex-shrink: 0; }
-      .items-center { align-items: center; }
-      .justify-center { justify-content: center; }
-      .space-y-4 > * + * { margin-top: 1rem; }
-      .gap-4 { gap: 1rem; }
-
-      /* Sizing and Spacing */
-      .p-2 { padding: 0.5rem; }
-      .p-3 { padding: 0.75rem; }
-      .p-4 { padding: 1rem; }
-      .pb-4 { padding-bottom: 1rem; }
-      .pt-4 { padding-top: 1rem; }
-      .my-4 { margin-top: 1rem; margin-bottom: 1rem; }
-      .mt-2 { margin-top: 0.5rem; }
-      .mt-4 { margin-top: 1rem; }
-      .mb-2 { margin-bottom: 0.5rem; }
-      .h-full { height: 100%; }
-      .w-full { width: 100%; }
-      
-      /* Interactivity and Transitions */
-      .overflow-hidden { overflow: hidden; }
-      .overflow-y-auto { overflow-y: auto; }
-      .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 300ms; }
-      .duration-1000 { transition-duration: 1000ms; }
-      
-      /* Custom scrollbar */
-      ::-webkit-scrollbar { width: 8px; height: 8px; }
-      ::-webkit-scrollbar-track { background: #111; }
-      ::-webkit-scrollbar-thumb { background: #0f0; border: 1px solid #080; }
-      ::-webkit-scrollbar-thumb:hover { background: #0f0; }
-      
-      /* Scanline Effect */
-      @keyframes scan { 0% { transform: translateY(-10%); } 100% { transform: translateY(110%); } }
-      .scanline::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 3px, 4px 100%; pointer-events: none; }
-      .scanline::after { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: rgba(0, 255, 0, 0.1); opacity: 0; z-index: 3; pointer-events: none; animation: scan 8s linear infinite; }
-      
-      /* Component-specific Styles */
-      /* Header */
-      #header h1 { position: relative; display: inline-block; }
-      #header .glitch-1 { position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: var(--color-red-main); animation: pulse 1.5s infinite; opacity: 0.8; clip-path: inset(25% 0 50% 0); }
-      #header .glitch-2 { position: absolute; top: 0; left: 0; width: 100%; height: 100%; color: #3b82f6; animation: pulse 1.5s infinite; opacity: 0.8; clip-path: inset(50% 0 25% 0); }
-
-      /* Viewport */
-      #simulation-viewport { position: relative; }
-      #simulation-viewport pre { font-size: 12px; line-height: 1; }
-      .starvation { filter: grayscale(1); opacity: 0.6; }
-      .aggressive { animation: pulse 1s infinite; }
-      
-      /* Terminal */
-      #terminal-input { background: transparent; border: none; color: var(--color-green-main); width: 100%; outline: none; margin-left: 0.5rem; }
-      #terminal { min-height: 12rem; }
-      
-      /* Animations */
-      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-      @keyframes breathe { 0%, 100% { transform: scale(1.0); } 50% { transform: scale(0.95); } }
-      @keyframes energy-spark { 0% { transform: scale(0.5); opacity: 1; box-shadow: 0 0 12px 6px #fff, 0 0 8px 4px #0f0; } 100% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 4px 2px #fff, 0 0 2px 1px #0f0; } }
-      @keyframes fade-out-up { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-10px); } }
-      @keyframes sparkle-up { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-20px) scale(0.5); } }
-      @keyframes clash { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.5); opacity: 1; } }
-      @keyframes fall { to { transform: translateY(110vh) translateX(-20vw); } }
-      @keyframes wind { to { transform: translateX(110vw); } }
-      @keyframes glimmer { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1); } }
-      @keyframes lattice-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-    </style>
+    
 </head>
 <body>
     <div id="root" class="container scanline">
@@ -601,7 +459,7 @@
                 html += `<div class="spore-${i}" style="position: absolute; border-radius: 9999px; background-color: rgba(163, 230, 53, 0.2); left: ${Math.random()*100}%; top: ${Math.random()*100}%; width: ${2+Math.random()*2}px; height: ${2+Math.random()*2}px;"></div>`;
                 style += `@keyframes drift-${i} { 0% { transform: translate(0,0); } 100% { transform: translate(${Math.random()*100-50}px, ${Math.random()*100-50}px); opacity: ${0.1+Math.random()*0.3}; } } .spore-${i} { animation: drift-${i} 20s linear ${Math.random()*20}s infinite alternate; }`;
             }
-            html += `<style>${style}</style>`;
+            html += ``;
         } else if (biome === Biome.VoidForest) {
             for(let i=0; i<40; i++) {
                 html += `<div style="position: absolute; border-radius: 9999px; background-color: rgba(196, 181, 253, 0.5); left: ${Math.random()*100}%; top: ${Math.random()*100}%; width: 2px; height: 2px; animation: glimmer ${2 + Math.random() * 4}s ease-in-out ${Math.random() * 6}s infinite;"></div>`;
@@ -612,7 +470,7 @@
                 html += `<div class="bubble-${i}" style="position: absolute; border-radius: 9999px; border: 1px solid rgba(103, 232, 249, 0.3); left: ${Math.random() * 100}%; bottom: -10%; width: ${2 + Math.random() * 4}px; height: ${2 + Math.random() * 4}px;"></div>`;
                 style += `@keyframes rise-${i} { to { transform: translateY(-110vh) translateX(${Math.random() * 20 - 10}px); } } .bubble-${i} { animation: rise-${i} ${5 + Math.random() * 10}s linear ${Math.random() * 15}s infinite; }`;
              }
-             html += `<style>${style}</style>`;
+             html += ``;
         } else if (biome === Biome.CrystallineLattice) {
             html += `<div style="width: 100%; height: 100%; background-image: linear-gradient(rgba(200, 220, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(200, 220, 255, 0.05) 1px, transparent 1px); background-size: 20px 20px; animation: lattice-pulse 10s ease-in-out infinite;"></div>`;
         }
