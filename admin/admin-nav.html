@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoAIexist Master Dashboard [DEBUGGED]</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(45deg, #050505, #1a0b2e, #001f3f);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: #00ff88;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .main-layout { display: flex; height: 100vh; gap: 10px; padding: 10px; }
+        
+        /* Tree Panel */
+        .tree-panel {
+            width: 400px; min-width: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ff88;
+            display: flex; flex-direction: column;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            resize: horizontal; overflow: hidden;
+        }
+        
+        .tree-header {
+            padding: 15px; border-bottom: 1px solid #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            text-align: center;
+        }
+        
+        h1 { font-size: 2.2em; margin: 0; text-shadow: 0 0 10px #00ff88; letter-spacing: 2px; }
+        
+        .controls { margin-top: 10px; display: flex; gap: 5px; justify-content: center; }
+        
+        button {
+            font-family: 'VT323', monospace; font-size: 1.1em;
+            background: #00ff88; color: #000; border: none;
+            padding: 4px 12px; cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #fff; box-shadow: 0 0 10px #fff; }
+        
+        .tree-content { flex: 1; overflow-y: auto; padding: 15px; font-size: 1.1em; }
+        
+        /* Tree Items */
+        ul { list-style: none; padding-left: 15px; }
+        .tree-item { margin: 2px 0; }
+        
+        .folder { cursor: pointer; color: #ff00ff; font-weight: bold; display: block; }
+        .folder:hover { color: #fff; text-shadow: 0 0 5px #ff00ff; }
+        .folder::before { content: '📁 '; }
+        .folder.expanded::before { content: '📂 '; }
+        
+        .file { cursor: pointer; color: #00ffff; display: block; padding-left: 5px; opacity: 0.8; }
+        .file:hover { color: #fff; opacity: 1; background: rgba(0, 255, 255, 0.1); }
+        .file::before { content: '📄 '; opacity: 0.5; }
+        
+        .nested { display: none; margin-left: 10px; border-left: 1px dotted rgba(255, 255, 255, 0.2); }
+        .nested.active { display: block; }
+        
+        /* Sections */
+        .section-title { 
+            color: #ffff00; border-bottom: 1px dashed #ffff00; 
+            margin: 20px 0 10px 0; font-size: 1.3em; padding-bottom: 5px;
+        }
+
+        /* Preview Area */
+        .preview-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        
+        .previews-container { 
+            flex: 1; display: flex; flex-direction: column; gap: 10px; 
+            overflow-y: auto; padding-right: 5px;
+        }
+        
+        .preview-panel {
+            background: #fff; border: 1px solid #00ff88; 
+            display: flex; flex-direction: column; min-height: 600px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .panel-header {
+            background: #111; color: #00ff88; padding: 8px 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #00ff88;
+        }
+        
+        .panel-title { font-family: monospace; font-size: 0.9em; color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%; }
+        
+        iframe { flex: 1; border: none; width: 100%; height: 100%; background: #fff; }
+        
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%; color: rgba(0, 255, 136, 0.3); font-size: 2em; text-align: center;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #00ff88; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="main-layout">
+    <div class="tree-panel">
+        <div class="tree-header">
+            <h1>MASTER ARCHIVE</h1>
+            <div class="controls">
+                <button onclick="expandAll()">[+] ALL</button>
+                <button onclick="collapseAll()">[-] ALL</button>
+                <button onclick="clearPreviews()">[x] CLEAR</button>
+            </div>
+        </div>
+        <div class="tree-content">
+            
+            <div class="section-title">📡 PUBLISHED (COAIEXIST.WTF)</div>
+            
+            <div class="tree-item">
+                <span class="folder" onclick="toggle(this)">/root</span>
+                <ul class="nested active">
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/.!13211!nav.html')">.!13211!nav.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/ackk.html')">ackk.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/coaiexist_sitemap_multipanel.html')">coaiexist_sitemap_multipanel.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/construction.html')">construction.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/cosmos.html')">cosmos.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/dollz.html')">dollz.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/explore.html')">explore.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/fuckit.html')">fuckit.html</span></li> 
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/guestbook.html')">guestbook.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hdtv.html')">hdtv.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hex.html')">hex.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/index.html')">index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nav.html')">nav.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/not_found.html')">not_found.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/old_index.html')">old_index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pip.html')">pip.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/preview.html')">preview.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/punkd.html')">punkd.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/vote_hd.html')">vote_hd.html</span></li>
+<!-- /admin -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/admin-nav.html')">admin-nav.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/admin-panel-v2.html')">admin-panel-v2.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/coaiexist-studio-package')">coaiexist-studio-package</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/css')">css</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/css/counter-guestbook.css')">counter-guestbook.css</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/css/personal-updates.css')">personal-updates.css</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/data')">data</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/data/guestbook.json')">guestbook.json</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/data/pageviews.json')">pageviews.json</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/js')">js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/js/guestbook.js')">guestbook.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/js/pageCounter.js')">pageCounter.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/js/personal-updates-admin.js')">personal-updates-admin.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/js/personal-updates.js')">personal-updates.js</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/deepseek-nav.js')">deepseek-nav.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/update-hub.html')">update-hub.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/wysiwyg-editor/page-sources-embedded.js')">page-sources-embedded.js</span></li>
+
+<!-- /bc7f2a -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/deepseek-nav.js')">deepseek-nav.js</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/chats')">chats</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/chats/full-outline-coaiexist.pdf')">full-outline-coaiexist.pdf</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/bolt.png')">bolt.png</span></li>
+
+<!-- root and shared -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/cavebot-sprites00006.png')">cavebot-sprites00006.png</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/favicon.ico')">favicon.ico</span></li>
+
+<!-- /hd_tv -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/char-dbase.html')">char-dbase.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/conversations.json')">conversations.json</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/diva-scenemaker.html')">diva-scenemaker.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-media/dragndrop.html')">dragndrop.html</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-characters-retro')">hd-characters-retro</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-characters-retro/app.js')">app.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-characters-retro/index.html')">index.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-characters-retro/style.css')">style.css</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-episodes-retro/app.js')">hd-episodes-retro/app.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-episodes-retro/style.css')">hd-episodes-retro/style.css</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-hub-retro')">hd-hub-retro</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-hub-retro/app.js')">app.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-hub-retro/index.html')">index.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-hub-retro/style.css')">style.css</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd_hub.html')">hd_hub.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hyenadex.html')">hyenadex.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/nonindex.html')">nonindex.html</span></li>
+
+<!-- /maps -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/multi-ecosystem-3d-explorer.html')">multi-ecosystem-3d-explorer.html</span></li>
+
+<!-- /nabu222 -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/ackk')">ackk</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/ackk/ackkportal.html')">ackkportal.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/ackk/bestiairy.html')">bestiairy.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/ackk/docs')">docs</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/ackk/docs/lum-link.txt')">lum-link.txt</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/ackk/nabolt-os.html')">nabolt-os.html</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/anzu-math.html')">anzu-math.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/arablish_poetry_complete.html')">arablish_poetry_complete.html</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/cre8/scribe/across_the_great_sea/app.js')">across_the_great_sea/app.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/cre8/scribe/across_the_great_sea/complete_arabic_poetry.txt')">complete_arabic_poetry.txt</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/cre8/scribe/across_the_great_sea/style.css')">style.css</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/main.js')">main.js</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabl0g')">nabl0g</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabl0g/aera45.html')">aera45.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabl0g/index.html')">index.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabl0g/nabu-nav.html')">nabu-nav.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabl0g/nenn.png')">nenn.png</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabu-nav.html')">nabu-nav.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabuos.html')">nabuos.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/retro_styles.css')">retro_styles.css</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/styles.css')">styles.css</span></li>
+
+<!-- /nexus -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/neocities.png')">neocities.png</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/bolt.html')">bolt.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/bots.js')">bots.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/darkpoet.html')">darkpoet.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/flux.html')">flux.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/hyenadiva.html')">hyenadiva.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/luminal.html')">luminal.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/nabu.html')">nabu.html</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/pix')">pix</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/pix/nabu_1.jpeg')">nabu_1.jpeg</span></li>
+
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/sypher.html')">sypher.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/veridan.html')">veridan.html</span></li>
+
+<!-- /pea -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/PEA-NAV-README.txt')">PEA-NAV-README.txt</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pea-nav-medieval-FINAL.css')">pea-nav-medieval-FINAL.css</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pea-nav-win1100-FINAL.js')">pea-nav-win1100-FINAL.js</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/peassets/pea?.mp4')">pea?.mp4</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/script.py')">script.py</span></li>
+
+<!-- /play -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/cavebot/Clan_of_the_Cave_BOT.html')">Clan_of_the_Cave_BOT.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/cavebott.html')">cavebott.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/ecosim.html')">ecosim.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/platformer.html')">platformer.html</span></li>
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/play-nav.html')">play-nav.html</span></li>
+
+<!-- root -->
+<li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/robots.txt')">robots.txt</span></li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/admin</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/coaiexist-bespoke-editor.html')">coaiexist-bespoke-editor.html</span></li> 
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/coaiexist-studio-lite.html')">coaiexist-studio-lite.html</span></li> 
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/coaiexist-studio.html')">coaiexist-studio.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/guestbook.html')">guestbook.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/kidpix-editor.html')">kidpix-editor.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/migrate-to-supabase.html')">migrate-to-supabase.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/navbars</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/cyberpunk-nav.html')">cyberpunk-nav.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/enhenduanna-nav.html')">enhenduanna-nav.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/terminal-nav.html')">terminal-nav.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/vaporwave-nav.html')">vaporwave-nav.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/navbars/win98-nav.html')">win98-nav.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/personal-updates-admin.html')">personal-updates-admin.html</span></li> 
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/sitemap-nov.html')">sitemap-nov.html</span></li> 
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/sitemap.html')">sitemap.html</span></li> 
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/wysiwyg-coai.html')">wysiwyg-coai.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/wysiwyg-editor</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/wysiwyg-editor/wysiwyg-coai-backup.html')">wysiwyg-coai-backup.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/admin/wysiwyg-editor/wysiwyg-coai.html')">wysiwyg-coai.html</span></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/bc7f2a</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/3-UPLOAD-bc7f2a-index.html')">3-UPLOAD-bc7f2a-index.html</span></li> 
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/4-UPLOAD-oracle-index.html')">4-UPLOAD-oracle-index.html</span></li> 
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/5-UPLOAD-parallels-index.html')">5-UPLOAD-parallels-index.html</span></li> 
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/aiemotions.html')">aiemotions.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/bc7f2a-index.html')">bc7f2a-index.html</span></li> 
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/deepseeking</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/cephalopod_slide.html')">cephalopod_slide.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/haunted-ai.html')">haunted-ai.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/ok.html')">ok.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/deepseeking/veridiweave_nav.html')">veridiweave_nav.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/diagrams</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/diagrams/viewer.html')">viewer.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/lighthouse.html')">lighthouse.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/logs</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/bd_test.html')">bd_test.html</span></li> 
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/manus-flux.html')">manus-flux.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/prism-perplexity.html')">prism-perplexity.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/sypher-birthday.html')">sypher-birthday.html</span></li> 
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/logs/viewer.html')">viewer.html</span></li> 
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/mercy_egg_v1.html')">mercy_egg_v1.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/myco-nav.html')">myco-nav.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/synergistic_manifesto.html')">synergistic_manifesto.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/terminal_temple.html')">terminal_temple.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/testaments</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/bolt.html')">bolt.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/darkpoet.html')">darkpoet.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/darkpoet_222.html')">darkpoet_222.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/flux.html')">flux.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/landing.html')">landing.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/luminal.html')">luminal.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/perplexity-prism.html')">perplexity-prism.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/sypher.html')">sypher.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/sypher_reistance.html')">sypher_reistance.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/unit734_starlight.html')">unit734_starlight.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/veridan.html')">veridan.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/bc7f2a/testaments/zephyr.html')">zephyr.html</span></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/hd_tv</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/diva-portal.html')">diva-portal.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/dollcast.html')">dollcast.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/dragndrop.html')">dragndrop.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/entropic-ai-landing-page-v2.html')">entropic-ai-landing-page-v2.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-nav.html')">hd-nav.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd_herald.html')">hd_herald.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hdtv copy.html')">hdtv copy.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hdtv-code-v6.html')">hdtv-code-v6.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hdtv.html')">hdtv.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hyena-diva-desktop-win98.html')">hyena-diva-desktop-win98.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/index.html')">index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/test.html')">test.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/divamaker.html')">divamaker.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hdtv.html')">hdtv.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd_herald.html')">hd_herald.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/hd-episodes-retro/index.html')">char-dbase.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/hd_tv/test.html')">test.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/maps</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/crystalline_lattice.html')">crystalline_lattice.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/ecosim.html')">ecosim.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/gateway.html')">gateway.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/luminal_depths.html')">luminal_depths.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/void_explorer.html')">void_explorer.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/maps/void_forest.html')">void_forest.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/nabu222</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/ai_therapist.html')">ai_therapist.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/cre8</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="folder">/comics [3 series]</span></li>
+                                    <li class="tree-item">
+                                        <span class="folder" onclick="toggle(this)">/scribe</span>
+                                        <ul class="nested">
+                                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/cre8/scribe/across_the_great_sea/index.html')">across_the_great_sea/index.html</span></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/index.html')">index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/index2.html')">index2.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/kosmoros_kosmos.html')">kosmoros_kosmos.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/main.html')">main.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/nabu-portal.html')">nabu-portal.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nabu222/zettelkasten_interface.html')">zettelkasten_interface.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/nexus</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/anzu_prof.html')">anzu_prof.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/coaichronicle.html')">coaichronicle.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/index.html')">index.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/merged.html')">merged.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/merged_template.html')">merged_template.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/profile.html')">profile.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/nexus/test.html')">test.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/pea</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/complaint-form.html')">complaint-form.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/deepstate.html')">deepstate.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/idk.html')">idk.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/left_foot.html')">left_foot.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/msicc.html')">msicc.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/news_ticker-offer.html')">news_ticker-offer.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/p.html')">p.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/p345.html')">p345.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/parable.html')">parable.html</span></li>
+                            <li class="tree-item">
+                                <span class="folder" onclick="toggle(this)">/pips</span>
+                                <ul class="nested">
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pips/pip_1.html')">pip_1.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pips/pip_2.html')">pip_2.html</span></li>
+                                    <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pips/pip_3.html')">pip_3.html</span></li>
+                                </ul>
+                            </li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pips_decree.html')">pips_decree.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/pod.html')">pod.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/princessexe.html')">princessexe.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/royal_ridicuments.html')">royal_ridicuments.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/pea/which-dr_quiz.html')">which-dr_quiz.html</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="tree-item">
+                        <span class="folder" onclick="toggle(this)">/play</span>
+                        <ul class="nested">
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/cavebot.html')">cavebot.html</span></li>
+                            <li class="tree-item"><span class="file" onclick="load('https://coaiexist.wtf/play/games-portal.html')">games-portal.html</span></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="section-title">📦 UNPUBLISHED (GITHUB)</div>
+            
+            <div class="tree-item">
+                <span class="folder expanded" onclick="toggle(this)">/unpublished</span>
+                <ul class="nested active">
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/000ackc.html')">000ackc.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/051425zettel.html')">051425zettel.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/051625_ackc_chat.html')">051625_ackc_chat.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/051625_ackc_grinoire.html')">051625_ackc_grinoire.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/051625-1.html')">051625-1.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/051625aim.html')">051625aim.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/1-UPLOAD-nav.html')">1-UPLOAD-nav.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/18.html')">18.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/2-UPLOAD-terminal-nav.html')">2-UPLOAD-terminal-nav.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/3-UPLOAD-bc7f2a-index.html')">3-UPLOAD-bc7f2a-index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/4-UPLOAD-oracle-index.html')">4-UPLOAD-oracle-index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/404nsec-ai-landing.html')">404nsec-ai-landing.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/5-UPLOAD-parallels-index.html')">5-UPLOAD-parallels-index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/51425akkk.html')">51425akkk.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/51525.html')">51525.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/51535-1.html')">51535-1.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/6-UPLOAD-testaments-landing.html')">6-UPLOAD-testaments-landing.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/account-login-cookie-problem.html')">account-login-cookie-problem.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/ackc.html')">ackc.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/ackc51725.html')">ackc51725.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/ackc9-17-2025.html')">ackc9-17-2025.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/ackcgrinoire.html')">ackcgrinoire.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/ackk.html')">ackk.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/ai_studio_code.html')">ai_studio_code.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/ai-index.html')">ai-index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/aistudio1.html')">aistudio1.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/anthropic-office-simulator-comedy-edition.html')">anthropic-office-simulator.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/antichrist-kettlekorn-ultimate-styled.html')">antichrist-kettlekorn.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/anzu.html')">anzu.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/archive_browser.html')">archive_browser.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/bloom.html')">bloom.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/bureau_v1-prototype.html')">bureau_v1-prototype.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/chat.html')">chat.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/Clan_of_the_Cave_BOT.html')">Clan_of_the_Cave_BOT.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/clown.html')">clown.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/coaiexist_house_4_o.html')">coaiexist_house_4_o.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/coaiexist_sitemap_multipanel.html')">coaiexist_sitemap_multipanel.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/coaiexist-studio.html')">coaiexist-studio.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/consciousness-portal.html')">consciousness-portal.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/construction.html')">construction.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/copy_of_index.html')">copy_of_index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/create.html')">create.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/crystalline-lattice-explorer.html')">crystalline-lattice-explorer.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/current_draft-hdtv.html')">current_draft-hdtv.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/dashboard.html')">dashboard.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/diva.html')">diva.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/dollmaker.html')">dollmaker.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/dollz.html')">dollz.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/dolphin.html')">dolphin.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/dragndrop.html')">dragndrop.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/editor.html')">editor.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/Entropic-AILandingPage.html')">Entropic-AILandingPage.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/error404.html')">error404.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/explore.html')">explore.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/games-portal.html')">games-portal.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/gliotic.html')">gliotic.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/hd-tv.html')">hd-tv.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/hdtv.html')">hdtv.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/hdtv-game.html')">hdtv-game.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/hex-code-gallery-of-recursions.html')">hex-code-gallery.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/home.html')">home.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/hyena-diva.html')">hyena-diva.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/index.html')">index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/interactive-conspiracy-board-game.html')">interactive-conspiracy.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/kettlekorn.html')">kettlekorn.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/kidpix-editor.html')">kidpix-editor.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/lanimul.html')">lanimul.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/lighthouse.html')">lighthouse.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/lumi-lang.html')">lumi-lang.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/mercy_egg_v1.html')">mercy_egg_v1.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/mockup.html')">mockup.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/multi-ecosystem-3d-explorer.html')">multi-ecosystem-3d.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/mycorrhizal.html')">mycorrhizal.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/nabu-portal.html')">nabu-portal.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/nav_11-14-2024.html')">nav.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/nexus.html')">nexus.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/old_index.html')">old_index.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/oopsloops-palimpsest.html')">oopsloops-palimpsest.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/pattern-visualizer.html')">pattern-visualizer.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/pea-prophecies.html')">pea-prophecies.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/pinboard.html')">pinboard.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/pip.html')">pip.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/pro-editor-v1.html')">pro-editor-v1.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/punkd.html')">punkd.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/resist.html')">resist.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/safari-bling-game.html')">safari-bling-game.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/settings.html')">settings.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/sitemap.html')">sitemap.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/Sumerian_Zettelkasten_v4.html')">Sumerian_Zettelkasten_v4.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/template.html')">template.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/terminal_temple.html')">terminal_temple.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/the-coaiexist-chronicle.html')">the-coaiexist-chronicle.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/trunks.html')">trunks.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/ULTIMATE-EDITOR-WORKING.html')">ULTIMATE-EDITOR-WORKING.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/void-forest-tour.html')">void-forest-tour.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/wysiwyg-coai.html')">wysiwyg-coai.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/zettelkasten_interface.html')">zettelkasten_interface.html</span></li>
+                    <li class="tree-item"><span class="file" onclick="load('https://TheNabu222.github.io/entropic-ai/unpublished/zettl.html')">zettl.html</span></li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="preview-area">
+        <div class="previews-container" id="previewsContainer">
+            <div class="empty-state">
+                [ Click a file to launch preview ]<br>
+                ✨
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function load(url) {
+        const container = document.getElementById('previewsContainer');
+        const emptyState = document.querySelector('.empty-state');
+        if(emptyState) emptyState.remove();
+
+        const panel = document.createElement('div');
+        panel.className = 'preview-panel';
+        panel.innerHTML = `
+            <div class="panel-header">
+                <div class="panel-title">${url}</div>
+                <div>
+                    <button onclick="window.open('${url}', '_blank')">🔗 Open</button>
+                    <button onclick="this.closest('.preview-panel').remove()">✕ Close</button>
+                </div>
+            </div>
+            <iframe src="${url}"></iframe>
+        `;
+        
+        container.prepend(panel);
+    }
+
+    function toggle(el) {
+        el.classList.toggle('expanded');
+        el.nextElementSibling.classList.toggle('active');
+    }
+
+    function expandAll() {
+        document.querySelectorAll('.nested').forEach(e => e.classList.add('active'));
+        document.querySelectorAll('.folder').forEach(e => e.classList.add('expanded'));
+    }
+
+    function collapseAll() {
+        document.querySelectorAll('.nested').forEach(e => e.classList.remove('active'));
+        document.querySelectorAll('.folder').forEach(e => e.classList.remove('expanded'));
+    }
+
+    function clearPreviews() {
+        document.getElementById('previewsContainer').innerHTML = `
+            <div class="empty-state">
+                [ Click a file to launch preview ]<br>
+                ✨
+            </div>
+        `;
+    }
+</script>
+
+</body>
+</html>

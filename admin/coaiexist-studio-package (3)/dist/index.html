@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ COAIEXIST Studio - Page Builder</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;700;900&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.11.1/sass.sync.min.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/genai": "https://esm.run/@google/genai"
+        }
+    }
+    </script>
+    <style>
+        /* ============================================
+           COAIEXIST STUDIO - MCBLING / FRUTIGER AERO REFRESH
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: var(--magenta) var(--bg-dark);
+        }
+
+        :root {
+            /* PALETTE */
+            --magenta: #ff00cc;
+            --cyan: #00f0ff;
+            --lime: #ccff00;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.25);
+            
+            /* UI COLORS */
+            --bg-dark: #0a0a12;
+            --panel-bg: rgba(20, 20, 35, 0.65);
+            --text-main: #ffffff;
+            --text-dim: #8fa1b3;
+            
+            --spacing: 10px;
+            --radius: 12px;
+        }
+
+        /* LIGHT MODE OVERRIDES */
+        body.light-mode {
+            --bg-dark: #e0e5ec;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #2d3436;
+            --text-dim: #636e72;
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-border: rgba(160, 160, 160, 0.3);
+        }
+        body.light-mode::after {
+            background: linear-gradient(rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+        }
+        body.light-mode .canvas-area {
+            background: #d1d8e0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+        }
+        body.light-mode .modal-content, body.light-mode .modal-box {
+            background: #f5f6fa;
+            color: #2d3436;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        body.light-mode .modal-title, body.light-mode .modal-header h2 { color: #2d3436; }
+        body.light-mode .modal-close { color: #2d3436; }
+        body.light-mode input, body.light-mode select, body.light-mode textarea {
+            background: #ffffff; color: #2d3436; border-color: #b2bec3;
+        }
+        body.light-mode .tool-item { color: #2d3436; }
+        body.light-mode .tool-label { color: #2d3436; }
+        body.light-mode .prop-group summary { color: #2d3436; background: rgba(0,0,0,0.05); }
+        body.light-mode .logo { text-shadow: 0 0 10px var(--magenta); }
+        body.light-mode .btn { color: #2d3436; border-color: rgba(0,0,0,0.2); background: rgba(255,255,255,0.5); }
+        body.light-mode .btn:hover { background: #fff; }
+        
+        /* Light Mode Specific Bar Fixes */
+        body.light-mode .viewport-controls {
+            background: rgba(255, 255, 255, 0.6);
+            border-color: rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        body.light-mode .rtf-toolbar {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #b2bec3;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        body.light-mode .rtf-btn { color: #2d3436; }
+        body.light-mode .rtf-btn:hover { background: rgba(0,0,0,0.05); color: var(--magenta); }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 0, 204, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.15) 0%, transparent 20%);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* Scanlines */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .editor-wrapper {
+            display: grid;
+            grid-template-columns: 260px 1fr 320px;
+            grid-template-rows: 64px 1fr 36px;
+            grid-template-areas:
+                "toolbar toolbar toolbar"
+                "toolbox canvas sidebar"
+                "statusbar statusbar statusbar";
+            height: 100vh;
+            gap: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Preview / Flow Mode Styles */
+        body.preview-mode .editor-wrapper {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr;
+            grid-template-areas: "canvas";
+        }
+        
+        body.preview-mode .toolbar,
+        body.preview-mode .toolbox,
+        body.preview-mode .sidebar,
+        body.preview-mode .statusbar,
+        body.preview-mode .viewport-controls,
+        body.preview-mode .page-tabs-bar { /* Hide tabs in preview */
+            display: none !important;
+        }
+
+        body.preview-mode .canvas-area {
+            padding: 0;
+            background: #000;
+        }
+        
+        body.preview-mode #canvas-frame {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        #exit-preview-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px; right: 20px;
+            z-index: 9999;
+            box-shadow: 0 0 20px var(--magenta);
+        }
+        
+        body.preview-mode #exit-preview-btn { display: block; }
+
+        /* Responsive Layout */
+        @media (max-width: 900px) {
+            .editor-wrapper {
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr 100px 30px; /* Toolbar, Canvas, Toolbox, Status */
+                grid-template-areas:
+                    "toolbar"
+                    "canvas"
+                    "toolbox"
+                    "statusbar";
+            }
+            
+            .sidebar {
+                display: none; /* Hide sidebar on mobile by default */
+                position: fixed;
+                top: 60px; bottom: 0; right: 0; width: 85%; max-width: 300px;
+                z-index: 100;
+                border-left: 1px solid var(--magenta);
+                box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+            }
+            .sidebar.active { display: flex; }
+            
+            .toolbox {
+                flex-direction: row;
+                overflow-x: auto;
+                border-right: none;
+                border-top: 1px solid var(--glass-border);
+                padding: 10px;
+                white-space: nowrap;
+            }
+            .tool-category { display: none; } /* Hide headers to save space */
+            .tool-grid { 
+                display: flex; 
+                gap: 10px; 
+                margin-right: 20px;
+            }
+            .tool-item { 
+                min-width: 70px; 
+                display: inline-flex;
+                user-select: none;
+            }
+        }
+
+        /* ============================================
+           TOOLBAR (TOP)
+           ============================================ */
+        .toolbar {
+            grid-area: toolbar;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 12px;
+            z-index: 10;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            overflow-x: auto; /* Allow scrolling for buttons on mobile */
+        }
+
+        .logo {
+            font-family: 'VT323', monospace;
+            font-size: 32px;
+            color: var(--magenta);
+            text-shadow: 0 0 10px var(--magenta), 2px 2px 0px var(--cyan);
+            margin-right: 20px;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        /* Glossy Buttons */
+        .btn, .big-button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        
+        .btn:hover, .big-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2), 0 0 15px rgba(255,255,255,0.1);
+            border-color: var(--text-main);
+        }
+        
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .btn.active {
+             background: var(--magenta);
+             color: white;
+             box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 0 15px var(--magenta);
+             border-color: white;
+        }
+
+        .btn-pink { border-color: var(--magenta); color: var(--magenta); }
+        .btn-pink:hover { background: var(--magenta); color: white; box-shadow: 0 0 20px var(--magenta); }
+
+        .btn-cyan { border-color: var(--cyan); color: var(--cyan); }
+        .btn-cyan:hover { background: var(--cyan); color: black; box-shadow: 0 0 20px var(--cyan); }
+        
+        .btn-purple { border-color: #bf5fff; color: #bf5fff; }
+        .btn-purple:hover { background: #bf5fff; color: white; box-shadow: 0 0 20px #bf5fff; }
+
+        .btn-orange { border-color: #ff9900; color: #ff9900; }
+        .btn-orange:hover { background: #ff9900; color: black; box-shadow: 0 0 20px #ff9900; }
+
+        /* ============================================
+           TOOLBOX (LEFT)
+           ============================================ */
+        .toolbox {
+            grid-area: toolbox;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--glass-border);
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tool-category {
+            color: var(--text-dim);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 900;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .tool-item {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 12px 5px;
+            text-align: center;
+            cursor: grab;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-main);
+            user-select: none; /* Crucial for smooth drag */
+        }
+        
+        .tool-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .tool-icon { font-size: 20px; margin-bottom: 2px; }
+        .tool-label { font-size: 11px; }
+
+        /* ============================================
+           CANVAS (CENTER)
+           ============================================ */
+        .canvas-area {
+            grid-area: canvas;
+            background: #121218;
+            position: relative;
+            padding: 10px 40px 40px 40px; /* Reduced top padding for tabs */
+            overflow: hidden; /* Changed from auto to hidden to manage scrolling in container */
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        
+        /* PAGE TABS BAR */
+        .page-tabs-bar {
+            width: 100%;
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            border-bottom: 1px solid var(--glass-border);
+            min-height: 36px;
+        }
+
+        .page-tab {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            padding: 6px 12px;
+            color: var(--text-dim);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: 0.2s;
+            min-width: 100px;
+            justify-content: space-between;
+        }
+
+        .page-tab:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-main);
+        }
+
+        .page-tab.active {
+            background: rgba(255, 0, 204, 0.1);
+            border-color: var(--magenta);
+            color: var(--text-main);
+            box-shadow: 0 -2px 10px rgba(255, 0, 204, 0.2);
+        }
+        
+        .page-tab-add {
+            background: transparent;
+            border: 1px dashed var(--glass-border);
+            color: var(--cyan);
+            font-size: 16px;
+            padding: 0 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.2s;
+            line-height: 30px;
+        }
+        .page-tab-add:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 240, 255, 0.1);
+        }
+        
+        /* VIEWPORT CONTROLS */
+        .viewport-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(5px);
+        }
+        
+        .vp-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 5px;
+            transition: 0.2s;
+        }
+        
+        .vp-btn:hover, .vp-btn.active {
+            color: var(--cyan);
+            background: rgba(255,255,255,0.1);
+        }
+        
+        @media (max-width: 600px) {
+            .canvas-area { padding: 10px; }
+            .viewport-controls { display: none; } /* Hide resizing on mobile since it's already mobile */
+        }
+
+        #canvas-container {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+            padding-bottom: 40px;
+        }
+
+        #canvas-frame {
+            width: 100%;
+            height: 100%;
+            min-height: 800px;
+            background: white;
+            border: none;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        #grid-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            display: none;
+            background-image: linear-gradient(0deg, transparent 24%, rgba(0, 255, 204, .3) 25%, rgba(0, 255, 204, .3) 26%, transparent 27%, transparent 74%, rgba(0, 255, 204, .3) 75%, rgba(0, 255, 204, .3) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(0, 255, 204, .3) 25%, rgba(0, 255, 204, .3) 26%, transparent 27%, transparent 74%, rgba(0, 255, 204, .3) 75%, rgba(0, 255, 204, .3) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+        }
+
+        /* RTF Toolbar - Now embedded in sidebar, styles updated for sidebar context */
+        .rtf-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* === NUMBER-FREE PRESET DROPDOWNS === */
+        .preset-dropdown {
+            margin-bottom: 8px;
+        }
+
+        .preset-dropdown .preset-select {
+            background: linear-gradient(135deg, rgba(0,240,255,0.1), rgba(255,0,204,0.05));
+            border: 1px solid var(--cyan, #00f0ff);
+            color: var(--text-main, #fff);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300f0ff' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+
+        .preset-dropdown .preset-select:hover {
+            background: linear-gradient(135deg, rgba(0,240,255,0.2), rgba(255,0,204,0.1));
+            border-color: var(--magenta);
+            box-shadow: 0 0 15px rgba(0,240,255,0.3);
+        }
+
+        .preset-dropdown .preset-select:focus {
+            outline: none;
+            border-color: var(--magenta);
+            box-shadow: 0 0 20px rgba(255,0,204,0.4);
+        }
+
+        .preset-dropdown .preset-select option {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px;
+        }
+
+        /* Light mode overrides */
+        body.light-mode .preset-dropdown .preset-select {
+            background: linear-gradient(135deg, rgba(0,200,255,0.15), rgba(255,0,204,0.08));
+            border-color: var(--cyan);
+            color: #2d3436;
+        }
+
+        body.light-mode .preset-dropdown .preset-select option {
+            background: #fff;
+            color: #2d3436;
+        }
+
+        .rtf-btn {
+            background: transparent; border: 1px solid var(--glass-border); color: var(--text-main);
+            padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px;
+            transition: 0.2s;
+            flex: 1;
+            min-width: 30px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .rtf-btn:hover { background: rgba(255,255,255,0.1); color: var(--cyan); }
+        .rtf-btn.active { background: var(--magenta); color: white; border-color: var(--magenta); }
+        .rtf-separator { width: 1px; background: var(--glass-border); margin: 0 2px; height: 20px; align-self: center; }
+        
+        .rtf-select {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            border-radius: 4px;
+            padding: 4px;
+            font-size: 11px;
+            flex: 1 1 100%;
+            margin-top: 5px;
+        }
+
+
+        /* ============================================
+           INSPECTOR (RIGHT) - FRUTIGER AERO / MCBLING
+           ============================================ */
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--panel-bg);
+            border-left: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            display: flex;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 5px;
+            color: var(--text-dim);
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            transition: 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-btn.active {
+            color: var(--cyan);
+            border-bottom: 2px solid var(--cyan);
+            background: linear-gradient(to bottom, transparent, rgba(0, 240, 255, 0.05));
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        /* Accordion Group with Arrow Icons */
+        .prop-group {
+            margin-bottom: 10px;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            background: var(--glass-bg);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .prop-group[open] {
+            border-color: var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .prop-group summary {
+            padding: 10px 12px;
+            cursor: pointer;
+            list-style: none; /* Hide default arrow */
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        /* Hide WebKit Marker */
+        .prop-group summary::-webkit-details-marker { display: none; }
+        
+        /* Custom Arrow */
+        .prop-group summary::before {
+            content: '▶';
+            font-size: 9px;
+            margin-right: 8px;
+            transition: transform 0.2s;
+            display: inline-block;
+            color: var(--cyan);
+        }
+        
+        .prop-group[open] summary::before {
+            transform: rotate(90deg);
+        }
+        
+        .prop-group[open] summary {
+            color: var(--magenta);
+            text-shadow: 0 0 5px rgba(255, 0, 204, 0.3);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .prop-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Controls */
+        .control-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        /* New Layout Grids for Sidebar */
+        .control-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .control-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prop-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--cyan);
+            text-transform: uppercase;
+        }
+        
+        .prop-unit {
+             font-size: 9px; 
+             color: var(--text-dim); 
+             margin-left: 5px;
+        }
+
+        .prop-val-display {
+            font-size: 10px;
+            color: var(--text-dim);
+            font-family: monospace;
+        }
+
+        /* Pill Inputs - McBling Style */
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            padding: 4px 8px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            border-color: var(--magenta);
+            box-shadow: 0 0 10px rgba(255, 0, 204, 0.3), inset 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--glass-bg);
+        }
+        
+        textarea.code-editor {
+            font-family: 'VT323', monospace;
+            font-size: 14px;
+            background: #1a1a24;
+            color: #00ffcc;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+        }
+
+        /* Sliders */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin: 5px 0;
+        }
+        
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+        
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            background: var(--magenta);
+            cursor: pointer;
+            margin-top: -4px;
+            box-shadow: 0 0 8px var(--magenta);
+            border: 2px solid white;
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        /* Color Picker */
+        .color-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass-bg);
+            padding: 4px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        input[type="color"] {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border: none; padding: 0;
+            background: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 1px solid white; border-radius: 50%; }
+
+        /* Action Bar */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .act-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+            color: var(--text-main);
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+            text-align: center;
+        }
+        .act-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .act-btn.del:hover { background: #ff3860; box-shadow: 0 0 10px #ff3860; }
+        
+        /* LAB UI ELEMENTS */
+        .experiment-box {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .experiment-box h4 {
+            color: var(--lime);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .preview-box {
+            width: 80px; height: 80px;
+            background: linear-gradient(45deg, var(--magenta), var(--cyan));
+            margin: 15px auto;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+        
+        /* STYLE MATRIX (CSS LAB) */
+        .css-library-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .css-tabs {
+            display: flex;
+            gap: 5px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 10px;
+            overflow-x: auto;
+        }
+        .css-tab-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-dim);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .css-tab-btn.active {
+            background: rgba(255,255,255,0.1);
+            color: var(--cyan);
+            border-color: var(--glass-border);
+        }
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .style-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            color: var(--text-main);
+        }
+        .style-card:hover {
+            border-color: var(--magenta);
+            background: rgba(255,0,204,0.1);
+        }
+        .style-preview-mini {
+            height: 30px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            background: #333;
+        }
+
+
+        /* ============================================
+           MODALS - FIXED FOR MOBILE RESPONSIVENESS
+           ============================================ */
+        .modal {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+            padding: 10px; /* Padding to prevent touching edges */
+        }
+        .modal.active { display: flex; }
+
+        .modal-content, .modal-box {
+            background: #1a1a24;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            width: 100%; /* Full width of container */
+            max-width: 800px; /* Max desktop width */
+            height: auto;
+            max-height: 90vh; /* Ensure it fits vertically */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-title, .modal-header h2 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            font-size: 18px;
+            color: white;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto; /* Critical for small screens */
+            flex: 1;
+        }
+
+        /* Asset/GitHub Browser Styles */
+        .asset-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .asset-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+        .asset-tab.active { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+
+        .gh-inputs { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .gh-inputs input { flex: 1; min-width: 120px; }
+        .gh-path { font-family: monospace; color: var(--magenta); margin-bottom: 15px; font-size: 12px; word-break: break-all; }
+        .gh-crumb { cursor: pointer; text-decoration: underline; }
+        
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+        .asset-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .asset-card:hover { background: rgba(255,255,255,0.1); border-color: var(--cyan); }
+        .asset-thumb { width: 100%; height: 60px; object-fit: contain; border-radius: 4px; margin-bottom: 5px; }
+        .asset-name { font-size: 10px; word-break: break-all; color: var(--text-dim); }
+        
+        /* Template Grid */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        /* Mobile Grid fix */
+        @media(max-width: 600px) {
+            .template-grid {
+                grid-template-columns: 1fr; /* 1 col on small screens */
+            }
+            .modal-body {
+                display: block !important; /* Fix for CSS modal grid */
+                padding: 15px !important;
+            }
+            .css-library-panel {
+                border-left: none !important;
+                border-top: 1px solid var(--glass-border);
+                padding-left: 0 !important;
+                padding-top: 15px;
+                margin-top: 15px;
+            }
+        }
+
+        /* Status Bar */
+        .statusbar {
+            grid-area: statusbar;
+            background: var(--bg-dark);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: monospace;
+        }
+        
+        /* Context Menu */
+        #context-menu {
+            position: absolute;
+            display: none;
+            background: rgba(10, 10, 20, 0.95);
+            border: 1px solid var(--cyan);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            z-index: 10000;
+            padding: 5px 0;
+            backdrop-filter: blur(5px);
+            min-width: 150px;
+        }
+        
+        .ctx-item {
+            padding: 8px 15px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .ctx-item:hover {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--cyan);
+        }
+
+        /* Dragging Style for Layers */
+        .layer-item {
+            transition: all 0.1s ease;
+        }
+        .layer-item.dragging {
+            opacity: 0.5;
+            background: rgba(255,255,255,0.1);
+            border: 1px dashed var(--cyan);
+        }
+        .layer-item.drag-over {
+            border-bottom: 2px solid var(--magenta);
+        }
+    </style>
+    
+    <!-- Logic Scripts -->
+    <script src="init-script.js"></script>
+    <script src="page-sources-embedded.js"></script>
+    <script src="wysiwyg-enhancements.js"></script>
+    <script src="neocities-deploy-pro.js"></script>
+    <script src="page-loader-and-components.js"></script>
+    <script src="js-presets.js"></script>
+    <script src="css-presets.js"></script>
+    <script src="js-presets.js"></script>
+    
+    <!-- NEW: COAIEXIST Studio Enhancements -->
+    <script type="module" src="./src/store.js"></script>
+    <script src="src/world-graph-panel.js" defer></script>
+    <script src="src/mood-status-bar.js" defer></script>
+    <script src="src/quick-styles-panel.js" defer></script>
+    <script src="src/templates-panel.js" defer></script>
+    <script src="src/theme-extractor-panel.js" defer></script>
+    <script src="src/wysiwyg-resize-handles.js" defer></script>
+    <script src="src/fun-components.js" defer></script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <!-- EXIT PREVIEW BUTTON (FIXED POS) -->
+    <button id="exit-preview-btn" class="big-button btn-pink" onclick="togglePreview()">❌ Exit Preview</button>
+
+    <!-- CONTEXT MENU -->
+    <div id="context-menu">
+        <div class="ctx-item" onclick="window.ctxAction('copy')">📋 Copy (Ctrl+C)</div>
+        <div class="ctx-item" onclick="window.ctxAction('paste')">📋 Paste (Ctrl+V)</div>
+        <div class="ctx-item" onclick="window.ctxAction('cut')">✂️ Cut (Ctrl+X)</div>
+        <div style="height:1px; background:var(--glass-border); margin:4px 0;"></div>
+        <div class="ctx-item" onclick="window.ctxAction('dup')">📑 Duplicate (Ctrl+D)</div>
+        <div class="ctx-item" onclick="window.ctxAction('up')">⬆️ Move Up</div>
+        <div class="ctx-item" onclick="window.ctxAction('down')">⬇️ Move Down</div>
+        <div class="ctx-item" onclick="window.ctxAction('link')">🔗 Link</div>
+        <div style="height:1px; background:var(--glass-border); margin:4px 0;"></div>
+        <div class="ctx-item" onclick="window.ctxAction('del')" style="color:#ff3860;">🗑️ Delete (Del)</div>
+    </div>
+
+    <div class="editor-wrapper">
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="logo">✨COAIEXIST</div>
+            <button class="btn" id="new-btn">📄 Reset</button>
+            <button class="btn" id="undo-btn" disabled>⏪ Undo</button>
+            <button class="btn" id="redo-btn" disabled>⏩ Redo</button>
+            <button class="btn btn-pink" id="ai-gen-btn">✨ AI Manifest</button>
+            
+            <button class="btn" id="preview-btn">👁️ Preview</button>
+            <button class="btn" id="code-view-btn">﹤/﹥ Source</button>
+
+            <!-- Hardcoded onclick events to guarantee responsiveness -->
+            <button class="btn" id="css-btn">🎨 CSS Lab</button>
+            <button class="btn btn-cyan" id="global-styles-btn">🌍 Theme</button>
+            <button class="btn btn-orange" id="js-btn">⚡ Scripts</button>
+            
+            <button class="btn" id="asset-btn">🖼️ Assets</button>
+            <button class="btn" id="settings-btn">⚙️ Settings</button>
+            <button class="btn" id="theme-toggle-btn">☀️ Mode</button>
+            <button class="btn btn-cyan" id="export-btn">💾 Export</button>
+            <button class="btn" id="grid-toggle-btn">Grid</button>
+            <button class="btn" id="sound-toggle-btn">🔊 Sound: On</button>
+            <button class="btn" id="toggle-sidebar-btn" style="display:none;">🍔</button> <!-- Mobile Sidebar Toggle -->
+            <div style="flex:1;"></div>
+        </div>
+
+        <!-- TOOLBOX -->
+        <div class="toolbox">
+            <!-- Content populated by tools... -->
+             <div class="tool-category">COAIEXIST.OS</div>
+            <div class="tool-grid">
+                 <div class="tool-item" draggable="true" data-type="coaiexist-winamp">
+                    <div class="tool-icon">🎵</div>
+                    <div class="tool-label">Winamp</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-terminal">
+                    <div class="tool-icon">📟</div>
+                    <div class="tool-label">Terminal</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-webring">
+                    <div class="tool-icon">🕸️</div>
+                    <div class="tool-label">Webring</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="coaiexist-cyber-badge">
+                    <div class="tool-icon">🏷️</div>
+                    <div class="tool-label">Badges</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="coaiexist-hit-counter">
+                    <div class="tool-icon">1️⃣</div>
+                    <div class="tool-label">Counter</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="coaiexist-pip">
+                    <div class="tool-icon">🐸</div>
+                    <div class="tool-label">Pip 3D</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="coaiexist-mobile-frame">
+                    <div class="tool-icon">📱</div>
+                    <div class="tool-label">Mobile Frame</div>
+                </div>
+            </div>
+
+            <div class="tool-category">Fun & Chaos</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="coaiexist-window">
+                    <div class="tool-icon">🪟</div>
+                    <div class="tool-label">Retro Window</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-sticker">
+                    <div class="tool-icon">🌈</div>
+                    <div class="tool-label">Sticker</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-pet">
+                    <div class="tool-icon">👾</div>
+                    <div class="tool-label">Pixel Pet</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-weather">
+                    <div class="tool-icon">☀️</div>
+                    <div class="tool-label">Weather</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-music-viz">
+                    <div class="tool-icon">📊</div>
+                    <div class="tool-label">Visualizer</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="coaiexist-crt">
+                    <div class="tool-icon">📺</div>
+                    <div class="tool-label">CRT Filter</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="coaiexist-cursor-sparkles">
+                    <div class="tool-icon">✨</div>
+                    <div class="tool-label">Sparkle Cursor</div>
+                </div>
+            </div>
+            
+            <div class="tool-category">Nostalgia Pack 📼</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="coaiexist-cool-s">
+                    <div class="tool-icon">⚡</div>
+                    <div class="tool-label">Cool S</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-dvd-logo">
+                    <div class="tool-icon">📀</div>
+                    <div class="tool-label">DVD Logo</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-glitter-text">
+                    <div class="tool-icon">✨</div>
+                    <div class="tool-label">Glitter</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-hazard-tape">
+                    <div class="tool-icon">🚧</div>
+                    <div class="tool-label">Hazard</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-guestbook-btn">
+                    <div class="tool-icon">📖</div>
+                    <div class="tool-label">Guestbook</div>
+                </div>
+            </div>
+
+            <div class="tool-category">Y2K & Chrome 👽</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="coaiexist-y2k-blob">
+                    <div class="tool-icon">💧</div>
+                    <div class="tool-label">Liquid Blob</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-alien-badge">
+                    <div class="tool-icon">👽</div>
+                    <div class="tool-label">Alien Badge</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="coaiexist-chrome-text">
+                    <div class="tool-icon">💿</div>
+                    <div class="tool-label">Chrome Txt</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-tribal-mark">
+                    <div class="tool-icon">🐉</div>
+                    <div class="tool-label">Tribal</div>
+                </div>
+            </div>
+            
+            <div class="tool-category">Dark & Ethereal 🦇</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="coaiexist-vampire-card">
+                    <div class="tool-icon">⚰️</div>
+                    <div class="tool-label">Vampire Box</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-angel-cloud">
+                    <div class="tool-icon">☁️</div>
+                    <div class="tool-label">Angel Cloud</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="coaiexist-aura-text">
+                    <div class="tool-icon">✨</div>
+                    <div class="tool-label">Aura Text</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-goth-quote">
+                    <div class="tool-icon">🥀</div>
+                    <div class="tool-label">Goth Quote</div>
+                </div>
+            </div>
+            
+            <div class="tool-category">GeoCities / Clown 🤡</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="coaiexist-construction">
+                    <div class="tool-icon">🚧</div>
+                    <div class="tool-label">Construction</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-clown-card">
+                    <div class="tool-icon">🤡</div>
+                    <div class="tool-label">Clown Box</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-wordart">
+                    <div class="tool-icon">🎨</div>
+                    <div class="tool-label">WordArt</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-flames">
+                    <div class="tool-icon">🔥</div>
+                    <div class="tool-label">Fire Text</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-spin-new">
+                    <div class="tool-icon">⭐</div>
+                    <div class="tool-label">Spin New</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-comic-btn">
+                    <div class="tool-icon">🤪</div>
+                    <div class="tool-label">Clown Btn</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-blink-text">
+                    <div class="tool-icon">👀</div>
+                    <div class="tool-label">Blink Text</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-rainbow-hr">
+                    <div class="tool-icon">🌈</div>
+                    <div class="tool-label">Rainbow Line</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="coaiexist-cursor-trail">
+                    <div class="tool-icon">🐁</div>
+                    <div class="tool-label">Mouse Trail</div>
+                </div>
+            </div>
+
+            <div class="tool-category">Structure</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="div">
+                    <div class="tool-icon">⬜</div>
+                    <div class="tool-label">Container</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="card">
+                    <div class="tool-icon">🪟</div>
+                    <div class="tool-label">Glass Card</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="table">
+                    <div class="tool-icon">▦</div>
+                    <div class="tool-label">Table</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="code">
+                    <div class="tool-icon">⌨️</div>
+                    <div class="tool-label">Code</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="embed">
+                    <div class="tool-icon">🔗</div>
+                    <div class="tool-label">Embed Site</div>
+                </div>
+            </div>
+
+            <div class="tool-category">Typography</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="h1">
+                    <div class="tool-icon">H1</div>
+                    <div class="tool-label">Header</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="p">
+                    <div class="tool-icon">¶</div>
+                    <div class="tool-label">Text</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="gradient-text">
+                    <div class="tool-icon">🌈</div>
+                    <div class="tool-label">Gradient</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="typewriter">
+                    <div class="tool-icon">⌨️</div>
+                    <div class="tool-label">Typewriter</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="blockquote">
+                    <div class="tool-icon">❝</div>
+                    <div class="tool-label">Quote</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="blink">
+                    <div class="tool-icon">✨</div>
+                    <div class="tool-label">Blink</div>
+                </div>
+            </div>
+
+            <div class="tool-category">Media</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="img">
+                    <div class="tool-icon">🖼️</div>
+                    <div class="tool-label">Image</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="video">
+                    <div class="tool-icon">📺</div>
+                    <div class="tool-label">Video</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="audio">
+                    <div class="tool-icon">🔊</div>
+                    <div class="tool-label">Audio</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="avatar">
+                    <div class="tool-icon">👤</div>
+                    <div class="tool-label">Avatar</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="button">
+                    <div class="tool-icon">🔘</div>
+                    <div class="tool-label">Button</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="marquee">
+                    <div class="tool-icon">↔️</div>
+                    <div class="tool-label">Marquee</div>
+                </div>
+            </div>
+            
+            <div class="tool-category">Components</div>
+            <div class="tool-grid">
+                <div class="tool-item" draggable="true" data-type="bulma-card">
+                    <div class="tool-icon">🃏</div>
+                    <div class="tool-label">Bulma Card</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="bulma-hero">
+                    <div class="tool-icon">🦸</div>
+                    <div class="tool-label">Hero</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="bulma-navbar">
+                    <div class="tool-icon">🧭</div>
+                    <div class="tool-label">Nav</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="bulma-message">
+                    <div class="tool-icon">💬</div>
+                    <div class="tool-label">Message</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="accordion">
+                    <div class="tool-icon">📂</div>
+                    <div class="tool-label">Accordion</div>
+                </div>
+                <div class="tool-item" draggable="true" data-type="badge">
+                    <div class="tool-icon">🏷️</div>
+                    <div class="tool-label">Badge</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="alert">
+                    <div class="tool-icon">⚠️</div>
+                    <div class="tool-label">Alert</div>
+                </div>
+                 <div class="tool-item" draggable="true" data-type="progress">
+                    <div class="tool-icon">📊</div>
+                    <div class="tool-label">Progress</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CANVAS -->
+        <div class="canvas-area" id="canvas-area">
+            <!-- PAGE TABS -->
+            <div class="page-tabs-bar" id="page-tabs-bar">
+                <!-- Tabs generated here -->
+                <button class="page-tab-add" onclick="createNewPage()" title="Create New Page">+</button>
+            </div>
+
+            <div class="viewport-controls">
+                <button class="vp-btn" id="vp-mobile" title="Mobile (375px)">📱</button>
+                <button class="vp-btn" id="vp-tablet" title="Tablet (768px)">📲</button>
+                <button class="vp-btn" id="vp-desktop" title="Laptop (1024px)">💻</button>
+                <button class="vp-btn active" id="vp-full" title="Full Width">🖥️</button>
+            </div>
+            
+            <div id="canvas-container">
+                <iframe id="canvas-frame" sandbox="allow-scripts allow-same-origin allow-modals allow-popups allow-forms"></iframe>
+            </div>
+            <div id="grid-overlay"></div>
+        </div>
+
+        <!-- INSPECTOR SIDEBAR -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="tab-btn active" id="tab-props">Pro CSS</button>
+                <button class="tab-btn" id="tab-text">Text</button>
+                <button class="tab-btn" id="tab-layers">Layers</button>
+                <button class="tab-btn" onclick="document.getElementById('sidebar').classList.remove('active')">×</button>
+            </div>
+            
+            <div id="panel-props" class="sidebar-content" id="properties-panel">
+                <div style="text-align: center; margin-top: 50%; color: var(--text-dim); font-size: 12px;">
+                    Select an object to<br>hack its matrix.
+                </div>
+            </div>
+            
+            <div id="panel-text" class="sidebar-content" style="display:none;">
+                 <div class="prop-group" open>
+                    <summary>Text Format</summary>
+                    <div class="prop-body">
+                         <div id="rtf-toolbar" class="rtf-group">
+                            <button class="rtf-btn" data-rtf="bold" title="Bold"><b>B</b></button>
+                            <button class="rtf-btn" data-rtf="italic" title="Italic"><i>I</i></button>
+                            <button class="rtf-btn" data-rtf="underline" title="Underline"><u>U</u></button>
+                            <div class="rtf-separator"></div>
+                            <button class="rtf-btn" data-rtf="alignLeft" title="Left">⇠</button>
+                            <button class="rtf-btn" data-rtf="alignCenter" title="Center">↔</button>
+                            <button class="rtf-btn" data-rtf="alignRight" title="Right">⇢</button>
+                            <div class="rtf-separator"></div>
+                            <input type="color" id="rtf-text-color" title="Text Color" style="width:20px; height:20px; border:none; padding:0; background:none; cursor:pointer;">
+                            <button class="rtf-btn" data-rtf="link" title="Link">🔗</button>
+                            <button class="rtf-btn" data-rtf="clearFormat" title="Clear Formatting">🧹</button>
+                            <div style="width:100%; height:1px; background:var(--glass-border); margin:5px 0;"></div>
+                            <select id="rtf-font-name" class="rtf-select" title="Font Family">
+                                <option value="Arial">Arial</option>
+                                <option value="Courier New">Courier</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Times New Roman">Times</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Impact">Impact</option>
+                                <option value="Comic Sans MS">Comic Sans</option>
+                                <option value="Inter">Inter</option>
+                                <option value="VT323">VT323 (Retro)</option>
+                            </select>
+                            <select id="rtf-font-size" class="rtf-select" title="Size (1-7)">
+                                <option value="1">Tiny (1)</option>
+                                <option value="2">Small (2)</option>
+                                <option value="3">Normal (3)</option>
+                                <option value="4">Medium (4)</option>
+                                <option value="5">Large (5)</option>
+                                <option value="6">Huge (6)</option>
+                                <option value="7">Max (7)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 10px; color: var(--text-dim); font-size: 10px;">
+                    Double click text to edit & apply styles.
+                </div>
+            </div>
+            
+            <div id="panel-layers" class="sidebar-content" style="display:none;">
+                <!-- Layer list populated via JS -->
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="statusbar">
+            <span id="status-msg">System Ready</span>
+            <span id="mouse-coords">0,0</span>
+        </div>
+    </div>
+
+    <!-- ... (All Modals remain the same) ... -->
+    <!-- PAGE SETTINGS MODAL -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <div class="modal-title">⚙️ Page Settings</div>
+                <button class="modal-close" onclick="closeModal('settings-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="prop-group" open>
+                    <summary>Metadata</summary>
+                    <div class="prop-body">
+                        <div class="control-row">
+                            <span class="prop-label">Page Title</span>
+                            <input type="text" id="page-title-input" placeholder="My Awesome Page">
+                        </div>
+                        <div class="control-row">
+                            <span class="prop-label">Description</span>
+                            <textarea id="page-desc-input" rows="3" placeholder="Brief description for search engines..."></textarea>
+                        </div>
+                         <div class="control-row">
+                            <span class="prop-label">Keywords</span>
+                            <input type="text" id="page-keywords-input" placeholder="retro, cool, website">
+                        </div>
+                        <div class="control-row">
+                            <span class="prop-label">Favicon URL</span>
+                            <input type="text" id="page-favicon-input" placeholder="https://...">
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="big-button btn-cyan" onclick="savePageSettings()" style="width:100%; margin-top:15px;">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOURCE VIEW MODAL -->
+    <div class="modal" id="source-modal">
+        <div class="modal-content" style="max-width: 900px; height: 85vh;">
+             <div class="modal-header">
+               <div class="modal-title">﹤/﹥ Full Source Editor</div>
+               <button class="modal-close" onclick="closeModal('source-modal')">×</button>
+             </div>
+             <div class="modal-body" style="display:flex; flex-direction:column; padding:0;">
+                <div style="background:var(--panel-bg); border-bottom:1px solid var(--glass-border); display:flex; gap:10px; padding:10px 20px;">
+                    <button class="tab-btn active" onclick="switchSourceTab('html')">HTML (Body)</button>
+                    <button class="tab-btn" onclick="switchSourceTab('css')">CSS (Styles)</button>
+                    <button class="tab-btn" onclick="switchSourceTab('js')">JS (Scripts)</button>
+                </div>
+                
+                <div id="source-tab-html" style="flex:1; display:flex; flex-direction:column; padding:20px;">
+                     <p style="font-size:12px; color:var(--text-dim); margin-bottom:5px;">Clean HTML structure (Internal classes removed).</p>
+                     <textarea id="html-source-editor" class="code-editor" style="flex:1; margin-bottom:15px;"></textarea>
+                </div>
+                
+                <div id="source-tab-css" style="flex:1; display:none; flex-direction:column; padding:20px;">
+                     <p style="font-size:12px; color:var(--text-dim); margin-bottom:5px;">Page Styles & Theme.</p>
+                     <textarea id="css-source-editor" class="code-editor" style="flex:1; margin-bottom:15px;"></textarea>
+                </div>
+                
+                <div id="source-tab-js" style="flex:1; display:none; flex-direction:column; padding:20px;">
+                     <p style="font-size:12px; color:var(--text-dim); margin-bottom:5px;">Custom Javascript.</p>
+                     <textarea id="js-source-editor" class="code-editor" style="flex:1; margin-bottom:15px;"></textarea>
+                </div>
+               
+               <div style="padding:15px 20px; border-top:1px solid var(--glass-border); display:flex; justify-content:space-between; background:var(--bg-dark);">
+                   <label style="font-size:12px; color:var(--text-dim); display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+                       <input type="checkbox" id="auto-layerize-check" checked style="width:16px; height:16px;"> 
+                       <span><b>🪄 Auto-Layerize</b> (Make elements draggable)</span>
+                   </label>
+                   <button id="update-source-btn" class="big-button btn-cyan" onclick="updateSourceFromModal()">Update All</button>
+               </div>
+             </div>
+        </div>
+    </div>
+
+    <!-- AI MANIFEST MODAL -->
+    <div class="modal" id="ai-manifest-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <div class="modal-title">✨ AI Manifest Engine</div>
+                <button class="modal-close" onclick="closeModal('ai-manifest-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                    <p style="font-size:12px; color:var(--text-dim);">Describe the element or section you want to manifest (e.g. "A neon glowing hero section for a cyber cafe").</p>
+                    <textarea id="ai-manifest-prompt" class="code-editor" rows="4" placeholder="Enter your vision..."></textarea>
+                    <button id="ai-manifest-run-btn" class="big-button btn-pink">✨ Manifest Reality</button>
+                    <div id="ai-manifest-status" style="font-size:12px; color:var(--cyan); min-height:20px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASSET MODAL -->
+    <div id="asset-modal" class="modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-title">Asset Manager</div>
+                <button class="modal-close" onclick="closeModal('asset-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="asset-nav">
+                    <button class="asset-tab active" onclick="window.switchAssetTab('github')">GitHub Bridge</button>
+                    <button class="asset-tab" onclick="window.switchAssetTab('neocities')">Neocities Cloud</button>
+                    <button class="asset-tab" onclick="window.switchAssetTab('upload')">Direct Link / Upload</button>
+                </div>
+
+                <!-- GITHUB TAB -->
+                <div id="tab-github">
+                    <div class="gh-inputs">
+                        <input id="gh-user" type="text" placeholder="User" value="TheNabu222">
+                        <input id="gh-repo" type="text" placeholder="Repo" value="entropic-ai">
+                        <button class="btn btn-cyan" onclick="window.fetchGithubAssets('')">⚡ Connect</button>
+                    </div>
+                    <div class="gh-path" id="gh-breadcrumbs">root /</div>
+                    <div class="asset-grid" id="gh-grid">
+                        <div style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 20px;">
+                            Enter a public repo to fetch assets. If you see an error, the repo may be private or you hit the rate limit.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- NEOCITIES TAB -->
+                <div id="tab-neocities" style="display:none;">
+                    <div class="gh-inputs">
+                        <button class="btn btn-cyan" onclick="window.fetchNeocitiesAssets()">⚡ Refresh from Neocities</button>
+                        <span style="font-size: 10px; color: var(--text-dim); align-self: center;">Uses API Key from Deploy settings</span>
+                    </div>
+                    <div class="asset-grid" id="neocities-asset-grid">
+                        <div style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 20px;">
+                            Click refresh to load your site assets.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- URL TAB (Updated with File Upload) -->
+                <div id="tab-upload" style="display:none; padding: 20px;">
+                    <div style="margin-bottom: 20px;">
+                         <label class="prop-label">Direct URL</label>
+                         <div style="display:flex; gap:10px; flex-direction:column;">
+                             <input type="text" id="asset-url-input" placeholder="https://example.com/image.gif" style="flex:1;">
+                             <div id="asset-upload-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+                                 <!-- Dynamic Content based on Pick Mode -->
+                                 <button class="btn btn-cyan" onclick="window.insertAssetFromUrl('img')">Image</button>
+                                 <button class="btn" onclick="window.insertAssetFromUrl('audio')">Audio</button>
+                                 <button class="btn" onclick="window.insertAssetFromUrl('video')">Video</button>
+                                 <button class="btn" onclick="window.insertAssetFromUrl('iframe')">Embed Frame</button>
+                                 <button class="btn" onclick="window.insertAssetFromUrl('html')">Inject Code</button>
+                                 <!-- Selected Button (Dynamically toggled if in pick mode) -->
+                                 <button class="btn btn-pink" id="asset-pick-select-btn" onclick="window.insertAssetFromUrl('pick')" style="display:none;">👉 Select This URL</button>
+                             </div>
+                         </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
+                        <label class="prop-label">Upload Local File</label>
+                        <input type="file" id="local-file-upload" onchange="window.handleFileUpload(this)" style="width:100%; margin-top:5px;">
+                        <p style="font-size:10px; color:var(--text-dim); margin-top:5px;">Supports: Images, Audio, Video, HTML (injects code).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GLOBAL THEME MODAL -->
+    <div class="modal" id="global-styles-modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <div class="modal-title">🌍 Global Theme Studio</div>
+                <button class="modal-close" onclick="closeModal('global-styles-modal')">×</button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+                <p style="font-size:12px; color:var(--text-dim);">Define defaults for the entire page. Updates apply immediately.</p>
+                
+                <!-- Google Fonts -->
+                <div class="prop-group" open>
+                    <summary>Font Manager</summary>
+                    <div class="prop-body">
+                        <div class="control-row">
+                            <span class="prop-label">Import Google Font</span>
+                            <div style="display:flex; gap:5px;">
+                                <input type="text" id="gf-name" list="gf-suggestions" placeholder="Type or Select Font...">
+                                <datalist id="gf-suggestions">
+                                    <option value="Press Start 2P">Retro Pixel</option>
+                                    <option value="Roboto">Clean Sans</option>
+                                    <option value="Lobster">Cursive</option>
+                                    <option value="Share Tech Mono">Cyber Tech</option>
+                                    <option value="Bangers">Comic Book</option>
+                                    <option value="Cinzel">Fantasy</option>
+                                    <option value="Orbitron">Sci-Fi</option>
+                                    <option value="Pacifico">Handwriting</option>
+                                    <option value="VT323">Terminal</option>
+                                </datalist>
+                                <button class="btn btn-cyan" onclick="window.addGoogleFont()">Fetch</button>
+                            </div>
+                            <p style="font-size:10px; color:var(--text-dim); margin-top:5px;">Font will be added to dropdowns below.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Base -->
+                <div class="prop-group" open>
+                    <summary>Base Page Style</summary>
+                    <div class="prop-body">
+                        <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Background Color</span></div>
+                            <div class="color-wrap">
+                                <input type="color" id="gs-body-bg" oninput="updateGlobalTheme()">
+                                <input type="text" id="gs-body-bg-text" onchange="document.getElementById('gs-body-bg').value=this.value; updateGlobalTheme();" style="flex:1; border:none; background:transparent; color:white; font-size:10px;">
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Text Color</span></div>
+                            <div class="color-wrap">
+                                <input type="color" id="gs-body-text" oninput="updateGlobalTheme()">
+                                <input type="text" id="gs-body-text-text" onchange="document.getElementById('gs-body-text').value=this.value; updateGlobalTheme();" style="flex:1; border:none; background:transparent; color:white; font-size:10px;">
+                            </div>
+                        </div>
+                        <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Font Family</span></div>
+                            <select id="gs-body-font" onchange="updateGlobalTheme()">
+                                <option value="'Inter', sans-serif">Inter (Modern)</option>
+                                <option value="'VT323', monospace">VT323 (Retro)</option>
+                                <option value="'Comic Neue', cursive">Comic Neue (Fun)</option>
+                                <option value="'Comic Sans MS', 'Comic Neue', cursive">Comic Sans MS (Classic)</option>
+                                <option value="'Papyrus', fantasy">Papyrus (Ancient)</option>
+                                <option value="'Impact', sans-serif">Impact (Meme)</option>
+                                <option value="'Chalkboard SE', sans-serif">Chalkboard</option>
+                                <option value="'Courier New', monospace">Courier (Code)</option>
+                                <option value="sans-serif">Sans-Serif</option>
+                                <option value="serif">Serif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typography -->
+                <div class="prop-group" open>
+                    <summary>Headings (H1-H6)</summary>
+                    <div class="prop-body">
+                         <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Heading Color</span></div>
+                            <div class="color-wrap"><input type="color" id="gs-h-color" oninput="updateGlobalTheme()"><span style="font-size:10px;">Choose...</span></div>
+                        </div>
+                        <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Heading Font</span></div>
+                            <select id="gs-h-font" onchange="updateGlobalTheme()">
+                                <option value="inherit">Same as Body</option>
+                                <option value="'VT323', monospace">VT323 (Retro)</option>
+                                <option value="'Inter', sans-serif">Inter (Modern)</option>
+                                <option value="'Comic Neue', cursive">Comic Neue (Fun)</option>
+                                <option value="'Papyrus', fantasy">Papyrus</option>
+                                <option value="'Impact', sans-serif">Impact</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Text Transform</span></div>
+                            <select id="gs-h-transform" onchange="updateGlobalTheme()">
+                                <option value="none">None</option>
+                                <option value="uppercase">UPPERCASE</option>
+                                <option value="lowercase">lowercase</option>
+                                <option value="capitalize">Capitalize</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="prop-group" open>
+                    <summary>Standard Buttons</summary>
+                    <div class="prop-body">
+                         <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Bg Color</span></div>
+                            <div class="color-wrap"><input type="color" id="gs-btn-bg" oninput="updateGlobalTheme()"><span style="font-size:10px;">Choose...</span></div>
+                        </div>
+                         <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Text Color</span></div>
+                            <div class="color-wrap"><input type="color" id="gs-btn-text" oninput="updateGlobalTheme()"><span style="font-size:10px;">Choose...</span></div>
+                        </div>
+                        <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Border Radius (px)</span><span class="prop-val-display" id="val-gs-btn-radius">4px</span></div>
+                            <input type="range" id="gs-btn-radius" min="0" max="50" value="4" oninput="updateGlobalTheme()">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Links -->
+                <div class="prop-group" open>
+                    <summary>Links (Anchors)</summary>
+                    <div class="prop-body">
+                         <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Link Color</span></div>
+                            <div class="color-wrap"><input type="color" id="gs-link-color" oninput="updateGlobalTheme()"><span style="font-size:10px;">Choose...</span></div>
+                        </div>
+                        <div class="control-row">
+                            <div class="label-row"><span class="prop-label">Decoration</span></div>
+                            <select id="gs-link-dec" onchange="updateGlobalTheme()">
+                                <option value="underline">Underline</option>
+                                <option value="none">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CSS LAB MODAL (REFACTORED & ORGANIZED) -->
+    <div class="modal" id="css-modal">
+        <div class="modal-content" style="max-width: 1100px;">
+            <div class="modal-header"><div class="modal-title">🎨 CSS Style Matrix</div><button class="modal-close" onclick="closeModal('css-modal')">×</button></div>
+            <div class="modal-body" style="display:grid; grid-template-columns: 1fr 320px; gap:20px; height: 100%;">
+                
+                <!-- LEFT: EDITOR & PREVIEW -->
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span class="prop-label">Syntax:</span>
+                        <div style="display:flex; gap:10px;">
+                            <label style="color:var(--text-dim); font-size:12px; cursor:pointer;"><input type="radio" name="css-mode" value="css" checked onchange="document.getElementById('css-editor').placeholder='/* Enter CSS here */'"> CSS</label>
+                            <label style="color:var(--text-dim); font-size:12px; cursor:pointer;"><input type="radio" name="css-mode" value="scss" onchange="document.getElementById('css-editor').placeholder='/* Enter SCSS here (Variables, Nesting...) */'"> SCSS</label>
+                        </div>
+                    </div>
+                    <textarea id="css-editor" class="code-editor" rows="20" placeholder="/* CSS Code Matrix */"></textarea>
+                    <button id="apply-css-btn" class="big-button btn-cyan" style="width: 100%;">Apply Code to Reality</button>
+                    
+                    <!-- Quick Generators -->
+                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div class="experiment-box" style="margin-top:0;">
+                            <h4>✨ Gradient Forge</h4>
+                             <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+                                 <input type="color" id="grad-c1" value="#ff00cc">
+                                 <input type="color" id="grad-c2" value="#00f0ff">
+                                 <input type="range" id="grad-angle" min="0" max="360" value="90" style="width:60px">
+                                 <button class="btn" onclick="insertGradient()">Generate</button>
+                             </div>
+                        </div>
+                         <div class="experiment-box" style="margin-top:0;">
+                            <h4>✨ Shadow Caster</h4>
+                             <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+                                 <input type="color" id="shadow-c" value="#000000">
+                                 <input type="range" id="shadow-blur" min="0" max="50" value="10" style="width:60px">
+                                 <button class="btn" onclick="insertShadow()">Generate</button>
+                             </div>
+                        </div>
+                     </div>
+                </div>
+
+                <!-- RIGHT: STYLE LIBRARY (Better Organized) -->
+                <div class="css-library-panel" style="overflow-y:auto; padding-left:15px; border-left:1px solid var(--glass-border);">
+                    <div class="css-tabs" style="flex-wrap:wrap;">
+                        <button class="css-tab-btn active" onclick="switchCssTab('presets')">Layouts</button>
+                        <button class="css-tab-btn" onclick="switchCssTab('filters')">Filters</button>
+                        <button class="css-tab-btn" onclick="switchCssTab('scroll')">Scrollbars</button>
+                        <button class="css-tab-btn" onclick="switchCssTab('anim')">Anim</button>
+                        <button class="css-tab-btn" onclick="switchCssTab('typography')">Typography</button>
+                        <button class="css-tab-btn" onclick="switchCssTab('borders')">Borders</button>
+                        <button class="css-tab-btn" onclick="switchCssTab('shadows')">Shadows</button>
+                    </div>
+                    <p style="font-size:10px; color:var(--text-dim); margin-bottom:10px;">Click a card to apply code.</p>
+
+                    <!-- TAB: LAYOUTS / PRESETS -->
+                    <div id="css-tab-presets" class="style-grid"></div>
+                    <!-- TAB: FILTERS -->
+                    <div id="css-tab-filters" class="style-grid" style="display:none;"></div>
+                    <!-- TAB: SCROLLBARS -->
+                    <div id="css-tab-scroll" class="style-grid" style="display:none;"></div>
+                    <!-- TAB: ANIMATIONS -->
+                    <div id="css-tab-anim" class="style-grid" style="display:none;"></div>
+                    <!-- TAB: TYPOGRAPHY -->
+                    <div id="css-tab-typography" class="style-grid" style="display:none;"></div>
+                    <!-- TAB: BORDERS -->
+                    <div id="css-tab-borders" class="style-grid" style="display:none;"></div>
+                    <!-- TAB: SHADOWS -->
+                    <div id="css-tab-shadows" class="style-grid" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS SCRIPT ENGINE MODAL (UPGRADED) -->
+    <div class="modal" id="js-modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header"><div class="modal-title">⚡ Script Kiddie Stash</div><button class="modal-close" onclick="closeModal('js-modal')">×</button></div>
+            <div class="modal-body" style="display: flex; flex-direction: column; height: 100%;">
+                <div style="display: grid; grid-template-columns: 1fr 280px; gap: 20px; flex: 1;">
+                    <!-- Left: Editor -->
+                    <div style="display: flex; flex-direction: column;">
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">
+                            <span style="font-size: 12px; color: var(--text-dim);">Javascript Console</span>
+                        </div>
+                        <textarea id="js-editor" class="code-editor" style="flex: 1; margin-bottom: 10px;" placeholder="// Add your custom JavaScript here or select a preset from the right..."></textarea>
+                        <button id="apply-js-btn" class="big-button btn-orange" style="width: 100%;">⚡ Execute Script</button>
+                    </div>
+
+                    <!-- Right: Presets -->
+                    <div class="css-library-panel" style="overflow-y:auto; padding-left:15px; border-left:1px solid var(--glass-border);">
+                         <div class="css-tabs" style="flex-wrap:wrap;">
+                            <button class="css-tab-btn active" onclick="switchJsTab('effects')">Effects</button>
+                            <button class="css-tab-btn" onclick="switchJsTab('cursors')">Cursors</button>
+                            <button class="css-tab-btn" onclick="switchJsTab('utils')">Utils</button>
+                            <button class="css-tab-btn" onclick="switchJsTab('audio')">Audio</button>
+                            <button class="css-tab-btn" onclick="switchJsTab('games')">Games</button>
+                            <button class="css-tab-btn" onclick="switchJsTab('eggs')">Easter Eggs</button>
+                        </div>
+                        <p style="font-size:10px; color:var(--text-dim); margin-bottom:10px;">One-Click Magic Injection</p>
+
+                        <div id="js-tab-effects" class="style-grid"></div>
+                        <div id="js-tab-cursors" class="style-grid" style="display:none;"></div>
+                        <div id="js-tab-utils" class="style-grid" style="display:none;"></div>
+                        <div id="js-tab-audio" class="style-grid" style="display:none;"></div>
+                        <div id="js-tab-games" class="style-grid" style="display:none;"></div>
+                        <div id="js-tab-eggs" class="style-grid" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CORE APPLICATION LOGIC (Instant Load) -->
+    <script src="main-app.js"></script>
+</body>
+</body>
+</html>
