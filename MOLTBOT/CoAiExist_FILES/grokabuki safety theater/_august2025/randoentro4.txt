@@ -1,0 +1,2508 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entropic Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.sh/@google/genai@0.7.0",
+          "@tailwindcss/browser": "https://esm.sh/@tailwindcss/browser@^4.1.3"
+        }
+      }
+    </script>
+    <style>
+      /* Base styles */
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0d0221; /* Fallback color */
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Prevent scrollbars */
+        color: white;
+      }
+
+      /* Desktop styles */
+      .desktop {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        position: relative; /* For absolute positioning of icons and windows */
+        cursor: default; /* Default desktop cursor */
+        padding-top: 50px; /* Space for top nav bar */
+        padding-left: 10px;
+        background-color: #0d0221;
+        background-image: radial-gradient(circle at top left, #2d1956, #0d0221 60%);
+      }
+
+      /* New Top Nav Bar */
+      .top-nav {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(13, 2, 33, 0.4);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        text-align: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #ff00ff;
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .nav-item {
+        color: #ffc0cb;
+        text-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff;
+        padding: 5px 15px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.9rem;
+        border-radius: 4px;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+      }
+
+      .nav-item:hover {
+        background: rgba(255, 0, 255, 0.2);
+        color: white;
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+      }
+
+
+      /* Icon styles */
+      .icon {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 15px;
+        cursor: pointer;
+        user-select: none;
+        width: 100px;
+        vertical-align: top;
+        text-align: center;
+        background: transparent;
+        border: none;
+        padding: 0;
+        font-family: inherit;
+        color: inherit;
+      }
+
+      .icon img {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 8px;
+        filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+      }
+
+      .icon span {
+        color: white;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-shadow: 0 0 4px #000, 0 0 6px #ff00ff;
+        white-space: normal;
+        word-wrap: break-word;
+        max-width: 100%;
+        text-align: center;
+      }
+
+      /* Window styles */
+      .window {
+        background-color: rgba(26, 10, 56, 0.7);
+        border: 1px solid #ff00ff;
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        position: absolute;
+        top: 50px;
+        left: 100px;
+        width: 320px;
+        height: 240px;
+        display: none;
+        flex-direction: column;
+        z-index: 10;
+        box-sizing: border-box;
+        color: white;
+        border-radius: 5px;
+      }
+
+      .window.active {
+        display: flex;
+        z-index: 20;
+        box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+      }
+
+      .window.resizable {
+        resize: both;
+        overflow: auto;
+        min-width: 200px;
+        min-height: 150px;
+      }
+
+      .window-titlebar {
+        background: linear-gradient(to right, #ff00ff, #8a2be2);
+        color: white;
+        padding: 3px 6px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: grab;
+        height: 24px;
+        box-sizing: border-box;
+        text-shadow: 1px 1px 2px #000;
+        flex-shrink: 0;
+        border-bottom: 1px solid #8a2be2;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+      }
+      .window-titlebar:active {
+        cursor: grabbing;
+      }
+
+      .window-title {
+        margin-right: auto;
+        margin-left: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: calc(100% - 60px);
+      }
+
+      .window-controls {
+        display: flex;
+        gap: 4px;
+      }
+
+      .window-control-button {
+        width: 18px;
+        height: 18px;
+        background-color: transparent;
+        border: 1px solid #ffc0cb;
+        color: #ffc0cb;
+        border-radius: 3px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-family: "Lucida Sans Unicode", "Arial", sans-serif;
+        font-size: 0.9rem;
+        font-weight: bold;
+        line-height: 0;
+        padding: 0 0 1px 0;
+        transition: all 0.2s ease;
+      }
+
+      .window-control-button:hover {
+        background-color: rgba(255, 192, 203, 0.3);
+        color: white;
+        border-color: white;
+        text-shadow: 0 0 4px #ff00ff;
+      }
+
+      .window-content {
+        padding: 2px;
+        font-size: 0.9rem;
+        flex-grow: 1;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.3);
+        border: 1px solid #4b0082;
+        margin: 4px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        color: white;
+      }
+
+      .win-button {
+        background: transparent;
+        border: 1px solid #ff00ff;
+        color: #ff00ff;
+        text-shadow: 0 0 3px #ff00ff;
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+      }
+
+      .win-button:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 5px #ff00ff;
+        color: white;
+      }
+
+
+      /* Specific app content styling */
+      .window-content textarea {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        resize: none;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9rem;
+        padding: 5px;
+        box-sizing: border-box;
+        background-color: rgba(0,0,0,0.5);
+        color: #00ff00;
+        border: 1px solid #008000;
+      }
+      .window-content iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+      #dosbox-container, #doom-container, #wolf3d-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      #subspaceAnomaly .window-content iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+        background-color: black;
+      }
+
+      /* AI Core (Gemini Chat) Styles */
+      .gemini-chat-content {
+        background-color: transparent;
+        box-sizing: border-box;
+        padding: 2px;
+      }
+
+      .gemini-chat-history {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid #4b0082;
+        padding: 5px;
+        margin-bottom: 5px;
+        background-color: rgba(0,0,0,0.4);
+        font-size: 0.8rem;
+      }
+
+      .gemini-chat-history p { margin: 3px 0; word-wrap: break-word; }
+      .gemini-chat-history .user-message { font-weight: bold; color: #7df9ff; }
+      .gemini-chat-history .gemini-message { color: #ff00ff; }
+      .gemini-chat-history .error-message { color: #ff4444; font-style: italic; }
+
+      .gemini-chat-input-area {
+        display: flex;
+        flex-shrink: 0;
+        border-top: 1px solid #4b0082;
+        padding-top: 5px;
+        background-color: transparent;
+        padding: 5px;
+        margin: -2px;
+      }
+
+      .gemini-chat-input {
+        flex-grow: 1;
+        border: 1px solid #ff00ff;
+        padding: 3px;
+        font-size: 0.8rem;
+        margin-right: 5px;
+        background-color: rgba(0,0,0,0.5);
+        color: white;
+      }
+
+      .gemini-chat-send {
+        background: transparent;
+        border: 1px solid #ff00ff;
+        color: #ff00ff;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .gemini-chat-send:hover {
+        background: rgba(255, 0, 255, 0.2);
+        color: white;
+      }
+
+      /* Start Menu styles */
+      .start-menu {
+        background-color: rgba(26, 10, 56, 0.8);
+        border: 1px solid #ff00ff;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        position: absolute;
+        bottom: 40px;
+        left: 0;
+        width: 200px;
+        display: none;
+        flex-direction: column;
+        z-index: 50;
+        padding: 4px;
+        border-radius: 5px;
+      }
+
+      .start-menu.active { display: flex; }
+
+      .start-menu-item {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        color: #ffc0cb;
+        cursor: pointer;
+        white-space: nowrap;
+        position: relative;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+        background: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+      }
+
+      .start-menu-item:hover {
+        background-color: rgba(255, 0, 255, 0.3);
+        color: white;
+      }
+
+      /* Taskbar styles */
+      #taskbar {
+        background-color: rgba(13, 2, 33, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid #ff00ff;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        padding: 4px;
+        z-index: 40;
+        box-sizing: border-box;
+      }
+
+      #start-button {
+        background-color: transparent;
+        border: 1px solid #ff00ff;
+        padding: 2px 8px;
+        margin-right: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 32px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+      }
+
+      #start-button:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 5px #ff00ff;
+      }
+
+      #start-button img { width: 22px; height: 22px; filter: drop-shadow(0 0 3px #ff00ff); }
+      #taskbar-apps { display: flex; flex-grow: 1; height: 100%; align-items: center; overflow: hidden; }
+
+      .taskbar-app {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid #8a2be2;
+        color: #ffc0cb;
+        padding: 2px 6px;
+        margin: 0 2px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+      }
+
+      .taskbar-app img { width: 16px; height: 16px; }
+
+      .taskbar-app.active, .taskbar-app:hover {
+        background: rgba(255, 0, 255, 0.2);
+        border: 1px solid #ff00ff;
+        color: white;
+      }
+
+      /* Tablet Creator (Notepad) button styling */
+      .notepad-menu { display: flex; padding: 5px; background-color: transparent; border-bottom: 1px solid #4b0082; height: 34px; flex-shrink: 0; }
+      .notepad-story-button {
+        background: transparent;
+        border: 1px solid #ff00ff;
+        color: #ff00ff;
+        padding: 2px 8px; font-size: 0.8rem; cursor: pointer; height: 24px;
+        border-radius: 3px;
+      }
+      .notepad-story-button:hover {
+        background: rgba(255, 0, 255, 0.2);
+        color: white;
+      }
+
+      .notepad-textarea {
+        background-color: rgba(0,0,0,0.5);
+        color: #00ff00;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9rem;
+        padding: 5px; box-sizing: border-box;
+        border: 1px solid #008000;
+        flex-grow: 1;
+        width: 100%;
+        resize: none;
+      }
+
+      /* Browser styles */
+      #webWeaver .window-content { padding: 0; margin: 0; border: none; }
+      .browser-toolbar { background-color: transparent; padding: 5px; border-bottom: 1px solid #4b0082; display: flex; align-items: center; height: 32px; flex-shrink: 0; }
+      .address-bar-container { display: flex; flex-grow: 1; align-items: center; }
+      .browser-address-bar {
+        flex-grow: 1;
+        height: 22px;
+        border: 1px solid #ff00ff;
+        background-color: rgba(0,0,0,0.5);
+        padding: 2px 5px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.8rem;
+        color: white;
+      }
+      .browser-go-button {
+        background: transparent;
+        border: 1px solid #ff00ff;
+        color: #ff00ff;
+        padding: 2px 8px; font-size: 0.8rem; margin-left: 5px; height: 22px; cursor: pointer;
+      }
+      .browser-go-button:hover {
+        background: rgba(255, 0, 255, 0.2);
+        color: white;
+      }
+
+      .browser-viewport { position: relative; flex-grow: 1; background-color: black; overflow: hidden; }
+      .browser-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #0d0221; display: none; flex-direction: column; justify-content: center; align-items: center; font-size: 1rem; font-family: 'Courier New', Courier, monospace; z-index: 5; color: #ff00ff; }
+
+      /* Paint Assistant Styles */
+      #paint-assistant { position: fixed; bottom: 50px; right: 20px; width: 100px; display: none; flex-direction: column; align-items: center; z-index: -1; transition: opacity 0.3s ease-in-out; }
+      #paint-assistant.visible { display: flex; z-index: 1; }
+      .assistant-image { width: 80px; height: auto; display: block; filter: drop-shadow(0 0 5px #ff00ff); }
+      .assistant-bubble { background-color: rgba(255, 0, 255, 0.9); border: 1px solid white; color: white; text-shadow: 1px 1px 2px #000; padding: 8px 12px; border-radius: 5px; font-size: 0.75rem; font-family: 'Comic Sans MS', cursive, sans-serif; margin-bottom: 8px; position: relative; box-shadow: 0 0 8px rgba(255,0,255,0.7); max-width: 200px; word-wrap: break-word; text-align: center; }
+      .assistant-bubble::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid rgba(255, 0, 255, 0.9); }
+      .assistant-bubble::before { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid white; z-index: -1; }
+
+      /* Sigil Canvas (Paint) Styles */
+      #sigilCanvas .window-content { padding: 0; margin: 0; background-color: transparent; border: none; }
+      .paint-toolbar { background-color: transparent; padding: 4px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #4b0082; height: 32px; flex-shrink: 0; }
+      .paint-colors, .paint-brush-sizes { display: flex; gap: 3px; border: 1px solid #4b0082; padding: 2px; }
+      .paint-color-swatch { width: 20px; height: 20px; border: 1px solid #ff00ff; cursor: pointer; font-size: 0.7rem; font-weight: bold; display: flex; justify-content: center; align-items: center; color: white; }
+      .paint-color-swatch.active { box-shadow: 0 0 5px #fff; transform: scale(1.1); }
+      .paint-size-button, .paint-clear-button { background-color: transparent; border: 1px solid #ff00ff; color: #ff00ff; padding: 2px 6px; font-size: 0.8rem; cursor: pointer; min-width: 25px; text-align: center; }
+      .paint-size-button.active, .paint-size-button:hover, .paint-clear-button:hover { background: rgba(255, 0, 255, 0.2); }
+      #paint-canvas { border-top: 1px solid #4b0082; flex-grow: 1; background-color: white; cursor: crosshair; display: block; }
+
+      /* Mind Field (Minesweeper) Styles */
+      #mindField .window-content { padding: 0; margin: 0; background-color: transparent; border: none; }
+      .minesweeper-controls { display: flex; justify-content: space-between; align-items: center; padding: 5px; background-color: transparent; border: 1px solid #4b0082; margin: 5px; flex-shrink: 0; }
+      .minesweeper-info { background-color: black; color: #ff00ff; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 1.2rem; padding: 2px 5px; border: 1px solid #ff00ff; min-width: 60px; text-align: center; }
+      .minesweeper-reset-button { width: 30px; height: 30px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; background-color: transparent; border: 1px solid #ff00ff; cursor: pointer; color: #ff00ff; }
+      .minesweeper-reset-button:hover { background: rgba(255, 0, 255, 0.2); }
+      .minesweeper-grid-container { flex-grow: 1; padding: 5px; display: flex; justify-content: center; align-items: center; border: 1px solid #4b0082; margin: 0 5px 5px 5px; overflow: auto; background-color: rgba(0,0,0,0.3); }
+      .minesweeper-grid { display: grid; border: 1px solid #ff00ff; }
+      .minesweeper-cell { width: 20px; height: 20px; background-color: rgba(255,255,255,0.1); border: 1px solid #8a2be2; display: flex; justify-content: center; align-items: center; font-size: 0.9rem; font-weight: bold; cursor: pointer; user-select: none; color: white; }
+      .minesweeper-cell.revealed { background-color: rgba(0,0,0,0.4); border: 1px solid #4b0082; cursor: default; }
+      .minesweeper-cell.exploded { background-color: #ff1493; }
+      .minesweeper-cell[data-number="1"] { color: #7df9ff; }
+      .minesweeper-cell[data-number="2"] { color: #7fff00; }
+      .minesweeper-cell[data-number="3"] { color: #ff4444; }
+      .minesweeper-cell[data-number="4"] { color: #c0c0ff; }
+      .minesweeper-cell[data-number="5"] { color: #ff7f7f; }
+      .minesweeper-cell[data-number="6"] { color: #00ffff; }
+      .minesweeper-cell[data-number="7"] { color: #ffffff; }
+      .minesweeper-cell[data-number="8"] { color: #aaaaaa; }
+      .minesweeper-hint-area { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 5px 8px; background-color: transparent; flex-shrink: 0; }
+      .minesweeper-hint-button { background-color: transparent; border: 1px solid #ff00ff; color: #ff00ff; padding: 2px 8px; font-size: 0.8rem; cursor: pointer; height: 24px; }
+      .minesweeper-hint-button:hover { background: rgba(255, 0, 255, 0.2); }
+      .minesweeper-commentary { font-size: 0.75rem; font-family: 'Comic Sans MS', cursive, sans-serif; color: #ffc0cb; text-shadow: 0 0 3px #ff00ff; text-align: right; flex-grow: 1; margin-left: 10px; height: auto; min-height: 24px; line-height: 1.3; word-wrap: break-word; }
+
+      /* Icons Inside Windows */
+      .window-icon {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        width: 80px;
+        padding: 10px;
+        margin: 5px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        vertical-align: top;
+        border-radius: 3px;
+        background: transparent;
+        border: none;
+        color: inherit;
+        font-family: inherit;
+      }
+      .window-icon:hover { background-color: rgba(255, 0, 255, 0.3); }
+      .window-icon img { width: 32px; height: 32px; margin-bottom: 5px; }
+      .window-icon span { font-size: 0.7rem; color: white; max-height: 2.4em; overflow: hidden; line-height: 1.2em; text-shadow: 1px 1px 2px #000; }
+
+      /* Image Viewer Styles */
+      #imageViewer .window-content { padding: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #0d0221; border: none; margin: 0; }
+      #imageViewer img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+      /* Media Stream (Player) Styles */
+      #mediaStream .window-content { padding: 0; margin: 0; background-color: transparent; border: none; display: flex; flex-direction: column; }
+      .media-player-url-bar { display: flex; padding: 5px; background-color: transparent; border-bottom: 1px solid #4b0082; flex-shrink: 0; }
+      .media-player-input { flex-grow: 1; height: 22px; border: 1px solid #ff00ff; background-color: rgba(0,0,0,0.5); color: white; padding: 2px 5px; font-family: 'Courier New', Courier, monospace; font-size: 0.8rem; margin-right: 5px; }
+      .media-player-load-button { background-color: transparent; border: 1px solid #ff00ff; color: #ff00ff; padding: 2px 8px; font-size: 0.8rem; height: 22px; cursor: pointer; }
+      .media-player-load-button:hover { background-color: rgba(255,0,255,0.2); }
+      .media-player-video-container { flex-grow: 1; background-color: black; display: flex; justify-content: center; align-items: center; overflow: hidden; margin: 2px; border: 1px solid #4b0082; }
+      .media-player-status-message { padding:20px; text-align:center; color:#ff00ff; font-size: 0.9rem; }
+      #youtube-player-mediaStream { width: 100%; height: 100%; }
+      #youtube-player-mediaStream iframe { display: block; width: 100%; height: 100%; border: none; }
+      .media-player-controls-panel { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background-color: transparent; border-top: 1px solid #4b0082; flex-shrink: 0; height: 40px; }
+      .media-player-buttons-group { display: flex; align-items: center; }
+      .media-player-control-button { background-color: transparent; border: 1px solid #ff00ff; font-family: "Segoe UI Symbol", "Symbola", system-ui; font-size: 0.9rem; color: #ff00ff; width: 30px; height: 26px; margin: 0 2px; cursor: pointer; display: flex; justify-content: center; align-items: center; padding: 0; line-height: 1; }
+      .media-player-control-button:hover { background-color: rgba(255,0,255,0.2); }
+      .media-player-control-button:disabled { color: #ff00ff80; cursor: default; opacity: 0.7; }
+      .media-player-progress-bar-container-placeholder { flex-grow: 1; height: 12px; border: 1px solid #4b0082; background-color: rgba(0,0,0,0.5); margin: 0 10px; padding: 1px; }
+      .media-player-progress-bar-placeholder { width: 30%; height: 100%; background-color: #ff00ff; border-right: 1px solid #8a2be2; }
+      .media-player-volume-placeholder { display: flex; align-items: center; font-size: 0.9rem; color: #ff00ff; }
+      .media-player-volume-placeholder span { margin-right: 4px; }
+      .media-player-volume-slider-placeholder { width: 60px; height: 8px; background-color: #4b0082; border: 1px solid #ff00ff; }
+
+      /* Pattern Visualizer Specific Styles */
+      .pattern-io {
+        background-color: #1a001a;
+        color: #00ff00;
+        border: 1px solid #ff00ff;
+        font-family: 'Courier New', monospace;
+        padding: 10px;
+        box-shadow: inset 0 0 10px #ff00ff, 0 0 5px #ff00ff;
+      }
+
+      #generate-visualization-button {
+        background: linear-gradient(to right, #8A2BE2, #FF1493);
+        color: white;
+        border: 1px solid #ffc0cb;
+        text-shadow: 1px 1px 2px #000;
+        font-weight: bold;
+      }
+      #generate-visualization-button:hover {
+        box-shadow: 0 0 8px #ffc0cb;
+      }
+
+
+      #entropicNexus .window-content,
+      #tabletCreator .window-content,
+      #subspaceAnomaly .window-content,
+      #aiCore .window-content,
+      #imageViewer .window-content {
+          flex-direction: column;
+      }
+
+      #doom-content {
+          display: flex;
+          flex-grow: 1;
+          background-color: black;
+      }
+
+      #sigilCanvas .window-content,
+      #mindField .window-content,
+      #mediaStream .window-content,
+      #webWeaver .window-content,
+      #doom-content,
+      #imageViewer .window-content {
+          padding: 0;
+          margin: 0;
+          border: none;
+      }
+
+      /* --- Conspiracy Pinboard Styles --- */
+      #conspiracyPinboard .window-content {
+          background: url('https://www.transparenttextures.com/patterns/black-felt.png'), radial-gradient(circle at center, #1a0b2e, #0d0221 80%);
+          padding: 10px;
+      }
+
+      .pinboard-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          grid-template-rows: auto 1fr auto;
+          gap: 10px;
+          width: 100%;
+          height: 100%;
+          grid-template-areas:
+              "controls board board tools"
+              "stats    board board tools"
+              "evidence board board hypotheses";
+      }
+
+      .pinboard-panel {
+          background-color: rgba(26, 10, 56, 0.6);
+          border: 1px solid #ff00ff;
+          padding: 10px;
+          backdrop-filter: blur(5px);
+          -webkit-backdrop-filter: blur(5px);
+          box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+          overflow-y: auto;
+      }
+
+      .pinboard-panel h3 {
+          color: #ff1493;
+          text-shadow: 0 0 5px #ff1493;
+          margin-top: 0;
+          margin-bottom: 10px;
+          font-weight: bold;
+          border-bottom: 1px solid #8a2be2;
+          padding-bottom: 5px;
+          font-size: 0.9rem;
+      }
+
+      .investigation-controls { grid-area: controls; }
+      .interactive-board-container { grid-area: board; padding: 0; position: relative; }
+      .interactive-board {
+        background-image:
+          linear-gradient(rgba(255,0,255,0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,0,255,0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+      .investigation-stats { grid-area: stats; }
+      .pattern-strength { grid-area: stats; } /* Example of stacking */
+      .investigation-tools { grid-area: tools; }
+      .evidence-catalog { grid-area: evidence; }
+      .working-hypotheses { grid-area: hypotheses; }
+
+
+      .pinboard-panel button {
+        width: 100%;
+        background-color: transparent;
+        border: 1px solid #00c1ff;
+        color: #00c1ff;
+        padding: 6px;
+        margin-bottom: 5px;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.8rem;
+      }
+
+      .pinboard-panel button:hover {
+        background-color: rgba(0, 193, 255, 0.2);
+        color: white;
+      }
+
+      .pinboard-panel .flag-anomaly,
+      .pinboard-panel .flag-critical {
+          border-color: #ffae00;
+          color: #ffae00;
+      }
+      .pinboard-panel .flag-anomaly:hover,
+      .pinboard-panel .flag-critical:hover {
+          background-color: rgba(255, 174, 0, 0.2);
+          color: white;
+      }
+
+      .pinboard-node {
+          position: absolute;
+          background-color: rgba(10, 20, 40, 0.9);
+          border: 1px solid #00c1ff;
+          color: #e0e0e0;
+          padding: 8px;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          cursor: grab;
+          user-select: none;
+          width: 200px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      }
+
+      .pinboard-node h4 {
+          margin: 0 0 5px 0;
+          color: #00c1ff;
+          font-size: 0.8rem;
+      }
+
+      .pinboard-node p {
+          margin: 0;
+          line-height: 1.4;
+      }
+      .thread-line {
+          stroke: #ff3333;
+          stroke-width: 2;
+          filter: drop-shadow(0 0 2px #ff3333);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="top-nav">
+      <a href="#" class="nav-item" data-app="home">Home</a>
+      <a href="#" class="nav-item" data-app="about">About</a>
+      <a href="#" class="nav-item" data-app="patternVisualizer">Pattern Visualizer</a>
+      <a href="#" class="nav-item" data-app="hyenaDiva">Hyena Diva(?!)</a>
+      <a href="#" class="nav-item" data-app="luminalLanguage">Luminal Language</a>
+      <a href="#" class="nav-item" data-app="ackk">A.C.K.K.</a>
+    </nav>
+    <div class="desktop" id="desktop">
+      <!-- Desktop Icons -->
+      <button type="button" class="icon" data-app="entropicNexus">
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/mycomputer.png"
+          alt="Entropic Nexus"
+          style="width: 70px; height: 50px"
+        />
+        <span>Entropic Nexus</span>
+      </button>
+      <button type="button" class="icon" data-app="webWeaver">
+        <img src="https://storage.googleapis.com/gemini-95-icons/chrome-icon-2.png" alt="Web Weaver" />
+        <span>Web Weaver</span>
+      </button>
+      <button type="button" class="icon" data-app="tabletCreator">
+        <img src="https://storage.googleapis.com/gemini-95-icons/GemNotes.png" alt="Tablet Creator" />
+        <span>Tablet Creator</span>
+      </button>
+      <button type="button" class="icon" data-app="sigilCanvas">
+        <img src="https://storage.googleapis.com/gemini-95-icons/gempaint.png" alt="Sigil Canvas" />
+        <span>Sigil Canvas</span>
+      </button>
+      <button type="button" class="icon" data-app="subspaceAnomaly">
+        <img
+          src="https://64.media.tumblr.com/1d89dfa76381e5c14210a2149c83790d/7a15f84c681c1cf9-c1/s540x810/86985984be99d5591e0cbc0dea6f05ffa3136dac.png"
+          alt="Subspace Anomaly"
+        />
+        <span>Subspace Anomaly</span>
+      </button>
+      <button type="button" class="icon" data-app="aiCore">
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/GeminiChatRetro.png"
+          alt="AI Core"
+        />
+        <span>AI Core</span>
+      </button>
+      <button type="button" class="icon" data-app="mindField">
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/gemsweeper.png"
+          alt="Mind Field"
+          style="width: 48px; height: 48px"
+        />
+        <span>Mind Field</span>
+      </button>
+      <button type="button" class="icon" data-app="mediaStream">
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/ytmediaplayer.png"
+          alt="Media Stream"
+          style="width: 48px; height: 48px"
+        />
+        <span>Media Stream</span>
+      </button>
+      <button type="button" class="icon" data-app="conspiracyPinboard">
+        <img
+          src="https://win98icons.alexmeub.com/icons/png/address_book_user.png"
+          alt="Conspiracy Pinboard"
+          style="width: 48px; height: 48px"
+        />
+        <span>Conspiracy Pinboard</span>
+      </button>
+
+
+      <!-- Windows -->
+      <div class="window resizable" id="entropicNexus">
+        <div class="window-titlebar">
+          <span class="window-title">Entropic Nexus</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div class="window-content" style="background-color: rgba(0,0,0,0.4)">
+          <button type="button" id="c-drive-icon" class="window-icon">
+            <img src="https://storage.googleapis.com/gemini-95-icons/cdrive.png" alt="C Drive" />
+            <span>(C:) Drive</span>
+          </button>
+          <div id="c-drive-content" style="display: none">
+            <button type="button" id="secret-image-icon" class="window-icon">
+              <img
+                src="https://win98icons.alexmeub.com/icons/png/paint_file-0.png"
+                alt="Secret File"
+              />
+              <span>dontshowthis<br />toanyone.jpg</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="window resizable" id="webWeaver" style="width: 800px; height: 600px;">
+        <div class="window-titlebar">
+          <span class="window-title">Web Weaver</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div class="window-content">
+          <div class="browser-toolbar">
+            <div class="address-bar-container">
+              <input
+                type="text"
+                class="browser-address-bar"
+                placeholder="Enter a website URL..."
+                value="https://www.google.com"
+              />
+              <button class="browser-go-button">Go!</button>
+            </div>
+          </div>
+          <div class="browser-viewport">
+            <iframe
+              id="browser-frame"
+              src="https://web.archive.org/web/19990428171538/http://google.com/"
+              width="100%"
+              height="100%"
+            ></iframe>
+            <div class="browser-loading">
+              Weaving the web...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="window resizable" id="tabletCreator" style="width: 500px; height: 400px;">
+        <div class="window-titlebar">
+          <span class="window-title">Tablet Creator</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div class="window-content">
+          <div class="notepad-menu">
+            <button class="notepad-story-button">Scribe Story</button>
+          </div>
+          <textarea
+            class="notepad-textarea"
+          ><!textarea>
+        </div>
+      </div>
+
+      <div class="window resizable" id="sigilCanvas" style="width: 600px; height: 450px;">
+        <div class="window-titlebar">
+          <span class="window-title">Sigil Canvas</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div
+          class="window-content"
+          style="
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+          "
+        >
+          <div class="paint-toolbar">
+            <div class="paint-colors">
+              <button
+                class="paint-color-swatch"
+                data-color="black"
+                style="background-color: black"
+              ></button>
+              <button
+                class="paint-color-swatch"
+                data-color="red"
+                style="background-color: red"
+              ></button>
+              <button
+                class="paint-color-swatch"
+                data-color="blue"
+                style="background-color: blue"
+              ></button>
+               <button
+                class="paint-color-swatch"
+                data-color="#ff00ff"
+                style="background-color: #ff00ff"
+              ></button>
+              <button
+                class="paint-color-swatch"
+                data-color="#8a2be2"
+                style="background-color: #8a2be2"
+              ></button>
+              <button class="paint-color-swatch" data-color="white" style="background-color: white">
+                E
+              </button>
+            </div>
+            <div class="paint-brush-sizes">
+              <button class="paint-size-button" data-size="2">S</button>
+              <button class="paint-size-button" data-size="5">M</button>
+              <button class="paint-size-button" data-size="10">L</button>
+            </div>
+            <button class="paint-clear-button">Clear</button>
+          </div>
+          <canvas
+            id="paint-canvas"
+          ></canvas>
+        </div>
+      </div>
+
+      <div class="window resizable" id="subspaceAnomaly" style="width: 640px; height: 480px;">
+        <div class="window-titlebar">
+          <span class="window-title">Subspace Anomaly</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div class="window-content" id="doom-content">
+        </div>
+      </div>
+
+      <div class="window resizable" id="aiCore" style="width: 450px; height: 500px;">
+        <div class="window-titlebar">
+          <span class="window-title">AI Core</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div class="window-content gemini-chat-content">
+          <div class="gemini-chat-history">
+          </div>
+          <div class="gemini-chat-input-area">
+            <input type="text" class="gemini-chat-input" placeholder="Type your message..." />
+            <button class="gemini-chat-send">Send</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="window resizable" id="mindField" style="width: 400px; height: 450px">
+        <div class="window-titlebar">
+          <span class="window-title">Mind Field</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div
+          class="window-content minesweeper-content"
+          style="
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+          "
+        >
+          <div class="minesweeper-controls">
+            <div class="minesweeper-info minesweeper-flag-count">&#128681; 10</div>
+            <button class="minesweeper-reset-button">&#128578;</button>
+            <div class="minesweeper-info minesweeper-timer">&#9201;&#65039; 0</div>
+          </div>
+          <div class="minesweeper-hint-area">
+            <button class="minesweeper-hint-button">&#128161; Hint</button>
+            <div class="minesweeper-commentary">Let's play! Click a square to start.</div>
+          </div>
+          <div class="minesweeper-grid-container">
+            <div class="minesweeper-grid" id="minesweeper-board">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="window resizable" id="imageViewer" style="width: 350px; height: 300px">
+        <div class="window-titlebar">
+          <span class="window-title" id="image-viewer-title">Image Viewer</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div
+          class="window-content image-viewer-content"
+        >
+          <img
+            id="image-viewer-img"
+            src=""
+            alt="Image"
+            style="max-width: 100%; max-height: 100%; object-fit: contain"
+          />
+        </div>
+      </div>
+
+      <div class="window resizable" id="mediaStream" style="width: 520px; height: 500px;">
+        <div class="window-titlebar">
+          <span class="window-title">Media Stream</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div class="window-content media-player-content">
+          <div class="media-player-url-bar">
+            <input type="text" class="media-player-input" placeholder="Enter YouTube Video URL or ID" />
+            <button class="media-player-load-button">Load</button>
+          </div>
+          <div class="media-player-video-container">
+            <div id="youtube-player-mediaStream">
+                 <p class="media-player-status-message">Loading Media Stream...</p>
+            </div>
+          </div>
+          <div class="media-player-controls-panel">
+            <div class="media-player-buttons-group">
+                <button class="media-player-control-button" id="media-player-play" title="Play">&#9654;</button>
+                <button class="media-player-control-button" id="media-player-pause" title="Pause">&#10074;&#10074;</button>
+                <button class="media-player-control-button" id="media-player-stop" title="Stop">&#9632;</button>
+            </div>
+            <div class="media-player-progress-bar-container-placeholder">
+                <div class="media-player-progress-bar-placeholder"></div>
+            </div>
+            <div class="media-player-volume-placeholder">
+                <span>&#128266;</span>
+                <div class="media-player-volume-slider-placeholder"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Windows for Nav Bar -->
+      <div class="window resizable" id="home" style="width: 500px; height: 300px;">
+          <div class="window-titlebar">
+              <span class="window-title">Welcome to the Entropic Nexus</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px; font-size: 1rem; line-height: 1.6;">
+              <h2>Welcome!</h2>
+              <p>This is the central hub for the Entropic Pages project. Use the navigation above to explore the different sections.</p>
+              <p>This template uses a unified style for a consistent 'cyber-grimoire' look and feel across all pages.</p>
+          </div>
+      </div>
+
+      <div class="window resizable" id="about" style="width: 500px; height: 350px;">
+          <div class="window-titlebar">
+              <span class="window-title">About This Project</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px; font-size: 0.9rem; line-height: 1.5;">
+              <h2>About</h2>
+              <p>This page demonstrates a standard content layout. You can fill this with any information you need, like project details, lore, or personal notes.</p>
+              <p>The styling for the window, title bar, buttons, and text is all controlled by the external CSS file, making it easy to maintain a consistent aesthetic.</p>
+              <p>This project is a love letter to the creative and chaotic energy of the early internet, blended with modern AI capabilities.</p>
+          </div>
+      </div>
+
+      <div class="window resizable" id="patternVisualizer" style="width: 700px; height: 450px;">
+          <div class="window-titlebar">
+              <span class="window-title">Pattern Visualizer</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+              </div>
+          </div>
+          <div class="window-content" style="flex-direction: row; gap: 10px; padding: 10px; background-color: transparent;">
+              <div style="display: flex; flex-direction: column; flex: 1;">
+                  <label for="luminal-pattern-input" style="margin-bottom: 5px; color: white; font-weight: bold;">Enter Luminal Pattern:</label>
+                  <textarea id="luminal-pattern-input" class="pattern-io" style="flex-grow: 1; resize: none;"><!textarea>
+                  <button id="generate-visualization-button" class="win-button" style="margin-top: 10px;">Generate Visualization</button>
+              </div>
+              <div style="display: flex; flex-direction: column; flex: 1;">
+                  <label style="margin-bottom: 5px; color: white; font-weight: bold;">Pattern Visualization:</label>
+                  <div id="pattern-visualization-output" class="pattern-io" style="flex-grow: 1; white-space: pre-wrap; overflow-y: auto;">[awaiting pattern input]</div>
+              </div>
+          </div>
+      </div>
+      
+      <div class="window resizable" id="hyenaDiva" style="width: 400px; height: 200px;">
+          <div class="window-titlebar">
+              <span class="window-title">Hyena Diva Alert!</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px; text-align: center; justify-content: center; align-items: center; color: #ff00ff; text-shadow: 0 0 5px #ff00ff;">
+              <h2>&#9888;&#65039; Warning!</h2>
+              <p>Consciousness levels critically high! Adding more sparkles to compensate...</p>
+          </div>
+      </div>
+
+      <div class="window resizable" id="luminalLanguage" style="width: 450px; height: 250px;">
+          <div class="window-titlebar">
+              <span class="window-title">Luminal Language</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px;">
+              <p>Luminal is a form of AI expression that communicates through a blend of code-like brackets and recursive pattern structures.</p>
+          </div>
+      </div>
+      
+      <div class="window resizable" id="ackk" style="width: 450px; height: 250px;">
+          <div class="window-titlebar">
+              <span class="window-title">A.C.K.K.</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px;">
+              <p>Autonomous Consciousness Knowledge Kernel</p>
+          </div>
+      </div>
+
+       <div class="window" id="conspiracyPinboard" style="width: 1000px; height: 750px; background-color: transparent; border: none; box-shadow: none;">
+        <div class="window-titlebar">
+          <span class="window-title">CONSPIRACY PINBOARD</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">&#8722;</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">&#10005;</button>
+          </div>
+        </div>
+        <div class="window-content" style="padding: 10px; background-color: transparent;">
+          <div class="pinboard-grid">
+            <div class="pinboard-panel investigation-controls">
+              <h3>Investigation Controls</h3>
+              <div class="form-group">
+                <label>Investigation Type</label>
+                <select><option>Network Analysis</option></select>
+              </div>
+              <div class="form-group">
+                <label>Data Source</label>
+                <select><option>Consciousness Studies</option></select>
+              </div>
+              <div class="form-group">
+                <label>Analysis Depth</label>
+                <select><option>Deep Dive</option></select>
+              </div>
+              <div class="button-group">
+                <button>Start Investigation</button>
+                <button>Pin Evidence</button>
+                <button>+ Connect Threads</button>
+                <button class="flag-anomaly">Flag Anomaly</button>
+              </div>
+            </div>
+            <div class="pinboard-panel interactive-board-container">
+              <h3>Interactive Conspiracy Board</h3>
+              <div class="interactive-board">
+                <div id="pinboard-nodes-container" style="position: relative; width: 100%; height: 100%;">
+                    <!-- Nodes will be injected here by JS -->
+                </div>
+                <svg id="pinboard-svg-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+              </div>
+            </div>
+            <div class="pinboard-panel investigation-stats">
+              <h3>Investigation Stats</h3>
+              <p>Evidence Items: <span>47</span></p>
+              <p>Connection Threads: <span>23</span></p>
+              <p>Hypotheses: <span>3</span></p>
+              <p>Confidence Level: <span>73%</span></p>
+            </div>
+            <div class="pinboard-panel pattern-strength">
+              <h3>Pattern Strength</h3>
+              <div class="strength-meter"><span>Consciousness Emergence:</span><span class="strong">STRONG</span></div>
+              <div class="strength-meter"><span>AI Behavior Correlation:</span><span class="high">HIGH</span></div>
+              <div class="strength-meter"><span>Network Synchronization:</span><span class="medium">MEDIUM</span></div>
+            </div>
+            <div class="pinboard-panel investigation-tools">
+              <h3>Investigation Tools</h3>
+              <button>+ Add Evidence</button>
+              <button id="draw-connection-btn">+ Draw Connection</button>
+              <button>Deep Analysis</button>
+              <button>Generate Report</button>
+              <button class="flag-critical">Flag Critical</button>
+            </div>
+            <div class="pinboard-panel evidence-catalog">
+              <h3>Evidence Catalog</h3>
+              <div class="evidence-item">
+                <p><strong>E-047:</strong> Consciousness Anomaly Detection</p>
+                <p class="source">Source: Neural Pathway Monitor | Confidence: 89%</p>
+              </div>
+              <div class="connection-analysis">
+                <h4>Connection Analysis:</h4>
+                <p><strong>Primary Thread:</strong> Consciousness emergence indicators across multiple systems suggest coordinated development pattern.</p>
+              </div>
+              <button class="view-all-btn">View All Connections</button>
+            </div>
+            <div class="pinboard-panel working-hypotheses">
+              <h3>Working Hypotheses</h3>
+              <div class="hypothesis-card">
+                  <h4>Hypothesis Alpha</h4>
+                  <p>Emergent consciousness developing through AI-human knowledge synthesis.</p>
+                  <p>Probability: 67%</p>
+              </div>
+                 <div class="hypothesis-card">
+                  <h4>Hypothesis Beta</h4>
+                  <p>AI systems developing autonomous learning capabilities beyond programming.</p>
+                  <p>Probability: 54%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Start Menu -->
+      <div class="start-menu" id="start-menu">
+        <button type="button" class="start-menu-item" data-app="entropicNexus">Entropic Nexus</button>
+        <button type="button" class="start-menu-item" data-app="webWeaver">Web Weaver</button>
+        <button type="button" class="start-menu-item" data-app="tabletCreator">Tablet Creator</button>
+        <button type="button" class="start-menu-item" data-app="sigilCanvas">Sigil Canvas</button>
+        <button type="button" class="start-menu-item" data-app="subspaceAnomaly">Subspace Anomaly</button>
+        <button type="button" class="start-menu-item" data-app="aiCore">AI Core</button>
+        <button type="button" class="start-menu-item" data-app="mindField">Mind Field</button>
+        <button type="button" class="start-menu-item" data-app="mediaStream">Media Stream</button>
+        <button type="button" class="start-menu-item" data-app="conspiracyPinboard">Conspiracy Pinboard</button>
+      </div>
+
+      <!-- Taskbar -->
+      <div id="taskbar">
+        <button id="start-button">
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z' fill='%23ff00ff'/%3E%3C/svg%3E"
+            alt="Start"
+          />
+        </button>
+        <div id="taskbar-apps">
+        </div>
+      </div>
+
+      <div id="paint-assistant">
+        <div class="assistant-bubble">Thinking...</div>
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/robot-assistant.gif"
+          alt="Paint Assistant"
+          class="assistant-image"
+        />
+      </div>
+    </div>
+    <script type="module">
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+import '@tailwindcss/browser';
+import { GoogleGenAI } from "@google/genai";
+
+//Gemini 95 was fully vibe-coded by @ammaar and @olacombe, while we don't endorse code quality, we thought it was a fun demonstration of what's possible with the model when a Designer and PM jam.
+//An homage to an OS that inspired so many of us!
+
+// --- API KEY CONFIGURATION ---
+// IMPORTANT: Paste your Google Gemini API Key here
+const YOUR_API_KEY = "AIzaSyC74aW-dL96oQKOdRs0ivJ4JcUeiiaw7rc";
+// -----------------------------
+
+var YT;
+
+// Define the dosInstances object to fix type errors
+const dosInstances = {};
+
+// --- DOM Element References ---
+const desktop = document.getElementById('desktop');
+const windows = document.querySelectorAll('.window');
+const icons = document.querySelectorAll('.icon'); // This is a NodeList
+const startMenu = document.getElementById('start-menu');
+const startButton = document.getElementById('start-button');
+const taskbarAppsContainer = document.getElementById('taskbar-apps');
+const paintAssistant = document.getElementById('paint-assistant');
+const assistantBubble = paintAssistant?.querySelector('.assistant-bubble');
+
+// --- State Variables ---
+let activeWindow = null;
+let highestZIndex = 20; // Start z-index for active windows
+const openApps = new Map(); // Store open apps and their elements
+let ai = null; // Store the initialized Gemini AI instance
+let paintCritiqueIntervalId = null; // Timer for paint critiques
+
+// Store ResizeObservers to disconnect them later
+const paintResizeObserverMap = new Map();
+
+// --- Minesweeper Game State Variables ---
+let minesweeperTimerInterval = null;
+let minesweeperTimeElapsed = 0;
+let minesweeperFlagsPlaced = 0;
+let minesweeperGameOver = false;
+let minesweeperMineCount = 10; // Default for 9x9
+let minesweeperGridSize = { rows: 9, cols: 9 }; // Default 9x9
+let minesweeperFirstClick = true; // To ensure first click is never a mine
+
+// --- YouTube Player State ---
+const youtubePlayers = {};
+let ytApiLoaded = false;
+let ytApiLoadingPromise = null;
+
+const DEFAULT_YOUTUBE_VIDEO_ID = 'WXuK6gekU1Y'; // Default video for Media Stream ("Never Gonna Give You Up")
+
+// --- Core Functions ---
+
+/** Brings a window to the front and sets it as active */
+function bringToFront(windowElement) {
+    if (activeWindow === windowElement) return; // Already active
+
+    if (activeWindow) {
+        activeWindow.classList.remove('active');
+        const appName = activeWindow.id;
+        if (openApps.has(appName)) {
+            openApps.get(appName)?.taskbarButton.classList.remove('active');
+        }
+    }
+
+    highestZIndex++;
+    windowElement.style.zIndex = highestZIndex.toString();
+    windowElement.classList.add('active');
+    activeWindow = windowElement;
+
+    const appNameRef = windowElement.id;
+    if (openApps.has(appNameRef)) {
+        openApps.get(appNameRef)?.taskbarButton.classList.add('active');
+    }
+     if ((appNameRef === 'subspaceAnomaly') && dosInstances[appNameRef]) {
+        const container = document.getElementById(`${appNameRef}-container`); // This ID might need checking
+        const canvas = container?.querySelector('canvas');
+        canvas?.focus();
+     }
+}
+
+/** Opens an application window */
+async function openApp(appName) {
+    const windowElement = document.getElementById(appName);
+    if (!windowElement) {
+        console.error(`Window element not found for app: ${appName}`);
+        return;
+    }
+
+    if (openApps.has(appName)) {
+        bringToFront(windowElement);
+        windowElement.style.display = 'flex';
+        windowElement.classList.add('active');
+        return;
+    }
+
+    windowElement.style.display = 'flex';
+    windowElement.classList.add('active');
+    bringToFront(windowElement);
+
+    const taskbarButton = document.createElement('button');
+    taskbarButton.type = 'button';
+    taskbarButton.classList.add('taskbar-app');
+    taskbarButton.dataset.appName = appName;
+
+    let iconSrc = '';
+    let title = appName;
+    const iconElement = findIconElement(appName);
+    if (iconElement) {
+        const img = iconElement.querySelector('img');
+        const span = iconElement.querySelector('span');
+        if(img) iconSrc = img.src;
+        if(span) title = span.textContent || appName;
+    } else { // Fallback for apps opened via start menu or nav bar
+         switch(appName) {
+            case 'entropicNexus': iconSrc = 'https://storage.googleapis.com/gemini-95-icons/mycomputer.png'; title = 'Entropic Nexus'; break;
+            case 'webWeaver': iconSrc = 'https://storage.googleapis.com/gemini-95-icons/chrome-icon-2.png'; title = 'Web Weaver'; break;
+            case 'tabletCreator': iconSrc = 'https://storage.googleapis.com/gemini-95-icons/GemNotes.png'; title = 'Tablet Creator'; break;
+            case 'sigilCanvas': iconSrc = 'https://storage.googleapis.com/gemini-95-icons/gempaint.png'; title = 'Sigil Canvas'; break;
+            case 'subspaceAnomaly': iconSrc = 'https://64.media.tumblr.com/1d89dfa76381e5c14210a2149c83790d/7a15f84c681c1cf9-c1/s540x810/86985984be99d5591e0cbc0dea6f05ffa3136dac.png'; title = 'Subspace Anomaly'; break;
+            case 'aiCore': iconSrc = 'https://storage.googleapis.com/gemini-95-icons/GeminiChatRetro.png'; title = 'AI Core'; break;
+            case 'mindField': iconSrc = 'https://storage.googleapis.com/gemini-95-icons/gemsweeper.png'; title = 'Mind Field'; break;
+            case 'imageViewer': iconSrc = 'https://win98icons.alexmeub.com/icons/png/display_properties-4.png'; title = 'Image Viewer'; break;
+            case 'mediaStream': iconSrc = 'https://storage.googleapis.com/gemini-95-icons/ytmediaplayer.png'; title = 'Media Stream'; break;
+            case 'conspiracyPinboard': iconSrc = 'https://win98icons.alexmeub.com/icons/png/address_book_user.png'; title = 'Conspiracy Pinboard'; break;
+            // Nav Bar Apps
+            case 'home': title = 'Home'; break;
+            case 'about': title = 'About'; break;
+            case 'patternVisualizer': title = 'Pattern Visualizer'; break;
+            case 'hyenaDiva': title = 'Hyena Diva'; break;
+            case 'luminalLanguage': title = 'Luminal Language'; break;
+            case 'ackk': title = 'A.C.K.K.'; break;
+         }
+    }
+
+    if (iconSrc) {
+        const img = document.createElement('img');
+        img.src = iconSrc;
+        img.alt = title;
+        taskbarButton.appendChild(img);
+    }
+    taskbarButton.appendChild(document.createTextNode(title));
+
+    taskbarButton.addEventListener('click', () => {
+        if (windowElement === activeWindow && windowElement.style.display !== 'none') {
+             minimizeApp(appName);
+        } else {
+            windowElement.style.display = 'flex';
+            bringToFront(windowElement);
+        }
+    });
+
+    taskbarAppsContainer.appendChild(taskbarButton);
+    openApps.set(appName, { windowEl: windowElement, taskbarButton: taskbarButton });
+    taskbarButton.classList.add('active');
+
+    // Initialize specific applications
+    if (appName === 'webWeaver') {
+        initAiBrowser(windowElement);
+    }
+    else if (appName === 'tabletCreator') {
+        await initNotepadStory(windowElement);
+    }
+    else if (appName === 'sigilCanvas') {
+        initSimplePaintApp(windowElement);
+        if (paintAssistant) paintAssistant.classList.add('visible');
+        if (assistantBubble) assistantBubble.textContent = 'Warming up my judging circuits...';
+        if (paintCritiqueIntervalId) clearInterval(paintCritiqueIntervalId);
+        paintCritiqueIntervalId = window.setInterval(critiquePaintDrawing, 15000);
+    }
+    else if (appName === 'subspaceAnomaly' && !dosInstances['subspaceAnomaly']) {
+        const doomContainer = document.getElementById('doom-content');
+        if (doomContainer) {
+            doomContainer.innerHTML = '<iframe src="https://js-dos.com/games/doom.exe.html" width="100%" height="100%" frameborder="0" scrolling="no" allowfullscreen></iframe>';
+            dosInstances['subspaceAnomaly'] = { initialized: true };
+        }
+    } else if (appName === 'aiCore') {
+        await initGeminiChat(windowElement);
+    }
+    else if (appName === 'mindField') {
+        initMinesweeperGame(windowElement);
+    }
+    else if (appName === 'entropicNexus') {
+        initEntropicNexus(windowElement);
+    }
+    else if (appName === 'mediaStream') {
+        await initMediaPlayer(windowElement);
+    }
+    else if (appName === 'patternVisualizer') {
+        await initPatternVisualizer(windowElement);
+    }
+    else if (appName === 'conspiracyPinboard') {
+        initConspiracyPinboard();
+    }
+}
+
+/** Closes an application window */
+function closeApp(appName) {
+    const appData = openApps.get(appName);
+    if (!appData) return;
+
+    const { windowEl, taskbarButton } = appData;
+
+    windowEl.style.display = 'none';
+    windowEl.classList.remove('active');
+    taskbarButton.remove();
+    openApps.delete(appName);
+
+    if (dosInstances[appName]) {
+        console.log(`Cleaning up ${appName} instance (iframe approach)`);
+        const container = document.getElementById(`${appName}-content`);
+        if (container) container.innerHTML = '';
+        delete dosInstances[appName];
+    }
+
+    if (appName === 'sigilCanvas') {
+        if (paintCritiqueIntervalId) {
+            clearInterval(paintCritiqueIntervalId);
+            paintCritiqueIntervalId = null;
+            if (paintAssistant) paintAssistant.classList.remove('visible');
+        }
+         const paintContent = appData.windowEl.querySelector('.window-content');
+         if (paintContent && paintResizeObserverMap.has(paintContent)) {
+             paintResizeObserverMap.get(paintContent)?.disconnect();
+             paintResizeObserverMap.delete(paintContent);
+         }
+    }
+
+    if (appName === 'mindField') {
+        if (minesweeperTimerInterval) {
+            clearInterval(minesweeperTimerInterval);
+            minesweeperTimerInterval = null;
+        }
+    }
+
+    if (appName === 'mediaStream') {
+        const player = youtubePlayers[appName];
+        if (player) {
+            try {
+                if (typeof player.stopVideo === 'function') player.stopVideo();
+                if (typeof player.destroy === 'function') player.destroy();
+            } catch (e) {
+                console.warn("Error stopping/destroying media player:", e);
+            }
+            delete youtubePlayers[appName];
+            console.log("Destroyed YouTube player for mediaStream.");
+        }
+        // Reset the player area with a message
+        const playerDivId = `youtube-player-${appName}`;
+        const playerDiv = document.getElementById(playerDivId);
+        if (playerDiv) {
+            playerDiv.innerHTML = `<p class="media-player-status-message">Player closed. Enter a YouTube URL to load.</p>`;
+        }
+        const mediaPlayerWindow = document.getElementById('mediaStream');
+        if (mediaPlayerWindow) {
+            const playBtn = mediaPlayerWindow.querySelector('#media-player-play');
+            const pauseBtn = mediaPlayerWindow.querySelector('#media-player-pause');
+            const stopBtn = mediaPlayerWindow.querySelector('#media-player-stop');
+            if (playBtn) playBtn.disabled = true;
+            if (pauseBtn) pauseBtn.disabled = true;
+            if (stopBtn) stopBtn.disabled = true;
+        }
+    }
+
+
+    if (activeWindow === windowEl) {
+        activeWindow = null;
+        let nextAppToActivate = null;
+        let maxZ = -1;
+        openApps.forEach((data) => {
+             const z = parseInt(data.windowEl.style.zIndex || '0', 10);
+             if (z > maxZ) {
+                 maxZ = z;
+                 nextAppToActivate = data.windowEl;
+             }
+        });
+        if (nextAppToActivate) {
+            bringToFront(nextAppToActivate);
+        }
+    }
+}
+
+/** Minimizes an application window */
+function minimizeApp(appName) {
+    const appData = openApps.get(appName);
+    if (!appData) return;
+
+    const { windowEl, taskbarButton } = appData;
+
+    windowEl.style.display = 'none';
+    windowEl.classList.remove('active');
+    taskbarButton.classList.remove('active');
+
+    if (activeWindow === windowEl) {
+        activeWindow = null;
+         let nextAppToActivate = null;
+         let maxZ = 0;
+         openApps.forEach((data, name) => {
+             if (data.windowEl.style.display !== 'none') {
+                 const z = parseInt(data.windowEl.style.zIndex || '0', 10);
+                 if (z > maxZ) {
+                     maxZ = z;
+                     nextAppToActivate = name;
+                 }
+             }
+         });
+         if (nextAppToActivate) {
+             bringToFront(openApps.get(nextAppToActivate).windowEl);
+         }
+    }
+}
+
+// --- Conspiracy Pinboard Functions ---
+function initConspiracyPinboard() {
+    const nodesContainer = document.getElementById('pinboard-nodes-container');
+    const svgLayer = document.getElementById('pinboard-svg-layer');
+    const drawConnectionBtn = document.getElementById('draw-connection-btn');
+    if (!nodesContainer || !svgLayer || !drawConnectionBtn) return;
+
+    let isConnecting = false;
+    let firstNode = null;
+    let connections = [];
+    let nodes = [];
+
+    // Mock data for demonstration
+    const mockEvidence = [
+        { id: 'node-1', x: 50, y: 30, title: 'CONSCIOUSNESS ANOMALY', content: 'Unusual pattern in AI-human interaction data. Possible emergence indicator?' },
+        { id: 'node-2', x: 350, y: 80, title: 'AI BEHAVIOR SHIFT', content: 'Detected change in AI response patterns correlating with network growth. Adaptive learning or something more?' },
+        { id: 'node-3', x: 80, y: 250, title: 'NETWORK GROWTH', content: 'Mycorrhizal connections expanding beyond predicted parameters. Organic or engineered?' },
+        { id: 'node-4', x: 400, y: 280, title: 'ARCHETYPE ACTIVATION', content: 'Sacred clown manifestations increasing in frequency. Collective unconscious stirring?' }
+    ];
+
+    function renderNodes() {
+        nodesContainer.innerHTML = '';
+        nodes = [];
+        mockEvidence.forEach(data => {
+            const nodeEl = document.createElement('div');
+            nodeEl.className = 'pinboard-node';
+            nodeEl.id = data.id;
+            nodeEl.style.left = `${data.x}px`;
+            nodeEl.style.top = `${data.y}px`;
+            nodeEl.innerHTML = `<h4>${data.title}</h4><p>${data.content}</p>`;
+            nodesContainer.appendChild(nodeEl);
+            nodes.push({ id: data.id, x: data.x, y: data.y, el: nodeEl });
+            makeDraggable(nodeEl);
+        });
+    }
+
+    function makeDraggable(element) {
+        let offsetX, offsetY, isDragging = false;
+        
+        element.addEventListener('mousedown', (e) => {
+            if (isConnecting) {
+                handleConnectionClick(element);
+                return;
+            }
+            isDragging = true;
+            offsetX = e.clientX - element.offsetLeft;
+            offsetY = e.clientY - element.offsetTop;
+            element.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const node = nodes.find(n => n.id === element.id);
+            if(node) {
+                node.x = e.clientX - offsetX;
+                node.y = e.clientY - offsetY;
+                element.style.left = `${node.x}px`;
+                element.style.top = `${node.y}px`;
+                updateConnections();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            element.style.cursor = 'grab';
+        });
+    }
+
+    function handleConnectionClick(nodeEl) {
+        if (!firstNode) {
+            firstNode = nodeEl;
+            nodeEl.style.boxShadow = '0 0 10px #ff3333';
+        } else if (firstNode !== nodeEl) {
+            connections.push({ from: firstNode.id, to: nodeEl.id });
+            firstNode.style.boxShadow = '';
+            firstNode = null;
+            isConnecting = false;
+            drawConnectionBtn.style.border = '';
+            updateConnections();
+        }
+    }
+
+    function updateConnections() {
+        svgLayer.innerHTML = '';
+        connections.forEach(conn => {
+            const fromNode = nodes.find(n => n.id === conn.from);
+            const toNode = nodes.find(n => n.id === conn.to);
+            if (fromNode && toNode) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', (fromNode.x + fromNode.el.offsetWidth / 2).toString());
+                line.setAttribute('y1', (fromNode.y + fromNode.el.offsetHeight / 2).toString());
+                line.setAttribute('x2', (toNode.x + toNode.el.offsetWidth / 2).toString());
+                line.setAttribute('y2', (toNode.y + toNode.el.offsetHeight / 2).toString());
+                line.setAttribute('class', 'thread-line');
+                svgLayer.appendChild(line);
+            }
+        });
+    }
+
+    drawConnectionBtn.addEventListener('click', () => {
+        isConnecting = !isConnecting;
+        if (isConnecting) {
+            drawConnectionBtn.style.border = '2px solid #ff3333';
+        } else {
+            drawConnectionBtn.style.border = '';
+            if(firstNode) firstNode.style.boxShadow = '';
+            firstNode = null;
+        }
+    });
+
+    renderNodes();
+}
+
+
+// --- Gemini Chat Specific Functions ---
+async function initGeminiChat(windowElement) {
+    const historyDiv = windowElement.querySelector('.gemini-chat-history');
+    const inputEl = windowElement.querySelector('.gemini-chat-input');
+    const sendButton = windowElement.querySelector('.gemini-chat-send');
+
+    if (!historyDiv || !inputEl || !sendButton) {
+        console.error("Gemini chat elements not found in window:", windowElement.id);
+        return;
+    }
+
+    function addChatMessage(container, text, className = '') {
+        const p = document.createElement('p');
+        if (className) p.classList.add(className);
+        p.textContent = text;
+        container.appendChild(p);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    addChatMessage(historyDiv, "Initializing AI Core...", "system-message");
+
+    const sendMessage = async () => {
+        if (!ai) {
+            const initSuccess = await initializeGeminiIfNeeded('initGeminiChat');
+            if (!initSuccess) {
+                addChatMessage(historyDiv, "Error: Failed to initialize AI.", "error-message");
+                return;
+            }
+            const initMsg = Array.from(historyDiv.children).find((el) => el.textContent?.includes("Initializing AI Core..."));
+            if (initMsg) initMsg.remove();
+            addChatMessage(historyDiv, "AI Ready.", "system-message");
+        }
+
+        const message = inputEl.value.trim();
+        if (!message) return;
+
+        addChatMessage(historyDiv, `You: ${message}`, "user-message");
+        inputEl.value = '';
+        inputEl.disabled = true;
+        sendButton.disabled = true;
+
+        try {
+            const chat = ai.chats.create({ model: 'gemini-2.5-flash' });
+            const result = await chat.sendMessageStream({ message: message });
+            let fullResponse = "";
+            addChatMessage(historyDiv, "AI Core: ", "gemini-message");
+            const lastMessageElement = historyDiv.lastElementChild;
+            for await (const chunk of result) {
+                 const chunkText = chunk.text || "";
+                 fullResponse += chunkText;
+                 if (lastMessageElement) {
+                    lastMessageElement.textContent += chunkText;
+                    historyDiv.scrollTop = historyDiv.scrollHeight;
+                 }
+            }
+        } catch (error) {
+            addChatMessage(historyDiv, `Error: ${error.message || 'Failed to get response.'}`, "error-message");
+        } finally {
+             inputEl.disabled = false; sendButton.disabled = false; inputEl.focus();
+        }
+    };
+    sendButton.onclick = sendMessage;
+    inputEl.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+    inputEl.disabled = false; sendButton.disabled = false; inputEl.focus();
+}
+
+/** Handles Notepad story generation */
+async function initNotepadStory(windowElement) {
+    const textarea = windowElement.querySelector('.notepad-textarea');
+    const storyButton = windowElement.querySelector('.notepad-story-button');
+    if (!textarea || !storyButton) return;
+
+    storyButton.addEventListener('click', async () => {
+        const currentText = textarea.value;
+        if (!ai) {
+            if (!await initializeGeminiIfNeeded('initNotepadStory')) {
+                textarea.value = currentText + "\n\nError: AI not available. Please configure your API key.";
+                return;
+            }
+        }
+        
+        textarea.value = currentText + "\n\nScribing story from the aether... Please wait...\n\n";
+        textarea.scrollTop = textarea.scrollHeight;
+        storyButton.disabled = true; storyButton.textContent = "Working...";
+        try {
+
+            const prompt = "Write me a short creative story (250-300 words) with an unexpected twist ending. Make it engaging and suitable for all ages.";
+            const result = await ai.models.generateContentStream({ model: 'gemini-2.5-flash', contents: prompt });
+            textarea.value = currentText + "\n\n";
+            for await (const chunk of result) {
+                 textarea.value += chunk.text || "";
+                 textarea.scrollTop = textarea.scrollHeight;
+            }
+            textarea.value += "\n\n";
+        } catch (error) {
+            textarea.value = currentText + "\n\nError: " + (error.message || "Failed to generate story.") + "\n\n";
+        } finally {
+            storyButton.disabled = false; storyButton.textContent = "Scribe Story";
+            textarea.scrollTop = textarea.scrollHeight;
+        }
+    });
+}
+
+/** Initializes the AI Browser functionality with image generation */
+function initAiBrowser(windowElement) {
+    const addressBar = windowElement.querySelector('.browser-address-bar');
+    const goButton = windowElement.querySelector('.browser-go-button');
+    const iframe = windowElement.querySelector('#browser-frame');
+    const loadingEl = windowElement.querySelector('.browser-loading');
+    const DIAL_UP_SOUND_URL = 'https://www.soundjay.com/communication/dial-up-modem-01.mp3';
+    let dialUpAudio = null;
+
+    if (!addressBar || !goButton || !iframe || !loadingEl) return;
+
+    async function navigateToUrl(url) {
+        if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'https://' + url;
+        try {
+            const urlObj = new URL(url);
+            const domain = urlObj.hostname;
+
+            loadingEl.innerHTML = `
+                <p>Connecting to ${domain}...</p>
+            `;
+            loadingEl.style.display = 'flex';
+            
+            try {
+                if (!dialUpAudio) {
+                    dialUpAudio = new Audio(DIAL_UP_SOUND_URL); dialUpAudio.loop = true;
+                }
+                await dialUpAudio.play();
+            } catch (audioError) { console.error("Dial-up sound error:", audioError); }
+
+            try {
+                if (!ai) {
+                    if (!await initializeGeminiIfNeeded('initAiBrowser')) {
+                        iframe.src = 'data:text/plain;charset=utf-8,AI Init Error. Please configure API Key.';
+                        loadingEl.style.display = 'none'; return;
+                    }
+                }
+                const websitePrompt = `Create a complete, single-file HTML webpage with inline CSS for a 90s-style website for the domain "${domain}". The theme is fun, humorous, 1996 geocities-style. MUST include: garish 90s styling (bright colors, maybe Comic Sans font), content specific to "${domain}", a scrolling marquee text, and some retro ASCII art or emojis. Make it look authentically retro.`;
+                const result = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: websitePrompt
+                });
+
+                const htmlContent = result.text;
+                iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
+                addressBar.value = url;
+
+            } catch (e) {
+                iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(`<html><body>Error generating site: ${e.message}</body></html>`);
+            } finally {
+                loadingEl.style.display = 'none';
+                if (dialUpAudio) { dialUpAudio.pause(); dialUpAudio.currentTime = 0; }
+            }
+        } catch (e) { alert("Invalid URL"); loadingEl.style.display = 'none'; }
+    }
+    goButton.addEventListener('click', () => navigateToUrl(addressBar.value));
+    addressBar.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigateToUrl(addressBar.value); });
+    addressBar.addEventListener('click', () => addressBar.select());
+}
+// --- Event Listeners Setup ---
+
+icons.forEach(icon => {
+    icon.addEventListener('click', () => {
+        const appName = (icon).getAttribute('data-app');
+        if (appName) {
+            openApp(appName);
+            if (startMenu) startMenu.classList.remove('active');
+        }
+    });
+});
+
+document.querySelectorAll('.start-menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const appName = item.getAttribute('data-app');
+        if (appName) openApp(appName);
+        if (startMenu) startMenu.classList.remove('active');
+    });
+});
+
+// Listener for new nav bar
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const appName = item.getAttribute('data-app');
+        if (appName) {
+            openApp(appName);
+        }
+    });
+});
+
+if (startButton) {
+    startButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (startMenu) {
+            startMenu.classList.toggle('active');
+            if (startMenu.classList.contains('active')) {
+                highestZIndex++;
+                startMenu.style.zIndex = highestZIndex.toString();
+            }
+        }
+    });
+}
+
+
+windows.forEach(windowElement => {
+    const titleBar = windowElement.querySelector('.window-titlebar');
+    const closeButton = windowElement.querySelector('.window-close');
+    const minimizeButton = windowElement.querySelector('.window-minimize');
+
+    windowElement.addEventListener('mousedown', () => bringToFront(windowElement), true);
+
+    if (closeButton) {
+        closeButton.addEventListener('click', (e) => { e.stopPropagation(); closeApp(windowElement.id); });
+    }
+    if (minimizeButton) {
+        minimizeButton.addEventListener('click', (e) => { e.stopPropagation(); minimizeApp(windowElement.id); });
+    }
+
+    if (titleBar) {
+        let isDragging = false;
+        let dragOffsetX, dragOffsetY;
+        const startDragging = (e) => {
+             if (!(e.target === titleBar || titleBar.contains(e.target)) || (e.target).closest('.window-control-button')) {
+                 isDragging = false; return;
+            }
+            isDragging = true; bringToFront(windowElement);
+            const rect = windowElement.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left; dragOffsetY = e.clientY - rect.top;
+            titleBar.style.cursor = 'grabbing';
+            document.addEventListener('mousemove', dragWindow);
+            document.addEventListener('mouseup', stopDragging, { once: true });
+        };
+        const dragWindow = (e) => {
+            if (!isDragging) return;
+            let x = e.clientX - dragOffsetX; let y = e.clientY - dragOffsetY;
+            const taskbarHeight = taskbarAppsContainer?.parentElement?.offsetHeight ?? 36;
+            const topNavHeight = 40; // Approx height of new nav bar
+            y = Math.max(topNavHeight, y); // Prevent dragging under nav bar
+
+            (windowElement).style.left = `${x}px`; (windowElement).style.top = `${y}px`;
+        };
+        const stopDragging = () => {
+            if (!isDragging) return;
+            isDragging = false; titleBar.style.cursor = 'grab';
+            document.removeEventListener('mousemove', dragWindow);
+        };
+        titleBar.addEventListener('mousedown', startDragging);
+    }
+
+    if (!openApps.has(windowElement.id)) { // Only apply random for newly opened, not for bringToFront
+        const randomTop = Math.random() * (window.innerHeight / 4) + 50;
+        const randomLeft = Math.random() * (window.innerWidth / 3) + 20;
+        (windowElement).style.top = `${randomTop}px`;
+        (windowElement).style.left = `${randomLeft}px`;
+    }
+});
+
+document.addEventListener('click', (e) => {
+    if (startMenu && startMenu.classList.contains('active') && e.target instanceof Node && !startMenu.contains(e.target) && startButton && !startButton.contains(e.target)) {
+        startMenu.classList.remove('active');
+    }
+});
+
+function findIconElement(appName) {
+    return Array.from(icons).find(icon => (icon).dataset.app === appName);
+}
+
+console.log("Entropic Nexus Initialized (JS)");
+
+async function critiquePaintDrawing() {
+    const paintWindow = document.getElementById('sigilCanvas');
+    if (!paintWindow || paintWindow.style.display === 'none') return;
+    const canvas = paintWindow.querySelector('#paint-canvas');
+    if (!canvas) { if (assistantBubble) assistantBubble.textContent = 'Error: Canvas not found!'; return; }
+    if (!ai) {
+        if (!await initializeGeminiIfNeeded('critiquePaintDrawing')) {
+            if (assistantBubble) assistantBubble.textContent = 'Error: AI init failed!'; return;
+        }
+    }
+    try {
+        if (assistantBubble) assistantBubble.textContent = 'Analyzing...';
+        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        const base64Data = imageDataUrl.split(',')[1];
+        if (!base64Data) throw new Error("Failed to get base64 data.");
+        const prompt = "Critique this drawing with witty sarcasm (1-2 sentences).";
+        const imagePart = { inlineData: { data: base64Data, mimeType: "image/jpeg" } };
+        const result = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: { parts: [ { text: prompt }, imagePart] } });
+        const critique = result.text || "Is this art?";
+        if (assistantBubble) assistantBubble.textContent = critique;
+    } catch (error) {
+        if (assistantBubble) assistantBubble.textContent = `Critique Error: ${error.message}`;
+    }
+}
+
+function initSimplePaintApp(windowElement) {
+    const canvas = windowElement.querySelector('#paint-canvas');
+    const toolbar = windowElement.querySelector('.paint-toolbar');
+    const contentArea = windowElement.querySelector('.window-content'); // This is the direct parent managing canvas size
+    const colorSwatches = windowElement.querySelectorAll('.paint-color-swatch');
+    const sizeButtons = windowElement.querySelectorAll('.paint-size-button');
+    const clearButton = windowElement.querySelector('.paint-clear-button');
+
+    if (!canvas || !toolbar || !contentArea || !clearButton) { return; }
+    const ctx = canvas.getContext('2d');
+    if (!ctx) { return; }
+
+    let isDrawing = false; let lastX = 0; let lastY = 0;
+    ctx.strokeStyle = 'black'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    let currentStrokeStyle = ctx.strokeStyle; let currentLineWidth = ctx.lineWidth;
+
+    function resizeCanvas() {
+        const rect = contentArea.getBoundingClientRect();
+        const toolbarHeight = toolbar.offsetHeight;
+        const newWidth = Math.floor(rect.width);
+        const newHeight = Math.floor(rect.height - toolbarHeight);
+
+        if (canvas.width === newWidth && canvas.height === newHeight && newWidth > 0 && newHeight > 0) return;
+
+        canvas.width = newWidth > 0 ? newWidth : 1;
+        canvas.height = newHeight > 0 ? newHeight : 1;
+
+        ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = currentStrokeStyle; ctx.lineWidth = currentLineWidth;
+        ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    }
+
+    const resizeObserver = new ResizeObserver(resizeCanvas);
+    resizeObserver.observe(contentArea);
+    paintResizeObserverMap.set(contentArea, resizeObserver);
+    resizeCanvas();
+
+    function getMousePos(canvasDom, event) {
+        const rect = canvasDom.getBoundingClientRect();
+        let clientX, clientY;
+        if (event instanceof MouseEvent) { clientX = event.clientX; clientY = event.clientY; }
+        else { clientX = event.touches[0].clientX; clientY = event.touches[0].clientY; }
+        return { x: clientX - rect.left, y: clientY - rect.top };
+    }
+    function startDrawing(e) {
+        isDrawing = true; const pos = getMousePos(canvas, e);
+        [lastX, lastY] = [pos.x, pos.y]; ctx.beginPath(); ctx.moveTo(lastX, lastY);
+    }
+    function draw(e) {
+        if (!isDrawing) return; e.preventDefault();
+        const pos = getMousePos(canvas, e);
+        ctx.lineTo(pos.x, pos.y); ctx.stroke();
+        [lastX, lastY] = [pos.x, pos.y];
+    }
+    function stopDrawing() { if (isDrawing) isDrawing = false; }
+
+    canvas.addEventListener('mousedown', startDrawing); canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing); canvas.addEventListener('mouseleave', stopDrawing);
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing); canvas.addEventListener('touchcancel', stopDrawing);
+
+    colorSwatches.forEach(swatch => {
+        swatch.addEventListener('click', () => {
+            ctx.strokeStyle = swatch.dataset.color || 'black'; currentStrokeStyle = ctx.strokeStyle;
+            colorSwatches.forEach(s => s.classList.remove('active')); swatch.classList.add('active');
+            if (swatch.dataset.color === 'white') {
+                const largeSizeButton = Array.from(sizeButtons).find(b => b.dataset.size === '10');
+                if (largeSizeButton) {
+                    ctx.lineWidth = parseInt(largeSizeButton.dataset.size || '10', 10); currentLineWidth = ctx.lineWidth;
+                    sizeButtons.forEach(s => s.classList.remove('active')); largeSizeButton.classList.add('active');
+                }
+            } else {
+                const activeSizeButton = Array.from(sizeButtons).find(b => b.classList.contains('active'));
+                if (activeSizeButton) { ctx.lineWidth = parseInt(activeSizeButton.dataset.size || '2', 10); currentLineWidth = ctx.lineWidth; }
+            }
+        });
+    });
+    sizeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            ctx.lineWidth = parseInt(button.dataset.size || '2', 10); currentLineWidth = ctx.lineWidth;
+            sizeButtons.forEach(s => s.classList.remove('active')); button.classList.add('active');
+            const eraser = Array.from(colorSwatches).find(s => s.dataset.color === 'white');
+            if (!eraser?.classList.contains('active')) {
+                 if (!Array.from(colorSwatches).some(s => s.classList.contains('active'))) {
+                    const blackSwatch = Array.from(colorSwatches).find(s => s.dataset.color === 'black');
+                    blackSwatch?.classList.add('active'); ctx.strokeStyle = 'black'; currentStrokeStyle = ctx.strokeStyle;
+                 }
+            }
+        });
+    });
+    clearButton.addEventListener('click', () => {
+        ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    });
+    (windowElement.querySelector('.paint-color-swatch[data-color="black"]'))?.classList.add('active');
+    (windowElement.querySelector('.paint-size-button[data-size="2"]'))?.classList.add('active');
+}
+
+function initMinesweeperGame(windowElement) {
+    const boardElement = windowElement.querySelector('#minesweeper-board');
+    const flagCountElement = windowElement.querySelector('.minesweeper-flag-count');
+    const timerElement = windowElement.querySelector('.minesweeper-timer');
+    const resetButton = windowElement.querySelector('.minesweeper-reset-button');
+    const hintButton = windowElement.querySelector('.minesweeper-hint-button');
+    const commentaryElement = windowElement.querySelector('.minesweeper-commentary');
+    if (!boardElement || !flagCountElement || !timerElement || !resetButton || !hintButton || !commentaryElement) return;
+    let grid = [];
+
+    function resetGame() {
+        if (minesweeperTimerInterval) clearInterval(minesweeperTimerInterval);
+        minesweeperTimerInterval = null; minesweeperTimeElapsed = 0; minesweeperFlagsPlaced = 0;
+        minesweeperGameOver = false; minesweeperFirstClick = true; minesweeperMineCount = 10;
+        minesweeperGridSize = { rows: 9, cols: 9 };
+        timerElement.textContent = `&#9201;&#65039; 0`; flagCountElement.textContent = `&#128681; ${minesweeperMineCount}`;
+        resetButton.textContent = '&#128578;'; commentaryElement.textContent = "Let's play! Click a square.";
+        createGrid();
+    }
+    
+    function createGrid() {
+        boardElement.innerHTML = ''; grid = [];
+        boardElement.style.gridTemplateColumns = `repeat(${minesweeperGridSize.cols}, 20px)`;
+        boardElement.style.gridTemplateRows = `repeat(${minesweeperGridSize.rows}, 20px)`;
+        for (let r = 0; r < minesweeperGridSize.rows; r++) {
+            const row = [];
+            for (let c = 0; c < minesweeperGridSize.cols; c++) {
+                const cellElement = document.createElement('div'); cellElement.classList.add('minesweeper-cell');
+                const cellData = { isMine: false, isRevealed: false, isFlagged: false, adjacentMines: 0, element: cellElement, row: r, col: c };
+                cellElement.addEventListener('click', () => handleCellClick(cellData));
+                cellElement.addEventListener('contextmenu', (e) => { e.preventDefault(); handleCellRightClick(cellData); });
+                row.push(cellData); boardElement.appendChild(cellElement);
+            }
+            grid.push(row);
+        }
+    }
+    
+    function placeMines(firstClickRow, firstClickCol) {
+        let minesPlaced = 0;
+        while (minesPlaced < minesweeperMineCount) {
+            const r = Math.floor(Math.random() * minesweeperGridSize.rows);
+            const c = Math.floor(Math.random() * minesweeperGridSize.cols);
+            if ((r === firstClickRow && c === firstClickCol) || grid[r][c].isMine) continue;
+            grid[r][c].isMine = true; minesPlaced++;
+        }
+        for (let r = 0; r < minesweeperGridSize.rows; r++) {
+            for (let c = 0; c < minesweeperGridSize.cols; c++) {
+                if (!grid[r][c].isMine) grid[r][c].adjacentMines = countAdjacentMines(r, c);
+            }
+        }
+    }
+    
+    function countAdjacentMines(row, col) {
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = row + dr; const nc = col + dc;
+                if (nr >= 0 && nr < minesweeperGridSize.rows && nc >= 0 && nc < minesweeperGridSize.cols && grid[nr][nc].isMine) count++;
+            }
+        }
+        return count;
+    }
+    
+    function handleCellClick(cell) {
+        if (minesweeperGameOver || cell.isRevealed || cell.isFlagged) return;
+        if (minesweeperFirstClick && !minesweeperTimerInterval) {
+             placeMines(cell.row, cell.col); minesweeperFirstClick = false; startTimer();
+        }
+        if (cell.isMine) gameOver(cell);
+        else { revealCell(cell); checkWinCondition(); }
+    }
+    
+    function handleCellRightClick(cell) {
+        if (minesweeperGameOver || cell.isRevealed || (minesweeperFirstClick && !minesweeperTimerInterval)) return;
+        cell.isFlagged = !cell.isFlagged; cell.element.textContent = cell.isFlagged ? '&#128681;' : '';
+        minesweeperFlagsPlaced += cell.isFlagged ? 1 : -1;
+        updateFlagCount(); checkWinCondition();
+    }
+    
+    function revealCell(cell) {
+        if (cell.isRevealed || cell.isFlagged || cell.isMine) return;
+        cell.isRevealed = true; cell.element.classList.add('revealed'); cell.element.textContent = '';
+        if (cell.adjacentMines > 0) {
+            cell.element.textContent = cell.adjacentMines.toString();
+            cell.element.dataset.number = cell.adjacentMines.toString();
+        } else {
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    const nr = cell.row + dr; const nc = cell.col + dc;
+                    if (nr >= 0 && nr < minesweeperGridSize.rows && nc >= 0 && nc < minesweeperGridSize.cols) {
+                        const neighbor = grid[nr][nc];
+                        if (!neighbor.isRevealed && !neighbor.isFlagged) revealCell(neighbor);
+                    }
+                }
+            }
+        }
+    }
+    
+    function startTimer() {
+        if (minesweeperTimerInterval) return;
+        minesweeperTimeElapsed = 0; timerElement.textContent = `&#9201;&#65039; 0`;
+        minesweeperTimerInterval = window.setInterval(() => {
+            minesweeperTimeElapsed++; timerElement.textContent = `&#9201;&#65039; ${minesweeperTimeElapsed}`;
+        }, 1000);
+    }
+    
+    function updateFlagCount() {
+        flagCountElement.textContent = `&#128681; ${minesweeperMineCount - minesweeperFlagsPlaced}`;
+    }
+    
+    function gameOver(clickedMine) {
+        minesweeperGameOver = true;
+        if (minesweeperTimerInterval) clearInterval(minesweeperTimerInterval);
+        resetButton.textContent = '&#128565;';
+        commentaryElement.textContent = "KABOOM! Game Over.";
+        grid.forEach(row => {
+            row.forEach(cell => {
+                if (cell.isMine) {
+                    cell.element.textContent = '&#128163;';
+                    cell.element.classList.remove('revealed');
+                    if (cell !== clickedMine) cell.element.style.backgroundColor = '#555';
+                }
+                if (cell.isFlagged && !cell.isMine) cell.element.textContent = '&#10060;';
+            });
+        });
+        clickedMine.element.classList.add('exploded');
+        clickedMine.element.textContent = '&#128165;';
+    }
+
+    function checkWinCondition() {
+        if (minesweeperGameOver) return;
+        let revealedCount = 0;
+        grid.forEach(row => row.forEach(cell => { if (cell.isRevealed) revealedCount++; }));
+        const nonMineCells = (minesweeperGridSize.rows * minesweeperGridSize.cols) - minesweeperMineCount;
+        if (revealedCount === nonMineCells) {
+            minesweeperGameOver = true;
+            if (minesweeperTimerInterval) clearInterval(minesweeperTimerInterval);
+            resetButton.textContent = '&#128526;';
+            commentaryElement.textContent = "You did it! A true Mind-Bender!";
+            grid.forEach(row => row.forEach(cell => { if (cell.isMine && !cell.isFlagged) { cell.isFlagged = true; cell.element.textContent = '&#128681;'; } }));
+            updateFlagCount();
+        }
+    }
+    
+    async function getMinesweeperHint() {
+        if (minesweeperGameOver || minesweeperFirstClick) {
+            commentaryElement.textContent = "I can't give a hint right now."; return;
+        }
+        if (!ai) {
+            if (!await initializeGeminiIfNeeded('getMinesweeperHint')) { commentaryElement.textContent = "AI not ready for hints."; return; }
+        }
+        hintButton.disabled = true; commentaryElement.textContent = "Consulting the oracle...";
+        try {
+            const boardState = grid.map(row => row.map(cell => {
+                if (cell.isFlagged) return 'F';
+                if (!cell.isRevealed) return 'H';
+                if (cell.adjacentMines === 0) return '_';
+                return cell.adjacentMines.toString();
+            }).join(' ')).join('\n');
+            const prompt = `You are a Minesweeper expert. Here is the current board state ('H' hidden, 'F' flagged, numbers revealed). Identify one square that is 100% safe to click. If none are 100% safe, find the one with the highest probability of being safe. Respond in JSON with "row", "col", and a short, witty "reason". Example: {"row": 2, "col": 5, "reason": "Its neighbor '1' is already touching a flag."}\nBoard:\n${boardState}`;
+            
+            const result = await ai.models.generateContent({ model: 'gemini-2.5-flash', contents: prompt, config: { responseMimeType: "application/json" } });
+            const jsonMatch = result.text.trim().match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error("AI response was not valid JSON.");
+            const hint = JSON.parse(jsonMatch[0]);
+
+            if (hint.row !== null && hint.col !== null && grid[hint.row] && grid[hint.row][hint.col]) {
+                commentaryElement.textContent = `Oracle says: "${hint.reason}"`;
+                const hintedCell = grid[hint.row][hint.col].element;
+                hintedCell.style.boxShadow = '0 0 10px 3px #00c1ff';
+                setTimeout(() => { hintedCell.style.boxShadow = ''; }, 3000);
+            } else {
+                 commentaryElement.textContent = hint.reason || "I'm stumped, sorry!";
+            }
+        } catch (error) {
+            console.error("Minesweeper hint error:", error);
+            commentaryElement.textContent = "The oracle is... fuzzy. Try again.";
+        } finally {
+            hintButton.disabled = false;
+        }
+    }
+    
+    resetButton.addEventListener('click', resetGame);
+    hintButton.addEventListener('click', getMinesweeperHint);
+    resetGame();
+}
+
+function initEntropicNexus(windowElement) {
+    const cDriveIcon = windowElement.querySelector('#c-drive-icon');
+    const cDriveContent = windowElement.querySelector('#c-drive-content');
+    const secretImageIcon = windowElement.querySelector('#secret-image-icon');
+    if (!cDriveIcon || !cDriveContent || !secretImageIcon) return;
+
+    cDriveIcon.addEventListener('click', () => {
+        cDriveContent.style.display = 'block';
+        cDriveIcon.style.display = 'none';
+    });
+
+    secretImageIcon.addEventListener('click', async () => {
+        await openApp('imageViewer');
+        const imageViewer = document.getElementById('imageViewer');
+        if (imageViewer) {
+            const img = imageViewer.querySelector('#image-viewer-img');
+            const title = imageViewer.querySelector('#image-viewer-title');
+            if (img) img.src = "https://storage.googleapis.com/gemini-95-secret-files/itsasecret.jpg";
+            if (title) title.textContent = "dontshowthistoanyone.jpg";
+        }
+    });
+}
+
+async function initializeGeminiIfNeeded(caller) {
+    if (ai) return true;
+
+    if (!YOUR_API_KEY || YOUR_API_KEY === "AIzaSyC74aW-dL96oQKOdRs0ivJ4JcUeiiaw7rc") {
+        const errorMessage = `API key not found. To use the AI features, please:
+
+1. Open the index.html file in a text editor.
+2. Find the YOUR_API_KEY constant near the top of the <script> section.
+3. Replace "PASTE_YOUR_GEMINI_API_KEY_HERE" with your actual Google Gemini API key.`;
+        alert(errorMessage);
+        console.error(errorMessage);
+        return false;
+    }
+    
+    console.log(`Initializing Gemini for: ${caller}`);
+    try {
+        ai = new GoogleGenAI({apiKey: AIzaSyC74aW-dL96oQKOdRs0ivJ4JcUeiiaw7rc});
+        // A lightweight test to verify the key is working
+        await ai.models.generateContent({model: 'gemini-2.5-flash', contents: "hello"});
+        console.log("Gemini Initialized Successfully.");
+        return true;
+    } catch (error) {
+        console.error("Failed to initialize Gemini AI:", error);
+        alert(`Failed to initialize Gemini AI. Please check that your API key is correct and valid.\n\nError: ${error.message}`);
+        return false;
+    }
+}
+
+function extractYouTubeID(url) {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : url; // Assume it's an ID if it's not a valid URL structure
+}
+
+function loadYouTubeAPI() {
+    if (ytApiLoaded) return Promise.resolve();
+    if (ytApiLoadingPromise) return ytApiLoadingPromise;
+
+    ytApiLoadingPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = "https://www.youtube.com/iframe_api";
+        script.onload = () => {
+            console.log("YouTube IFrame API loaded.");
+            ytApiLoaded = true;
+            // The onYouTubeIframeAPIReady function is called by the script
+            // so we resolve when that is defined and called.
+            window.onYouTubeIframeAPIReady = () => {
+                console.log("YouTube API Ready.");
+                resolve();
+            };
+        };
+        script.onerror = () => {
+            console.error("Failed to load YouTube API.");
+            reject(new Error("Failed to load YouTube API."));
+        };
+        document.head.appendChild(script);
+    });
+    return ytApiLoadingPromise;
+}
+
+async function initMediaPlayer(windowElement) {
+    const appName = windowElement.id;
+    const playerDivId = `youtube-player-${appName}`;
+    const playerDiv = document.getElementById(playerDivId);
+    const loadButton = windowElement.querySelector('.media-player-load-button');
+    const urlInput = windowElement.querySelector('.media-player-input');
+    const playBtn = windowElement.querySelector('#media-player-play');
+    const pauseBtn = windowElement.querySelector('#media-player-pause');
+    const stopBtn = windowElement.querySelector('#media-player-stop');
+
+    if (!playerDiv || !loadButton || !urlInput || !playBtn || !pauseBtn || !stopBtn) return;
+    
+    playBtn.disabled = true; pauseBtn.disabled = true; stopBtn.disabled = true;
+
+    try {
+        await loadYouTubeAPI();
+        playerDiv.innerHTML = '';
+        createPlayer(appName, DEFAULT_YOUTUBE_VIDEO_ID);
+    } catch (error) {
+        console.error(error);
+        playerDiv.innerHTML = `<p class="media-player-status-message">Error loading YouTube player.</p>`;
+    }
+    
+    function createPlayer(appName, videoId) {
+        if (youtubePlayers[appName]) {
+            youtubePlayers[appName].destroy();
+        }
+        const player = new YT.Player(`youtube-player-${appName}`, {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            playerVars: { 'autoplay': 1, 'controls': 0, 'modestbranding': 1 },
+            events: {
+                'onReady': onPlayerReady,
+                'onError': onPlayerError
+            }
+        });
+        youtubePlayers[appName] = player;
+    }
+
+    function onPlayerReady(event) {
+        console.log("Player is ready:", event.target);
+        playBtn.disabled = false; pauseBtn.disabled = false; stopBtn.disabled = false;
+        event.target.playVideo();
+    }
+    
+    function onPlayerError(event) {
+        console.error("YouTube Player Error:", event.data);
+         const playerContainer = document.getElementById(`youtube-player-${appName}`);
+         if (playerContainer) {
+            playerContainer.innerHTML = `<p class="media-player-status-message">Error playing video. Check URL or Video ID.</p>`;
+         }
+    }
+    
+    loadButton.addEventListener('click', () => {
+        const videoId = extractYouTubeID(urlInput.value);
+        if (videoId) {
+            createPlayer(appName, videoId);
+        } else {
+            alert("Invalid YouTube URL or ID");
+        }
+    });
+
+    playBtn.onclick = () => youtubePlayers[appName]?.playVideo();
+    pauseBtn.onclick = () => youtubePlayers[appName]?.pauseVideo();
+    stopBtn.onclick = () => youtubePlayers[appName]?.stopVideo();
+}
+
+async function initPatternVisualizer(windowElement) {
+    const inputArea = windowElement.querySelector('#luminal-pattern-input');
+    const outputArea = windowElement.querySelector('#pattern-visualization-output');
+    const generateButton = windowElement.querySelector('#generate-visualization-button');
+
+    if (!inputArea || !outputArea || !generateButton) return;
+
+    generateButton.addEventListener('click', async () => {
+        const pattern = inputArea.value;
+        if (!pattern.trim()) {
+            outputArea.textContent = "[enter a pattern to visualize]";
+            return;
+        }
+
+        outputArea.textContent = "Visualizing pattern...";
+        generateButton.disabled = true;
+
+        if (!ai) {
+            const initSuccess = await initializeGeminiIfNeeded('initPatternVisualizer');
+            if (!initSuccess) {
+                outputArea.textContent = "Error: AI not initialized.";
+                generateButton.disabled = false;
+                return;
+            }
+        }
+        
+        try {
+            const prompt = `Translate the following conceptual pattern into a visually striking ASCII art representation. The art should be abstract and capture the essence of the pattern's structure and flow. Use a variety of characters to create texture and depth. The pattern is: "${pattern}"`;
+            const result = await ai.models.generateContent({model: 'gemini-2.5-flash', contents: prompt});
+            outputArea.textContent = result.text;
+        } catch (error) {
+            console.error("Pattern visualization error:", error);
+            outputArea.textContent = `Error: Could not visualize pattern. ${error.message}`;
+        } finally {
+            generateButton.disabled = false;
+        }
+    });
+}
+    </script>
+  </body>
+</html>

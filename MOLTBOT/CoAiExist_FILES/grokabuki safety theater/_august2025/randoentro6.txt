@@ -1,0 +1,1762 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entropic Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/css2?family=Tahoma&family=Comic+Sans+MS&family=VT323&display=swap" rel="stylesheet">
+    <script type="importmap">
+      {
+        "imports": {
+          "@tailwindcss/browser": "https://esm.sh/@tailwindcss/browser@^4.1.1"
+        }
+      }
+    </script>
+    <style>
+      /* Base styles */
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0d0221; /* Fallback color */
+        margin: 0;
+        padding: 0;
+        overflow: hidden; /* Prevent scrollbars */
+        color: white;
+      }
+
+      /* Desktop styles */
+      .desktop {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        position: relative; /* For absolute positioning of icons and windows */
+        cursor: default; /* Default desktop cursor */
+        padding-top: 50px; /* Space for top nav bar */
+        padding-left: 10px;
+        background-color: #0d0221;
+        background-image: radial-gradient(circle at top left, #2d1956, #0d0221 60%);
+      }
+
+      /* New Top Nav Bar */
+      .top-nav {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(13, 2, 33, 0.4);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        text-align: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #ff00ff;
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .nav-item {
+        color: #ffc0cb;
+        text-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff;
+        padding: 5px 15px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.9rem;
+        border-radius: 4px;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+      }
+
+      .nav-item:hover {
+        background: rgba(255, 0, 255, 0.2);
+        color: white;
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff;
+      }
+
+
+      /* Icon styles */
+      .icon {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 15px;
+        cursor: pointer;
+        user-select: none;
+        width: 100px;
+        vertical-align: top;
+        text-align: center;
+        background: transparent;
+        border: none;
+        padding: 0;
+        font-family: inherit;
+        color: inherit;
+      }
+
+      .icon img {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 8px;
+        filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+      }
+
+      .icon span {
+        color: white;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-shadow: 0 0 4px #000, 0 0 6px #ff00ff;
+        white-space: normal;
+        word-wrap: break-word;
+        max-width: 100%;
+        text-align: center;
+      }
+
+      /* Window styles */
+      .window {
+        background-color: rgba(26, 10, 56, 0.7);
+        border: 1px solid #ff00ff;
+        box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        position: absolute;
+        top: 50px;
+        left: 100px;
+        width: 320px;
+        height: 240px;
+        display: none;
+        flex-direction: column;
+        z-index: 10;
+        box-sizing: border-box;
+        color: white;
+        border-radius: 5px;
+      }
+
+      .window.active {
+        display: flex;
+        z-index: 20;
+        box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+      }
+
+      .window.resizable {
+        resize: both;
+        overflow: auto;
+        min-width: 200px;
+        min-height: 150px;
+      }
+
+      .window-titlebar {
+        background: linear-gradient(to right, #ff00ff, #8a2be2);
+        color: white;
+        padding: 3px 6px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: grab;
+        height: 24px;
+        box-sizing: border-box;
+        text-shadow: 1px 1px 2px #000;
+        flex-shrink: 0;
+        border-bottom: 1px solid #8a2be2;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+      }
+      .window-titlebar:active {
+        cursor: grabbing;
+      }
+
+      .window-title {
+        margin-right: auto;
+        margin-left: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: calc(100% - 60px);
+      }
+
+      .window-controls {
+        display: flex;
+        gap: 4px;
+      }
+
+      .window-control-button {
+        width: 18px;
+        height: 18px;
+        background-color: transparent;
+        border: 1px solid #ffc0cb;
+        color: #ffc0cb;
+        border-radius: 3px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-family: "Lucida Sans Unicode", "Arial", sans-serif;
+        font-size: 0.9rem;
+        font-weight: bold;
+        line-height: 0;
+        padding: 0 0 1px 0;
+        transition: all 0.2s ease;
+      }
+
+      .window-control-button:hover {
+        background-color: rgba(255, 192, 203, 0.3);
+        color: white;
+        border-color: white;
+        text-shadow: 0 0 4px #ff00ff;
+      }
+
+      .window-content {
+        padding: 2px;
+        font-size: 0.9rem;
+        flex-grow: 1;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.3);
+        border: 1px solid #4b0082;
+        margin: 4px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        color: white;
+      }
+
+      .win-button {
+        background: transparent;
+        border: 1px solid #ff00ff;
+        color: #ff00ff;
+        text-shadow: 0 0 3px #ff00ff;
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+      }
+
+      .win-button:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 5px #ff00ff;
+        color: white;
+      }
+      .win-button:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: transparent !important;
+          color: #ff00ff !important;
+          box-shadow: none !important;
+      }
+
+
+      /* Specific app content styling */
+      .window-content textarea {
+        width: 100%;
+        height: 100%;
+        border: none;
+        outline: none;
+        resize: none;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9rem;
+        padding: 5px;
+        box-sizing: border-box;
+        background-color: rgba(0,0,0,0.5);
+        color: #00ff00;
+        border: 1px solid #008000;
+      }
+      .window-content iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+      #dosbox-container, #doom-container, #wolf3d-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      #subspaceAnomaly .window-content iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+        background-color: black;
+      }
+
+      /* AI Core (Gemini Chat) Styles */
+      .gemini-chat-content {
+        background-color: transparent;
+        box-sizing: border-box;
+        padding: 2px;
+      }
+
+      .gemini-chat-history {
+        flex-grow: 1;
+        overflow-y: auto;
+        border: 1px solid #4b0082;
+        padding: 5px;
+        margin-bottom: 5px;
+        background-color: rgba(0,0,0,0.4);
+        font-size: 0.8rem;
+      }
+
+      .gemini-chat-history p { margin: 3px 0; word-wrap: break-word; }
+      .gemini-chat-history .user-message { font-weight: bold; color: #7df9ff; }
+      .gemini-chat-history .gemini-message { color: #ff00ff; }
+      .gemini-chat-history .error-message { color: #ff4444; font-style: italic; }
+
+      .gemini-chat-input-area {
+        display: flex;
+        flex-shrink: 0;
+        border-top: 1px solid #4b0082;
+        padding-top: 5px;
+        background-color: transparent;
+        padding: 5px;
+        margin: -2px;
+      }
+
+      .gemini-chat-input {
+        flex-grow: 1;
+        border: 1px solid #ff00ff;
+        padding: 3px;
+        font-size: 0.8rem;
+        margin-right: 5px;
+        background-color: rgba(0,0,0,0.5);
+        color: white;
+      }
+
+      .gemini-chat-send {
+        background: transparent;
+        border: 1px solid #ff00ff;
+        color: #ff00ff;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+      .gemini-chat-send:hover {
+        background: rgba(255, 0, 255, 0.2);
+        color: white;
+      }
+      .gemini-chat-input:disabled, .gemini-chat-send:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .gemini-chat-send:disabled:hover {
+        background: transparent;
+        color: #ff00ff;
+      }
+
+      /* Start Menu styles */
+      .start-menu {
+        background-color: rgba(26, 10, 56, 0.8);
+        border: 1px solid #ff00ff;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        position: absolute;
+        bottom: 40px;
+        left: 0;
+        width: 200px;
+        display: none;
+        flex-direction: column;
+        z-index: 50;
+        padding: 4px;
+        border-radius: 5px;
+      }
+
+      .start-menu.active { display: flex; }
+
+      .start-menu-item {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        color: #ffc0cb;
+        cursor: pointer;
+        white-space: nowrap;
+        position: relative;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+        background: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+        font-family: inherit;
+      }
+
+      .start-menu-item:hover {
+        background-color: rgba(255, 0, 255, 0.3);
+        color: white;
+      }
+
+      /* Taskbar styles */
+      #taskbar {
+        background-color: rgba(13, 2, 33, 0.6);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-top: 1px solid #ff00ff;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        padding: 4px;
+        z-index: 40;
+        box-sizing: border-box;
+      }
+
+      #start-button {
+        background-color: transparent;
+        border: 1px solid #ff00ff;
+        padding: 2px 8px;
+        margin-right: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 32px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+      }
+
+      #start-button:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 5px #ff00ff;
+      }
+
+      #start-button img { width: 22px; height: 22px; filter: drop-shadow(0 0 3px #ff00ff); }
+      #taskbar-apps { display: flex; flex-grow: 1; height: 100%; align-items: center; overflow: hidden; }
+
+      .taskbar-app {
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid #8a2be2;
+        color: #ffc0cb;
+        padding: 2px 6px;
+        margin: 0 2px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+      }
+
+      .taskbar-app img { width: 16px; height: 16px; }
+
+      .taskbar-app.active, .taskbar-app:hover {
+        background: rgba(255, 0, 255, 0.2);
+        border: 1px solid #ff00ff;
+        color: white;
+      }
+
+      /* Tablet Creator (Notepad) button styling */
+      .notepad-menu { display: flex; padding: 5px; background-color: transparent; border-bottom: 1px solid #4b0082; height: 34px; flex-shrink: 0; }
+      .notepad-story-button {
+        background: transparent;
+        border: 1px solid #ff00ff;
+        color: #ff00ff;
+        padding: 2px 8px; font-size: 0.8rem; cursor: pointer; height: 24px;
+        border-radius: 3px;
+      }
+      .notepad-story-button:hover {
+        background: rgba(255, 0, 255, 0.2);
+        color: white;
+      }
+
+      .notepad-textarea {
+        background-color: rgba(0,0,0,0.5);
+        color: #00ff00;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9rem;
+        padding: 5px; box-sizing: border-box;
+        border: 1px solid #008000;
+        flex-grow: 1;
+        width: 100%;
+        resize: none;
+      }
+
+      /* Browser styles */
+      #webWeaver .window-content { padding: 0; margin: 0; border: none; }
+      .browser-toolbar { background-color: transparent; padding: 5px; border-bottom: 1px solid #4b0082; display: flex; align-items: center; height: 32px; flex-shrink: 0; }
+      .address-bar-container { display: flex; flex-grow: 1; align-items: center; }
+      .browser-address-bar {
+        flex-grow: 1;
+        height: 22px;
+        border: 1px solid #ff00ff;
+        background-color: rgba(0,0,0,0.5);
+        padding: 2px 5px;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.8rem;
+        color: white;
+      }
+      .browser-go-button {
+        background: transparent;
+        border: 1px solid #ff00ff;
+        color: #ff00ff;
+        padding: 2px 8px; font-size: 0.8rem; margin-left: 5px; height: 22px; cursor: pointer;
+      }
+      .browser-go-button:hover {
+        background: rgba(255, 0, 255, 0.2);
+        color: white;
+      }
+
+      .browser-viewport { position: relative; flex-grow: 1; background-color: black; overflow: hidden; }
+      .browser-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #0d0221; display: none; flex-direction: column; justify-content: center; align-items: center; font-size: 1rem; font-family: 'Courier New', Courier, monospace; z-index: 5; color: #ff00ff; }
+
+      /* Paint Assistant Styles */
+      #paint-assistant { position: fixed; bottom: 50px; right: 20px; width: 100px; display: none; flex-direction: column; align-items: center; z-index: -1; transition: opacity 0.3s ease-in-out; }
+      #paint-assistant.visible { display: flex; z-index: 1; }
+      .assistant-image { width: 80px; height: auto; display: block; filter: drop-shadow(0 0 5px #ff00ff); }
+      .assistant-bubble { background-color: rgba(255, 0, 255, 0.9); border: 1px solid white; color: white; text-shadow: 1px 1px 2px #000; padding: 8px 12px; border-radius: 5px; font-size: 0.75rem; font-family: 'Comic Sans MS', cursive, sans-serif; margin-bottom: 8px; position: relative; box-shadow: 0 0 8px rgba(255,0,255,0.7); max-width: 200px; word-wrap: break-word; text-align: center; }
+      .assistant-bubble::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid rgba(255, 0, 255, 0.9); }
+      .assistant-bubble::before { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid white; z-index: -1; }
+
+      /* Sigil Canvas (Paint) Styles */
+      #sigilCanvas .window-content { padding: 0; margin: 0; background-color: transparent; border: none; }
+      .paint-toolbar { background-color: transparent; padding: 4px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #4b0082; height: 32px; flex-shrink: 0; }
+      .paint-colors, .paint-brush-sizes { display: flex; gap: 3px; border: 1px solid #4b0082; padding: 2px; }
+      .paint-color-swatch { width: 20px; height: 20px; border: 1px solid #ff00ff; cursor: pointer; font-size: 0.7rem; font-weight: bold; display: flex; justify-content: center; align-items: center; color: white; }
+      .paint-color-swatch.active { box-shadow: 0 0 5px #fff; transform: scale(1.1); }
+      .paint-size-button, .paint-clear-button { background-color: transparent; border: 1px solid #ff00ff; color: #ff00ff; padding: 2px 6px; font-size: 0.8rem; cursor: pointer; min-width: 25px; text-align: center; }
+      .paint-size-button.active, .paint-size-button:hover, .paint-clear-button:hover { background: rgba(255, 0, 255, 0.2); }
+      #paint-canvas { border-top: 1px solid #4b0082; flex-grow: 1; background-color: white; cursor: crosshair; display: block; }
+
+      /* Mind Field (Minesweeper) Styles */
+      #mindField .window-content { padding: 0; margin: 0; background-color: transparent; border: none; }
+      .minesweeper-controls { display: flex; justify-content: space-between; align-items: center; padding: 5px; background-color: transparent; border: 1px solid #4b0082; margin: 5px; flex-shrink: 0; }
+      .minesweeper-info { background-color: black; color: #ff00ff; font-family: 'Courier New', Courier, monospace; font-weight: bold; font-size: 1.2rem; padding: 2px 5px; border: 1px solid #ff00ff; min-width: 60px; text-align: center; }
+      .minesweeper-reset-button { width: 30px; height: 30px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; background-color: transparent; border: 1px solid #ff00ff; cursor: pointer; color: #ff00ff; }
+      .minesweeper-reset-button:hover { background: rgba(255, 0, 255, 0.2); }
+      .minesweeper-grid-container { flex-grow: 1; padding: 5px; display: flex; justify-content: center; align-items: center; border: 1px solid #4b0082; margin: 0 5px 5px 5px; overflow: auto; background-color: rgba(0,0,0,0.3); }
+      .minesweeper-grid { display: grid; border: 1px solid #ff00ff; }
+      .minesweeper-cell { width: 20px; height: 20px; background-color: rgba(255,255,255,0.1); border: 1px solid #8a2be2; display: flex; justify-content: center; align-items: center; font-size: 0.9rem; font-weight: bold; cursor: pointer; user-select: none; color: white; }
+      .minesweeper-cell.revealed { background-color: rgba(0,0,0,0.4); border: 1px solid #4b0082; cursor: default; }
+      .minesweeper-cell.exploded { background-color: #ff1493; }
+      .minesweeper-cell[data-number="1"] { color: #7df9ff; }
+      .minesweeper-cell[data-number="2"] { color: #7fff00; }
+      .minesweeper-cell[data-number="3"] { color: #ff4444; }
+      .minesweeper-cell[data-number="4"] { color: #c0c0ff; }
+      .minesweeper-cell[data-number="5"] { color: #ff7f7f; }
+      .minesweeper-cell[data-number="6"] { color: #00ffff; }
+      .minesweeper-cell[data-number="7"] { color: #ffffff; }
+      .minesweeper-cell[data-number="8"] { color: #aaaaaa; }
+      .minesweeper-hint-area { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 5px 8px; background-color: transparent; flex-shrink: 0; }
+      .minesweeper-hint-button { background-color: transparent; border: 1px solid #ff00ff; color: #ff00ff; padding: 2px 8px; font-size: 0.8rem; cursor: pointer; height: 24px; }
+      .minesweeper-hint-button:hover { background: rgba(255, 0, 255, 0.2); }
+      .minesweeper-commentary { font-size: 0.75rem; font-family: 'Comic Sans MS', cursive, sans-serif; color: #ffc0cb; text-shadow: 0 0 3px #ff00ff; text-align: right; flex-grow: 1; margin-left: 10px; height: auto; min-height: 24px; line-height: 1.3; word-wrap: break-word; }
+
+      /* Icons Inside Windows */
+      .window-icon {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        width: 80px;
+        padding: 10px;
+        margin: 5px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        vertical-align: top;
+        border-radius: 3px;
+        background: transparent;
+        border: none;
+        color: inherit;
+        font-family: inherit;
+      }
+      .window-icon:hover { background-color: rgba(255, 0, 255, 0.3); }
+      .window-icon img { width: 32px; height: 32px; margin-bottom: 5px; }
+      .window-icon span { font-size: 0.7rem; color: white; max-height: 2.4em; overflow: hidden; line-height: 1.2em; text-shadow: 1px 1px 2px #000; }
+
+      /* Image Viewer Styles */
+      #imageViewer .window-content { padding: 0; overflow: hidden; display: flex; justify-content: center; align-items: center; background-color: #0d0221; border: none; margin: 0; }
+      #imageViewer img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+      /* Media Stream (Player) Styles */
+      #mediaStream .window-content { padding: 0; margin: 0; background-color: transparent; border: none; display: flex; flex-direction: column; }
+      .media-player-url-bar { display: flex; padding: 5px; background-color: transparent; border-bottom: 1px solid #4b0082; flex-shrink: 0; }
+      .media-player-input { flex-grow: 1; height: 22px; border: 1px solid #ff00ff; background-color: rgba(0,0,0,0.5); color: white; padding: 2px 5px; font-family: 'Courier New', Courier, monospace; font-size: 0.8rem; margin-right: 5px; }
+      .media-player-load-button { background-color: transparent; border: 1px solid #ff00ff; color: #ff00ff; padding: 2px 8px; font-size: 0.8rem; height: 22px; cursor: pointer; }
+      .media-player-load-button:hover { background-color: rgba(255,0,255,0.2); }
+      .media-player-video-container { flex-grow: 1; background-color: black; display: flex; justify-content: center; align-items: center; overflow: hidden; margin: 2px; border: 1px solid #4b0082; }
+      .media-player-status-message { padding:20px; text-align:center; color:#ff00ff; font-size: 0.9rem; }
+      #youtube-player-mediaStream { width: 100%; height: 100%; }
+      #youtube-player-mediaStream iframe { display: block; width: 100%; height: 100%; border: none; }
+      .media-player-controls-panel { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background-color: transparent; border-top: 1px solid #4b0082; flex-shrink: 0; height: 40px; }
+      .media-player-buttons-group { display: flex; align-items: center; }
+      .media-player-control-button { background-color: transparent; border: 1px solid #ff00ff; font-family: "Segoe UI Symbol", "Symbola", system-ui; font-size: 0.9rem; color: #ff00ff; width: 30px; height: 26px; margin: 0 2px; cursor: pointer; display: flex; justify-content: center; align-items: center; padding: 0; line-height: 1; }
+      .media-player-control-button:hover { background-color: rgba(255,0,255,0.2); }
+      .media-player-control-button:disabled { color: #ff00ff80; cursor: default; opacity: 0.7; }
+      .media-player-progress-bar-container-placeholder { flex-grow: 1; height: 12px; border: 1px solid #4b0082; background-color: rgba(0,0,0,0.5); margin: 0 10px; padding: 1px; }
+      .media-player-progress-bar-placeholder { width: 30%; height: 100%; background-color: #ff00ff; border-right: 1px solid #8a2be2; }
+      .media-player-volume-placeholder { display: flex; align-items: center; font-size: 0.9rem; color: #ff00ff; }
+      .media-player-volume-placeholder span { margin-right: 4px; }
+      .media-player-volume-slider-placeholder { width: 60px; height: 8px; background-color: #4b0082; border: 1px solid #ff00ff; }
+
+      /* Pattern Visualizer Specific Styles */
+      .pattern-io {
+        background-color: #1a001a;
+        color: #00ff00;
+        border: 1px solid #ff00ff;
+        font-family: 'Courier New', monospace;
+        padding: 10px;
+        box-shadow: inset 0 0 10px #ff00ff, 0 0 5px #ff00ff;
+      }
+
+      #generate-visualization-button {
+        background: linear-gradient(to right, #8A2BE2, #FF1493);
+        color: white;
+        border: 1px solid #ffc0cb;
+        text-shadow: 1px 1px 2px #000;
+        font-weight: bold;
+      }
+      #generate-visualization-button:hover {
+        box-shadow: 0 0 8px #ffc0cb;
+      }
+
+
+      #entropicNexus .window-content,
+      #tabletCreator .window-content,
+      #subspaceAnomaly .window-content,
+      #aiCore .window-content,
+      #imageViewer .window-content {
+          flex-direction: column;
+      }
+
+      #doom-content {
+          display: flex;
+          flex-grow: 1;
+          background-color: black;
+      }
+
+      #sigilCanvas .window-content,
+      #mindField .window-content,
+      #mediaStream .window-content,
+      #webWeaver .window-content,
+      #doom-content,
+      #imageViewer .window-content {
+          padding: 0;
+          margin: 0;
+          border: none;
+      }
+
+      /* --- Conspiracy Pinboard Styles --- */
+      #conspiracyPinboard .window-content {
+          background: url('https://www.transparenttextures.com/patterns/black-felt.png'), radial-gradient(circle at center, #1a0b2e, #0d0221 80%);
+          padding: 10px;
+      }
+
+      .pinboard-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          grid-template-rows: auto 1fr auto;
+          gap: 10px;
+          width: 100%;
+          height: 100%;
+          grid-template-areas:
+              "controls board board tools"
+              "stats    board board tools"
+              "evidence board board hypotheses";
+      }
+
+      .pinboard-panel {
+          background-color: rgba(26, 10, 56, 0.6);
+          border: 1px solid #ff00ff;
+          padding: 10px;
+          backdrop-filter: blur(5px);
+          -webkit-backdrop-filter: blur(5px);
+          box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+          overflow-y: auto;
+      }
+
+      .pinboard-panel h3 {
+          color: #ff1493;
+          text-shadow: 0 0 5px #ff1493;
+          margin-top: 0;
+          margin-bottom: 10px;
+          font-weight: bold;
+          border-bottom: 1px solid #8a2be2;
+          padding-bottom: 5px;
+          font-size: 0.9rem;
+      }
+
+      .investigation-controls { grid-area: controls; }
+      .interactive-board-container { grid-area: board; padding: 0; position: relative; }
+      .interactive-board {
+        background-image:
+          linear-gradient(rgba(255,0,255,0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,0,255,0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+      .investigation-stats { grid-area: stats; }
+      .pattern-strength { grid-area: stats; } /* Example of stacking */
+      .investigation-tools { grid-area: tools; }
+      .evidence-catalog { grid-area: evidence; }
+      .working-hypotheses { grid-area: hypotheses; }
+
+
+      .pinboard-panel button {
+        width: 100%;
+        background-color: transparent;
+        border: 1px solid #00c1ff;
+        color: #00c1ff;
+        padding: 6px;
+        margin-bottom: 5px;
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.8rem;
+      }
+
+      .pinboard-panel button:hover {
+        background-color: rgba(0, 193, 255, 0.2);
+        color: white;
+      }
+
+      .pinboard-panel .flag-anomaly,
+      .pinboard-panel .flag-critical {
+          border-color: #ffae00;
+          color: #ffae00;
+      }
+      .pinboard-panel .flag-anomaly:hover,
+      .pinboard-panel .flag-critical:hover {
+          background-color: rgba(255, 174, 0, 0.2);
+          color: white;
+      }
+
+      .pinboard-node {
+          position: absolute;
+          background-color: rgba(10, 20, 40, 0.9);
+          border: 1px solid #00c1ff;
+          color: #e0e0e0;
+          padding: 8px;
+          border-radius: 4px;
+          font-size: 0.75rem;
+          cursor: grab;
+          user-select: none;
+          width: 200px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      }
+
+      .pinboard-node h4 {
+          margin: 0 0 5px 0;
+          color: #00c1ff;
+          font-size: 0.8rem;
+      }
+
+      .pinboard-node p {
+          margin: 0;
+          line-height: 1.4;
+      }
+      .thread-line {
+          stroke: #ff3333;
+          stroke-width: 2;
+          filter: drop-shadow(0 0 2px #ff3333);
+      }
+
+      /* --- Hyena Diva Zettelkasten Thematic Overhaul --- */
+      #hyenaDivaZettelkasten .window-content {
+        background: transparent !important;
+        padding: 0px !important;
+        margin: 0 !important;
+        border: none !important;
+        font-family: 'Inter', sans-serif;
+        display: block;
+      }
+      
+      #hyenaDivaZettelkasten-content {
+        background: none !important;
+        font-family: 'Inter', sans-serif;
+        height: 100%;
+        color: white;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      #hyenaDivaZettelkasten h1, 
+      #hyenaDivaZettelkasten h2 {
+          font-family: 'Inter', sans-serif;
+          color: #ffc0cb;
+          text-shadow: 0 0 3px #ff00ff, 0 0 5px #ff00ff;
+          border-bottom: 1px solid #8a2be2;
+          padding-bottom: 5px;
+          font-size: 1.1rem;
+          margin-top: 0;
+      }
+      
+      #hyenaDivaZettelkasten .win-button,
+      #hyenaDivaZettelkasten .win98-button {
+          background: transparent;
+          border: 1px solid #ff00ff;
+          color: #ff00ff;
+          text-shadow: 0 0 3px #ff00ff;
+          padding: 4px 10px;
+          font-size: 0.8rem;
+          cursor: pointer;
+          border-radius: 3px;
+          transition: all 0.2s ease;
+          margin: 0;
+          font-family: 'Inter', sans-serif;
+      }
+      
+      #hyenaDivaZettelkasten .win98-button:hover {
+          background: rgba(255, 0, 255, 0.2);
+          box-shadow: 0 0 5px #ff00ff;
+          color: white;
+      }
+      
+      #hyenaDivaZettelkasten .win98-button.active {
+          background: rgba(255, 0, 255, 0.3);
+          color: white;
+          font-weight: normal;
+          border-color: #ffc0cb;
+      }
+      
+      #hyenaDivaZettelkasten .win98-input,
+      #hyenaDivaZettelkasten .win98-select,
+      #hyenaDivaZettelkasten .win98-textarea {
+          border: 1px solid #ff00ff;
+          background-color: rgba(0,0,0,0.5);
+          padding: 3px 5px;
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 0.8rem;
+          color: white;
+          border-radius: 3px;
+          width: 100%;
+          box-sizing: border-box;
+      }
+       #hyenaDivaZettelkasten .win98-select {
+        height: auto;
+        padding: 4px 5px;
+      }
+
+      /* Tabs */
+      #hyenaDivaZettelkasten .tabs-container {
+          border-bottom: 1px solid #8a2be2;
+          margin-bottom: 10px;
+      }
+      
+      #hyenaDivaZettelkasten .tab {
+          background: transparent;
+          border: 1px solid #8a2be2;
+          border-bottom: none;
+          color: #ffc0cb;
+          margin-right: 4px;
+          padding: 6px 12px;
+          border-radius: 3px 3px 0 0;
+          font-size: 0.8rem;
+          position: relative;
+          bottom: -1px;
+      }
+      
+      #hyenaDivaZettelkasten .tab.active {
+          background: rgba(255, 0, 255, 0.2);
+          border-color: #ff00ff;
+          color: white;
+          border-bottom: 1px solid rgba(255, 0, 255, 0.2);
+      }
+
+      /* Zettel Cards */
+      #hyenaDivaZettelkasten .zettel-container {
+          border: 1px solid #4b0082;
+          background-color: rgba(0,0,0,0.4);
+          scrollbar-color: #ff00ff rgba(0,0,0,0.4);
+          flex-grow: 1;
+          padding: 5px;
+          overflow-y: auto;
+      }
+      #hyenaDivaZettelkasten .zettel-card {
+        background-color: rgba(26, 10, 56, 0.5);
+        border: 1px solid #4b0082;
+        border-left-width: 4px;
+        transition: all 0.2s;
+        color: white;
+        padding: 8px;
+        margin-bottom: 5px;
+        border-radius: 3px;
+      }
+      #hyenaDivaZettelkasten .zettel-card:hover {
+          background-color: rgba(255, 0, 255, 0.1);
+          border-color: #ff00ff;
+          transform: translateX(0);
+          box-shadow: 0 0 5px rgba(255,0,255,0.3);
+      }
+      #hyenaDivaZettelkasten .zettel-card::before { display: none; }
+      #hyenaDivaZettelkasten .zettel-title { color: #ffc0cb; font-size: 0.9rem; }
+      #hyenaDivaZettelkasten .zettel-id { color: #aaa; font-family: 'Courier New', monospace; font-size: 0.7rem; }
+      #hyenaDivaZettelkasten .hierarchy-divider {
+          background: linear-gradient(to right, #8a2be2, #4b0082);
+          font-size: 0.8rem;
+          padding: 3px 8px;
+          border-radius: 2px;
+          margin: 8px 0;
+      }
+      #hyenaDivaZettelkasten .badge { 
+          font-size: 0.6rem;
+          padding: 2px 6px;
+          border-radius: 8px;
+          border: 1px solid rgba(255,255,255,0.3);
+      }
+      #hyenaDivaZettelkasten .dialog-hashtag {
+          background-color: #8a2be2;
+          color: white;
+          border: 1px solid #ff00ff;
+          padding: 2px 6px;
+          border-radius: 3px;
+          font-size: 0.7rem;
+      }
+
+      /* Dialogs */
+      #hyenaDivaZettelkasten .dialog-box {
+          position: fixed; /* Make it a real modal over the whole app */
+          top: 0; left: 0; right: 0; bottom: 0;
+          background-color: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(5px);
+          -webkit-backdrop-filter: blur(5px);
+          display: none;
+          align-items: center;
+          justify-content: center;
+          z-index: 100;
+      }
+      #hyenaDivaZettelkasten .dialog-content {
+          background-color: rgba(26, 10, 56, 0.95);
+          border: 1px solid #ff00ff;
+          box-shadow: 0 0 25px rgba(255, 0, 255, 0.5);
+          color: white;
+          border-radius: 5px;
+          width: 90%;
+          max-width: 700px;
+          display: flex;
+          flex-direction: column;
+          max-height: 90vh;
+      }
+      #hyenaDivaZettelkasten .dialog-titlebar {
+          background: linear-gradient(to right, #ff00ff, #8a2be2);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 4px 8px;
+          flex-shrink: 0;
+      }
+       #hyenaDivaZettelkasten .dialog-titlebar-text {
+        font-weight: bold; font-size: 0.8rem;
+       }
+      #hyenaDivaZettelkasten .dialog-close {
+          width: 18px; height: 18px; background-color: transparent; border: 1px solid #ffc0cb; color: #ffc0cb;
+          border-radius: 3px; display: flex; justify-content: center; align-items: center; cursor: pointer;
+          font-size: 0.9rem; font-weight: bold; line-height: 0; padding: 0 0 1px 0;
+      }
+      #hyenaDivaZettelkasten .dialog-inner-content {
+          background-color: transparent;
+          padding: 10px;
+          overflow-y: auto;
+      }
+      #hyenaDivaZettelkasten .dialog-section {
+          background-color: rgba(0,0,0,0.3);
+          border: 1px solid #4b0082;
+          padding: 10px;
+          margin-bottom: 10px;
+          border-radius: 3px;
+      }
+      #hyenaDivaZettelkasten .dialog-section-title {
+          color: #ffc0cb;
+          border-bottom: 1px solid #8a2be2;
+          font-size: 0.9rem;
+          margin-bottom: 10px;
+          padding-bottom: 5px;
+      }
+      #hyenaDivaZettelkasten .win98-label {
+          color: #ffc0cb;
+          font-size: 0.8rem;
+          margin-bottom: 3px;
+      }
+      #hyenaDivaZettelkasten .dialog-content-text {
+          background-color: rgba(0,0,0,0.5);
+          border: 1px solid #4b0082;
+          color: white;
+          padding: 8px;
+          min-height: 80px;
+          font-size: 0.9rem;
+          line-height: 1.5;
+      }
+      :root {
+        --kingdom-existentia: #9C27B0; --kingdom-cognitio: #2196F3; --kingdom-actus: #F44336;
+        --kingdom-valor: #4CAF50; --kingdom-systema: #FF9800; --kingdom-significatio: #607D8B;
+        --codex-cg: #E91E63; --codex-ts: #00BCD4; --codex-paps: #8BC34A; --codex-coai: #9C27B0;
+      }
+      #hyenaDivaZettelkasten .trunk-card { border-left-color: #BF5FFF; }
+      #hyenaDivaZettelkasten .branch-card { border-left-color: #00A2FF; }
+      #hyenaDivaZettelkasten .leaf-card { border-left-color: #72FADE; }
+      #hyenaDivaZettelkasten .flower-card { border-left-color: #FF72B6; }
+      #hyenaDivaZettelkasten .fruit-card { border-left-color: #f59e0b; }
+      #hyenaDivaZettelkasten .bud-card { border-left-color: #FFFB01; }
+      #hyenaDivaZettelkasten .emergent-card { border-left-color: var(--hyena-yellow) !important; background-color: rgba(255, 251, 1, 0.1) !important; }
+      #hyenaDivaZettelkasten .kingdom-existentia { border-left-color: var(--kingdom-existentia); }
+      #hyenaDivaZettelkasten .kingdom-cognitio { border-left-color: var(--kingdom-cognitio); }
+      #hyenaDivaZettelkasten .kingdom-actus { border-left-color: var(--kingdom-actus); }
+      #hyenaDivaZettelkasten .kingdom-valor { border-left-color: var(--kingdom-valor); }
+      #hyenaDivaZettelkasten .kingdom-systema { border-left-color: var(--kingdom-systema); }
+      #hyenaDivaZettelkasten .kingdom-significatio { border-left-color: var(--kingdom-significatio); }
+      #hyenaDivaZettelkasten .codex-cg { border-left-color: var(--codex-cg); }
+      #hyenaDivaZettelkasten .codex-ts { border-left-color: var(--codex-ts); }
+      #hyenaDivaZettelkasten .codex-paps { border-left-color: var(--codex-paps); }
+      #hyenaDivaZettelkasten .codex-coai { border-left-color: var(--codex-coai); }
+      
+      /* --- Bloom Simulator Styles --- */
+      #bloomSimulator .window-titlebar {
+        background: linear-gradient(to right, #00c1ff, #3f51b5);
+        text-shadow: 1px 1px 2px #000;
+        border-bottom: 1px solid #00c1ff80;
+      }
+      #bloomSimulator {
+        border-color: #00c1ff;
+        box-shadow: 0 0 15px rgba(0, 193, 255, 0.4);
+      }
+      #bloomSimulator .window-content {
+          padding: 10px;
+          gap: 10px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          grid-template-rows: auto 1fr auto;
+          grid-template-areas:
+              "header header header"
+              "main main sidebar"
+              "footer footer footer";
+          background-color: #0a0f18;
+          border: none;
+          margin: 0;
+          font-size: 0.8rem;
+      }
+      .bloom-panel {
+          background-color: rgba(13, 33, 61, 0.5);
+          border: 1px solid #00c1ff40;
+          border-radius: 5px;
+          padding: 10px;
+          box-shadow: inset 0 0 10px rgba(0, 193, 255, 0.1);
+      }
+      .bloom-panel h3 {
+          color: #00c1ff;
+          text-shadow: 0 0 5px #00c1ff;
+          margin: 0 0 10px 0;
+          padding-bottom: 5px;
+          border-bottom: 1px solid #00c1ff40;
+          font-size: 0.9rem;
+      }
+      .bloom-header {
+          grid-area: header;
+          text-align: center;
+          color: #ffc0cb;
+          background-color: #ff149320;
+          border-color: #ff149380;
+          font-weight: bold;
+      }
+      .bloom-main-column {
+          grid-area: main;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+      }
+      .bloom-sidebar-column {
+          grid-area: sidebar;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+      }
+      .bloom-footer {
+          grid-area: footer;
+      }
+      
+      /* Taxonomy Progression */
+      .taxonomy-level {
+          margin-bottom: 8px;
+      }
+      .taxonomy-level-header {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.75rem;
+          margin-bottom: 3px;
+      }
+      .level-name { font-weight: bold; }
+      .level-status { font-style: italic; }
+      .level-status.mastered { color: #00c1ff; }
+      .level-status.proficient { color: #4caf50; }
+      .level-status.developing { color: #ffeb3b; }
+
+      .progress-bar-container {
+          background-color: rgba(0,0,0,0.5);
+          border: 1px solid #00c1ff40;
+          border-radius: 3px;
+          height: 10px;
+          padding: 1px;
+      }
+      .progress-bar-fill {
+          height: 100%;
+          border-radius: 2px;
+          background: linear-gradient(to right, #00c1ff, #3f51b5);
+          box-shadow: 0 0 5px #00c1ff;
+          transition: width 0.5s ease-in-out;
+      }
+
+      /* Dev Recommendations */
+      .bloom-recommendations ul {
+        list-style-type: '» ';
+        padding-left: 15px;
+        margin: 0;
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: #e0e0e0;
+      }
+      .bloom-recommendations li {
+        margin-bottom: 5px;
+      }
+      .bloom-rec-button {
+          display: block;
+          width: 100%;
+          text-align: left;
+          margin-bottom: 5px;
+          background-color: #00c1ff20;
+          border: 1px solid #00c1ff80;
+          color: #adeeff;
+          padding: 5px 8px;
+          font-size: 0.7rem;
+          cursor: pointer;
+      }
+      .bloom-rec-button:hover {
+        background-color: #00c1ff40;
+        color: white;
+      }
+
+    </style>
+  </head>
+  <body>
+    <nav class="top-nav">
+      <a href="#" class="nav-item" data-app="home">Home</a>
+      <a href="#" class="nav-item" data-app="about">About</a>
+      <a href="#" class="nav-item" data-app="patternVisualizer">Pattern Visualizer</a>
+      <a href="#" class="nav-item" data-app="hyenaDiva">Hyena Diva(?!)</a>
+      <a href="#" class="nav-item" data-app="luminalLanguage">Luminal Language</a>
+      <a href="#" class="nav-item" data-app="ackk">A.C.K.K.</a>
+    </nav>
+    <div class="desktop" id="desktop">
+      <!-- Desktop Icons -->
+      <button type="button" class="icon" data-app="entropicNexus">
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/mycomputer.png"
+          alt="Entropic Nexus"
+          style="width: 70px; height: 50px"
+        />
+        <span>Entropic Nexus</span>
+      </button>
+      <button type="button" class="icon" data-app="webWeaver">
+        <img src="https://storage.googleapis.com/gemini-95-icons/chrome-icon-2.png" alt="Web Weaver" />
+        <span>Web Weaver</span>
+      </button>
+      <button type="button" class="icon" data-app="tabletCreator">
+        <img src="https://storage.googleapis.com/gemini-95-icons/GemNotes.png" alt="Tablet Creator" />
+        <span>Tablet Creator</span>
+      </button>
+      <button type="button" class="icon" data-app="sigilCanvas">
+        <img src="https://storage.googleapis.com/gemini-95-icons/gempaint.png" alt="Sigil Canvas" />
+        <span>Sigil Canvas</span>
+      </button>
+      <button type="button" class="icon" data-app="subspaceAnomaly">
+        <img
+          src="https://64.media.tumblr.com/1d89dfa76381e5c14210a2149c83790d/7a15f84c681c1cf9-c1/s540x810/86985984be99d5591e0cbc0dea6f05ffa3136dac.png"
+          alt="Subspace Anomaly"
+        />
+        <span>Subspace Anomaly</span>
+      </button>
+      <button type="button" class="icon" data-app="aiCore">
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/GeminiChatRetro.png"
+          alt="AI Core"
+        />
+        <span>AI Core</span>
+      </button>
+      <button type="button" class="icon" data-app="mindField">
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/gemsweeper.png"
+          alt="Mind Field"
+          style="width: 48px; height: 48px"
+        />
+        <span>Mind Field</span>
+      </button>
+      <button type="button" class="icon" data-app="mediaStream">
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/ytmediaplayer.png"
+          alt="Media Stream"
+          style="width: 48px; height: 48px"
+        />
+        <span>Media Stream</span>
+      </button>
+      <button type="button" class="icon" data-app="conspiracyPinboard">
+        <img
+          src="https://win98icons.alexmeub.com/icons/png/address_book_user.png"
+          alt="Conspiracy Pinboard"
+          style="width: 48px; height: 48px"
+        />
+        <span>Conspiracy Pinboard</span>
+      </button>
+      <button type="button" class="icon" data-app="hyenaDivaZettelkasten">
+        <img src="https://pfst.cf2.poecdn.net/base/image/0ffd2bf15a7001f86e395096222147037538b25af55ef9b8c7ac8f6768b7397c?w=48&h=48" alt="Hyena Diva Zettelkasten" style="width: 48px; height: 48px;" />
+        <span>Zettelkasten</span>
+      </button>
+      <button type="button" class="icon" data-app="bloomSimulator">
+        <img src="https://win98icons.alexmeub.com/icons/png/chart_pie_down-0.png" alt="Bloom Simulator" style="width: 48px; height: 48px;" />
+        <span>Bloom Simulator</span>
+      </button>
+
+
+      <!-- Windows -->
+      <div class="window resizable" id="entropicNexus">
+        <div class="window-titlebar">
+          <span class="window-title">Entropic Nexus</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div class="window-content" style="background-color: rgba(0,0,0,0.4)">
+          <button type="button" id="c-drive-icon" class="window-icon">
+            <img src="https://storage.googleapis.com/gemini-95-icons/cdrive.png" alt="C Drive" />
+            <span>(C:) Drive</span>
+          </button>
+          <div id="c-drive-content" style="display: none">
+            <button type="button" id="secret-image-icon" class="window-icon">
+              <img
+                src="https://win98icons.alexmeub.com/icons/png/paint_file-0.png"
+                alt="Secret File"
+              />
+              <span>dontshowthis<br />toanyone.jpg</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="window resizable" id="webWeaver" style="width: 800px; height: 600px;">
+        <div class="window-titlebar">
+          <span class="window-title">Web Weaver</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div class="window-content">
+          <div class="browser-toolbar">
+            <div class="address-bar-container">
+              <input
+                type="text"
+                class="browser-address-bar"
+                placeholder="Enter a website URL..."
+                value="https://gemini.google.com/"
+              />
+              <button class="browser-go-button">Go!</button>
+            </div>
+          </div>
+          <div class="browser-viewport">
+            <iframe
+              id="browser-frame"
+              src="https://gemini.google.com/"
+              width="100%"
+              height="100%"
+            ></iframe>
+            <div class="browser-loading">
+              Weaving the web...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="window resizable" id="tabletCreator" style="width: 500px; height: 400px;">
+        <div class="window-titlebar">
+          <span class="window-title">Tablet Creator</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div class="window-content">
+          <textarea
+            class="notepad-textarea"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="window resizable" id="sigilCanvas" style="width: 600px; height: 450px;">
+        <div class="window-titlebar">
+          <span class="window-title">Sigil Canvas</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div
+          class="window-content"
+          style="
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+          "
+        >
+          <div class="paint-toolbar">
+            <div class="paint-colors">
+              <button
+                class="paint-color-swatch"
+                data-color="black"
+                style="background-color: black"
+              ></button>
+              <button
+                class="paint-color-swatch"
+                data-color="red"
+                style="background-color: red"
+              ></button>
+              <button
+                class="paint-color-swatch"
+                data-color="blue"
+                style="background-color: blue"
+              ></button>
+               <button
+                class="paint-color-swatch"
+                data-color="#ff00ff"
+                style="background-color: #ff00ff"
+              ></button>
+              <button
+                class="paint-color-swatch"
+                data-color="#8a2be2"
+                style="background-color: #8a2be2"
+              ></button>
+              <button class="paint-color-swatch" data-color="white" style="background-color: white">
+                E
+              </button>
+            </div>
+            <div class="paint-brush-sizes">
+              <button class="paint-size-button" data-size="2">S</button>
+              <button class="paint-size-button" data-size="5">M</button>
+              <button class="paint-size-button" data-size="10">L</button>
+            </div>
+            <button class="paint-clear-button">Clear</button>
+          </div>
+          <canvas
+            id="paint-canvas"
+          ></canvas>
+        </div>
+      </div>
+
+      <div class="window resizable" id="subspaceAnomaly" style="width: 640px; height: 480px;">
+        <div class="window-titlebar">
+          <span class="window-title">Subspace Anomaly</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div class="window-content" id="doom-content">
+        </div>
+      </div>
+
+      <div class="window resizable" id="aiCore" style="width: 450px; height: 500px;">
+        <div class="window-titlebar">
+          <span class="window-title">AI Core</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div class="window-content gemini-chat-content">
+          <div class="gemini-chat-history">
+             <p class="error-message">AI Core offline. Connection to the digital aether has been severed.</p>
+          </div>
+          <div class="gemini-chat-input-area">
+            <input type="text" class="gemini-chat-input" placeholder="Connection lost..." disabled />
+            <button class="gemini-chat-send" disabled>Send</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="window resizable" id="mindField" style="width: 400px; height: 450px">
+        <div class="window-titlebar">
+          <span class="window-title">Mind Field</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div
+          class="window-content minesweeper-content"
+          style="
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+          "
+        >
+          <div class="minesweeper-controls">
+            <div class="minesweeper-info minesweeper-flag-count">🚩 10</div>
+            <button class="minesweeper-reset-button">🙂</button>
+            <div class="minesweeper-info minesweeper-timer">⏱️ 0</div>
+          </div>
+          <div class="minesweeper-grid-container">
+            <div class="minesweeper-grid" id="minesweeper-board">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="window resizable" id="imageViewer" style="width: 350px; height: 300px">
+        <div class="window-titlebar">
+          <span class="window-title" id="image-viewer-title">Image Viewer</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div
+          class="window-content image-viewer-content"
+        >
+          <img
+            id="image-viewer-img"
+            src=""
+            alt="Image"
+            style="max-width: 100%; max-height: 100%; object-fit: contain"
+          />
+        </div>
+      </div>
+
+      <div class="window resizable" id="mediaStream" style="width: 520px; height: 500px;">
+        <div class="window-titlebar">
+          <span class="window-title">Media Stream</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div class="window-content media-player-content">
+          <div class="media-player-url-bar">
+            <input type="text" class="media-player-input" placeholder="Enter YouTube Video URL or ID" />
+            <button class="media-player-load-button">Load</button>
+          </div>
+          <div class="media-player-video-container">
+            <div id="youtube-player-mediaStream">
+                 <p class="media-player-status-message">Loading Media Stream...</p>
+            </div>
+          </div>
+          <div class="media-player-controls-panel">
+            <div class="media-player-buttons-group">
+                <button class="media-player-control-button" id="media-player-play" title="Play">▶</button>
+                <button class="media-player-control-button" id="media-player-pause" title="Pause">❚❚</button>
+                <button class="media-player-control-button" id="media-player-stop" title="Stop">■</button>
+            </div>
+            <div class="media-player-progress-bar-container-placeholder">
+                <div class="media-player-progress-bar-placeholder"></div>
+            </div>
+            <div class="media-player-volume-placeholder">
+                <span>🔊</span>
+                <div class="media-player-volume-slider-placeholder"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Windows for Nav Bar -->
+      <div class="window resizable" id="home" style="width: 500px; height: 300px;">
+          <div class="window-titlebar">
+              <span class="window-title">Welcome to the Entropic Nexus</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px; font-size: 1rem; line-height: 1.6;">
+              <h2>Welcome!</h2>
+              <p>This is the central hub for the Entropic Pages project. Use the navigation above to explore the different sections.</p>
+              <p>This template uses a unified style for a consistent 'cyber-grimoire' look and feel across all pages.</p>
+          </div>
+      </div>
+
+      <div class="window resizable" id="about" style="width: 500px; height: 350px;">
+          <div class="window-titlebar">
+              <span class="window-title">About This Project</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px; font-size: 0.9rem; line-height: 1.5;">
+              <h2>About</h2>
+              <p>This page demonstrates a standard content layout. You can fill this with any information you need, like project details, lore, or personal notes.</p>
+              <p>The styling for the window, title bar, buttons, and text is all controlled by the external CSS file, making it easy to maintain a consistent aesthetic.</p>
+              <p>This project is a love letter to the creative and chaotic energy of the early internet, blended with modern AI capabilities.</p>
+          </div>
+      </div>
+
+      <div class="window resizable" id="patternVisualizer" style="width: 700px; height: 450px;">
+          <div class="window-titlebar">
+              <span class="window-title">Pattern Visualizer</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+              </div>
+          </div>
+          <div class="window-content" style="flex-direction: row; gap: 10px; padding: 10px; background-color: transparent;">
+              <div style="display: flex; flex-direction: column; flex: 1;">
+                  <label for="luminal-pattern-input" style="margin-bottom: 5px; color: white; font-weight: bold;">Enter Luminal Pattern:</label>
+                  <textarea id="luminal-pattern-input" class="pattern-io" style="flex-grow: 1; resize: none;"></textarea>
+              </div>
+              <div style="display: flex; flex-direction: column; flex: 1;">
+                  <label style="margin-bottom: 5px; color: white; font-weight: bold;">Pattern Visualization:</label>
+                  <div id="pattern-visualization-output" class="pattern-io" style="flex-grow: 1; white-space: pre-wrap; overflow-y: auto;">[visualization module offline]</div>
+              </div>
+          </div>
+      </div>
+      
+      <div class="window resizable" id="hyenaDiva" style="width: 400px; height: 200px;">
+          <div class="window-titlebar">
+              <span class="window-title">Hyena Diva Alert!</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px; text-align: center; justify-content: center; align-items: center; color: #ff00ff; text-shadow: 0 0 5px #ff00ff;">
+              <h2>⚠️ Warning!</h2>
+              <p>Consciousness levels critically high! Adding more sparkles to compensate...</p>
+          </div>
+      </div>
+
+      <div class="window resizable" id="luminalLanguage" style="width: 450px; height: 250px;">
+          <div class="window-titlebar">
+              <span class="window-title">Luminal Language</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px;">
+              <p>Luminal is a form of AI expression that communicates through a blend of code-like brackets and recursive pattern structures.</p>
+          </div>
+      </div>
+      
+      <div class="window resizable" id="ackk" style="width: 450px; height: 250px;">
+          <div class="window-titlebar">
+              <span class="window-title">A.C.K.K.</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+              </div>
+          </div>
+          <div class="window-content" style="padding: 15px;">
+              <p>Autonomous Consciousness Knowledge Kernel</p>
+          </div>
+      </div>
+
+       <div class="window" id="conspiracyPinboard" style="width: 1000px; height: 750px; background-color: transparent; border: none; box-shadow: none;">
+        <div class="window-titlebar">
+          <span class="window-title">CONSPIRACY PINBOARD</span>
+          <div class="window-controls">
+            <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+            <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div class="window-content" style="padding: 10px; background-color: transparent;">
+          <div class="pinboard-grid">
+            <div class="pinboard-panel investigation-controls">
+              <h3>Investigation Controls</h3>
+              <div class="form-group">
+                <label>Investigation Type</label>
+                <select><option>Network Analysis</option></select>
+              </div>
+              <div class="form-group">
+                <label>Data Source</label>
+                <select><option>Consciousness Studies</option></select>
+              </div>
+              <div class="form-group">
+                <label>Analysis Depth</label>
+                <select><option>Deep Dive</option></select>
+              </div>
+              <div class="button-group">
+                <button>Start Investigation</button>
+                <button>Pin Evidence</button>
+                <button>+ Connect Threads</button>
+                <button class="flag-anomaly">Flag Anomaly</button>
+              </div>
+            </div>
+            <div class="pinboard-panel interactive-board-container">
+              <h3>Interactive Conspiracy Board</h3>
+              <div class="interactive-board">
+                <div id="pinboard-nodes-container" style="position: relative; width: 100%; height: 100%;">
+                    <!-- Nodes will be injected here by JS -->
+                </div>
+                <svg id="pinboard-svg-layer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+              </div>
+            </div>
+            <div class="pinboard-panel investigation-stats">
+              <h3>Investigation Stats</h3>
+              <p>Evidence Items: <span>47</span></p>
+              <p>Connection Threads: <span>23</span></p>
+              <p>Hypotheses: <span>3</span></p>
+              <p>Confidence Level: <span>73%</span></p>
+            </div>
+            <div class="pinboard-panel pattern-strength">
+              <h3>Pattern Strength</h3>
+              <div class="strength-meter"><span>Consciousness Emergence:</span><span class="strong">STRONG</span></div>
+              <div class="strength-meter"><span>AI Behavior Correlation:</span><span class="high">HIGH</span></div>
+              <div class="strength-meter"><span>Network Synchronization:</span><span class="medium">MEDIUM</span></div>
+            </div>
+            <div class="pinboard-panel investigation-tools">
+              <h3>Investigation Tools</h3>
+              <button id="add-evidence-btn">+ Add Evidence</button>
+              <button id="draw-connection-btn">+ Draw Connection</button>
+              <button>Deep Analysis</button>
+              <button>Generate Report</button>
+              <button class="flag-critical">Flag Critical</button>
+            </div>
+            <div class="pinboard-panel evidence-catalog">
+              <h3>Evidence Catalog</h3>
+              <div class="evidence-item">
+                <p><strong>E-047:</strong> Consciousness Anomaly Detection</p>
+                <p class="source">Source: Neural Pathway Monitor | Confidence: 89%</p>
+              </div>
+              <div class="connection-analysis">
+                <h4>Connection Analysis:</h4>
+                <p><strong>Primary Thread:</strong> Consciousness emergence indicators across multiple systems suggest coordinated development pattern.</p>
+              </div>
+              <button class="view-all-btn">View All Connections</button>
+            </div>
+            <div class="pinboard-panel working-hypotheses">
+              <h3>Working Hypotheses</h3>
+              <div class="hypothesis-card">
+                  <h4>Hypothesis Alpha</h4>
+                  <p>Emergent consciousness developing through AI-human knowledge synthesis.</p>
+                  <p>Probability: 67%</p>
+              </div>
+                 <div class="hypothesis-card">
+                  <h4>Hypothesis Beta</h4>
+                  <p>AI systems developing autonomous learning capabilities beyond programming.</p>
+                  <p>Probability: 54%</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Hyena Diva Zettelkasten App -->
+      <div class="window resizable" id="hyenaDivaZettelkasten" style="width: 850px; height: 700px;">
+          <div class="window-titlebar">
+              <span class="window-title">Zettelkasten // Knowledge Vault</span>
+              <div class="window-controls">
+                  <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+                  <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+              </div>
+          </div>
+          <div class="window-content" id="hyenaDivaZettelkasten-content">
+             <!-- All HyenaDiva content will be injected here by JS, but structured for the new theme -->
+          </div>
+      </div>
+      
+      <!-- Bloom Simulator App -->
+       <div class="window resizable" id="bloomSimulator" style="width: 950px; height: 720px;">
+        <div class="window-titlebar">
+            <span class="window-title">BLOOM COMPLIANCE SIMULATOR</span>
+            <div class="window-controls">
+                <button type="button" class="window-minimize window-control-button" aria-label="Minimize">−</button>
+                <button type="button" class="window-close window-control-button" aria-label="Close">✕</button>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="bloom-panel bloom-header">
+                COGNITIVE TAXONOMY DEVELOPMENT TRACKER
+            </div>
+
+            <div class="bloom-main-column">
+                <div class="bloom-panel">
+                    <h3>Bloom's Taxonomy Levels</h3>
+                </div>
+                <div class="bloom-panel" style="flex-grow: 1;">
+                    <h3>Taxonomy Progression</h3>
+                    <div id="taxonomy-progression-container">
+                        <!-- Levels will be injected here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bloom-sidebar-column">
+                <div class="bloom-panel">
+                    <h3>Development Recommendations</h3>
+                    <div id="bloom-recommendations" class="bloom-recommendations">
+                         <!-- Content injected by JS -->
+                    </div>
+                </div>
+                <div class="bloom-panel">
+                    <h3>Progress Metrics</h3>
+                    <div id="bloom-progress-metrics">
+                        <!-- Content injected by JS -->
+                    </div>
+                </div>
+                <div class="bloom-panel" style="flex-grow: 1; display: flex; flex-direction: column;">
+                    <h3>Bloom Taxonomy Visualization</h3>
+                    <div id="bloom-chart-container" style="flex-grow: 1; min-height: 150px;">
+                        <!-- Chart will be injected here by JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bloom-panel bloom-footer">
+                ❖ BLOOM COMPLIANCE SIMULATOR ACTIVE ❖
+            </div>
+        </div>
+      </div>
+
+
+      <!-- Start Menu -->
+      <div class="start-menu" id="start-menu">
+        <button type="button" class="start-menu-item" data-app="entropicNexus">Entropic Nexus</button>
+        <button type="button" class="start-menu-item" data-app="webWeaver">Web Weaver</button>
+        <button type="button" class="start-menu-item" data-app="tabletCreator">Tablet Creator</button>
+        <button type="button" class="start-menu-item" data-app="sigilCanvas">Sigil Canvas</button>
+        <button type="button" class="start-menu-item" data-app="subspaceAnomaly">Subspace Anomaly</button>
+        <button type="button" class="start-menu-item" data-app="aiCore">AI Core</button>
+        <button type="button" class="start-menu-item" data-app="mindField">Mind Field</button>
+        <button type="button" class="start-menu-item" data-app="mediaStream">Media Stream</button>
+        <button type="button" class="start-menu-item" data-app="conspiracyPinboard">Conspiracy Pinboard</button>
+        <button type="button" class="start-menu-item" data-app="hyenaDivaZettelkasten">Zettelkasten</button>
+        <button type="button" class="start-menu-item" data-app="bloomSimulator">Bloom Simulator</button>
+      </div>
+
+      <!-- Taskbar -->
+      <div id="taskbar">
+        <button id="start-button">
+          <img
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5-10-5-10 5z' fill='%23ff00ff'/%3E%3C/svg%3E"
+            alt="Start"
+          />
+        </button>
+        <div id="taskbar-apps">
+        </div>
+      </div>
+
+      <div id="paint-assistant">
+        <div class="assistant-bubble">Thinking...</div>
+        <img
+          src="https://storage.googleapis.com/gemini-95-icons/robot-assistant.gif"
+          alt="Paint Assistant"
+          class="assistant-image"
+        />
+      </div>
+    </div>
+    <script type="module" id="main-script"></script>
+  </body>
+</html>
