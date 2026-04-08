@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hyena Diva Drag-n-Drop Stage Maker</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 20px; font-family: Arial, sans-serif; background: #f5e6ff; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { text-align: center; color: #6b2c5c; }
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    button { padding: 10px 20px; background: #8b3a8b; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #6b2c5c; }
+    .main { display: flex; gap: 20px; }
+    #stage { 
+      flex: 1; 
+      border: 3px solid #333; 
+      background: #e8d4ff; 
+      position: relative; 
+      height: 500px; 
+      background-size: cover;
+      overflow: hidden;
+    }
+    .sidebar { width: 250px; }
+    .panel { background: white; border: 1px solid #ccc; border-radius: 5px; padding: 15px; margin-bottom: 15px; }
+    .panel h3 { margin-top: 0; color: #6b2c5c; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 10px; }
+    .tile { 
+      width: 60px; 
+      height: 60px; 
+      overflow: hidden; 
+      border: 2px solid #ddd; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tile img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+    .tile:hover { border-color: #8b3a8b; }
+    .stage-item { position: absolute; cursor: grab; user-select: none; }
+    .stage-item:active { cursor: grabbing; }
+    .stage-item img { width: 100%; height: auto; display: block; image-rendering: pixelated; }
+    input[type="text"] { width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎭 Hyena Diva Stage Maker</h1>
+    <div class="controls">
+      <button onclick="clearStage()">Clear Stage</button>
+      <button onclick="scatterItems()">Scatter Props</button>
+      <button onclick="saveScene()">Save Scene</button>
+      <button onclick="loadScene()">Load Scene</button>
+      <input type="file" id="loadFile" accept=".json" style="display:none" />
+    </div>
+    <div class="main">
+      <div id="stage"></div>
+      <div class="sidebar">
+        <div class="panel">
+          <h3>🎨 Backdrops</h3>
+          <div class="grid" id="backdrops"></div>
+        </div>
+        <div class="panel">
+          <h3>🎬 Props & Sprites</h3>
+          <input type="text" id="search" placeholder="Search..." />
+          <div class="grid" id="props"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GITHUB_RAW = "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main";
+    
+    const backdropsData = [
+      "_cavebot-bg1-reeds.png",
+      "_cavebot-bg2-cedarwoods.png",
+      "_cavebot-bg3-crystalhearth.png",
+      "_cavebot-bg4-anzucave.png",
+      "_cavebot-bg5-snowywoods.png",
+      "_cavebot-bg6-syberruinsdoor.png",
+      "_cavebot-bg7-bridgetosyberruins.png",
+      "_cavebot-bg8-cavebeds.png",
+      "_cavebot-bg9-sybernest.png",
+      "_cavebot-bg10-openplains.png",
+      "_cavebot-bg11-duskyriver.png",
+      "_cavebot-bg12-headwaters.jpg"
+    ].map(f => `${GITHUB_RAW}/cavebot/assets/image/backdrops/empty/${f}`);
+
+    const propsData = [
+      // Sprites - Nabu
+      { src: `${GITHUB_RAW}/cavebot/assets/image/sprites/Nabu/_sprites_nabu1-idle.png`, name: "Nabu Idle" },
+      { src: `${GITHUB_RAW}/cavebot/assets/image/sprites/Nabu/_sprites_nabu2-ritual.png`, name: "Nabu Ritual" },
+      { src: `${GITHUB_RAW}/cavebot/assets/image/sprites/Nabu/_sprites_nabu3-reloadbow.png`, name: "Nabu Bow" },
+      { src: `${GITHUB_RAW}/cavebot/assets/image/sprites/Nabu/_sprites_nabu4-tenseskystare.png`, name: "Nabu Stare" },
+      { src: `${GITHUB_RAW}/cavebot/assets/image/sprites/Nabu/_sprites_nabu5-sitting.png`, name: "Nabu Sit" },
+      // Sprites - Anzu
+      { src: `${GITHUB_RAW}/cavebot/assets/image/sprites/Anzu%20/_sprites_anzu1-front.png`, name: "Anzu Front" },
+      { src: `${GITHUB_RAW}/cavebot/assets/image/sprites/Anzu%20/_sprites_anzu2-mechanzutransform.png`, name: "Anzu Mecha" },
+      { src: `${GITHUB_RAW}/cavebot/assets/image/sprites/Anzu%20/_sprites_anzu5-bashful.png`, name: "Anzu Shy" },
+      // Props
+      { src: `${GITHUB_RAW}/cavebot/assets/image/props/_cavebot2.png`, name: "Prop 1" },
+      { src: `${GITHUB_RAW}/cavebot/assets/image/props/_cavebot20.png`, name: "Prop 2" },
+      { src: `${GITHUB_RAW}/cavebot/assets/image/props/_cavebot27.png`, name: "Prop 3" },
+      // CoAi Sprites
+      { src: `${GITHUB_RAW}/_coai-sprites/nabu_sprite_crouch.png`, name: "Nabu Crouch" },
+      { src: `${GITHUB_RAW}/_coai-sprites/nabu_sprite_fistpump.png`, name: "Nabu Fist" },
+      { src: `${GITHUB_RAW}/_coai-sprites/nabuatwork.png`, name: "Nabu Work" }
+    ];
+
+    let stage = document.getElementById("stage");
+    let draggedItem = null;
+    let offsetX, offsetY;
+
+    function renderBackdrops() {
+      const container = document.getElementById("backdrops");
+      backdropsData.forEach(src => {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.innerHTML = `<img src="${src}" alt="backdrop" />`;
+        tile.onclick = () => stage.style.backgroundImage = `url(${src})`;
+        container.appendChild(tile);
+      });
+    }
+
+    function renderProps() {
+      const container = document.getElementById("props");
+      propsData.forEach(item => {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.innerHTML = `<img src="${item.src}" alt="${item.name}" />`;
+        tile.title = item.name;
+        tile.onclick = () => spawnItem(item.src);
+        container.appendChild(tile);
+      });
+    }
+
+    function spawnItem(src) {
+      const item = document.createElement("div");
+      item.className = "stage-item";
+      item.style.left = Math.random() * 300 + "px";
+      item.style.top = Math.random() * 300 + "px";
+      item.style.width = "80px";
+      item.innerHTML = `<img src="${src}" alt="item" />`;
+      item.onpointerdown = startDrag;
+      item.ondblclick = () => item.remove();
+      stage.appendChild(item);
+    }
+
+    function startDrag(e) {
+      draggedItem = this;
+      const rect = this.getBoundingClientRect();
+      const stageRect = stage.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      document.onpointermove = drag;
+      document.onpointerup = stopDrag;
+    }
+
+    function drag(e) {
+      if (!draggedItem) return;
+      const stageRect = stage.getBoundingClientRect();
+      let x = e.clientX - stageRect.left - offsetX;
+      let y = e.clientY - stageRect.top - offsetY;
+      x = Math.max(0, Math.min(x, stageRect.width - 80));
+      y = Math.max(0, Math.min(y, stageRect.height - 80));
+      draggedItem.style.left = x + "px";
+      draggedItem.style.top = y + "px";
+    }
+
+    function stopDrag() {
+      document.onpointermove = null;
+      document.onpointerup = null;
+      draggedItem = null;
+    }
+
+    function clearStage() {
+      stage.innerHTML = "";
+    }
+
+    function scatterItems() {
+      document.querySelectorAll(".stage-item").forEach(item => {
+        item.style.left = Math.random() * (stage.clientWidth - 80) + "px";
+        item.style.top = Math.random() * (stage.clientHeight - 80) + "px";
+      });
+    }
+
+    function saveScene() {
+      const items = Array.from(document.querySelectorAll(".stage-item")).map(item => ({
+        src: item.querySelector("img").src,
+        x: item.style.left,
+        y: item.style.top
+      }));
+      const blob = new Blob([JSON.stringify(items)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "scene.json";
+      a.click();
+    }
+
+    function loadScene() {
+      document.getElementById("loadFile").click();
+    }
+
+    document.getElementById("loadFile").onchange = (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        clearStage();
+        JSON.parse(reader.result).forEach(item => {
+          const el = document.createElement("div");
+          el.className = "stage-item";
+          el.style.left = item.x;
+          el.style.top = item.y;
+          el.style.width = "80px";
+          el.innerHTML = `<img src="${item.src}" alt="item" />`;
+          el.onpointerdown = startDrag;
+          el.ondblclick = () => el.remove();
+          stage.appendChild(el);
+        });
+      };
+      reader.readAsText(file);
+    };
+
+    document.getElementById("search").oninput = (e) => {
+      const query = e.target.value.toLowerCase();
+      document.querySelectorAll("#props .tile").forEach(tile => {
+        tile.style.display = tile.title.toLowerCase().includes(query) ? "" : "none";
+      });
+    };
+
+    renderBackdrops();
+    renderProps();
+  </script>
+</body>
+</html>

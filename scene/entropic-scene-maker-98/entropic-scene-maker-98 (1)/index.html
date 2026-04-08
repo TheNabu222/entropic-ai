@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>entropicFLASH MX 2004 Professional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=MS+Sans+Serif&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --win-teal: #008080;
+            --win-gray: #c0c0c0;
+            --win-white: #ffffff;
+            --win-dark-gray: #808080;
+            --win-black: #000000;
+            --win-blue: #000080;
+            --flash-yellow: #ffcc00;
+            --flash-stage-bg: #666666;
+        }
+
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            background-color: var(--win-teal);
+            font-family: 'MS Sans Serif', Tahoma, sans-serif;
+            height: 100vh; width: 100vw;
+            user-select: none;
+        }
+
+        .win98-border {
+            border: 2px solid;
+            border-color: var(--win-white) var(--win-dark-gray) var(--win-dark-gray) var(--win-white);
+            background: var(--win-gray);
+            box-shadow: 1px 1px 0 0 var(--win-black);
+        }
+
+        .win98-inset {
+            border: 2px solid;
+            border-color: var(--win-dark-gray) var(--win-white) var(--win-white) var(--win-dark-gray);
+            background: var(--win-white);
+        }
+
+        .win98-button {
+            border: 2px solid;
+            border-color: var(--win-white) var(--win-dark-gray) var(--win-dark-gray) var(--win-white);
+            background: var(--win-gray);
+            padding: 2px 6px;
+            outline: 1px solid var(--win-black);
+            box-shadow: inset 1px 1px var(--win-white);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .win98-button:active, .win98-button.active {
+            border-color: var(--win-dark-gray) var(--win-white) var(--win-white) var(--win-dark-gray);
+            box-shadow: inset -1px -1px var(--win-white);
+            padding: 3px 5px 1px 7px;
+        }
+
+        .title-bar {
+            background: linear-gradient(90deg, var(--win-blue), #1084d0);
+            color: white; padding: 3px 6px; height: 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: bold; font-size: 11px;
+        }
+
+        .flash-stage-container {
+            background: var(--flash-stage-bg);
+            background-image: radial-gradient(#777 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .flash-stage {
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 1px solid #000;
+            position: relative; overflow: hidden;
+        }
+
+        .layer-item {
+            position: absolute; cursor: move;
+        }
+
+        .layer-item.selected {
+            outline: 2px solid #00f;
+            box-shadow: 0 0 10px rgba(0,0,255,0.5);
+        }
+
+        .timeline-cell {
+            width: 20px; height: 18px; border-right: 1px solid #aaa; border-bottom: 1px solid #aaa;
+        }
+
+        .timeline-cell.active { background: var(--flash-yellow); }
+
+        .preloader-bg { background: #111; color: var(--flash-yellow); font-family: monospace; }
+        .loader-bar { width: 300px; height: 6px; border: 1px solid var(--flash-yellow); position: relative; }
+        .loader-fill { height: 100%; background: var(--flash-yellow); box-shadow: 0 0 10px var(--flash-yellow); width: 0%; }
+
+        @keyframes anim-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .pulse { animation: anim-pulse 1s infinite ease-in-out; }
+
+        @keyframes anim-jitter { 0% { transform: translate(0,0); } 25% { transform: translate(-2px, 2px); } 50% { transform: translate(2px, -2px); } 75% { transform: translate(-1px, -1px); } }
+        .jitter { animation: anim-jitter 0.1s infinite linear; }
+
+        .crt-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.01));
+            background-size: 100% 2px, 3px 100%; pointer-events: none; z-index: 9999;
+        }
+
+        #desktop-icons { pointer-events: none; }
+        .desktop-icon { pointer-events: auto; }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "@google/genai": "https://esm.sh/@google/genai@^1.40.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+
+    <!-- Preloader -->
+    <div id="preloader" class="preloader-bg h-screen w-screen flex flex-col items-center justify-center gap-6 z-[10000] absolute">
+        <div class="text-4xl font-bold italic text-flash-yellow">entropicFLASH MX</div>
+        <div class="loader-bar"><div id="loader-fill" class="loader-fill"></div></div>
+        <div id="loader-text" class="text-[10px] uppercase tracking-widest">0% Initializing...</div>
+        <button id="enter-btn" class="hidden px-8 py-2 bg-flash-yellow text-black font-bold border-2 border-white">ENTER WORKSPACE</button>
+    </div>
+
+    <!-- Desktop -->
+    <div id="desktop" class="h-screen w-screen relative">
+        <div id="desktop-icons" class="p-6 flex flex-col gap-6">
+            <div class="desktop-icon flex flex-col items-center w-20 cursor-pointer group" onclick="toggleWin('explorer')">
+                <span class="text-4xl mb-1">📚</span>
+                <span class="text-white text-[11px] font-bold drop-shadow-md group-hover:bg-blue-800 p-0.5">Library</span>
+            </div>
+            <div class="desktop-icon flex flex-col items-center w-20 cursor-pointer group" onclick="toggleWin('editor')">
+                <span class="text-4xl mb-1">⚡</span>
+                <span class="text-white text-[11px] font-bold drop-shadow-md group-hover:bg-blue-800 p-0.5">Authoring</span>
+            </div>
+            <div class="desktop-icon flex flex-col items-center w-20 cursor-pointer group" onclick="toggleWin('ai_hub')">
+                <span class="text-4xl mb-1">✨</span>
+                <span class="text-white text-[11px] font-bold drop-shadow-md group-hover:bg-blue-800 p-0.5">Gemini Lab</span>
+            </div>
+        </div>
+
+        <!-- Windows Container -->
+        <div id="windows-root"></div>
+
+        <!-- Taskbar -->
+        <div class="absolute bottom-0 left-0 right-0 h-10 bg-gray-300 border-t-2 border-white flex items-center px-1 z-[1000] win98-border">
+            <button class="win98-button px-4 font-bold h-8 mr-2"><span class="bg-flash-yellow text-black px-1 italic">MX</span> Flash</button>
+            <div id="taskbar-apps" class="flex gap-1 overflow-x-auto"></div>
+            <div class="flex-grow"></div>
+            <div class="win98-inset h-8 px-4 flex items-center text-[11px] font-bold italic bg-[#eee]">
+                <span id="clock">00:00 AM</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="crt-overlay"></div>
+
+    <script type="module">
+        import { GoogleGenAI, Modality } from 'https://esm.sh/@google/genai';
+
+        // --- App State ---
+        let state = {
+            assets: [],
+            layers: [],
+            selectedId: null,
+            windows: {
+                editor: { open: true, z: 10, x: 100, y: 50, w: 1000, h: 750 },
+                explorer: { open: false, z: 11, x: 50, y: 50, w: 400, h: 500 },
+                ai_hub: { open: false, z: 12, x: 300, y: 100, w: 500, h: 600 }
+            },
+            isPlaying: false,
+            zoom: 1,
+            filters: { text: '', type: 'all' },
+            aiHistory: [],
+            isAiLoading: false,
+            liveActive: false
+        };
+
+        const REPO = 'TheNabu222/entropic-ai';
+
+        // --- Utilities ---
+        const encode = (b) => btoa(String.fromCharCode(...b));
+        const decode = (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+        const decodeAudio = async (d, ctx) => {
+            const int16 = new Int16Array(d.buffer);
+            const buf = ctx.createBuffer(1, int16.length, 24000);
+            const chan = buf.getChannelData(0);
+            for (let i = 0; i < int16.length; i++) chan[i] = int16[i] / 32768.0;
+            return buf;
+        };
+
+        // --- Core Functions ---
+        async function init() {
+            const fill = document.getElementById('loader-fill');
+            const text = document.getElementById('loader-text');
+            const enter = document.getElementById('enter-btn');
+
+            let progress = 0;
+            const iv = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100; clearInterval(iv);
+                    enter.classList.remove('hidden');
+                }
+                fill.style.width = progress + '%';
+                text.innerText = Math.floor(progress) + '% Initializing...';
+            }, 50);
+
+            enter.onclick = () => {
+                document.getElementById('preloader').remove();
+                renderAll();
+            };
+
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            try {
+                const res = await fetch(`https://api.github.com/repos/${REPO}/git/trees/main?recursive=1`);
+                const data = await res.json();
+                state.assets = data.tree.filter(i => i.type === 'blob' && /\.(png|jpg|jpeg|gif|mp3)$/i.test(i.path)).map(i => ({
+                    name: i.path.split('/').pop(),
+                    path: i.path,
+                    url: `https://raw.githubusercontent.com/${REPO}/main/${i.path}`
+                }));
+            } catch (e) { console.error('Asset fetch failed', e); }
+        }
+
+        function updateClock() {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        window.toggleWin = (id, force) => {
+            state.windows[id].open = force !== undefined ? force : !state.windows[id].open;
+            if (state.windows[id].open) bringToFront(id);
+            renderAll();
+        };
+
+        function bringToFront(id) {
+            const maxZ = Math.max(...Object.values(state.windows).map(w => w.z));
+            state.windows[id].z = maxZ + 1;
+        }
+
+        function addLayer(asset) {
+            const isSfx = asset.name.endsWith('.mp3');
+            const layer = {
+                id: Math.random().toString(36).substr(2, 9),
+                name: asset.name.split('.')[0] + '_mc',
+                url: asset.url,
+                type: isSfx ? 'audio' : 'image',
+                x: 100, y: 100, w: 200, h: 200, opacity: 1, rot: 0, flip: false, anim: 'none'
+            };
+            state.layers.push(layer);
+            state.selectedId = layer.id;
+            renderAll();
+        }
+
+        // --- AI Suite ---
+        async function runThinkingScript(prompt) {
+            state.isAiLoading = true; renderAll();
+            try {
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const res = await ai.models.generateContent({
+                    model: 'gemini-3-pro-preview',
+                    contents: prompt,
+                    config: { 
+                        systemInstruction: 'Expert ActionScript 2.0. Return clean, tested code.',
+                        thinkingConfig: { thinkingBudget: 32768 } 
+                    }
+                });
+                state.aiHistory.push({ role: 'user', text: prompt }, { role: 'model', text: res.text });
+            } catch (e) { console.error(e); }
+            state.isAiLoading = false; renderAll();
+        }
+
+        async function generateImage(prompt, ratio, size) {
+            if (window.aistudio && !(await window.aistudio.hasSelectedApiKey())) await window.aistudio.openSelectKey();
+            state.isAiLoading = true; renderAll();
+            try {
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const res = await ai.models.generateContent({
+                    model: 'gemini-3-pro-image-preview',
+                    contents: prompt,
+                    config: { imageConfig: { aspectRatio: ratio, imageSize: size } }
+                });
+                const part = res.candidates[0].content.parts.find(p => p.inlineData);
+                if (part) addLayer({ name: 'ai_gen.png', url: `data:image/png;base64,${part.inlineData.data}` });
+            } catch (e) { console.error(e); }
+            state.isAiLoading = false; renderAll();
+        }
+
+        async function generateSpeech(text) {
+            state.isAiLoading = true; renderAll();
+            try {
+                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const res = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash-preview-tts',
+                    contents: text,
+                    config: { responseModalities: [Modality.AUDIO] }
+                });
+                const data = res.candidates[0].content.parts[0].inlineData.data;
+                const ctx = new AudioContext({ sampleRate: 24000 });
+                const buf = await decodeAudio(decode(data), ctx);
+                const s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination); s.start();
+            } catch (e) { console.error(e); }
+            state.isAiLoading = false; renderAll();
+        }
+
+        // --- Rendering ---
+        function renderAll() {
+            renderWindows();
+            renderTaskbar();
+        }
+
+        function renderTaskbar() {
+            const root = document.getElementById('taskbar-apps');
+            root.innerHTML = Object.entries(state.windows).filter(([k,v]) => v.open).map(([id, win]) => `
+                <button class="win98-button h-8 px-3 text-[10px] min-w-[100px] ${win.z === Math.max(...Object.values(state.windows).map(w => w.z)) ? 'active' : ''}" onclick="toggleWin('${id}')">
+                    ${id.toUpperCase()}
+                </button>
+            `).join('');
+        }
+
+        function renderWindows() {
+            const root = document.getElementById('windows-root');
+            root.innerHTML = Object.entries(state.windows).filter(([k,v]) => v.open).map(([id, win]) => `
+                <div class="win98-border absolute flex flex-col" style="left:${win.x}px; top:${win.y}px; width:${win.w}px; height:${win.h}px; z-index:${win.z}" onmousedown="toggleWin('${id}', true)">
+                    <div class="title-bar">
+                        <span>${id === 'editor' ? 'Flash Professional MX 2004' : id === 'explorer' ? 'Library Explorer' : 'Gemini AI Lab'}</span>
+                        <div class="flex gap-1"><button class="win98-button w-5 h-5 pb-1 text-black" onclick="toggleWin('${id}', false)">×</button></div>
+                    </div>
+                    <div class="flex-grow overflow-hidden flex flex-col pointer-events-auto">
+                        ${renderWinContent(id)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderWinContent(id) {
+            if (id === 'editor') return renderEditor();
+            if (id === 'explorer') return renderExplorer();
+            if (id === 'ai_hub') return renderAiHub();
+            return '';
+        }
+
+        function renderEditor() {
+            const sel = state.layers.find(l => l.id === state.selectedId);
+            return `
+                <div class="flex-grow flex flex-col bg-gray-200">
+                    <div class="h-24 bg-[#e1e1e1] border-b border-gray-400 flex overflow-hidden">
+                        <div class="w-48 border-r border-gray-400 bg-gray-100 flex flex-col">
+                            <div class="h-5 px-1 border-b text-[9px] font-bold">Timeline</div>
+                            <div class="flex-grow overflow-y-auto">
+                                ${state.layers.map(l => `<div class="h-[18px] border-b border-gray-300 text-[10px] px-1 truncate ${state.selectedId === l.id ? 'bg-blue-800 text-white' : ''}">${l.name}</div>`).join('')}
+                            </div>
+                        </div>
+                        <div class="flex-grow flash-timeline-header flex flex-col overflow-hidden">
+                            <div class="h-5 flex border-b">${Array.from({length:15}).map((_,i) => `<div class="w-[80px] border-r border-gray-400 text-[8px] flex items-end px-1">${(i*5)+1}</div>`).join('')}</div>
+                            ${state.layers.map(l => `<div class="h-[18px] flex">${Array.from({length:50}).map((_,i) => `<div class="timeline-cell ${i===0?'active':''}"></div>`).join('')}</div>`).join('')}
+                        </div>
+                    </div>
+                    <div class="flex-grow flex min-h-0 bg-gray-300">
+                        <div class="w-12 border-r border-gray-400 flex flex-col items-center py-2 gap-1 shrink-0">
+                            <div class="win98-button w-8 h-8 font-bold text-xs">P</div>
+                            <div class="win98-button w-8 h-8 font-bold text-xs">F</div>
+                        </div>
+                        <div class="flex-grow flex flex-col min-w-0">
+                            <div class="p-1 border-b flex gap-2 items-center bg-gray-200">
+                                <button class="win98-button font-bold text-[10px]" onclick="state.isPlaying=!state.isPlaying; renderAll()">${state.isPlaying ? 'STOP' : 'TEST MOVIE'}</button>
+                            </div>
+                            <div class="flex-grow flash-stage-container flex items-center justify-center p-12 overflow-auto" onmousedown="state.selectedId=null; renderAll()">
+                                <div class="flash-stage shrink-0" style="width:800px; height:500px; transform: scale(${state.zoom})">
+                                    ${state.layers.map(l => `
+                                        <div id="${l.id}" class="layer-item ${state.selectedId === l.id ? 'selected' : ''} ${l.anim}" style="left:${l.x}px; top:${l.y}px; width:${l.w}px; height:${l.h}px; opacity:${l.opacity}; transform:rotate(${l.rot}deg) scaleX(${l.flip?-1:1}); z-index:10" onmousedown="event.stopPropagation(); state.selectedId='${l.id}'; renderAll()">
+                                            ${l.type === 'image' ? `<img src="${l.url}" draggable="false" class="w-full h-full object-contain">` : `<div class="w-full h-full bg-blue-100 flex items-center justify-center text-[10px]">🎵 ${l.name}</div>`}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-72 border-l border-gray-400 flex flex-col shrink-0 overflow-y-auto p-2 gap-2">
+                            <div class="bg-[#444] text-white text-[9px] px-2 py-0.5 font-bold tracking-widest uppercase">Properties</div>
+                            ${sel ? `
+                                <div class="flex flex-col gap-2 text-[10px]">
+                                    <div class="flex flex-col"><span>Instance Name:</span><input class="win98-inset px-1" value="${sel.name}" onchange="updateL('${sel.id}', {name:this.value})"></div>
+                                    <div class="grid grid-cols-2 gap-1">
+                                        <div>W:<input type="number" class="win98-inset w-full" value="${sel.w}" onchange="updateL('${sel.id}', {w:parseInt(this.value)})"></div>
+                                        <div>H:<input type="number" class="win98-inset w-full" value="${sel.h}" onchange="updateL('${sel.id}', {h:parseInt(this.value)})"></div>
+                                        <div>X:<input type="number" class="win98-inset w-full" value="${sel.x}" onchange="updateL('${sel.id}', {x:parseInt(this.value)})"></div>
+                                        <div>Y:<input type="number" class="win98-inset w-full" value="${sel.y}" onchange="updateL('${sel.id}', {y:parseInt(this.value)})"></div>
+                                    </div>
+                                    <div class="flex gap-1">
+                                        <button class="win98-button flex-grow" onclick="updateL('${sel.id}', {flip:!sel.flip})">Flip H</button>
+                                        <button class="win98-button flex-grow" onclick="updateL('${sel.id}', {anim: sel.anim==='jitter'?'none':'jitter'})">Jitter</button>
+                                    </div>
+                                    <button class="win98-button text-red-700 font-bold mt-2" onclick="state.layers=state.layers.filter(l=>l.id!=='${sel.id}'); renderAll()">Remove Item</button>
+                                </div>
+                            ` : '<div class="opacity-40 text-center py-10 text-[10px]">Nothing selected</div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.updateL = (id, upd) => {
+            const l = state.layers.find(i => i.id === id);
+            Object.assign(l, upd);
+            renderAll();
+        };
+
+        function renderExplorer() {
+            const grouped = {};
+            state.assets.filter(a => a.name.toLowerCase().includes(state.filters.text.toLowerCase())).forEach(a => {
+                const folder = a.path.includes('/') ? a.path.split('/')[0] : 'Root';
+                if(!grouped[folder]) grouped[folder] = [];
+                grouped[folder].push(a);
+            });
+
+            return `
+                <div class="flex-grow flex flex-col bg-gray-200 p-2">
+                    <input class="win98-inset w-full px-2 py-1 mb-2 text-[11px]" placeholder="Filter assets..." oninput="state.filters.text=this.value; renderAll()" value="${state.filters.text}">
+                    <div class="flex-grow bg-white win98-inset overflow-y-auto p-1">
+                        ${Object.entries(grouped).map(([folder, items]) => `
+                            <div class="mb-1">
+                                <div class="bg-gray-100 px-2 py-0.5 border-b text-[10px] font-bold">📁 ${folder}</div>
+                                ${items.map(i => `
+                                    <div class="flex items-center gap-2 p-1 hover:bg-blue-800 hover:text-white cursor-pointer group text-[10px]" ondblclick="addLayer({name:'${i.name}', url:'${i.url}'})">
+                                        <div class="w-6 h-6 flex items-center justify-center bg-gray-50 border shrink-0 overflow-hidden">
+                                            ${i.name.endsWith('.mp3') ? '🎵' : `<img src="${i.url}" class="max-h-full">`}
+                                        </div>
+                                        <span class="truncate">${i.name}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAiHub() {
+            return `
+                <div class="flex-grow flex flex-col bg-[#eee] p-4 gap-4 overflow-y-auto">
+                    <div class="win98-border p-3 bg-gray-200 flex flex-col gap-2">
+                        <h3 class="text-xs font-bold underline">Image Generation (Pro Image 3)</h3>
+                        <textarea id="img-prompt" class="win98-inset p-2 text-[11px] h-16" placeholder="A futuristic background..."></textarea>
+                        <div class="flex gap-2 text-[10px]">
+                            <span>Aspect:</span><select id="img-ratio" class="win98-inset"><option>1:1</option><option>16:9</option><option>9:16</option></select>
+                            <span>Size:</span><select id="img-size" class="win98-inset"><option>1K</option><option>2K</option><option>4K</option></select>
+                        </div>
+                        <button class="win98-button font-bold text-xs" onclick="generateImage(document.getElementById('img-prompt').value, document.getElementById('img-ratio').value, document.getElementById('img-size').value)" ${state.isAiLoading?'disabled':''}>GENERATE ASSET</button>
+                    </div>
+
+                    <div class="win98-border p-3 bg-gray-200 flex flex-col gap-2">
+                        <h3 class="text-xs font-bold underline">Thinking AS2 Editor</h3>
+                        <div class="h-40 bg-white win98-inset overflow-y-auto p-2 text-[11px] font-mono whitespace-pre">
+                            ${state.aiHistory.map(m => `<div class="${m.role==='user'?'text-blue-700':'text-green-700'}">${m.role==='user'?'// ':'/* '}${m.text}${m.role==='user'?'':' */'}</div>`).join('')}
+                            ${state.isAiLoading ? '<div class="animate-pulse">_</div>' : ''}
+                        </div>
+                        <input id="ai-script-inp" class="win98-inset w-full p-1 text-[11px]" placeholder="Describe logic..." onkeydown="if(event.key==='Enter') runThinkingScript(this.value)">
+                    </div>
+
+                    <div class="win98-border p-3 bg-[#111] text-[#0f0] font-mono flex flex-col gap-2">
+                         <h3 class="text-xs font-bold underline text-white">Live Voice Connection</h3>
+                         <div class="h-20 overflow-y-auto text-[9px] bg-black p-1 border border-gray-800">
+                             ${liveTranscript.map(t => `<div>${t}</div>`).join('')}
+                         </div>
+                         <button class="win98-button text-xs text-black" onclick="toggleLiveApi()">START LIVE SESSION</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.generateImage = generateImage;
+        window.runThinkingScript = runThinkingScript;
+        window.addLayer = addLayer;
+
+        init();
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
