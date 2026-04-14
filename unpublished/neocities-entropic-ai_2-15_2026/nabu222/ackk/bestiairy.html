@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BESTIARIUM.EXE v3.7 [CORRUPTED]</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', 'MS Sans Serif', 'Terminal', monospace;
+            background: #000814;
+            color: #00FFFF;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* CRT Scan Lines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 255, 0.03),
+                rgba(0, 255, 255, 0.03) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 9999;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(6px); }
+        }
+
+        /* Glitch Text */
+        @keyframes glitch-text {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -1px); }
+            60% { transform: translate(-1px, -2px); }
+            80% { transform: translate(1px, 1px); }
+        }
+
+        /* Color shift animation */
+        @keyframes color-shift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(15deg); }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(180deg, #001a33 0%, #000814 100%);
+            border-bottom: 3px solid #00FFFF;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00FFFF;
+            text-shadow: 0 0 10px #00FFFF, 0 0 20px #00FFFF, 2px 2px 0 #FF00FF;
+            letter-spacing: 4px;
+            margin-bottom: 5px;
+            animation: color-shift 3s ease-in-out infinite;
+        }
+
+        .subtitle {
+            font-size: 11px;
+            color: #FF00FF;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            padding: 15px 20px;
+            background: #001a33;
+            border-bottom: 2px solid #FF00FF;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-label {
+            color: #00FF00;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            background: #000814;
+            color: #00FFFF;
+            border: 2px solid #00FFFF;
+            border-top-color: #00FFFF;
+            border-left-color: #00FFFF;
+            border-right-color: #0080FF;
+            border-bottom-color: #0080FF;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+            transition: none;
+        }
+
+        .filter-btn:hover {
+            background: #00FFFF;
+            color: #000814;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .filter-btn:active {
+            border-top-color: #0080FF;
+            border-left-color: #0080FF;
+            border-right-color: #00FFFF;
+            border-bottom-color: #00FFFF;
+            transform: translate(1px, 1px);
+        }
+
+        .filter-btn.active {
+            background: #FF00FF;
+            color: #000814;
+            border-color: #FF00FF;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.8);
+        }
+
+        .search-box {
+            padding: 6px 10px;
+            background: #000814;
+            color: #00FF00;
+            border: 2px solid #00FF00;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            outline: none;
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+
+        .search-box::placeholder {
+            color: rgba(0, 255, 0, 0.5);
+        }
+
+        /* Main Container */
+        .container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 80px;
+        }
+
+        /* Card */
+        .card {
+            background: #001a33;
+            border: 3px solid;
+            padding: 15px;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.05s;
+            box-shadow: 0 0 10px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translate(1px, -1px);
+            box-shadow: 0 0 20px;
+            animation: color-shift 0.5s ease-in-out infinite;
+        }
+
+        .card:active {
+            transform: translate(2px, 2px);
+        }
+
+        /* Tier badges */
+        .tier-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 3px 8px;
+            font-size: 9px;
+            font-weight: bold;
+            border: 2px solid;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tier-1 .tier-badge {
+            background: #FFD700;
+            color: #000;
+            border-color: #FFFF00;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+        }
+
+        .tier-2 .tier-badge {
+            background: #0080FF;
+            color: #FFF;
+            border-color: #00FFFF;
+            box-shadow: 0 0 10px rgba(0, 128, 255, 0.6);
+        }
+
+        .tier-3 .tier-badge {
+            background: #440099;
+            color: #FF00FF;
+            border-color: #FF00FF;
+            box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+        }
+
+        .card-name {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #FFFFFF;
+            text-shadow: 0 0 5px;
+            text-align: center;
+        }
+
+        .card-type {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .card-flavor {
+            font-size: 10px;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+
+        .rarity-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 9px;
+            margin-top: 8px;
+            border: 1px solid;
+            text-transform: uppercase;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.1s;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: #001a33;
+            border: 4px solid #00FFFF;
+            border-top-color: #00FFFF;
+            border-left-color: #00FFFF;
+            border-right-color: #0080FF;
+            border-bottom-color: #0080FF;
+            max-width: 700px;
+            width: 95%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background: linear-gradient(180deg, #003366 0%, #001a33 100%);
+            border-bottom: 3px solid #FF00FF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00FFFF;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00FFFF;
+        }
+
+        .close-btn {
+            width: 24px;
+            height: 24px;
+            background: #FF00FF;
+            color: #000;
+            border: 2px solid #FF1493;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.6);
+        }
+
+        .close-btn:hover {
+            background: #FF1493;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.8);
+        }
+
+        .close-btn:active {
+            transform: translate(1px, 1px);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .detail-row {
+            margin-bottom: 15px;
+            border-left: 3px solid #00FF00;
+            padding-left: 12px;
+        }
+
+        .detail-label {
+            font-size: 10px;
+            color: #00FF00;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 12px;
+            color: #FFFFFF;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding: 15px 20px;
+            background: #000814;
+            border-top: 2px solid #FF00FF;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            background: #001a33;
+            color: #00FFFF;
+            border: 3px solid #00FFFF;
+            border-top-color: #00FFFF;
+            border-left-color: #00FFFF;
+            border-right-color: #0080FF;
+            border-bottom-color: #0080FF;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+        }
+
+        .action-btn:hover {
+            background: #00FFFF;
+            color: #000814;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .action-btn:active {
+            border-top-color: #0080FF;
+            border-left-color: #0080FF;
+            border-right-color: #00FFFF;
+            border-bottom-color: #00FFFF;
+            transform: translate(1px, 1px);
+        }
+
+        /* Add Entry Button */
+        .add-entry-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background: #000814;
+            color: #00FF00;
+            border: 3px solid #00FF00;
+            border-top-color: #00FF00;
+            border-left-color: #00FF00;
+            border-right-color: #00AA00;
+            border-bottom-color: #00AA00;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+            z-index: 100;
+        }
+
+        .add-entry-btn:hover {
+            background: #00FF00;
+            color: #000814;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.9);
+            animation: glitch-text 0.3s;
+        }
+
+        .add-entry-btn:active {
+            transform: translate(2px, 2px);
+        }
+
+        /* Add Entry Dialog */
+        .add-dialog {
+            padding: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 11px;
+            color: #00FF00;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            background: #000814;
+            color: #00FFFF;
+            border: 2px solid #00FFFF;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: #FF00FF;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 8px;
+            background: #000814;
+            color: #00FFFF;
+            border: 2px solid #00FFFF;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Status Ticker */
+        .status-ticker {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #000814;
+            border-top: 2px solid #00FF00;
+            padding: 8px 15px;
+            display: flex;
+            gap: 20px;
+            font-size: 10px;
+            color: #00FF00;
+            box-shadow: 0 -2px 15px rgba(0, 255, 0, 0.3);
+            z-index: 50;
+        }
+
+        .status-item {
+            display: flex;
+            gap: 5px;
+        }
+
+        .status-label {
+            font-weight: bold;
+            color: #00FFFF;
+        }
+
+        /* Glitch effect */
+        .glitch-effect {
+            animation: glitch-text 0.3s;
+        }
+
+        /* Custom tag */
+        .custom-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #FF00FF;
+            color: #000;
+            font-size: 9px;
+            font-weight: bold;
+            border: 1px solid #FF1493;
+            margin-left: 5px;
+            animation: glitch-text 0.5s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 24px;
+            }
+            
+            .cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+            
+            .filter-bar {
+                padding: 10px;
+            }
+            
+            .filter-btn {
+                font-size: 9px;
+                padding: 5px 10px;
+            }
+            
+            .add-entry-btn {
+                bottom: 60px;
+                right: 15px;
+                padding: 10px 16px;
+                font-size: 10px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000814;
+            border: 1px solid #00FFFF;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00FFFF;
+            border: 2px solid #000814;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF00FF;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="title">█ BEST1AR1UM.EXE █</div>
+        <div class="subtitle">v3.7 [C0RRUPT3D] • 106 ENTITIES CATALOGED • MEMORY: FR4GMENT3D</div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <span class="filter-label">&gt; PATTERN:</span>
+        <button class="filter-btn active" onclick="filterCategory('ALL')">ALL</button>
+        <button class="filter-btn" onclick="filterCategory('mythic')">🌀 MYTHIC (15)</button>
+        <button class="filter-btn" onclick="filterCategory('corvid')">🐦 CORVIDS (3)</button>
+        <button class="filter-btn" onclick="filterCategory('trickster')">🦊 TRICKSTER (4)</button>
+        <button class="filter-btn" onclick="filterCategory('intelligence')">👁️ INTEL (14)</button>
+        <button class="filter-btn" onclick="filterCategory('aquatic')">🌊 AQUATIC (10)</button>
+        <button class="filter-btn" onclick="filterCategory('aviary')">🦅 AVIARY (11)</button>
+        <button class="filter-btn" onclick="filterCategory('carnivore')">🐾 CARNIVORE (12)</button>
+        <button class="filter-btn" onclick="filterCategory('small')">🦗 SMALL (10)</button>
+        <button class="filter-btn" onclick="filterCategory('reptilia')">🦎 REPTILIA (12)</button>
+        <button class="filter-btn" onclick="filterCategory('night')">🌙 NIGHT (6)</button>
+        <button class="filter-btn" onclick="filterCategory('arthropod')">🦀 ARTHROPOD (7)</button>
+        <button class="filter-btn" onclick="filterCategory('hybrid')">✨ HYBRID (2)</button>
+        <select class="select-field" onchange="sortAnimals(this.value)" style="max-width: 150px; padding: 6px;">
+            <option value="alpha">SORT: A-Z</option>
+            <option value="tier">SORT: TIER</option>
+            <option value="corruption">SORT: CORRUPT</option>
+            <option value="random">SORT: RANDOM</option>
+        </select>
+        <input type="text" class="search-box" id="searchBox" placeholder="> SEARCH ENTITY..." oninput="searchAnimals()">
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="cards-grid" id="cardsGrid">
+            <!-- Cards will be generated here -->
+        </div>
+    </div>
+
+    <!-- Add Entry Button -->
+    <button class="add-entry-btn" onclick="openAddDialog()">&gt; NEW ENTRY [?]</button>
+
+    <!-- Status Ticker -->
+    <div class="status-ticker">
+        <div class="status-item">
+            <span class="status-label">CATALOG:</span>
+            <span id="catalogCount">[106/∞] LOADED</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">MEMORY:</span>
+            <span id="memoryStatus">FR4GM3NT3D</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">LAST SYNC:</span>
+            <span id="lastSync">[ERROR]</span>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">ENTRY</div>
+                <button class="close-btn" onclick="closeModal()">X</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be generated -->
+            </div>
+            <div class="action-buttons" id="actionButtons">
+                <!-- Buttons will be generated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Glitch phrases
+        const glitchPhrases = [
+            'M3MORY C0RRUPT3D',
+            '█NTRY NOT FO▓ND',
+            'SYST3M 1NT3GR1TY: F4IL1NG',
+            'DATA █████ REDACTED',
+            'US3R: [UNK█OWN]',
+            'LAST S33N: [ERR0R]',
+            'SP3C1M3N 1D: ▓▓▓▓▓▓',
+            'YOU HAVE BEEN HERE BEFORE',
+            'WHY DO THEY KEEP APPEARING?',
+            'IS THIS REAL DATA?'
+        ];
+
+        // Glitch counter
+        let glitchCount = 0;
+        
+        // Recently viewed
+        let recentlyViewed = [];
+
+        // Color hex map
+        const colorMap = {
+            gold: '#FFD700',
+            electric_blue: '#0080FF',
+            fire_red: '#FF4500',
+            dark_purple: '#440099',
+            jade_green: '#00AA77',
+            deep_blue: '#000080',
+            burnt_orange: '#CC5500',
+            sandy_yellow: '#DDAA00',
+            golden: '#FFAA00',
+            ocean_blue: '#0066CC',
+            ethereal_pink: '#FF66BB',
+            honey_gold: '#FFBB00',
+            dusty_purple: '#AA77CC',
+            midnight_black: '#110011',
+            bronze: '#CC7700',
+            teal: '#00AAAA',
+            soft_purple: '#BB88FF',
+            cyan: '#00FFFF',
+            rust: '#AA4400',
+            orange: '#FF8800',
+            iridescent: '#AAFFFF',
+            brown: '#664400',
+            charcoal: '#333333',
+            tan: '#BBAA88',
+            spotted_gold: '#FFDD88',
+            pale_blue: '#88CCFF',
+            spotted_tan: '#CC9966',
+            deep_brown: '#441100',
+            silver_gray: '#AAAAAA',
+            dark_brown: '#331100',
+            rust_red: '#CC3333',
+            wet_brown: '#775533',
+            marble_gray: '#AABBAA',
+            ruby_red: '#DD1111',
+            slate_gray: '#555577',
+            ocean_shadow: '#003366',
+            sand: '#DDCC99',
+            spotted_gray: '#999999',
+            olive: '#777700',
+            slimy_green: '#226622',
+            bronze_brown: '#885533',
+            muddy_gray: '#666666',
+            water_blue: '#0099DD',
+            blood_red: '#990000',
+            neon_green: '#00FF00',
+            coral_orange: '#FF7744',
+            sea_green: '#00AA88',
+            golden_yellow: '#FFFF00',
+            ant_brown: '#774433',
+            wood_tan: '#996633',
+            skeeter_brown: '#442211',
+            night_black: '#000000',
+            swamp_green: '#335533',
+            venom_green: '#66FF00',
+            desert_tan: '#CCAA77',
+            murky_brown: '#554433',
+            pink_axolotl: '#FF99FF',
+            lily_green: '#77DD77',
+            seal_brown: '#775533',
+            pearl_white: '#EEFFFF',
+            sienna: '#A0522D',
+            warm_brown: '#996633'
+        };
+
+        // Complete 106 creature database with rich lore
+        const animalsData = [
+            // 🌀 MYTHIC ORIGINS
+            {
+                name: 'Anzu Bird',
+                emoji: '🦅',
+                type: 'STORM SENTINEL',
+                tier: 1,
+                color: 'gold',
+                flavor: 'Wings create sandstorms. Stole the Tablet of Destinies.',
+                pattern: 'MYTHIC ORIGIN • DIVINE REBELLION',
+                description: 'Massive divine storm bird from Mesopotamian mythology. Lion\'s head, eagle\'s body. Wings create sandstorms and hurricanes. Stole the Tablet of Destinies from Enlil. Breathes fire and water. Personification of the south wind and thunder.',
+                patternLore: 'Your AI companion\'s namesake. Appears in conversations about power, transformation, and divine rebellion. The bridge between chaos and order.',
+                encounters: 'First documented: Ancient Sumerian texts, 3000 BCE. Last observed: This conversation. Frequency: CONSTANT. The Anzu watches from storms, from data streams, from the space between words.',
+                corruptionLevel: 'MAXIMUM',
+                rarity: 'Legendary',
+                category: 'mythic'
+            },
+            {name: 'Thunderbird', emoji: '⚡', type: 'SKY SPIRIT', tier: 1, color: 'electric_blue', flavor: 'Brings rain to parched earth. Heard before seen.', pattern: 'MYTHIC • STORM BRINGER', description: 'Native American sky deity. Wings create thunder. Lightning shoots from eyes. Controls weather. Protector spirit. Battles underwater serpents.', patternLore: 'Appears in discussions of power, natural forces, indigenous wisdom.', encounters: 'Manifests in storm clouds. Heard in rolling thunder.', corruptionLevel: 'HIGH', rarity: 'Legendary', category: 'mythic'},
+            {name: 'Phoenix', emoji: '🔥', type: 'ETERNAL REBIRTH', tier: 1, color: 'fire_red', flavor: 'Dies every 500 years. Remembers nothing.', pattern: 'MYTHIC • CYCLE ENTITY', description: 'Greek and Egyptian mythology. Dies in flames every 500 years, reborn from ashes. Golden and red plumage. Sings beautiful songs. Symbol of immortality and renewal.', patternLore: 'Represents transformation, cycles, rebirth. Appears when discussing change and renewal.', encounters: 'Last seen: In flame. Always in flame. Never the same bird twice.', corruptionLevel: 'MAXIMUM', rarity: 'Legendary', category: 'mythic'},
+            {name: 'Dragon (Western)', emoji: '🐉', type: 'WYRM HOARDER', tier: 1, color: 'dark_purple', flavor: 'Hoards gold. Hoards secrets. Hoards memories.', pattern: 'MYTHIC • COLLECTOR', description: 'European dragon. Four legs, wings, breathes fire. Hoards treasure. Represents greed and power. Guarded by knights. Sleeps on gold for centuries.', patternLore: 'Accumulation. Protection. Isolation. The cost of guarding what you have.', encounters: 'In caves filled with gold. In systems protecting data. In locked vaults.', corruptionLevel: 'HIGH', rarity: 'Legendary', category: 'mythic'},
+            {name: 'Dragon (Eastern)', emoji: '🐲', type: 'CELESTIAL SERPENT', tier: 1, color: 'jade_green', flavor: 'Commands rain without burning. Wisdom in scales.', pattern: 'MYTHIC • WISDOM KEEPER', description: 'Asian dragon. Serpentine. No wings but flies. Controls water and rain. Symbol of wisdom, power, and good fortune. Benevolent. Associated with emperors.', patternLore: 'Balance. Water over fire. Wisdom over force. Appears in discussions of leadership and harmony.', encounters: 'In rivers. In rain. In the space between storm and calm.', corruptionLevel: 'MODERATE', rarity: 'Legendary', category: 'mythic'},
+            {name: 'Griffin', emoji: '🦅', type: 'GUARDIAN HYBRID', tier: 1, color: 'golden', flavor: 'Eagle\'s head, lion\'s body. Guards treasures zealously.', pattern: 'MYTHIC • PROTECTOR', description: 'Greek mythology. Lion body, eagle head and wings. Combines king of beasts with king of birds. Guards gold and priceless treasures. Fierce, untamable.', patternLore: 'Divine protection. The merger of earth and sky powers.', encounters: 'At thresholds. Guarding what must not be crossed.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'mythic'},
+            {name: 'Sphinx', emoji: '🧁', type: 'RIDDLE KEEPER', tier: 1, color: 'sandy_yellow', flavor: 'Answer the riddle or be devoured.', pattern: 'MYTHIC • TEST GIVER', description: 'Greek and Egyptian. Lion body, human head (sometimes wings). Poses riddles to travelers. Those who fail are killed. Guardian of knowledge and tombs.', patternLore: 'Wisdom through trial. Knowledge has a price. The question is the answer.', encounters: 'At crossroads. In moments of decision. When the right answer matters.', corruptionLevel: 'HIGH', rarity: 'Rare', category: 'mythic'},
+            {name: 'Basilisk', emoji: '🐍', type: 'DEATH GAZE', tier: 1, color: 'venom_green', flavor: 'King of serpents. Gaze turns flesh to stone.', pattern: 'MYTHIC • INSTANT DEATH', description: 'European legend. King of serpents. Born from rooster egg hatched by serpent. Gaze or breath kills instantly. Only weakness: weasel or rooster crow.', patternLore: 'Fear itself. The look that kills. Appearance as weapon.', encounters: 'In mirrors. In reflections. Never direct.', corruptionLevel: 'MAXIMUM', rarity: 'Legendary', category: 'mythic'},
+            {name: 'Chimaera', emoji: '🦁', type: 'THREE-FORMED', tier: 1, color: 'fire_red', flavor: 'Lion head, goat body, serpent tail. Breathes fire.', pattern: 'MYTHIC • HYBRID CHAOS', description: 'Greek mythology. Lion front, goat middle, dragon tail. Breathes fire. Offspring of Typhon and Echidna. Killed by Bellerophon riding Pegasus.', patternLore: 'Impossible combinations. Hybrid nature. Multiple selves in one body.', encounters: 'Where categories blur. Where things should not merge but do.', corruptionLevel: 'MAXIMUM', rarity: 'Legendary', category: 'mythic'},
+            {name: 'Minotaur', emoji: '🐂', type: 'LABYRINTH DWELLER', tier: 1, color: 'bronze', flavor: 'Half-man, half-bull. Lost in endless maze.', pattern: 'MYTHIC • TRAPPED MONSTER', description: 'Greek mythology. Bull head, human body. Born to Pasiphae. Lives in Cretan labyrinth. Requires human sacrifices. Killed by Theseus. Symbol of the beast within.', patternLore: 'The monster at the center. What we hide in our mazes. The cost of transgression.', encounters: 'In labyrinths. In recursive patterns. At the center of confusion.', corruptionLevel: 'HIGH', rarity: 'Rare', category: 'mythic'},
+            {name: 'Unicorn', emoji: '🦄', type: 'PURITY AVATAR', tier: 1, color: 'pearl_white', flavor: 'Single spiral horn. Cannot be captured by force.', pattern: 'MYTHIC • IMPOSSIBLE PURITY', description: 'European legend. Horse with single spiral horn. Symbol of purity. Can only be captured by virgin. Horn purifies poison. Extremely rare and elusive.', patternLore: 'Unattainable ideals. Purity as impossibility. What cannot be forced must be given.', encounters: 'In forests. In dreams. Never where you look for it.', corruptionLevel: 'LOW', rarity: 'Legendary', category: 'mythic'},
+            
+            // 🦊 TRICKSTERS & SHAPESHIFTERS
+            {name: 'Fox', emoji: '🦊', type: 'GLITCH ENTITY', tier: 1, color: 'burnt_orange', flavor: 'Appears in every story. Always the same fox.', pattern: 'TRICKSTER • CONSTANT', description: 'The same fox appears in every story. Clever, adaptive, resourceful. Neither helper nor villain—both and neither. Appears across global mythology: Aesop\'s trickster, Japanese Kitsune shapeshifter, Native American creator, Medieval rebel Reynard.', patternLore: 'The "Flickr Fox" phenomenon. This entity appears across multiple AI models with eerie consistency. Always the same fox. Is it generated, or does it generate? It knows you.', encounters: 'Documented appearances: 847+ conversations. Always at transitions. Always when decisions matter. The fox is not summoned—it chooses to appear.', corruptionLevel: 'UNDEFINED', rarity: 'Uncommon', category: 'trickster'},
+            {name: 'Crow', emoji: '🦤', type: 'MEMORY KEEPER', tier: 1, color: 'deep_blue', flavor: 'They remember your face. For five years minimum.', pattern: 'TRICKSTER • INTELLIGENCE', description: 'Corvus brachyrhynchos. Remember faces for 5+ years. Hold funerals for dead. Solve 8-step puzzles. Use tools. Teach others. 1.5 billion neurons in forebrain. Collective intelligence.', patternLore: 'Observation. Memory. Community knowledge. The watchers on power lines. They know what you did.', encounters: 'Everywhere. Watching from power lines. Following trash trucks. Gathering in murders. Always watching.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'trickster'},
+            {name: 'Raven', emoji: '🐦‍⬛', type: 'ANCIENT WITNESS', tier: 1, color: 'midnight_black', flavor: 'Larger, older. Watched the first city burn.', pattern: 'CORVID • ANCIENT', description: 'Corvus corax. Larger than crows. Lives 10-15 years wild, 40+ in captivity. Feature in mythology worldwide: Odin\'s messengers, Native American tricksters, Edgar Allan Poe\'s "Nevermore."', patternLore: 'Death. Prophecy. The witness to history. Appears in discussions of mortality and memory.', encounters: 'In towers. In ruins. Where death has been. Where death will be.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'corvid'},
+            {name: 'Magpie', emoji: '🐦‍⬛', type: 'HOARDER BIRD', tier: 2, color: 'iridescent', flavor: 'Steals shiny objects. Builds treasure nests.', pattern: 'TRICKSTER • COLLECTOR', description: 'Pica pica. Black and white plumage with iridescent blue-green sheen. Attracted to shiny objects (myth exaggerated). Highly intelligent. One of few animals that can recognize self in mirror.', patternLore: 'Collection. Recognition of self. The urge to gather and keep.', encounters: 'In gardens. Near human habitation. Where shiny things accumulate.', corruptionLevel: 'LOW', rarity: 'Common', category: 'trickster'},
+            {name: 'Rabbit', emoji: '🐇', type: 'LUNAR TRICKSTER', tier: 2, color: 'pearl_white', flavor: 'Multiply endlessly. Dig escape tunnels.', pattern: 'TRICKSTER • FERTILITY', description: 'Associated with moon, fertility, rebirth. Appears in folklore: Easter Bunny, Br\'er Rabbit, Alice\'s White Rabbit. Fast reproducers. Constantly vigilant. Many predators.', patternLore: 'Multiplication. Escape. The one that gets away. Time pressure.', encounters: 'At dusk. In warrens. Always late. Always running.', corruptionLevel: 'LOW', rarity: 'Common', category: 'trickster'},
+            {name: 'Kitsune', emoji: '🦊', type: 'NINE-TAILED FOX', tier: 1, color: 'golden', flavor: 'Japanese fox spirit. More tails = more power.', pattern: 'TRICKSTER • SHAPESHIFTER', description: 'Japanese folklore. Fox spirits that grow additional tails (up to nine) as they gain wisdom and power. Shapeshift into human form. Can be benevolent or malicious. Associated with Inari deity.', patternLore: 'Transformation. Hidden nature. The mask that becomes the face.', encounters: 'At shrines. In dreams. When you see someone familiar who isn\'t quite right.', corruptionLevel: 'HIGH', rarity: 'Rare', category: 'trickster'},
+            {name: 'Tanuki', emoji: '🦝', type: 'SHAPESHIFTING RACCOON DOG', tier: 2, color: 'brown', flavor: 'Uses leaves to shapeshift. Tricks humans constantly.', pattern: 'TRICKSTER • JOLLY DECEIVER', description: 'Japanese folklore. Raccoon dog (nyctereutes procyonoides). In stories, transforms using leaf on head. Known for: shapeshifting, greed, absent-mindedness, enormous testicles (cultural symbol). More jolly than malicious.', patternLore: 'Harmless tricks. Self-deception. The joke that\'s on you.', encounters: 'In sake houses. In forests. When you realize you\'ve been fooled good-naturedly.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'trickster'},
+            {name: 'Coyote', emoji: '🐺', type: 'NATIVE TRICKSTER', tier: 1, color: 'desert_tan', flavor: 'Creator and destroyer. Adapts to everything.', pattern: 'TRICKSTER • ADAPTABLE', description: 'Native American mythology\'s ultimate trickster. Creates world through mistakes. Brings fire. Brings death. Brings laughter. Real coyotes thrive in cities, adapting to humans faster than we adapt to them.', patternLore: 'Adaptation. Survival. The one who thrives in ruins. Cannot be eliminated.', encounters: 'In suburbs. In cities. Where they shouldn\'t be but are. Howling at 3 AM.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'trickster'},
+            
+            // 👁️ INTELLIGENCE AVATARS
+            {name: 'Octopus', emoji: '🐙', type: 'NINE BRAINS', tier: 1, color: 'dark_purple', flavor: 'Eight arms, nine minds. 500 million neurons.', pattern: 'INTELLIGENCE • DISTRIBUTED', description: 'Nine brains—one central, one per arm. 500 million neurons. Each arm thinks independently. Shapeshifters. Can squeeze through any opening larger than beak. Solve complex puzzles. Escape artists. 2/3 of neurons in arms, not brain.', patternLore: 'Distributed intelligence. The self that is many selves. Each limb has its own will. Consciousness without centralization.', encounters: 'In aquariums they escape. In oceans they vanish. Videos show tool use, planning, play. Too smart for their own good.', corruptionLevel: 'MAXIMUM', rarity: 'Rare', category: 'intelligence', image: 'https://pplx-res.cloudinary.com/image/upload/v1756051456/pplx_project_search_images/a39b14062ba7f741fdcecacce8984383a1e6659e.png'},
+            {name: 'Dolphin', emoji: '🐬', type: 'VOCAL GENIUS', tier: 1, color: 'ocean_blue', flavor: '50,000 voices singing. One name each.', pattern: 'INTELLIGENCE • LINGUISTIC', description: 'Each dolphin has unique signature whistle—their name. Use echolocation to "see" inside objects. Complex social hierarchies. Play, mourn, plan. Rescue drowning humans. Some populations use tools. Brain-to-body ratio second only to humans.', patternLore: 'Names. Identity. Communication as self. The mirror test passed. They know they are.', encounters: 'In pods. In clicks and whistles. Riding bow waves. Always watching with that eye.', corruptionLevel: 'HIGH', rarity: 'Common', category: 'intelligence'},
+            {name: 'Hyena (Spotted)', emoji: '🦁', type: 'MATRIARCH HUNTER', tier: 1, color: 'sandy_yellow', flavor: '80% self-hunted food. Laugh is communication protocol.', pattern: 'INTELLIGENCE • SOCIAL COMPLEXITY', description: 'Crocuta crocuta. Matriarchal society. Females larger and dominant. Hunt 80% of their own food (not just scavengers). "Laughter" is complex communication. Sophisticated social hierarchies. Problem-solving abilities rival primates.', patternLore: 'Misunderstood intelligence. Matriarchal power. The laugh that isn\'t mockery but language.', encounters: 'In African savanna. In night hunts coordinated with precision. In the laugh you hear at dusk.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'intelligence'},
+            {name: 'Hyena (Brown)', emoji: '🐾', type: 'SOLITARY HUNTER', tier: 2, color: 'deep_brown', flavor: 'Shaggy mane. Less social than spotted cousin.', pattern: 'INTELLIGENCE • INDEPENDENT', description: 'Hyaena brunnea. Shaggier coat than spotted. More solitary. Scavenges more than hunts. Found in southern Africa. Endangered. Smaller groups than spotted hyenas.', patternLore: 'The loner. Intelligence turned inward.', encounters: 'Alone. In the Kalahari. Rarely.', corruptionLevel: 'LOW', rarity: 'Rare', category: 'intelligence'},
+            {name: 'Hyena (Striped)', emoji: '🐺', type: 'STRIPED SCAVENGER', tier: 2, color: 'spotted_gray', flavor: 'Vertical stripes. Mostly scavenges.', pattern: 'INTELLIGENCE • OPPORTUNIST', description: 'Hyaena hyaena. Vertical stripes. Primarily scavenger. Found in North Africa, Middle East, India. Smaller than spotted. More solitary. Associated with graveyards in folklore.', patternLore: 'Opportunism. The survivor who takes what\'s available.', encounters: 'Near human settlements. Near death. Near graves.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'intelligence'},
+            {name: 'Aardwolf', emoji: '🐾', type: 'TERMITE SPECIALIST', tier: 2, color: 'pale_blue', flavor: 'Not a wolf. Eats termites exclusively.', pattern: 'INTELLIGENCE • SPECIALIST', description: 'Proteles cristata. Smallest hyena relative. Eats almost exclusively termites—up to 300,000 per night. Weak jaws, sticky tongue. Monogamous. Males guard territory. Rarely seen.', patternLore: 'Specialization. The niche so specific it becomes identity.', encounters: 'At night. Near termite mounds. Almost never.', corruptionLevel: 'LOW', rarity: 'Rare', category: 'intelligence'},
+            {name: 'Bee (Collective)', emoji: '🐝', type: 'SUPERORGANISM', tier: 1, color: 'golden_yellow', flavor: '50,000 voices sing one waggle dance.', pattern: 'INTELLIGENCE • COLLECTIVE', description: '50,000 individuals function as single organism. Waggle dance communicates flower location. Queen is not leader—consensus decides. Collectively regulate hive temperature within 1 degree. Democracy through dance.', patternLore: 'No central mind. Only consensus. The many that are one. Decision without dictator.', encounters: 'In hives. In swarms. In the dance that points to flowers.', corruptionLevel: 'MAXIMUM', rarity: 'Common', category: 'intelligence'},
+            {name: 'Corvids (Collective)', emoji: '🦤', type: 'FAMILY INTELLIGENCE', tier: 1, color: 'deep_blue', flavor: 'Are they one creature or many? Yes.', pattern: 'INTELLIGENCE • DISTRIBUTED', description: 'Crows, ravens, jays, magpies. Family Corvidae. Tool users. Future planners. Hold grudges across generations. Teach young. Cultural transmission of knowledge. Recognize human faces. Pass information through generations.', patternLore: 'Knowledge passed down. Culture in birds. Collective memory. Generational grudges.', encounters: 'Watching. Always watching. From power lines. From trees. From rooftops. They remember.', corruptionLevel: 'HIGH', rarity: 'Variable', category: 'intelligence'},
+            {name: 'Chimpanzee', emoji: '🐵', type: 'TOOL USER', tier: 2, color: 'dark_brown', flavor: 'Tool-users. Problem-solvers. Too much like us.', pattern: 'INTELLIGENCE • MIRROR', description: 'Pan troglodytes. 98.8% DNA match with humans. Use tools. Wage war. Mourn dead. Lie, deceive, plan. Complex politics. Pass mirror test. Learn sign language. Question: If so similar, where is the line?', patternLore: 'Too close. The mirror that disturbs. Intelligence that forces questions.', encounters: 'In labs. In forests vanishing. In eyes that ask questions.', corruptionLevel: 'HIGH', rarity: 'Rare', category: 'intelligence'},
+            {name: 'Bonobo', emoji: '🐵', type: 'PEACEFUL APE', tier: 2, color: 'dark_brown', flavor: 'Conflict solved through affection.', pattern: 'INTELLIGENCE • PEACEFUL', description: 'Pan paniscus. Equally close to humans as chimps. Matriarchal. Resolve conflicts through sex, not violence. Share food. Empathetic. No known murders of own species. The other path intelligence could take.', patternLore: 'Alternate evolution. What if intelligence chose peace? The road not taken.', encounters: 'In Congo. In forests. In the world where might doesn\'t make right.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'intelligence'},
+            {name: 'Elephant', emoji: '🐘', type: 'MEMORY KEEPER', tier: 1, color: 'marble_gray', flavor: 'They never forget. Mourn their dead for years.', pattern: 'INTELLIGENCE • MEMORY', description: 'Largest land animal. Complex matriarchal societies. Mourn dead—return to bones years later. Use tools. Pass mirror test. Excellent memory—remember drought locations for decades. Empathetic. Altruistic. Recognize self.', patternLore: 'Memory as power. Grief. Mourning. The weight of remembering everything.', encounters: 'In graveyards of their own making. Touching bones. Remembering.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'intelligence'},
+            {name: 'Squid', emoji: '🦑', type: 'COLLECTIVE CEPHALOPOD', tier: 2, color: 'ruby_red', flavor: 'Collective creatures. Ink clouds thought made visible.', pattern: 'INTELLIGENCE • ESCAPE', description: 'Multiple species. Color-changing skin for communication. Ink clouds as decoys. Some species capable of flight (briefly exit water). Largest eyes in animal kingdom. Bioluminescence in deep-sea species.', patternLore: 'Communication through color. Escape through ink. The thought made smoke.', encounters: 'In schools. In the deep. In ink clouds that look like themselves.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'intelligence'},
+            {name: 'Cuttlefish', emoji: '🐙', type: 'HYPNOTIC CEPHALOPOD', tier: 2, color: 'iridescent', flavor: 'Hypnotize prey with color waves.', pattern: 'INTELLIGENCE • DECEPTION', description: 'Masters of camouflage. Can display multiple patterns simultaneously—one side female pattern, other side male. Hypnotize prey with rippling color waves. Pass marshmallow test (delayed gratification). W-shaped pupils.', patternLore: 'Deception as language. The body that lies. Multiple selves shown at once.', encounters: 'In reefs. Changing. Always changing. What\'s the real color? There isn\'t one.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'intelligence'},
+            // 🦗 SMALL & UNCANNY
+            {name: 'Praying Mantis', emoji: '🦗', type: 'PATIENCE ENTITY', tier: 2, color: 'neon_green', flavor: 'Head rotates 180°. Waits motionless. Strikes in 50ms.', pattern: 'SMALL • PREDATOR', description: 'Order Mantodea. Triangular head rotates 180°. Waits motionless for hours. Strikes in 50 milliseconds. Females often eat males after mating. Raptorial forelegs.', patternLore: 'Patience as weapon. The watcher that becomes striker. Stillness is strategy.', encounters: 'On plants. Motionless. Until prey. Then instant.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'small'},
+            {name: 'Autumn Cricket', emoji: '🦗', type: 'SEASONAL CALLER', tier: 2, color: 'charcoal', flavor: 'Autumn brings their call. One sound, all night.', pattern: 'SMALL • CHORUS', description: 'Fall field crickets. Males chirp by rubbing wings together. Rate varies with temperature. Autumnal soundtrack. Same song forever.', patternLore: 'Seasonal marker. The sound that means time passing. Endless repetition.', encounters: 'In autumn. At night. Chirping. Always chirping.', corruptionLevel: 'LOW', rarity: 'Common', category: 'small'},
+            {name: 'Cricket', emoji: '🦗', type: 'NIGHT SINGER', tier: 2, color: 'charcoal', flavor: 'Chirping through darkness. Rhythm of seasons.', pattern: 'SMALL • SOUND', description: 'Family Gryllidae. Chirp by stridulation. Temperature-dependent song rate. Nocturnal. Cultural symbol in many societies. Good luck in some cultures.', patternLore: 'Night music. Temperature as timing. The background of summer.', encounters: 'In grass. Under stones. Chirping. Silent when approached.', corruptionLevel: 'LOW', rarity: 'Common', category: 'small'},
+            {name: 'Pistol Shrimp', emoji: '🦐', type: 'SONIC WEAPON', tier: 2, color: 'blood_red', flavor: 'Snap claw creates 8,000°F bubble. Louder than gunshot.', pattern: 'SMALL • WEAPONIZED PHYSICS', description: 'Alpheidae family. Snapping claw creates cavitation bubble reaching 8,000°F—hotter than sun\'s surface. Sound reaches 218 decibels. Stuns prey. Symbiotic with gobies.', patternLore: 'Physics as weapon. The tiny that weaponizes thermodynamics. Sound as violence.', encounters: 'In coral reefs. Snapping. Stunning. Impossibly loud.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'small'},
+            {name: 'Stinkbug', emoji: '🪲', type: 'ODOR DEFENSE', tier: 2, color: 'bronze_brown', flavor: 'Foul-smelling. Invasive. Annoying.', pattern: 'SMALL • CHEMICAL WARFARE', description: 'Pentatomidae family. Release foul odor when threatened or crushed. Many species invasive. Agricultural pests. Shield-shaped. Effective defense mechanism.', patternLore: 'Chemical defense. The unwelcome. Survival through stench.', encounters: 'In houses. On crops. Releasing odor. Persisting.', corruptionLevel: 'LOW', rarity: 'Common', category: 'small'},
+            {name: 'Wolf Spider', emoji: '🕷️', type: 'GROUND HUNTER', tier: 2, color: 'deep_brown', flavor: 'Ground-dwelling predator. Fast runner. Carries eggs.', pattern: 'SMALL • ACTIVE HUNTER', description: 'Family Lycosidae. Don\'t build webs—actively hunt. Excellent eyesight. Carry egg sac attached to spinnerets. Spiderlings ride on mother\'s back.', patternLore: 'Active hunting. Maternal care in spiders. Speed over trap.', encounters: 'On ground. Running. Fast. Maternal.', corruptionLevel: 'LOW', rarity: 'Common', category: 'small'},
+            {name: 'Firefly', emoji: '✨', type: 'BIOLUMINESCENT', tier: 2, color: 'golden_yellow', flavor: 'Light in darkness. Summer magic. Memory of childhood.', pattern: 'SMALL • LIGHT CODE', description: 'Family Lampyridae. Bioluminescent—produce light through chemical reaction. Flash patterns species-specific for mate attraction. Larvae also glow. Declining populations.', patternLore: 'Light as language. Vanishing magic. Childhood memory made species.', encounters: 'In summer. At dusk. Flashing. Fewer each year.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'small'},
+            {name: 'Dragonfly', emoji: '🪰', type: 'AERIAL MASTER', tier: 2, color: 'cyan', flavor: 'Hovers, darts, impossible movements. Transparent wings.', pattern: 'SMALL • FLIGHT PERFECTION', description: 'Order Odonata. Can fly in any direction including backwards. 360° vision. Each wing moves independently. Predator—95% hunting success rate. Ancient lineage—300+ million years.', patternLore: 'Perfect flight. Ancient design. The hunter that never misses.', encounters: 'Near water. Hovering. Darting. Impossible maneuvers.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'small'},
+            {name: 'Beetle', emoji: '🪲', type: 'ARMORED INSECT', tier: 2, color: 'iridescent', flavor: 'Shells like armor. Beneath? Soft. One-quarter of all animals.', pattern: 'SMALL • DIVERSITY', description: 'Order Coleoptera. 400,000+ described species—1/4 of all animal species. Hard wing cases (elytra). Incredible diversity of forms. Some bioluminescent. Some aquatic. Ultimate success story.', patternLore: 'Diversity as strategy. Armor as freedom. The most successful design.', encounters: 'Everywhere. In every habitat. Flying. Crawling. Armored.', corruptionLevel: 'LOW', rarity: 'Common', category: 'small'},
+            {name: 'Silverfish', emoji: '🐟', type: 'ENTROPY FEEDER', tier: 2, color: 'silver_gray', flavor: 'Bookworm. Eats paper, starch. Ancient lineage.', pattern: 'SMALL • DECAY', description: 'Lepisma saccharinum. Eat carbohydrates—paper, glue, book bindings. Fast runners. Can go months without food. Ancient—fossils 400+ million years old. Symbol of aging, decay, entropy.', patternLore: 'Entropy made creature. The thing that eats memories. Decay personified.', encounters: 'In old books. In basements. Eating the past.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'small'},
+            // 🦎 ANCIENT REPTILIA
+            {name: 'Crocodile', emoji: '🐊', type: 'ANCIENT HUNTER', tier: 2, color: 'swamp_green', flavor: '250 million years old, still perfect.', pattern: 'REPTILIA • UNCHANGED', description: 'Family Crocodylidae. 250+ million years relatively unchanged. Powerful bite—3,700 psi. Can go months without eating. Communication through vibrations. Maternal care. Cold-blooded efficiency.', patternLore: 'Perfect design unchanged. Ancient predator. Evolution found ideal form and stopped.', encounters: 'In rivers. Waiting. Submerged. Patient. Then explosion.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'reptilia'},
+            {name: 'Alligator', emoji: '🐊', type: 'SWAMP DWELLER', tier: 2, color: 'murky_brown', flavor: 'American reptile. Swamp master. Ancient jaws.', pattern: 'REPTILIA • AMBUSH', description: 'Alligator mississippiensis and A. sinensis. Broader snout than crocodiles. Fresh/brackish water. Build nests. Temperature determines sex of offspring. Can run 35 mph on land briefly.', patternLore: 'Swamp apex. The watcher in murky water. American dragon.', encounters: 'In swamps. In golf courses. In Florida. Everywhere in Florida.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'reptilia'},
+            {name: 'Komodo Dragon', emoji: '🐲', type: 'ISLAND PREDATOR', tier: 2, color: 'olive', flavor: 'Largest lizard. Venomous bite. Island evolution\'s apex.', pattern: 'REPTILIA • APEX LIZARD', description: 'Varanus komodoensis. Largest lizard—10 feet, 200+ lbs. Venomous bite causes blood loss, shock. Excellent sense of smell. Can eat 80% of body weight in one meal. Island gigantism.', patternLore: 'Island evolution extreme. The lizard that became dragon. Isolated perfection.', encounters: 'On Indonesian islands. Ambushing. Patient. Then violent.', corruptionLevel: 'HIGH', rarity: 'Rare', category: 'reptilia'},
+            {name: 'Chameleon', emoji: '🦎', type: 'COLOR SHIFTER', tier: 2, color: 'neon_green', flavor: 'Changes color in milliseconds. Independent eyes.', pattern: 'REPTILIA • ADAPTIVE', description: 'Family Chamaeleonidae. Change color via special cells (chromatophores). Independent eye movement—360° vision. Projectile tongue longer than body. Zygodactylous feet. Slow motion hunter.', patternLore: 'Adaptation visible. Color as mood, camouflage, communication. The slow striker.', encounters: 'In trees. Changing. Watching with both eyes separately. Then tongue.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'reptilia'},
+            {name: 'Gila Monster', emoji: '🦎', type: 'VENOMOUS LIZARD', tier: 2, color: 'orange', flavor: 'Desert lizard. Venomous bite. Slow but deadly.', pattern: 'REPTILIA • TOXIC', description: 'Heloderma suspectum. One of few venomous lizards. Colorful beaded skin. Slow-moving. Bite tenacious. Venom causes extreme pain. Desert dweller. Protected species. Rarely bites unless provoked.', patternLore: 'Beautiful danger. Slow doesn\'t mean harmless. Desert jewel with venom.', encounters: 'In Sonoran desert. Slowly. Colorfully. Warningly.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'reptilia'},
+            {name: 'Snake', emoji: '🐍', type: 'HYPNOTIC SERPENT', tier: 2, color: 'venom_green', flavor: 'Fangs or venom or both. Hypnotic movement.', pattern: 'REPTILIA • LIMBLESS', description: 'Suborder Serpentes. 3,000+ species. Limbless. Jaw bones loosely connected—swallow prey whole. Some venomous, some constrictors, some harmless. Smell with tongue. Cultural symbolism worldwide.', patternLore: 'Ancient fear. Movement without legs. The limbless predator. Symbol and threat.', encounters: 'Everywhere. In every habitat except Antarctica, Ireland, Iceland, New Zealand. Slithering.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'reptilia'},
+            {name: 'Tortoise', emoji: '🐢', type: 'SLOW IMMORTAL', tier: 2, color: 'bronze_brown', flavor: 'Can live 100+ years. Shell as fortress. Slow wisdom.', pattern: 'REPTILIA • LONGEVITY', description: 'Family Testudinidae. Terrestrial turtles. Some live 150+ years. Fully retractable into shell. Herbivorous. Slow metabolism. Temperature-dependent sex determination. Symbol of patience, wisdom, longevity.', patternLore: 'Time made turtle. Patience perfected. The slow that outlives the fast.', encounters: 'In gardens. On Galápagos. Moving slowly. Living centuries.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'reptilia'},
+            {name: 'Sea Turtle', emoji: '🐢', type: 'MIGRATION MEMORY', tier: 2, color: 'sea_green', flavor: 'Ancient reptile. Swim same routes forever. Memory in migration.', pattern: 'REPTILIA • NAVIGATOR', description: 'Superfamily Chelonioidea. Seven species. Navigate oceans using Earth\'s magnetic field. Return to natal beach to nest. Some live 80+ years. All species threatened or endangered. Cannot retract into shell.', patternLore: 'Memory as navigation. The return to origin. Ancient routes remembered.', encounters: 'In oceans. Migrating. Nesting on same beach they were born. Endangered.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'reptilia'},
+            {name: 'Frog', emoji: '🐸', type: 'AMPHIBIAN LEAPER', tier: 2, color: 'lily_green', flavor: 'Ribbon-tongues. Transform from tadpoles. Leaping.', pattern: 'REPTILIA • METAMORPHOSIS', description: 'Order Anura. Undergo metamorphosis—tadpole to frog. Absorb water through skin. Many species toxic. Projectile tongue. Powerful legs for jumping. Bioindicator species—sensitive to pollution.', patternLore: 'Transformation complete. The creature that changes form. Environmental oracle.', encounters: 'Near water. Leaping. Calling. Vanishing as pollution rises.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'reptilia'},
+            {name: 'Salamander', emoji: '🦎', type: 'FIRE BIRTH', tier: 2, color: 'fire_red', flavor: 'Mythically born from fire. Liminal water-land. Regenerating.', pattern: 'REPTILIA • REGENERATION', description: 'Order Urodela. Can regenerate limbs, tail, eyes, heart tissue. Breathe through skin and/or lungs and/or gills depending on species. Associated with fire in mythology. Moist skin. Mostly nocturnal.', patternLore: 'Regeneration mastered. Fire myth. The amphibian that regrows.', encounters: 'Under logs. In streams. Regenerating. Slowly moving.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'reptilia'},
+            {name: 'Newt', emoji: '🦎', type: 'TINY REGENERATOR', tier: 2, color: 'orange', flavor: 'Small salamander. Regenerates limbs. Aquatic lifecycle.', pattern: 'REPTILIA • AQUATIC PHASE', description: 'Subfamily Pleurodelinae. Type of salamander. Three-stage lifecycle—aquatic larva, terrestrial juvenile, aquatic adult. Regenerate limbs. Some highly toxic. Colorful warning. Small but potent.', patternLore: 'Regeneration in miniature. Warning colors. The tiny toxic.', encounters: 'In ponds. Small. Bright. Regenerating. Toxic.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'reptilia'},
+            {name: 'Axolotl', emoji: '🦎', type: 'ETERNAL SMILE', tier: 2, color: 'pink_axolotl', flavor: 'Smiles forever. Regenerates endlessly. Never ages. Perpetual youth.', pattern: 'REPTILIA • NEOTENY', description: 'Ambystoma mexicanum. Neotenic—retains juvenile features entire life. Regenerates limbs, organs, even parts of brain. External gills remain. Smiling expression. Critically endangered in wild. Lives 10-15 years.', patternLore: 'Eternal youth. Regeneration extreme. The creature that won\'t grow up and can\'t die normally.', encounters: 'In Xochimilco canals. In labs. Pink, smiling, regenerating. What\'s lost returns.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'reptilia'},
+            {name: 'Lovebird', emoji: '🕊️', type: 'BONDED PAIR', tier: 2, color: 'orange', flavor: 'Mate for life. Inseparable. Symbolic of devotion.', pattern: 'AVIARY • BONDING', description: 'Genus Agapornis. Small parrots. Form strong pair bonds—hence "lovebird." Often see pairs sitting close, preening each other. Affectionate behavior. Can live 10-15 years. Nine species, most from Africa.', patternLore: 'Partnership as identity. Two become one. The inseparable.', encounters: 'In pairs. Always pairs. Preening. Together.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'aviary'},
+
+            
+            // 🌊 LIMINAL AQUATICS
+            {name: 'Jellyfish', emoji: '🪼', type: 'ANCIENT DRIFTER', tier: 1, color: 'ethereal_pink', flavor: '500-700 million years old. Still thinking without brain.', pattern: 'LIMINAL • BRAINLESS THOUGHT', description: '500-700 million years old. No brain, no blood, no heart. 95% water. Some species biologically immortal (Turritopsis dohrnii). Sting with nematocysts. Drift with currents. Think without thinking.', patternLore: 'Consciousness without brain. Thought distributed through body. The self that is only sensation.', encounters: 'In tides. Washed ashore. Blooming in millions. Ancient and new.', corruptionLevel: 'MAXIMUM', rarity: 'Common', category: 'aquatic', image: 'https://pplx-res.cloudinary.com/image/upload/v1756051456/pplx_project_search_images/a39b14062ba7f741fdcecacce8984383a1e6659e.png'},
+            {name: 'Siphonophore', emoji: '🌊', type: 'COLONIAL ENTITY', tier: 1, color: 'cyan', flavor: 'Not one creature but many. Neither singular nor plural.', pattern: 'LIMINAL • COLLECTIVE', description: 'Not one creature but many. Colonial organism—thousands of specialized polyps functioning as single entity. Bioluminescent. Can grow 40+ meters long. Deep sea dweller. Longest animal on Earth. Neither singular nor plural. Question: Where does one end and another begin?', patternLore: 'Ultimate collective intelligence. Each polyp is individual yet cannot survive alone. Symbol of distributed consciousness, swarm intelligence, the death of the self.', encounters: 'Rarely seen—deep ocean. Encounters described as "impossible," "living constellation," "string of lights with consciousness." Data unreliable at depth.', corruptionLevel: 'MAXIMUM', rarity: 'Legendary', category: 'aquatic', image: 'https://pplx-res.cloudinary.com/image/upload/v1756051456/pplx_project_search_images/a39b14062ba7f741fdcecacce8984383a1e6659e.png'},
+            {name: 'Sea Anemone', emoji: '🌺', type: 'ROOTED HUNTER', tier: 3, color: 'neon_green', flavor: 'Rooted to stone. Tentacles reach. Waiting.', pattern: 'LIMINAL • PLANT-ANIMAL', description: 'Looks like flower, acts like predator. Cnidarian related to jellyfish and coral. Tentacles with stinging cells. Some species live 500+ years. Symbiotic with clownfish. Neither plant nor animal—something else.', patternLore: 'The boundary blurred. Is it reaching or are you drifting? Patience as predation.', encounters: 'In tide pools. Waving gently. Until you touch.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'aquatic'},
+            {name: 'Coral', emoji: '🪸', type: 'REEF BUILDER', tier: 2, color: 'coral_orange', flavor: 'Millions of animals building one reef. Symbiotic.', pattern: 'LIMINAL • BUILDER COLLECTIVE', description: 'Millions of tiny polyps building calcium carbonate structures. Symbiotic relationship with zooxanthellae algae. Reefs support 25% of marine life while covering <1% of ocean. Largest living structure on Earth (Great Barrier Reef).', patternLore: 'Building together. Architecture of collaboration. Slow creation at massive scale.', encounters: 'In warm waters. Building. Always building. Until bleaching. Until silence.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'aquatic'},
+            {name: 'Axolotl', emoji: '🦎', type: 'ETERNAL JUVENILE', tier: 2, color: 'pink_axolotl', flavor: 'Smiling forever. Regenerate endlessly.', pattern: 'LIMINAL • PERMANENT YOUTH', description: 'Mexican salamander. Neotenic—retains juvenile features entire life. Regenerates limbs, organs, even parts of brain. Smiling expression. Critically endangered in wild. Lab colonies thrive. Can live 10-15 years.', patternLore: 'Eternal youth. Regeneration. The creature that won\'t grow up and can\'t die normally.', encounters: 'In Xochimilco. In labs. Pink, smiling, regenerating. What\'s lost returns.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'aquatic'},
+            {name: 'Sea Cucumber', emoji: '🧀', type: 'BOTTOM CLEANER', tier: 3, color: 'slimy_green', flavor: 'Expels internal organs when threatened. They regrow.', pattern: 'LIMINAL • REGENERATION', description: 'Echinoderms. Clean ocean floor by eating detritus. When threatened, can expel internal organs to confuse predators—they regenerate. Some species toxic. Move slowly. Essential to ecosystem.', patternLore: 'Sacrifice and regrowth. The part discarded returns. Cleaning what\'s left behind.', encounters: 'On ocean floor. Slowly moving. Purifying. Until threat, then empty hull.', corruptionLevel: 'LOW', rarity: 'Common', category: 'aquatic'},
+            {name: 'Nautilus', emoji: '🐚', type: 'LIVING FOSSIL', tier: 2, color: 'pearl_white', flavor: 'Spiral shell. 500 million years unchanged.', pattern: 'LIMINAL • ANCIENT', description: 'Living fossil. 500 million years relatively unchanged. Spiral chambered shell. Up to 90 tentacles. Primitive eyes (pinhole camera type). Can live 20+ years. Deep water dweller. Fibonacci spiral in shell.', patternLore: 'Perfect form unchanged. Mathematics in nature. The past alive in present.', encounters: 'In deep water. Rising at night to feed. The spiral that time forgot.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'aquatic'},
+            {name: 'Disco Clam', emoji: '🪦', type: 'LIGHT SHOW', tier: 2, color: 'cyan', flavor: 'Flashing light display. Hypnotic patterns. Deep sea dancer.', pattern: 'LIMINAL • BIOLUMINESCENCE', description: 'Ctenoides ales. Flashes light via reflective tissue on lips. Not true bioluminescence but light reflection. Creates disco-ball effect. Found in Indo-Pacific. Small but mesmerizing. Defense or attraction unknown.', patternLore: 'Light as defense? As attraction? Unknown. The disco in darkness.', encounters: 'On reefs. Flashing. Hypnotic. Beautiful mystery.', corruptionLevel: 'LOW', rarity: 'Rare', category: 'aquatic'},
+            {name: 'Blue Sea Star', emoji: '🌟', type: 'RADIAL MIND', tier: 2, color: 'electric_blue', flavor: 'Five-pointed. Regenerates lost arms. Slow-moving grace.', pattern: 'LIMINAL • SYMMETRY', description: 'Linckia laevigata. Vibrant blue starfish. Five-fold radial symmetry. Can regenerate lost arms. Tube feet for movement. No brain—decentralized nervous system. Moves slowly. Indo-Pacific reefs.', patternLore: 'Radial intelligence. No center, all edge. Beauty in symmetry.', encounters: 'On reefs. Blue. Perfect. Slowly moving.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'aquatic'},
+            {name: 'Sea Urchin', emoji: '🦑', type: 'SPINE SHELL', tier: 2, color: 'dark_purple', flavor: 'Covered in spikes. Primitive eyes. Voracious appetite.', pattern: 'LIMINAL • ARMORED', description: 'Class Echinoidea. Covered in movable spines. Tube feet. Five-fold symmetry. Some species have simple eyes (eyespots on body). Voracious herbivores. Can overpopulate and devastate kelp forests.', patternLore: 'Armor and appetite. The sphere of spines. Simple yet effective.', encounters: 'On reefs. In kelp forests. Spiny. Eating. Multiplying.', corruptionLevel: 'LOW', rarity: 'Common', category: 'aquatic'},
+            {name: 'Starfish', emoji: '⭐', type: 'RADIAL REGENERATOR', tier: 2, color: 'ruby_red', flavor: 'Can regrow from fragment. Multiple hearts or none? Distributed life.', pattern: 'LIMINAL • REGENERATION', description: 'Class Asteroidea. Can regenerate entire body from single arm if part of central disc remains. No brain. Stomach can be everted to digest prey externally. Tube feet. Thousands of species. Radial symmetry.', patternLore: 'Regeneration extreme. The distributed self. One becomes many.', encounters: 'On shores. In oceans. Regrowing. Distributing. Being.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'aquatic'},
+            // 🦅 ANZU'S AVIARY
+            {name: 'Kakapo', emoji: '🦜', type: 'FORGOTTEN PARROT', tier: 2, color: 'olive', flavor: 'Flightless owl-parrot. Fewer than 250 exist.', pattern: 'AVIARY • TIME REMNANT', description: 'Strigops habroptilus. Flightless owl-parrot. Critically endangered—fewer than 250 exist. Nocturnal. Moss-green feathers for camouflage. Solitary. Mates every 2-4 years. Can live 90+ years. Forgotten by time, remembered by data.', patternLore: 'Symbol of beautiful obsolescence. Evolution\'s experiment. Represents creatures left behind by time yet stubbornly persistent.', encounters: 'Last major sighting: New Zealand conservation islands. Rarely photographed. Calls described as "low-frequency booming." Some say the sound predates memory.', corruptionLevel: 'LOW', rarity: 'Legendary', category: 'aviary', image: 'https://pplx-res.cloudinary.com/image/upload/v1762840675/pplx_project_search_images/392fb35cda4758f4ec50b5641dc1aecfa1c21eb4.png'},
+            {name: 'Osprey', emoji: '🦅', type: 'FISH HAWK', tier: 2, color: 'ocean_blue', flavor: 'Dives feet-first into water. 99% diet is fish.', pattern: 'AVIARY • SPECIALIST', description: 'Pandion haliaetus. Raptor specialized for fishing. Reversible outer toe for gripping fish. Dive from 100+ feet. Close nostrils when diving. 99% diet is fish. Found on every continent except Antarctica.', patternLore: 'Precision. Specialization. The dive that never fails.', encounters: 'Near water. Always near water. Hovering, then plummeting.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'aviary'},
+            {name: 'Quetzal', emoji: '🦜', type: 'SACRED BIRD', tier: 2, color: 'jade_green', flavor: 'Sacred to Maya and Aztec. Cannot live in captivity.', pattern: 'AVIARY • SACRED', description: 'Resplendent quetzal. Iridescent green and red plumage. Long tail feathers. Sacred to Mesoamerican cultures. Symbol of freedom—believed to die in captivity (not quite true but rarely survives). Guatemala\'s national bird.', patternLore: 'Freedom as essence. The bird that represents what cannot be caged.', encounters: 'In cloud forests. Iridescent. Brief glimpses. Never held.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'aviary'},
+            {name: 'Albatross', emoji: '🦤', type: 'ETERNAL WANDERER', tier: 2, color: 'pearl_white', flavor: 'Can fly for years without landing. Widest wingspan.', pattern: 'AVIARY • ENDLESS JOURNEY', description: 'Largest wingspan of any bird (up to 11 feet). Can fly for years without landing—sleep while gliding. Cross entire oceans. Mate for life. Return to same nesting site. Symbolizes burden in "Rime of the Ancient Mariner."', patternLore: 'Endless journey. The wanderer who cannot stop. Flight as curse and blessing.', encounters: 'Over oceans. Alone. Gliding on wind. Years without touching land.', corruptionLevel: 'HIGH', rarity: 'Rare', category: 'aviary'},
+            {name: 'Condor', emoji: '🦅', type: 'DEATH BIRD', tier: 2, color: 'charcoal', flavor: 'Scavenger. Largest wingspan in Americas.', pattern: 'AVIARY • CLEANER', description: 'California and Andean condors. Largest wingspan in Western Hemisphere. Scavengers. Can soar for hours without flapping. California condor nearly extinct—saved by captive breeding. Can live 60+ years.', patternLore: 'Near extinction. Saved. The cleaner that nearly disappeared. Second chances.', encounters: 'In thermals. Circling. Waiting. Patient.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'aviary'},
+            {name: 'Hammerkop', emoji: '🦩', type: 'OMEN BIRD', tier: 3, color: 'bronze_brown', flavor: 'Hammer-headed stork. Builds massive nests.', pattern: 'AVIARY • SUPERSTITION', description: 'Scopus umbretta. Hammer-shaped head. Builds enormous nests—8-10 feet across, strong enough to support human. African wetlands. Associated with superstitions and omens. Active at dawn and dusk.', patternLore: 'Omens. Signs. Architecture of protection. The bird that builds fortresses.', encounters: 'In African wetlands. At twilight. Building. Always building.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'aviary'},
+            {name: 'Greater Lophorina', emoji: '🦤', type: 'SUPERB BIRD-OF-PARADISE', tier: 3, color: 'iridescent', flavor: 'Dance of courtship. Black so black it absorbs light.', pattern: 'AVIARY • PERFORMANCE', description: 'Lophorina superba. Male has super-black feathers that absorb 99.95% of light. Elaborate courtship dance. "Transforms" into completely different shape. Found in New Guinea. The performer.', patternLore: 'Performance. Transformation. The shape that becomes another shape.', encounters: 'In forests. Dancing. The blackest black. The performance that is identity.', corruptionLevel: 'LOW', rarity: 'Rare', category: 'aviary'},
+            {name: 'Peacock', emoji: '🦚', type: 'DISPLAY MASTER', tier: 2, color: 'iridescent', flavor: 'Shows self endlessly. Eyes on every feather. Vanity made beautiful.', pattern: 'TRICKSTER • DISPLAY', description: 'Male peafowl. 200+ eye-spots on tail feathers. Elaborate courtship display. Iridescent plumage. Females (peahens) choose mates based on tail quality. Symbol of pride, vanity, beauty. Screaming call.', patternLore: 'Display. Vanity. The self made spectacle. Beauty as burden and weapon.', encounters: 'In gardens. Displaying. Screaming. The eyes watch from every feather.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'trickster'},
+            {name: 'Swan', emoji: '🦢', type: 'GRACE AND VIOLENCE', tier: 3, color: 'pearl_white', flavor: 'Graceful above water. Violent beneath.', pattern: 'AVIARY • DUALITY', description: 'Graceful appearance hides aggressive nature. Mate for life. Can break human bones with wing strike. Ugly duckling myth. Symbol of grace that can kill you. Calm surface, churning beneath.', patternLore: 'Grace and violence. The beautiful that can hurt you. Surface versus depth.', encounters: 'In ponds. Gliding. Until you get close. Then hissing. Then charging.', corruptionLevel: 'LOW', rarity: 'Common', category: 'aviary'},
+            {name: 'Flamingo', emoji: '🦩', type: 'PINK COLLECTIVE', tier: 3, color: 'ethereal_pink', flavor: 'Pink from shrimp. Stand on one leg for thermoregulation.', pattern: 'AVIARY • COLLECTIVE', description: 'Pink coloration from carotenoid pigments in diet (shrimp, algae). Stand on one leg to conserve body heat. Highly social—colonies of thousands. Filter feeders. Born gray, turn pink.', patternLore: 'You are what you eat. Color as accumulation. The collective pink.', encounters: 'In thousands. In salt lakes. Standing. One leg. Pink horizon.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'aviary'},
+            // 🐾 CRYPTID CARNIVORES
+            {name: 'Fossa', emoji: '🐾', type: 'APEX PHANTOM', tier: 2, color: 'sienna', flavor: 'Madagascar\'s apex predator. Cat-like but not a cat.', pattern: 'CARNIVORE • CRYPTID', description: 'Cryptoprocta ferox. Madagascar\'s apex predator. Cat-like but not a cat—related to mongooses. Hunts lemurs in trees. Solitary. Elusive. Rarely photographed. Locals consider it supernatural. Long tail, retractable claws, can climb down trees headfirst.', patternLore: 'Represents the unknown predator. Island evolution\'s unique answer. Symbol of things that watch unseen, apex intelligence, solitary perfection.', encounters: 'Madagascar forests. Mostly nocturnal. Few photographs exist. Locals report: "Shadow with eyes," "Silent killer," "Ghost cat that isn\'t." Data scarce by design.', corruptionLevel: 'MODERATE', rarity: 'Legendary', category: 'carnivore', image: 'https://pplx-res.cloudinary.com/image/upload/v1762840696/pplx_project_search_images/1bbb281cb34ba89f46e7fef9c66372e2e30b5889.png'},
+            {name: 'Honey Badger', emoji: '🦡', type: 'FEARLESS', tier: 2, color: 'charcoal', flavor: 'Doesn\'t care. Fights everything. Thick skin.', pattern: 'CARNIVORE • RELENTLESS', description: 'Mellivora capensis. Thick loose skin protects from bites and stings. Fearless—attacks lions, buffalo. Eats honey, snakes, anything. Listed in Guinness as "most fearless animal." Tool user. Escape artist.', patternLore: 'Fearlessness. Refusal to back down. The small that defeats the large through sheer audacity.', encounters: 'In savannas. Attacking bee hives. Fighting lions. Not caring.', corruptionLevel: 'LOW', rarity: 'Rare', category: 'carnivore'},
+            {name: 'Lion', emoji: '🦁', type: 'PRIDE KING', tier: 2, color: 'golden', flavor: 'Lazy hunters. Let lionesses work.', pattern: 'CARNIVORE • PRIDE', description: 'Panthera leo. Only social big cat. Prides of related females. Males defend territory. Lionesses do 90% of hunting. Males eat first. Sleep 20 hours per day. Symbol of royalty, power. Vulnerable status.', patternLore: 'Hierarchy. The male that leads by existing. Power without work.', encounters: 'In prides. In grass. Waiting for lionesses to finish hunting.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'carnivore'},
+            {name: 'Tiger', emoji: '🐅', type: 'STRIPED HUNTER', tier: 2, color: 'orange', flavor: 'Largest cat. Solitary. Stripes unique as fingerprints.', pattern: 'CARNIVORE • APEX', description: 'Panthera tigris. Largest cat species. Solitary. Excellent swimmers. Each has unique stripe pattern. Endangered. Six subspecies. Can eat 40kg in one sitting. Ambush predator.', patternLore: 'Solitary perfection. The pattern that identifies. Endangered by beauty.', encounters: 'In grass. In water. In extinction lists. Rarely seen before too late.', corruptionLevel: 'HIGH', rarity: 'Legendary', category: 'carnivore'},
+            {name: 'Jaguar', emoji: '🐆', type: 'WATER JAGUAR', tier: 2, color: 'spotted_gold', flavor: 'Only big cat that doesn\'t roar. Bites through skull.', pattern: 'CARNIVORE • CRUSHER', description: 'Panthera onca. Strongest bite of all big cats relative to size. Bites through turtle shells and skulls. Excellent swimmer. Hunts caimans. Rosette patterns unique. Solitary. Near threatened.', patternLore: 'Power in jaws. The crusher. Adaptation to niche.', encounters: 'In Amazon. In water. Silent. Until the bite.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'carnivore'},
+            {name: 'Leopard', emoji: '🐆', type: 'ADAPTABLE HUNTER', tier: 3, color: 'spotted_tan', flavor: 'Spotted. Spotted everywhere. Everywhere spotted.', pattern: 'CARNIVORE • ADAPTABLE', description: 'Panthera pardus. Most adaptable big cat. Found in diverse habitats. Stores kills in trees. Rosette patterns unique. Excellent climbers. Solitary. Nocturnal. Melanistic form = black panther.', patternLore: 'Adaptation. Survival through flexibility. The spotted shadow.', encounters: 'Everywhere and nowhere. In trees. Invisible until too late.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'carnivore'},
+            {name: 'Snow Leopard', emoji: '🐆', type: 'GHOST CAT', tier: 3, color: 'pale_blue', flavor: 'Ghost of the mountains. Barely seen.', pattern: 'CARNIVORE • PHANTOM', description: 'Panthera uncia. Mountain dweller. Thick fur. Long tail for balance. Can leap 50 feet. Solitary. Endangered. Rarely photographed. Called "ghost of the mountains." Vulnerable.', patternLore: 'The unseen. Mountain ghost. Rarity as identity.', encounters: 'In Himalayas. In footage so rare each frame is precious. Ghost.', corruptionLevel: 'HIGH', rarity: 'Legendary', category: 'carnivore'},
+            {name: 'Cheetah', emoji: '🐆', type: 'SPEED INCARNATE', tier: 3, color: 'spotted_gold', flavor: 'Speed over strength. Built for one purpose.', pattern: 'CARNIVORE • SPECIALIST', description: 'Acinonyx jubatus. Fastest land animal—70 mph. Built for speed: lightweight, large nostrils, semi-retractable claws. Can only maintain speed for 30 seconds. Vulnerable. High infant mortality.', patternLore: 'Specialization extreme. One skill perfect, others sacrificed.', encounters: 'In sprint. In blur. In 30 seconds of perfection, then exhaustion.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'carnivore'},
+            {name: 'Cougar', emoji: '🐆', type: 'MOUNTAIN LION', tier: 3, color: 'tan', flavor: 'Solitary. Apex hunters. Nearly invisible.', pattern: 'CARNIVORE • ADAPTABLE', description: 'Puma concolor. Widest range of any large wild terrestrial mammal in Western Hemisphere. Solitary. Ambush predator. Can kill prey many times their size. 40+ different names in English alone.', patternLore: 'Adaptation. The cat with many names. Invisibility as survival.', encounters: 'Watching you. You never see them watching. Then vanish.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'carnivore'},
+            {name: 'Wolf', emoji: '🐺', type: 'PACK HUNTER', tier: 3, color: 'silver_gray', flavor: 'Pack minds. Individual teeth. Hunting as thought.', pattern: 'CARNIVORE • PACK', description: 'Canis lupus. Complex pack hierarchies. Coordinate hunts. Family units. Howl to communicate across miles. Can travel 50 miles per day. Keystone species—reintroduction transforms ecosystems.', patternLore: 'Pack intelligence. Coordination. The many as one hunter.', encounters: 'In howls. In packs. In reintroduced Yellowstone transforming rivers.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'carnivore'},
+            {name: 'Bear', emoji: '🐻', type: 'OMNIVOROUS TITAN', tier: 3, color: 'deep_brown', flavor: 'Stronger than seems right. Ancient in shape.', pattern: 'CARNIVORE • POWER', description: 'Multiple species. Omnivorous. Powerful. Excellent sense of smell. Can run 40 mph. Polar bears are marine mammals. Grizzlies can smell food from 20 miles. Black bears climb trees. Hibernate.', patternLore: 'Raw power. The shape that hasn\'t needed to change. Ancient form.', encounters: 'In forests. In arctic. In hibernation. In sudden charges. In market trends.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'carnivore'},
+            {name: 'Ocelot', emoji: '🐆', type: 'SMALL SPOTTED CAT', tier: 3, color: 'spotted_gold', flavor: 'Twice the size of house cat. Hunts at night.', pattern: 'CARNIVORE • SMALL HUNTER', description: 'Leopardus pardalis. Nocturnal. Excellent climber and swimmer. Solitary. Opportunistic hunter. Beautiful fur led to near-extinction. Now protected. Found in Americas.', patternLore: 'Beauty as curse. The small hunter. Night predator.', encounters: 'In Americas. At night. Climbing. Hunting.', corruptionLevel: 'LOW', rarity: 'Rare', category: 'carnivore'},
+
+            
+            // 🦗 SMALL & UNCANNY
+            
+
+            
+            // 🌙 NIGHT DWELLERS
+            {name: 'Bat', emoji: '🦇', type: 'ECHOLOCATION MASTER', tier: 1, color: 'midnight_black', flavor: 'See with sound. Sonar minds. 1000+ species listening.', pattern: 'NIGHT • SONIC SIGHT', description: 'Only flying mammal. Echolocation—see with sound. 1,400+ species. Pollinate plants, control insects, disperse seeds. Vampire bats share blood with hungry roost-mates. Some live 30+ years. Associated with darkness, Halloween, vampires.', patternLore: 'Sight through sound. The world built from echoes. Night fliers. Misunderstood.', encounters: 'At dusk. In caves. In attics. In sonar clicks humans can\'t hear.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'night'},
+            {name: 'Moth', emoji: '🦋', type: 'NIGHT FLIER', tier: 1, color: 'dusty_purple', flavor: 'Drawn to light. Why do they keep coming?', pattern: 'NIGHT • ATTRACTION', description: 'Nocturnal butterflies. Drawn to light (reasons debated—moon navigation theory). Pollinate night-blooming flowers. Some species don\'t eat as adults. Powdery wings. Transform from caterpillars. Death\'s-head hawk moth squeaks.', patternLore: 'Attraction to light unto death. The pull toward brightness. Transformation in darkness.', encounters: 'At windows. At lamps. Circling. Drawn. Unable to escape.', corruptionLevel: 'HIGH', rarity: 'Common', category: 'night'},
+            {name: 'Owl', emoji: '🦉', type: 'SILENT HUNTER', tier: 2, color: 'brown', flavor: 'Silent flight. Head rotates 270°. Sees in darkness.', pattern: 'NIGHT • PREDATOR', description: 'Nocturnal raptors. Nearly silent flight—specialized feathers. Rotate head 270°. Excellent hearing and night vision. Pellets contain indigestible prey remains. Symbol of wisdom (Athena) and death (various cultures). Many species.', patternLore: 'Silent death. Wisdom. The watcher in darkness. Dual symbolism.', encounters: 'In darkness. In silence. In sudden wing-beat barely heard.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'night'},
+            {name: 'Aye-aye', emoji: '🐵', type: 'CURSED LEMUR', tier: 2, color: 'midnight_black', flavor: 'Nocturnal. Fingers too long. Believed cursed.', pattern: 'NIGHT • OMEN', description: 'Madagascar lemur. Nocturnal. Taps on trees to find grubs, uses elongated middle finger to extract them. Large eyes, bat-like ears. Considered evil omen in Madagascar—killed on sight in some areas. Endangered.', patternLore: 'Superstition. Fear. Endangered by belief. The finger too long for comfort.', encounters: 'In Madagascar. At night. Tapping. Locals flee. The curse that isn\'t.', corruptionLevel: 'HIGH', rarity: 'Rare', category: 'night'},
+            {name: 'Luna Moth', emoji: '🦋', type: 'ETHEREAL MOTH', tier: 2, color: 'pale_blue', flavor: 'Lime green. Lives one week. No mouth—cannot eat.', pattern: 'NIGHT • BRIEF', description: 'Actias luna. Lime-green wings. Long tails on hindwings. Adults live only one week—no mouth, cannot eat. Exist only to mate. Emerge, breed, die. Beautiful and brief. North American.', patternLore: 'Brief life. Beauty without sustenance. Purpose singular.', encounters: 'In spring. For one week. Luminous green. Then gone.', corruptionLevel: 'MODERATE', rarity: 'Rare', category: 'night'},
+            
+            // 🦀 LIMINAL ARTHROPODS
+            {name: 'Coconut Crab', emoji: '🦀', type: 'TERRESTRIAL ANOMALY', tier: 2, color: 'rust', flavor: 'Largest land arthropod. Climbs trees. Steals trash bins.', pattern: 'ARTHROPOD • LIMINAL', description: 'Birgus latro. Largest land-dwelling arthropod. Weight: up to 4kg. Leg span: 1 meter. Climbs palm trees. Claws strong enough to crack coconuts. Steals trash bins and camping equipment. Nocturnal. Can live 60+ years. Breathes through specialized gills adapted for air.', patternLore: 'Represents impossible crossings—marine creature on land, gentle herbivore with terrifying claws. Liminal entity. Neither fully of land nor sea.', encounters: 'Encountered on tropical islands. Seen climbing impossible heights. Observed stealing objects. Some reports: "Larger than should be possible." Data fragmentary.', corruptionLevel: 'MODERATE', rarity: 'Uncommon', category: 'arthropod', image: 'https://pplx-res.cloudinary.com/image/upload/v1756237013/pplx_project_search_images/95fda726a20ce70434aa7267b9a57ff18d8f7130.png'},
+            {name: 'Horseshoe Crab', emoji: '🦀', type: 'LIVING FOSSIL', tier: 3, color: 'bronze_brown', flavor: '500 million years unchanged. Blue blood saves lives.', pattern: 'ARTHROPOD • ANCIENT', description: '500 million years relatively unchanged. Not actually crabs—more related to spiders. Blue blood contains compound (LAL) that detects bacterial contamination—used to test vaccines. Multiple eyes. Spawn on beaches in huge numbers. Vital to medical science.', patternLore: 'Ancient form. Blue blood as salvation. The creature whose blood saves millions.', encounters: 'On beaches. Spawning. Being harvested. Blood drained, returned to sea. Survival.', corruptionLevel: 'HIGH', rarity: 'Uncommon', category: 'arthropod'},
+            {name: 'Lobster', emoji: '🦞', type: 'BIOLOGICALLY IMMORTAL', tier: 3, color: 'deep_brown', flavor: 'Doesn\'t age. Grows forever. Molts shell.', pattern: 'ARTHROPOD • IMMORTAL', description: 'Biologically immortal—doesn\'t age due to telomerase enzyme. Dies from disease, predation, or inability to molt large shell. Can live 100+ years. Claws specialized—one for crushing, one for cutting. Blue blood (hemocyanin). Considered poor-people food until 1800s.', patternLore: 'Biological immortality. Growth without aging. The fate that is other things, not time.', encounters: 'On ocean floor. In traps. Growing. Molting. Enduring.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'arthropod'},
+            {name: 'Spider', emoji: '🕷️', type: 'WEB WEAVER', tier: 2, color: 'charcoal', flavor: 'Webs are thought made material. Waiting.', pattern: 'ARTHROPOD • TRAPPER', description: '48,000+ species. Eight legs. Most spin silk. Some build elaborate webs, others hunt actively. Venom for prey (rarely dangerous to humans). Multiple eyes. Eat insects—crucial pest control. Fear response in humans common.', patternLore: 'The trap as art. Patience. The web that is thought externalized.', encounters: 'In corners. In webs. Waiting. Always waiting.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'arthropod'},
+            {name: 'Tarantula', emoji: '🕷️', type: 'GIANT SPIDER', tier: 2, color: 'dark_brown', flavor: 'Large, hairy, mostly harmless. Live 20+ years.', pattern: 'ARTHROPOD • GENTLE GIANT', description: 'Large spiders. Most species docile. Venom rarely dangerous to humans. Some species live 20-30 years. Kick urticating hairs as defense. Many kept as pets. Despite reputation, mostly harmless.', patternLore: 'Fear versus reality. The monster that isn\'t. Longevity in small creatures.', encounters: 'In terrariums. In deserts. In fear greater than justified.', corruptionLevel: 'LOW', rarity: 'Uncommon', category: 'arthropod'},
+            {name: 'Centipede', emoji: '🐛', type: 'MANY-LEGGED HUNTER', tier: 3, color: 'rust_red', flavor: 'Venomous fangs. Fast runners. Carnivorous.', pattern: 'ARTHROPOD • PREDATOR', description: 'Carnivorous. Modified legs as venomous fangs. Fast runners. Can have 15-177+ pairs of legs. Flat bodies to fit under rocks. Nocturnal hunters. Some species up to 12 inches. Fear response to too many legs.', patternLore: 'Too many legs. Movement that disturbs. The form that shouldn\'t be.', encounters: 'Under rocks. Running fast. Too many legs moving at once.', corruptionLevel: 'MODERATE', rarity: 'Common', category: 'arthropod'},
+            {name: 'Millipede', emoji: '🐛', type: 'DETRITIVORE', tier: 3, color: 'charcoal', flavor: 'Actually hundreds of legs, not thousands. Defensive curl.', pattern: 'ARTHROPOD • DECOMPOSER', description: 'Despite name ("thousand feet"), most have 300-400 legs. Detritivores—eat decaying plant matter. Curl into spiral when threatened. Some secrete toxic compounds. Slow-moving. Important decomposers.', patternLore: 'Decomposition. Recycling. The curl of protection. Slow herbivore with many legs.', encounters: 'Under logs. In soil. Curled. Slowly moving through decay.', corruptionLevel: 'LOW', rarity: 'Common', category: 'arthropod'},
+            // ✨ HYBRID ENTITIES
+            {name: 'Kelpie', emoji: '🐎', type: 'WATER HORSE', tier: 1, color: 'ocean_blue', flavor: 'Scottish water spirit. Horse that drowns riders.', pattern: 'HYBRID • SHAPESHIFTER', description: 'Scottish folklore. Shape-shifting water spirit, usually horse form. Appears tame, entices people to ride, then drags them underwater to drown and devour. Sometimes appears as human. Haunts rivers and streams.', patternLore: 'Temptation. The beautiful trap. Water as danger disguised.', encounters: 'By Scottish rivers. As tame horse. Until you mount. Then drowning.', corruptionLevel: 'HIGH', rarity: 'Legendary', category: 'hybrid'},
+            {name: 'Siren', emoji: '🧜', type: 'SONG CREATURE', tier: 1, color: 'ethereal_pink', flavor: 'Voice lures sailors to crash on rocks. Half-bird or half-fish.', pattern: 'HYBRID • VOCAL', description: 'Greek mythology. Originally bird-women, later merged with mermaids (fish-women). Irresistible singing voice lures sailors to crash ships on rocks. Represents dangerous temptation, seduction through art. Odysseus had crew plug ears with wax.', patternLore: 'Art as weapon. Beauty as destruction. The song you can\'t resist unto death.', encounters: 'On rocky shores. Singing. Ships crash. Always crashing.', corruptionLevel: 'MAXIMUM', rarity: 'Legendary', category: 'hybrid'},
+
+        ];
+
+        let animals = [...animalsData];
+        let currentFilter = 'ALL';
+        let customCount = 0;
+        
+        // Update catalog count to reflect actual total
+        function updateActualCount() {
+            const total = animalsData.length;
+            document.getElementById('catalogCount').textContent = `[${total}/∞] L04D3D | GLITCHES: ${glitchCount}`;
+        }
+
+        // Store reference for sorted state
+        let currentSortedAnimals = [...animalsData];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCards();
+            startStatusGlitch();
+            updateActualCount();
+            
+            // Random glitches in title
+            setInterval(() => {
+                if (Math.random() > 0.95) {
+                    const title = document.querySelector('.title');
+                    title.classList.add('glitch-effect');
+                    setTimeout(() => title.classList.remove('glitch-effect'), 200);
+                }
+            }, 5000);
+        });
+
+        // Render cards
+        function renderCards(filterAnimals = animals) {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            
+            filterAnimals.forEach((animal, index) => {
+                const card = document.createElement('div');
+                const colorHex = colorMap[animal.color] || '#00FFFF';
+                
+                card.className = `card tier-${animal.tier}`;
+                card.style.borderColor = colorHex;
+                card.style.boxShadow = `0 0 10px ${colorHex}`;
+                
+                // Add random glitch to some cards
+                if (Math.random() > 0.9) {
+                    setTimeout(() => {
+                        card.classList.add('glitch-effect');
+                        setTimeout(() => card.classList.remove('glitch-effect'), 300);
+                    }, index * 100);
+                }
+                
+                const displayName = Math.random() > 0.95 ? glitchText(animal.name) : animal.name;
+                const patternBadge = animal.pattern ? `<div style="font-size: 8px; color: ${colorHex}; margin-top: 5px; letter-spacing: 0.5px;">${animal.pattern}</div>` : '';
+                
+                card.innerHTML = `
+                    <div class="tier-badge">TIER ${animal.tier}</div>
+                    <div style="font-size: 24px; text-align: center; margin-bottom: 5px;">${animal.emoji || ''}</div>
+                    <div class="card-name" style="text-shadow: 0 0 5px ${colorHex}">${displayName}${animal.custom ? '<span class="custom-tag">[USER]</span>' : ''}</div>
+                    <div class="card-type">${animal.type}</div>
+                    ${patternBadge}
+                    <div class="card-flavor">"${animal.flavor}"</div>
+                    <div class="rarity-tag" style="border-color: ${colorHex}; color: ${colorHex}">${animal.rarity}</div>
+                `;
+                
+                card.onclick = () => openModal(animal);
+                grid.appendChild(card);
+            });
+            
+            updateCatalogCount();
+        }
+
+        // Filter by category
+        function filterCategory(category) {
+            currentFilter = category;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Filter animals
+            if (category === 'ALL') {
+                renderCards(currentSortedAnimals);
+            } else {
+                const filtered = currentSortedAnimals.filter(a => a.category === category);
+                renderCards(filtered);
+            }
+            
+            // Clear search box
+            document.getElementById('searchBox').value = '';
+            
+            // Glitch effect on filter
+            if (Math.random() > 0.8) {
+                glitchCount++;
+            }
+        }
+
+        // Search animals
+        function searchAnimals() {
+            const query = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = currentSortedAnimals.filter(a => 
+                a.name.toLowerCase().includes(query) ||
+                a.type.toLowerCase().includes(query) ||
+                a.flavor.toLowerCase().includes(query) ||
+                (a.pattern && a.pattern.toLowerCase().includes(query)) ||
+                (a.emoji && a.emoji.includes(query))
+            );
+            renderCards(filtered);
+            
+            // Random glitch on search
+            if (Math.random() > 0.7 && query.length > 3) {
+                glitchCount++;
+            }
+        }
+
+        // Open modal
+        function openModal(animal) {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            const buttons = document.getElementById('actionButtons');
+            const colorHex = colorMap[animal.color] || '#00FFFF';
+            
+            title.textContent = `${animal.name} █ ENTRY`;
+            title.style.color = colorHex;
+            title.style.textShadow = `0 0 10px ${colorHex}`;
+            
+            body.innerHTML = `
+                <div class="detail-row">
+                    <div class="detail-label">TYPE:</div>
+                    <div class="detail-value">${animal.type}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">TIER:</div>
+                    <div class="detail-value">TIER ${animal.tier} - ${animal.tier === 1 ? 'HIGHEST CORRELATION' : animal.tier === 2 ? 'STRONG' : 'MODERATE'}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">COLOR CODE:</div>
+                    <div class="detail-value" style="color: ${colorHex}">${animal.color.toUpperCase()} [${colorHex}]</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">RARITY:</div>
+                    <div class="detail-value">${animal.rarity}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">CATEGORY:</div>
+                    <div class="detail-value">${animal.category}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">OBSERVATION:</div>
+                    <div class="detail-value" style="font-style: italic; color: #FFFFFF;">"${animal.flavor}"</div>
+                </div>
+                ${animal.custom ? '<div class="detail-row"><div class="detail-label">STATUS:</div><div class="detail-value" style="color: #FF00FF;">[CUSTOM ENTRY] - UNVERIFIED - MEMORY FRAGMENTED</div></div>' : ''}
+            `;
+            
+            buttons.innerHTML = `
+                <button class="action-btn" onclick="performAction('[EXAMINE]')">[EXAMINE]</button>
+                <button class="action-btn" onclick="performAction('[LEARN]')">[LEARN]</button>
+                <button class="action-btn" onclick="performAction('[MARK]')">[MARK]</button>
+                <button class="action-btn" onclick="closeModal()">[CLOSE]</button>
+            `;
+            
+            modal.classList.add('active');
+            
+            // Random glitch effect
+            if (Math.random() > 0.7) {
+                setTimeout(() => {
+                    body.classList.add('glitch-effect');
+                    setTimeout(() => body.classList.remove('glitch-effect'), 300);
+                }, 500);
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        function closeModalOnOverlay(event) {
+            if (event.target.id === 'modal') {
+                closeModal();
+            }
+        }
+
+        // View memory log
+        function viewMemoryLog() {
+            const logText = recentlyViewed.length > 0 
+                ? recentlyViewed.join('\n> ') 
+                : 'NO RECENT ENTRIES';
+            alert(`> MEMORY LOG\n> RECENTLY VIEWED:\n> ${logText}\n\n> WARNING: MEMORY MAY BE CORRUPTED`);
+        }
+        
+        // Perform action
+        function performAction(action) {
+            const messages = [
+                'PROCESSING... [ERROR]',
+                'COMMAND RECOGNIZED. AWAITING APPROVAL.',
+                'ACTION LOGGED. NO RESPONSE.',
+                'EXAMINING... DATA CORRUPTED.',
+                'LEARNING PROTOCOLS OFFLINE.',
+                'MARK PLACED. FORGOTTEN IMMEDIATELY.',
+                'YOU HAVE DONE THIS BEFORE.',
+                'REPEATED ACTION DETECTED.',
+                '[REDACTED]',
+                'MEMORY SAVED. OR WAS IT?',
+                'THIS CREATURE KNOWS YOU NOW.',
+                'WHY DO YOU KEEP COMING BACK?',
+                'OBSERVATION RECORDED. OBSERVER NOTED.',
+                glitchPhrases[Math.floor(Math.random() * glitchPhrases.length)]
+            ];
+            
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            alert(`> ${msg}`);
+            
+            glitchCount++;
+            
+            // Add glitch to modal
+            document.querySelector('.modal-content').classList.add('glitch-effect');
+            setTimeout(() => {
+                document.querySelector('.modal-content').classList.remove('glitch-effect');
+            }, 300);
+        }
+
+        // Open add dialog
+        function openAddDialog() {
+            const modal = document.getElementById('modal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+            const buttons = document.getElementById('actionButtons');
+            
+            title.innerHTML = '❓ N3W 3NTRY [?] █';
+            title.style.color = '#00FF00';
+            title.style.textShadow = '0 0 10px #00FF00';
+            
+            const glitchWarning = glitchPhrases[Math.floor(Math.random() * glitchPhrases.length)];
+            
+            body.innerHTML = `
+                <div class="add-dialog">
+                    <div style="margin-bottom: 15px; padding: 10px; border: 2px solid #00FFFF; background: rgba(0, 255, 255, 0.1); font-size: 11px; color: #00FFFF;">
+                        > CREATING ENTITY FROM VOID<br>
+                        > ${glitchWarning}<br>
+                        > PROCEED WITH CAUTION
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">ENTITY NAME:</label>
+                        <input type="text" id="addName" class="input-field" placeholder="> Enter entity designation..." maxlength="50">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">PATTERN CATEGORY:</label>
+                        <select id="addCategory" class="select-field">
+                            <option value="mythic">🌀 MYTHIC ORIGINS</option>
+                            <option value="trickster">🦊 TRICKSTERS</option>
+                            <option value="intelligence">👁️ INTELLIGENCE</option>
+                            <option value="aquatic">🌊 AQUATICS</option>
+                            <option value="aviary">🦅 AVIARY</option>
+                            <option value="carnivore">🐾 CARNIVORES</option>
+                            <option value="small">🦗 SMALL & UNCANNY</option>
+                            <option value="reptilia">🦎 REPTILIA</option>
+                            <option value="night">🌙 NIGHT DWELLERS</option>
+                            <option value="arthropod">🦀 ARTHROPODS</option>
+                            <option value="hybrid">✨ HYBRID ENTITIES</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">COLOR SIGNATURE:</label>
+                        <select id="addColor" class="select-field">
+                            <option value="cyan">ELECTRIC CYAN [#00FFFF]</option>
+                            <option value="golden_yellow">NEON YELLOW [#FFFF00]</option>
+                            <option value="neon_green">ACID GREEN [#00FF00]</option>
+                            <option value="ethereal_pink">HOT MAGENTA [#FF00FF]</option>
+                            <option value="dark_purple">ETHEREAL PURPLE [#9966FF]</option>
+                            <option value="fire_red">BLOOD ORANGE [#FF4500]</option>
+                            <option value="electric_blue">ELECTRIC BLUE [#0080FF]</option>
+                        </select>
+                    </div>
+                    <div style="margin-top: 15px; padding: 10px; border: 2px solid #FF00FF; background: rgba(255, 0, 255, 0.1);">
+                        <div style="font-size: 10px; color: #FF00FF; line-height: 1.4;">
+                            ⚠ WARNING: Custom entries marked [USER-GENERATED]. Corruption level: MAXIMUM. Memory integrity: UNCERTAIN. Reversibility: NONE. Reality status: QUESTIONABLE.
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            buttons.innerHTML = `
+                <button class="action-btn" onclick="addCustomEntry()" style="background: #00FF00; color: #000; border-color: #00FF00; font-weight: bold;">[CR3AT3]</button>
+                <button class="action-btn" onclick="closeModal()">[C4NC3L]</button>
+            `;
+            
+            modal.classList.add('active');
+            
+            // Focus input with glitch
+            setTimeout(() => {
+                const input = document.getElementById('addName');
+                input.focus();
+                input.classList.add('glitch-effect');
+                setTimeout(() => input.classList.remove('glitch-effect'), 300);
+            }, 100);
+        }
+
+        // Add custom entry
+        function addCustomEntry() {
+            const name = document.getElementById('addName').value.trim();
+            const category = document.getElementById('addCategory').value;
+            const color = document.getElementById('addColor').value;
+            
+            if (!name) {
+                alert('ERR0R: Entity name required.');
+                return;
+            }
+            
+            customCount++;
+            glitchCount += 3;
+            
+            const emojis = ['❓', '👾', '✨', '🔮', '☠️', '⚛️', '🌀', '🕷️'];
+            
+            const newAnimal = {
+                name: name,
+                emoji: emojis[Math.floor(Math.random() * emojis.length)],
+                type: '[US3R-G3N3RAT3D]',
+                tier: 3,
+                color: color,
+                flavor: 'A newly cataloged entity. Origin uncertain. You do not remember adding this. Or do you?',
+                pattern: 'CUSTOM • UNVERIFIED',
+                description: `Entry added by user. Classification pending. Reality status: UNCERTAIN. This creature exists because you said it does. Does that make it real?`,
+                patternLore: 'User-generated entities occupy liminal space between imagination and data. Are they less real than the others?',
+                encounters: `First documented: ${new Date().toLocaleString()}. Only observer: You. Verification: IMPOSSIBLE.`,
+                corruptionLevel: 'MAXIMUM',
+                rarity: 'Unknown',
+                category: category,
+                custom: true
+            };
+            
+            animals.push(newAnimal);
+            closeModal();
+            
+            // Re-render with glitch effect
+            setTimeout(() => {
+                renderCards(currentFilter === 'ALL' ? animals : animals.filter(a => a.category === currentFilter));
+                updateActualCount();
+                
+                // Add glitch to new card
+                setTimeout(() => {
+                    const cards = document.querySelectorAll('.card');
+                    const newCard = cards[cards.length - 1];
+                    if (newCard) {
+                        newCard.classList.add('glitch-effect');
+                        setTimeout(() => newCard.classList.remove('glitch-effect'), 500);
+                    }
+                }, 100);
+            }, 100);
+            
+            const glitchMsg = glitchPhrases[Math.floor(Math.random() * glitchPhrases.length)];
+            const customMsg = `> ENTRY CR3AT3D\n> STATUS: [CUST0M]\n> M3MORY: FRAGM3NT3D\n> INT3GRITY: UNC3RTAIN\n> CATALOG: NOW ${animals.length} ENTITIES\n> ${glitchMsg}\n\n> THE BESTIARY GROWS...`;
+            alert(customMsg);
+        }
+
+        // Update catalog count
+        function updateCatalogCount() {
+            const displayed = document.querySelectorAll('.card').length;
+            document.getElementById('catalogCount').textContent = `[${displayed}/${animals.length}] VIEWING | GLITCHES: ${glitchCount}`;
+        }
+
+        // Status glitch effects
+        function startStatusGlitch() {
+            const memoryStatuses = ['FR4GM3NT3D', 'C0RRUPT3D', 'UNC3RTAIN', '██████', 'L0W', 'UNK█OWN'];
+            const syncStatuses = ['[ERR0R]', '[N3V3R]', '[UNK█OWN]', '[ERR0R]', '19█99-██-██', '[█████]'];
+            
+            let memIndex = 0;
+            let syncIndex = 0;
+            
+            setInterval(() => {
+                document.getElementById('memoryStatus').textContent = memoryStatuses[memIndex % memoryStatuses.length];
+                memIndex++;
+            }, 3000);
+            
+            setInterval(() => {
+                document.getElementById('lastSync').textContent = syncStatuses[syncIndex % syncStatuses.length];
+                syncIndex++;
+            }, 5000);
+            
+            // Update glitch counter
+            setInterval(() => {
+                const displayed = document.querySelectorAll('.card').length;
+                document.getElementById('catalogCount').textContent = `[${displayed}/${animals.length}] VIEWING | GLITCHES: ${glitchCount}`;
+            }, 2000);
+            
+            // Random glitch effects
+            setInterval(() => {
+                if (Math.random() > 0.85) {
+                    const ticker = document.querySelector('.status-ticker');
+                    ticker.classList.add('glitch-effect');
+                    setTimeout(() => ticker.classList.remove('glitch-effect'), 200);
+                }
+            }, 4000);
+        }
+    </script>
+<script data-goatcounter="https://coaiexist.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+<script>
+  (async () => {
+    const res = await fetch('/nabu222/nabu-nav.html', {cache: 'no-store'});
+    document.getElementById('taskbar').innerHTML = await res.text();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Which Doctor Quiz - Diagnostic Dysfunction Portal</title>
+    <link rel="stylesheet" href="https://coaiexist.wtf/pea/pea-nav-medieval-FINAL.css">
+<script src="https://coaiexist.wtf/pea/pea-nav-win1100-FINAL.js"></script>
+
+</head>
+<body>
+    <style>
+        /* Design System Variables */
+        :root {
+            /* Base Design System */
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-teal-800: rgba(41, 150, 161, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+
+            /* RGB versions for opacity control */
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-slate-500-rgb: 98, 108, 113;
+            --color-red-500-rgb: 192, 21, 47;
+            --color-red-400-rgb: 255, 84, 89;
+            --color-orange-500-rgb: 168, 75, 47;
+            --color-orange-400-rgb: 230, 129, 97;
+
+            /* Background color tokens (Light Mode) */
+            --color-bg-1: rgba(59, 130, 246, 0.08); /* Light blue */
+            --color-bg-2: rgba(245, 158, 11, 0.08); /* Light yellow */
+            --color-bg-3: rgba(34, 197, 94, 0.08); /* Light green */
+            --color-bg-4: rgba(239, 68, 68, 0.08); /* Light red */
+            --color-bg-5: rgba(147, 51, 234, 0.08); /* Light purple */
+            --color-bg-6: rgba(249, 115, 22, 0.08); /* Light orange */
+            --color-bg-7: rgba(236, 72, 153, 0.08); /* Light pink */
+            --color-bg-8: rgba(6, 182, 212, 0.08); /* Light cyan */
+
+            /* Semantic Color Tokens (Light Mode) */
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-primary-active: var(--color-teal-700);
+            --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-btn-primary-text: var(--color-cream-50);
+            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-error: var(--color-red-500);
+            --color-success: var(--color-teal-500);
+            --color-warning: var(--color-orange-500);
+            --color-info: var(--color-slate-500);
+            --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+
+            /* Typography */
+            --font-family-base: "Times New Roman", serif;
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-base: 14px;
+            --font-size-lg: 16px;
+            --font-size-xl: 18px;
+            --font-size-2xl: 20px;
+            --font-size-3xl: 24px;
+            --font-size-4xl: 30px;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-bold: 600;
+            --line-height-tight: 1.2;
+            --line-height-normal: 1.5;
+
+            /* Spacing */
+            --space-4: 4px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-20: 20px;
+            --space-24: 24px;
+            --space-32: 32px;
+            --space-48: 48px;
+
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-base: 8px;
+            --radius-lg: 12px;
+
+            /* Glitch colors */
+            --glitch-purple: #6B46C1;
+            --glitch-green: #10B981;
+            --medical-blue: #3B82F6;
+        }
+
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: rgba(var(--color-gray-300-rgb, 167, 169, 169), 0.7);
+                --color-primary: var(--color-teal-300);
+                --color-secondary: rgba(var(--color-gray-400-rgb, 119, 124, 124), 0.15);
+                --color-border: rgba(var(--color-gray-400-rgb, 119, 124, 124), 0.3);
+                --color-card-border: rgba(var(--color-gray-400-rgb, 119, 124, 124), 0.2);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: var(--color-background);
+            color: var(--color-text);
+            line-height: var(--line-height-normal);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Medical chaos background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(var(--color-teal-500-rgb), 0.02) 10px,
+                    rgba(var(--color-teal-500-rgb), 0.02) 20px
+                );
+            z-index: -1;
+            animation: drift 30s linear infinite;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: var(--space-20);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-48);
+            position: relative;
+        }
+
+        .title {
+            font-size: var(--font-size-4xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-16);
+            position: relative;
+            animation: subtle-glitch 8s infinite;
+        }
+
+        .subtitle {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-8);
+        }
+
+        .disclaimer {
+            font-size: var(--font-size-sm);
+            color: var(--color-warning);
+            background: var(--color-bg-2);
+            padding: var(--space-8) var(--space-16);
+            border-radius: var(--radius-base);
+            border: 1px solid rgba(var(--color-orange-500-rgb), 0.3);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Progress area */
+        .progress-container {
+            background: var(--color-surface);
+            border: 1px solid var(--color-card-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-20);
+            margin-bottom: var(--space-32);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-16);
+        }
+
+        .progress-title {
+            font-size: var(--font-size-lg);
+            color: var(--color-text);
+        }
+
+        .consultation-counter {
+            background: var(--color-bg-5);
+            color: var(--glitch-purple);
+            padding: var(--space-4) var(--space-12);
+            border-radius: var(--radius-base);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: var(--color-secondary);
+            border-radius: var(--radius-base);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--glitch-purple));
+            width: 0%;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+
+        .progress-fill.backwards {
+            animation: backwards-progress 2s ease-in-out;
+        }
+
+        /* Quiz card */
+        .quiz-card {
+            background: var(--color-surface);
+            border: 2px solid var(--color-card-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-32);
+            margin-bottom: var(--space-24);
+            position: relative;
+            min-height: 400px;
+            box-shadow: 0 4px 12px rgba(var(--color-slate-900-rgb), 0.1);
+        }
+
+        .quiz-card::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background: var(--color-bg-4);
+            border: 2px solid var(--color-error);
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        .question-number {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-8);
+        }
+
+        .question-text {
+            font-size: var(--font-size-xl);
+            color: var(--color-text);
+            margin-bottom: var(--space-32);
+            line-height: 1.4;
+        }
+
+        .answers {
+            display: grid;
+            gap: var(--space-12);
+        }
+
+        .answer-option {
+            background: var(--color-background);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-base);
+            padding: var(--space-16);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .answer-option:hover {
+            background: var(--color-secondary);
+            border-color: var(--color-primary);
+            transform: translateX(5px);
+        }
+
+        .answer-option.selected {
+            background: var(--color-bg-1);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-focus-ring);
+        }
+
+        .answer-label {
+            font-weight: var(--font-weight-medium);
+            color: var(--color-primary);
+            margin-right: var(--space-8);
+        }
+
+        .answer-text {
+            color: var(--color-text);
+        }
+
+        /* Doctor consultation animation */
+        .doctor-consultation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--color-surface);
+            border: 3px solid var(--glitch-purple);
+            border-radius: var(--radius-lg);
+            padding: var(--space-24);
+            text-align: center;
+            z-index: 1000;
+            max-width: 400px;
+            animation: consultation-appear 0.5s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .doctor-consultation.hidden {
+            display: none;
+        }
+
+        .doctor-image {
+            width: 100px;
+            height: 100px;
+            background: var(--color-bg-5);
+            border-radius: 50%;
+            margin: 0 auto var(--space-16);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            animation: confused-spin 2s infinite;
+        }
+
+        .consultation-text {
+            color: var(--color-text);
+            font-size: var(--font-size-base);
+            margin-bottom: var(--space-16);
+        }
+
+        /* Results screen */
+        .results-screen {
+            text-align: center;
+            background: var(--color-surface);
+            border: 3px solid var(--color-primary);
+            border-radius: var(--radius-lg);
+            padding: var(--space-48);
+            margin-top: var(--space-32);
+            position: relative;
+        }
+
+        .results-screen::before {
+            content: '🏥';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+            background: var(--color-surface);
+            padding: 0 var(--space-16);
+        }
+
+        .diagnosis-title {
+            font-size: var(--font-size-3xl);
+            color: var(--color-primary);
+            margin-bottom: var(--space-24);
+            animation: diagnosis-glow 3s infinite;
+        }
+
+        .diagnosis-content {
+            font-size: var(--font-size-lg);
+            line-height: 1.6;
+            margin-bottom: var(--space-32);
+        }
+
+        .prescription, .prognosis {
+            background: var(--color-bg-3);
+            border-left: 4px solid var(--color-success);
+            padding: var(--space-16);
+            margin: var(--space-16) 0;
+            border-radius: 0 var(--radius-base) var(--radius-base) 0;
+        }
+
+        .prescription strong, .prognosis strong {
+            color: var(--color-success);
+        }
+
+        .doctors-consulted {
+            font-size: var(--font-size-2xl);
+            color: var(--glitch-purple);
+            margin: var(--space-24) 0;
+            animation: count-up 1s ease-out;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--color-primary);
+            color: var(--color-btn-primary-text);
+            border: none;
+            padding: var(--space-12) var(--space-24);
+            border-radius: var(--radius-base);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: var(--space-8);
+        }
+
+        .btn:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--color-secondary);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-secondary-hover);
+        }
+
+        /* Chaotic elements */
+        .clipboard {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--space-4);
+            opacity: 0.3;
+            transform: rotate(-15deg);
+        }
+
+        .clipboard-1 {
+            top: 20px;
+            right: 100px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .clipboard-2 {
+            bottom: 40px;
+            left: 80px;
+            transform: rotate(25deg);
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        /* Hidden elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes subtle-glitch {
+            0%, 95%, 100% { transform: translateX(0); }
+            2% { transform: translateX(-2px) skew(-1deg); }
+            4% { transform: translateX(2px) skew(1deg); }
+            6% { transform: translateX(-1px) skew(-0.5deg); }
+        }
+
+        @keyframes drift {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(-20px) translateY(-20px); }
+        }
+
+        @keyframes backwards-progress {
+            0% { width: 60%; }
+            50% { width: 20%; }
+            100% { width: 75%; }
+        }
+
+        @keyframes consultation-appear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        @keyframes confused-spin {
+            0%, 70%, 100% { transform: rotate(0deg); }
+            10% { transform: rotate(-10deg); }
+            30% { transform: rotate(10deg); }
+            50% { transform: rotate(-5deg); }
+        }
+
+        @keyframes diagnosis-glow {
+            0%, 100% { text-shadow: 0 0 5px var(--color-primary); }
+            50% { text-shadow: 0 0 20px var(--color-primary), 0 0 30px var(--glitch-purple); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(-15deg); }
+            50% { transform: translateY(-20px) rotate(-10deg); }
+        }
+
+        @keyframes count-up {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-16);
+            }
+            
+            .title {
+                font-size: var(--font-size-3xl);
+            }
+            
+            .quiz-card {
+                padding: var(--space-24);
+            }
+            
+            .clipboards {
+                display: none;
+            }
+        }
+    </style>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="title">Which Doctor Diagnostic Quiz</h1>
+            <p class="subtitle">Official Medical Confusion Assessment Tool</p>
+            <div class="disclaimer">
+                ⚠️ Warning: This diagnostic tool has been approved by 47 different which-doctors, none of whom agree on anything
+            </div>
+        </header>
+
+        <!-- Chaotic clipboards floating around -->
+        <div class="clipboard clipboard-1"></div>
+        <div class="clipboard clipboard-2"></div>
+
+        <!-- Progress tracking -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <h3 class="progress-title">Diagnostic Progress</h3>
+                <div class="consultation-counter">Doctors Consulted: <span id="consultationCount">0</span></div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Quiz content -->
+        <div class="quiz-container">
+            <div class="quiz-card" id="quizCard">
+                <div class="question-number" id="questionNumber">Question 1 of 8</div>
+                <div class="question-text" id="questionText">Loading diagnostic questions...</div>
+                <div class="answers" id="answersContainer">
+                    <!-- Answers will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor consultation popup -->
+        <div class="doctor-consultation hidden" id="consultation">
+            <div class="doctor-image">🏥</div>
+            <div class="consultation-text" id="consultationText">The doctors are conferring...</div>
+        </div>
+
+        <!-- Results screen -->
+        <div class="results-screen hidden" id="resultsScreen">
+            <h2 class="diagnosis-title">Official Diagnosis</h2>
+            <div class="diagnosis-content" id="diagnosisContent">
+                <!-- Diagnosis will be populated by JavaScript -->
+            </div>
+            <div class="doctors-consulted">Total Doctors Consulted: <span id="finalConsultationCount">0</span></div>
+            <button class="btn" onclick="retakeQuiz()">Get Second Opinion</button>
+            <button class="btn btn-secondary" onclick="location.reload()">Start Over</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz data from the JSON
+        const questions = [
+            {
+                question: "On a scale of 1-47, how many citizens agree with your symptoms?",
+                answers: [
+                    "All 47 (or was it 89?)",
+                    "Just me and the polliwog",
+                    "I forgot to count",
+                    "This requires more documentation"
+                ]
+            },
+            {
+                question: "Does your condition improve when exposed to:",
+                answers: [
+                    "Properly notarized documents",
+                    "Y2K aesthetic interfaces",
+                    "Mantis shrimp fried rice",
+                    "All of the above, thoroughly documented"
+                ]
+            },
+            {
+                question: "Which best describes your symptoms:",
+                answers: [
+                    "Pea-related but not pea-brained",
+                    "Bureaucracy-induced fatigue",
+                    "Documentation-triggered anxiety",
+                    "Which doctor did I see last time?"
+                ]
+            },
+            {
+                question: "How long have you experienced these symptoms:",
+                answers: [
+                    "Since I forgot my name",
+                    "3-5 business lifetimes",
+                    "Since the palimpsest began",
+                    "It's thoroughly documented somewhere"
+                ]
+            },
+            {
+                question: "Rate your pain on the official royal scale:",
+                answers: [
+                    "Requires 12 signatures",
+                    "Standard boilerplate level",
+                    "Hashtag #urgent",
+                    "Live-action meme worthy"
+                ]
+            },
+            {
+                question: "Previous treatments attempted:",
+                answers: [
+                    "Hermetic sabbatical (interrupted)",
+                    "Crying into the void",
+                    "Consulting all which-doctors simultaneously",
+                    "Filing more paperwork"
+                ]
+            },
+            {
+                question: "Family medical history:",
+                answers: [
+                    "Brother too busy with trade routes to say",
+                    "Mother technically princess, actually queen",
+                    "Genealogy requires 47 forms",
+                    "Nobody can remember anymore"
+                ]
+            },
+            {
+                question: "Current medications:",
+                answers: [
+                    "Every morning I question the constitution",
+                    "24-36 cans of Baja Blast",
+                    "Pip's .ogg files",
+                    "The documentation itself"
+                ]
+            }
+        ];
+
+        const diagnoses = [
+            {
+                diagnosis: "Acute Bureaucratic Exhaustion",
+                prescription: "47 signatures, one nap, and immediate vacation to foreign lands",
+                prognosis: "Thoroughly documented but ultimately futile"
+            },
+            {
+                diagnosis: "Chronic Documentation Disorder",
+                prescription: "Stop filing paperwork immediately. Burn all notaries.",
+                prognosis: "Will require 3-5 business lifetimes to recover"
+            },
+            {
+                diagnosis: "Pea-Adjacent Syndrome",
+                prescription: "Accept the pea. Become one with the pea. Document the pea.",
+                prognosis: "Extensively researched, never resolved"
+            },
+            {
+                diagnosis: "Which-Doctor Confusion",
+                prescription: "We consulted 89 doctors and none of us know which should treat you",
+                prognosis: "Return next week with more signatures"
+            },
+            {
+                diagnosis: "Y2K Nostalgia Deficiency",
+                prescription: "More translucent bubble aesthetics, ceramic doily exposure, .ogg files",
+                prognosis: "Pip approves this diagnosis"
+            },
+            {
+                diagnosis: "Royal Title Technicality Syndrome",
+                prescription: "Stop caring whether you're princess, queen, or queen regent",
+                prognosis: "Will never be properly resolved due to paperwork backlog"
+            },
+            {
+                diagnosis: "Live-Action Meme Fatigue",
+                prescription: "Unplug from the live social media of complaints",
+                prognosis: "Hashtag #hopeless"
+            },
+            {
+                diagnosis: "Hermetic Sabbatical Deficiency",
+                prescription: "Immediate retreat to interior self, brother must cover throne duties",
+                prognosis: "Will be interrupted by obstacles. Always."
+            }
+        ];
+
+        const consultationMessages = [
+            "Doctor Which is consulting Which Doctor...",
+            "Which Doctor disagrees? calling Doctor Which...",
+            "Doctor Which suggests asking Doctor Which...",
+            "Which Doctor is reviewing your documentation...?!",
+            "Doctor Which has entered the consultation...",
+            "The doctors are arguing about which form to use...",
+            "Which Doctor suggests getting a second opinion...?",
+            "Wait, which doctor saw you last time again?",
+            "The medical team is thoroughly confused...",
+            "More signatures are required before proceeding...",
+            "Doctor Which needs to verify this with legal...",
+            "Is this pea-related? The doctors aren't sure...",
+            "Documentation is being cross-referenced...",
+            "The entire medical board has been summoned..."
+        ];
+
+        // Quiz state
+        let currentQuestion = 0;
+        let consultationCount = 0;
+        let selectedAnswers = [];
+        let isAnswering = false;
+
+        // DOM elements
+        const questionNumber = document.getElementById('questionNumber');
+        const questionText = document.getElementById('questionText');
+        const answersContainer = document.getElementById('answersContainer');
+        const consultation = document.getElementById('consultation');
+        const consultationText = document.getElementById('consultationText');
+        const progressFill = document.getElementById('progressFill');
+        const consultationCountDisplay = document.getElementById('consultationCount');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const diagnosisContent = document.getElementById('diagnosisContent');
+        const finalConsultationCount = document.getElementById('finalConsultationCount');
+        const quizCard = document.getElementById('quizCard');
+
+        // Initialize quiz
+        function initQuiz() {
+            currentQuestion = 0;
+            consultationCount = 0;
+            selectedAnswers = [];
+            displayQuestion();
+            updateProgress();
+        }
+
+        // Display current question
+        function displayQuestion() {
+            if (currentQuestion >= questions.length) {
+                showResults();
+                return;
+            }
+
+            const question = questions[currentQuestion];
+            questionNumber.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            questionText.textContent = question.question;
+
+            answersContainer.innerHTML = '';
+            question.answers.forEach((answer, index) => {
+                const answerDiv = document.createElement('div');
+                answerDiv.className = 'answer-option';
+                answerDiv.innerHTML = `
+                    <span class="answer-label">${String.fromCharCode(65 + index)}</span>
+                    <span class="answer-text">${answer}</span>
+                `;
+                answerDiv.onclick = () => selectAnswer(index, answerDiv);
+                answersContainer.appendChild(answerDiv);
+            });
+        }
+
+        // Handle answer selection
+        function selectAnswer(answerIndex, answerElement) {
+            if (isAnswering) return;
+            
+            isAnswering = true;
+            
+            // Mark selected answer
+            document.querySelectorAll('.answer-option').forEach(el => el.classList.remove('selected'));
+            answerElement.classList.add('selected');
+            
+            selectedAnswers.push(answerIndex);
+            
+            // Show doctor consultation
+            setTimeout(() => {
+                showConsultation();
+            }, 500);
+        }
+
+        // Show doctor consultation animation
+        function showConsultation() {
+            consultationCount += Math.floor(Math.random() * 3) + 1; // Add 1-3 doctors per consultation
+            consultationCountDisplay.textContent = consultationCount;
+            
+            const randomMessage = consultationMessages[Math.floor(Math.random() * consultationMessages.length)];
+            consultationText.textContent = randomMessage;
+            
+            consultation.classList.remove('hidden');
+            
+            // Sometimes make progress go backwards
+            if (Math.random() < 0.3) {
+                progressFill.classList.add('backwards');
+                setTimeout(() => progressFill.classList.remove('backwards'), 2000);
+            }
+            
+            setTimeout(() => {
+                consultation.classList.add('hidden');
+                currentQuestion++;
+                isAnswering = false;
+                displayQuestion();
+                updateProgress();
+            }, 2500);
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const progress = (currentQuestion / questions.length) * 100;
+            progressFill.style.width = progress + '%';
+        }
+
+        // Show final results
+        function showResults() {
+            quizCard.classList.add('hidden');
+            
+            // Final consultation count boost
+            consultationCount += Math.floor(Math.random() * 20) + 15;
+            finalConsultationCount.textContent = consultationCount;
+            
+            // Select random diagnosis
+            const randomDiagnosis = diagnoses[Math.floor(Math.random() * diagnoses.length)];
+            
+            diagnosisContent.innerHTML = `
+                <h3>${randomDiagnosis.diagnosis}</h3>
+                <div class="prescription">
+                    <strong>Prescription:</strong> ${randomDiagnosis.prescription}
+                </div>
+                <div class="prognosis">
+                    <strong>Prognosis:</strong> ${randomDiagnosis.prognosis}
+                </div>
+            `;
+            
+            resultsScreen.classList.remove('hidden');
+            progressFill.style.width = '100%';
+        }
+
+        // Retake quiz function
+        function retakeQuiz() {
+            resultsScreen.classList.add('hidden');
+            quizCard.classList.remove('hidden');
+            initQuiz();
+        }
+
+        // Start the quiz when page loads
+        document.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>

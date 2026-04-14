@@ -1,16 +1,17 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { SUPPORTED_SCRIPTS } from './constants';
 import { codexEntries, CodexEntry } from './codexData';
-import { 
-  transliterateText, 
-  getPhoneticGuide, 
-  getDefinitions, 
-  getHistoricalContext, 
+// TECHATER Protocol: Using rigid, rule-based services instead of AI
+import {
+  transliterateText,
+  getPhoneticGuide,
+  getDefinitions,
+  getHistoricalContext,
   getExamplePhrase,
   getResonanceAnalysis,
   getThematicTags,
   getIntelligentLanguageSelection
-} from './services/geminiService';
+} from './services/rigidService';
 import ScriptSelector from './components/ScriptSelector';
 import MultiScriptSelector from './components/MultiScriptSelector';
 import IconButton from './components/IconButton';

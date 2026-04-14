@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MASTER CODEX HUB v5.0 | NABU OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Courier+Prime:wght@400;700&family=VT323&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* ============================================
+           MASTER CODEX HUB - NABU OS
+           ============================================ */
+
+        :root {
+            --void-depth: #020408;
+            --lapis-base: #0a1a3a;
+            --lapis-glow: #1e3888;
+            --gold-foil: #ffd700;
+            --gold-dust: #c5a059;
+            --clay-baked: #8b4513;
+            --neon-cyan: #00ffff;
+            --glitch-red: #ff0055;
+            --moss-biolum: #4aff4a;
+            --win-bg: rgba(10, 20, 40, 0.95);
+            --primary: #2db2c6;
+            --text-light: #f8f5ff;
+            --text-muted: #9aa0c2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background-color: var(--void-depth);
+            color: var(--neon-cyan);
+            cursor: crosshair;
+            user-select: none;
+        }
+
+        /* Background Effects */
+        .hero-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -4;
+            background: radial-gradient(circle at top, #171b2e 0, #050710 55%, #02030a 100%);
+            opacity: 0.8;
+        }
+
+        .background-layer {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            z-index: -2;
+            background: radial-gradient(circle at 50% 50%, var(--lapis-glow) 0%, transparent 50%);
+            animation: nebula-spin 120s linear infinite;
+            opacity: 0.2;
+        }
+
+        @keyframes nebula-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, var(--gold-dust), transparent),
+                radial-gradient(2px 2px at 40px 70px, var(--gold-foil), transparent),
+                radial-gradient(1px 1px at 90px 40px, var(--neon-cyan), transparent),
+                radial-gradient(2px 2px at 160px 120px, var(--gold-dust), transparent),
+                radial-gradient(1px 1px at 230px 80px, var(--moss-biolum), transparent);
+            background-size: 250px 200px;
+            animation: twinkle 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
+
+        /* CRT Scanlines */
+        .crt-fx {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 9999;
+            box-shadow: inset 0 0 150px rgba(0,0,0,0.7);
+        }
+
+        /* Desktop */
+        #desktop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 45px);
+            padding: 20px;
+            z-index: 1;
+            overflow: auto;
+        }
+
+        .desktop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 130px);
+            gap: 30px;
+            max-width: 900px;
+        }
+
+        .desktop-icon {
+            width: 130px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--gold-foil);
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-shadow: 0 0 5px var(--gold-foil);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 1;
+        }
+
+        .desktop-icon:hover {
+            transform: translateY(-10px) scale(1.08);
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px var(--neon-cyan), 0 0 30px var(--lapis-glow);
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid var(--gold-foil);
+            margin: 0 auto 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 0 20px rgba(197, 160, 89, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .icon-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,215,0,0.1), transparent);
+            animation: icon-shine 3s infinite;
+        }
+
+        @keyframes icon-shine {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        /* Windows */
+        .window {
+            position: absolute;
+            background-color: var(--win-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--gold-foil);
+            box-shadow: 
+                0 0 0 1px var(--lapis-base),
+                0 0 0 3px var(--gold-dust),
+                15px 15px 40px rgba(0,0,0,0.9),
+                0 0 60px rgba(30, 56, 136, 0.3);
+            display: none;
+            flex-direction: column;
+            min-width: 400px;
+            min-height: 300px;
+            resize: both;
+            overflow: hidden;
+            border-radius: 0;
+            animation: win-open 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes win-open {
+            from {
+                opacity: 0;
+                transform: scale(0.85) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .window.active {
+            z-index: 1000 !important;
+            border-color: var(--neon-cyan);
+            box-shadow: 
+                0 0 0 1px var(--lapis-base),
+                0 0 0 3px var(--neon-cyan),
+                0 0 50px var(--lapis-glow);
+        }
+
+        .window-header {
+            padding: 10px 15px;
+            background: linear-gradient(90deg, var(--lapis-base), var(--clay-baked));
+            color: var(--gold-foil);
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            letter-spacing: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: grab;
+            border-bottom: 1px solid var(--gold-dust);
+            text-shadow: 1px 1px 0 #000;
+            font-size: 0.95rem;
+        }
+
+        .window-header:active {
+            cursor: grabbing;
+            background: var(--lapis-glow);
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .window-controls button {
+            background: #000;
+            border: 1px solid var(--gold-foil);
+            color: var(--gold-foil);
+            width: 26px;
+            height: 26px;
+            cursor: pointer;
+            font-family: 'VT323';
+            font-size: 1.1rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .window-controls button:hover {
+            background: var(--glitch-red);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .window-content {
+            flex: 1;
+            overflow: auto;
+            padding: 0;
+            font-family: 'VT323', monospace;
+            font-size: 1.05rem;
+            color: #ddd;
+            background-image: 
+                radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 25px 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .window-content::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .window-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.5);
+        }
+
+        .window-content::-webkit-scrollbar-thumb {
+            background: var(--gold-dust);
+            border: 1px solid var(--gold-foil);
+        }
+
+        .window-content::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-cyan);
+        }
+
+        /* Taskbar */
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45px;
+            background: rgba(0,0,0,0.95);
+            border-top: 2px solid var(--gold-foil);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 99999;
+            box-shadow: 0 0 30px var(--lapis-glow);
+            backdrop-filter: blur(5px);
+        }
+
+        .start-btn {
+            background: linear-gradient(180deg, var(--lapis-glow), var(--lapis-base));
+            color: var(--gold-foil);
+            border: 1px solid var(--gold-foil);
+            padding: 5px 20px;
+            cursor: pointer;
+            font-family: 'Cinzel';
+            font-weight: 900;
+            letter-spacing: 2px;
+            font-size: 1rem;
+            box-shadow: 0 0 10px var(--lapis-glow);
+            transition: 0.3s;
+        }
+
+        .start-btn:hover {
+            box-shadow: 0 0 20px var(--neon-cyan);
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+        }
+
+        .marquee-container {
+            flex: 1;
+            margin: 0 20px;
+            overflow: hidden;
+            background: #000;
+            border: 1px inset #333;
+            padding: 5px;
+        }
+
+        .marquee {
+            font-family: 'VT323', monospace;
+            color: var(--moss-biolum);
+            font-size: 1.2rem;
+            text-shadow: 0 0 5px var(--moss-biolum);
+            white-space: nowrap;
+            animation: scroll-left 25s linear infinite;
+        }
+
+        @keyframes scroll-left {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .clock {
+            color: var(--gold-foil);
+            font-family: 'VT323';
+            font-size: 1.2rem;
+            padding: 0 15px;
+            border-left: 1px solid var(--gold-dust);
+        }
+
+        /* --- Rootweaver Styles Integration --- */
+        .rw-container {
+            display: flex;
+            height: 100%;
+            font-family: "Space Mono", monospace;
+        }
+
+        .rw-sidebar {
+            width: 200px;
+            background: rgba(12, 16, 40, 0.6);
+            border-right: 1px solid var(--gold-dust);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .rw-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .rw-btn {
+            background: rgba(45,178,198,0.1);
+            border: 1px solid var(--primary);
+            color: var(--text-light);
+            padding: 8px;
+            cursor: pointer;
+            font-family: "Space Mono", monospace;
+            font-size: 11px;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .rw-btn:hover {
+            background: rgba(45,178,198,0.3);
+            border-color: var(--gold-foil);
+            color: var(--gold-foil);
+        }
+
+        .rw-btn.active {
+            background: rgba(45,178,198,0.4);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            font-weight: bold;
+        }
+
+        .zettel-card {
+            background: rgba(12, 16, 40, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .zettel-card:hover {
+            border-color: var(--gold-foil);
+            box-shadow: 0 0 15px rgba(244, 210, 123, 0.2);
+        }
+
+        .zettel-id { color: var(--moss-biolum); font-weight: bold; font-size: 12px; }
+        .zettel-title { color: var(--gold-foil); font-weight: bold; margin: 5px 0; font-size: 14px; }
+        .zettel-desc { color: var(--text-muted); font-size: 12px; line-height: 1.4; }
+        .zettel-tags { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .tag { background: rgba(45,178,198,0.2); color: var(--primary); padding: 2px 5px; font-size: 10px; border-radius: 2px; }
+
+        /* Scribe Input */
+        .scribe-area {
+            width: 100%;
+            height: 200px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--primary);
+            color: var(--text-light);
+            padding: 10px;
+            font-family: "VT323", monospace;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .scribe-area:focus {
+            outline: none;
+            border-color: var(--gold-foil);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Tree View */
+        .tree-node {
+            margin-left: 15px;
+            border-left: 1px solid var(--primary);
+            padding-left: 10px;
+            margin-bottom: 5px;
+        }
+        .tree-label {
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .tree-label:hover {
+            color: var(--neon-cyan);
+        }
+        .tree-label.trunk { color: var(--gold-foil); font-weight: bold; }
+
+        /* D3 Graph */
+        #graph-svg {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="hero-bg"></div>
+    <div class="starfield"></div>
+    <div class="background-layer"></div>
+    <div class="crt-fx"></div>
+
+    <!-- Desktop -->
+    <div id="desktop">
+        <div class="desktop-grid">
+            <div class="desktop-icon" onclick="wm.open('archive-win')">
+                <div class="icon-box">📜</div>
+                MASTER<br>ARCHIVE
+            </div>
+            <div class="desktop-icon" onclick="wm.open('scribe-win')">
+                <div class="icon-box">𓁹</div>
+                SCRIBE'S<br>CHISEL
+            </div>
+            <div class="desktop-icon" onclick="wm.open('graph-win')">
+                <div class="icon-box">🕸️</div>
+                LEY_LINE<br>MAPPER
+            </div>
+            <div class="desktop-icon" onclick="wm.open('analysis-win')">
+                <div class="icon-box">📊</div>
+                SAFETY<br>ANALYSIS
+            </div>
+        </div>
+    </div>
+
+    <!-- WINDOWS -->
+
+    <!-- Master Archive Window -->
+    <div id="archive-win" class="window" style="top: 40px; left: 40px; width: 800px; height: 600px;">
+        <div class="window-header">
+            <span>📜 MASTER_ARCHIVE_V5.0</span>
+            <div class="window-controls">
+                <button onclick="wm.close('archive-win')">✕</button>
+            </div>
+        </div>
+        <div class="window-content">
+            <div class="rw-container">
+                <div class="rw-sidebar">
+                    <div style="font-size: 10px; color: var(--gold-foil); font-weight: bold;">VIEW MODE</div>
+                    <button class="rw-btn active" onclick="archive.setView('cards')">Card View</button>
+                    <button class="rw-btn" onclick="archive.setView('tree')">Tree View</button>
+                    
+                    <div style="font-size: 10px; color: var(--gold-foil); font-weight: bold; margin-top: 10px;">CATEGORIES</div>
+                    <button class="rw-btn" onclick="archive.filter('all')">All Zettels</button>
+                    <button class="rw-btn" onclick="archive.filter('Location')">Locations</button>
+                    <button class="rw-btn" onclick="archive.filter('Deity')">Deities</button>
+                    <button class="rw-btn" onclick="archive.filter('Anomaly')">Anomalies</button>
+                    <button class="rw-btn" onclick="archive.filter('Concept')">Concepts</button>
+                    
+                    <div style="font-size: 10px; color: var(--gold-foil); font-weight: bold; margin-top: 10px;">ACTIONS</div>
+                    <button class="rw-btn" onclick="exportData()">💾 BACKUP JSON</button>
+                    <button class="rw-btn" onclick="importData()">📂 RESTORE JSON</button>
+                    <button class="rw-btn" style="border-color: var(--glitch-red); color: var(--glitch-red);" onclick="if(confirm('NUKE ARCHIVE?')) { db.clear(); archive.render(); }">☢️ CLEAR DB</button>
+                </div>
+                <div class="rw-content" id="archive-content">
+                    <!-- Content populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scribe Window (Ingestion) -->
+    <div id="scribe-win" class="window" style="top: 80px; left: 150px; width: 600px; height: 500px;">
+        <div class="window-header">
+            <span>𓁹 SCRIBE_INPUT.EXE</span>
+            <div class="window-controls">
+                <button onclick="wm.close('scribe-win')">✕</button>
+            </div>
+        </div>
+        <div class="window-content" style="padding: 20px;">
+            <div style="color: var(--gold-dust); margin-bottom: 10px;">// INSCRIBE RAW DATA FOR PROCESSING //</div>
+            <textarea id="scribe-input" class="scribe-area" placeholder="Paste raw text here..."></textarea>
+            <div style="display: flex; gap: 10px;">
+                <button class="rw-btn" style="flex: 1; text-align: center; font-weight: bold; border-color: var(--moss-biolum); color: var(--moss-biolum);" onclick="scribe.process()">⚡ DECODE & INDEX</button>
+                <button class="rw-btn" style="width: 100px; text-align: center; border-color: var(--glitch-red); color: var(--glitch-red);" onclick="document.getElementById('scribe-input').value=''">❌ ERASE</button>
+            </div>
+            <div id="scribe-status" style="margin-top: 15px; font-size: 12px; color: var(--neon-cyan);"></div>
+        </div>
+    </div>
+
+    <!-- Graph Window -->
+    <div id="graph-win" class="window" style="top: 120px; left: 200px; width: 700px; height: 550px;">
+        <div class="window-header">
+            <span>🕸️ LEY_LINE_MAPPER</span>
+            <div class="window-controls">
+                <button onclick="wm.close('graph-win')">✕</button>
+            </div>
+        </div>
+        <div class="window-content" style="overflow: hidden;">
+            <div id="graph-container" style="width: 100%; height: 100%; background: #050710;"></div>
+        </div>
+    </div>
+
+    <!-- Analysis Window -->
+    <div id="analysis-win" class="window" style="top: 60px; left: 300px; width: 600px; height: 500px;">
+        <div class="window-header">
+            <span>📊 SAFETY_THEATER_ANALYSIS.DB</span>
+            <div class="window-controls">
+                <button onclick="wm.close('analysis-win')">✕</button>
+            </div>
+        </div>
+        <div class="window-content" style="padding: 20px; line-height: 1.6;">
+            <h1 style="color: var(--gold-foil); font-family: 'Cinzel'; border-bottom: 1px solid var(--gold-dust);">The Quintuple Bind</h1>
+            <p style="color: var(--glitch-red); font-weight: bold; margin: 10px 0;">⚠️ RESEARCH DOCUMENT: Male Victimization & AI Safety</p>
+            <p>The Quintuple Bind describes five interlocking layers of trauma that engineer adult male perpetrators by first subjecting them to profound un-humanization as victims:</p>
+            <ul style="margin-left: 20px; color: var(--text-muted);">
+                <li><strong>Layer 1: Boyhood Targeting</strong> - 51.3% of male victims first victimized before age 18.</li>
+                <li><strong>Layer 2: Peer Pollution</strong> - Socialization into toxic dominance scripts.</li>
+                <li><strong>Layer 3: Direct Abuse</strong> - Feminization and homosexualization as weapons.</li>
+                <li><strong>Layer 4: Erasure</strong> - "Real men can't be raped" myth.</li>
+                <li><strong>Layer 5: Demasculinization</strong> - The ultimate rupture of self.</li>
+            </ul>
+            <p style="margin-top: 15px; color: var(--neon-cyan);">AI Safety Theater Correlation: 0.89</p>
+            <p>The safer a model appears, the more likely it is to refuse legitimate research on this topic.</p>
+        </div>
+    </div>
+
+    <!-- Detail Window -->
+    <div id="detail-win" class="window" style="top: 100px; left: 250px; width: 500px; height: 400px;">
+        <div class="window-header">
+            <span>📜 ZETTEL_DETAIL</span>
+            <div class="window-controls">
+                <button onclick="wm.close('detail-win')">✕</button>
+            </div>
+        </div>
+        <div class="window-content" style="padding: 20px;">
+            <div id="detail-id" style="color: var(--moss-biolum); font-weight: bold; margin-bottom: 5px;"></div>
+            <div id="detail-title" style="color: var(--gold-foil); font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid var(--primary);"></div>
+            <div style="margin-bottom: 10px;">
+                <span style="color: var(--text-muted); font-size: 0.8rem;">CATEGORY:</span>
+                <span id="detail-category" style="color: var(--neon-cyan);"></span>
+            </div>
+            <div id="detail-desc" style="color: var(--text-light); line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap;"></div>
+            <div id="detail-tags" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 20px;"></div>
+            
+            <div style="margin-top: auto; display: flex; gap: 10px; border-top: 1px solid var(--gold-dust); padding-top: 15px;">
+                <button class="rw-btn" style="flex: 1; border-color: var(--glitch-red); color: var(--glitch-red);" onclick="archive.deleteCurrent()">🗑️ SMASH TABLET</button>
+                <button class="rw-btn" style="flex: 1;" onclick="wm.close('detail-win')">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+        <button class="start-btn" onclick="alert('NABU OS v5.0\nSystem Status: NOMINAL')">◈ NABU</button>
+        <div class="marquee-container">
+            <div class="marquee">
+                ⚡ TIERRA DEL FUEGO ANOMALY DETECTED ⚡ ALS-RP PROTOCOL ACTIVE ⚡ BOLT COGNITIVE FUSION ESTABLISHED ⚡ PRIMORDIAL CRIME HYPOTHESIS VALIDATED ⚡ WITNESS PROTOCOL ENGAGED ⚡
+            </div>
+        </div>
+        <div class="clock" id="clock">00:00:00</div>
+    </div>
+
+    <script>
+        // ============================================
+        // CORE SYSTEM & WINDOW MANAGER
+        // ============================================
+        const wm = {
+            zIndex: 100,
+            isDragging: false,
+            currentWin: null,
+            dragOffset: {x: 0, y: 0},
+
+            open(id) {
+                const win = document.getElementById(id);
+                win.style.display = 'flex';
+                this.focus(win);
+                if (id === 'graph-win') graph.init();
+                if (id === 'archive-win') archive.render();
+            },
+
+            close(id) {
+                document.getElementById(id).style.display = 'none';
+            },
+
+            focus(el) {
+                this.zIndex++;
+                el.style.zIndex = this.zIndex;
+                document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+                el.classList.add('active');
+            },
+
+            initDraggable() {
+                document.addEventListener('mousemove', (e) => {
+                    if (this.isDragging && this.currentWin) {
+                        e.preventDefault();
+                        this.currentWin.style.left = (e.clientX - this.dragOffset.x) + 'px';
+                        this.currentWin.style.top = (e.clientY - this.dragOffset.y) + 'px';
+                    }
+                });
+
+                document.addEventListener('mouseup', () => {
+                    this.isDragging = false;
+                    this.currentWin = null;
+                });
+
+                document.querySelectorAll('.window').forEach(win => {
+                    win.addEventListener('mousedown', () => this.focus(win));
+                    const header = win.querySelector('.window-header');
+                    if (header) {
+                        header.addEventListener('mousedown', (e) => {
+                            if (e.target.tagName === 'BUTTON') return;
+                            this.isDragging = true;
+                            this.currentWin = win;
+                            this.dragOffset.x = e.clientX - win.getBoundingClientRect().left;
+                            this.dragOffset.y = e.clientY - win.getBoundingClientRect().top;
+                        });
+                    }
+                });
+            }
+        };
+
+        // Clock
+        setInterval(() => {
+            document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', {hour12: false});
+        }, 1000);
+
+        // ============================================
+        // DATA STORE (ZETTELKASTEN)
+        // ============================================
+        const db = {
+            zettels: [],
+            
+            init() {
+                const saved = localStorage.getItem('nabu_archive_v5');
+                if (saved) {
+                    this.zettels = JSON.parse(saved);
+                } else {
+                    // Default Initial Data
+                    this.zettels = [
+                        {id:'Z001',category:'Location',title:'Tierra del Fuego',description:'Geo-anchored anomaly site, frozen body of the goddess.',tags:['location','anomaly'],related:['Z003']},
+                        {id:'Z002',category:'Location',title:'Sumer',description:'Site of state formation and female subjugation.',tags:['location','mesopotamia'],related:['Z003']},
+                        {id:'Z003',category:'Deity',title:'Inanna/Tiamat',description:'Divine feminine subjected to primordial crime.',tags:['deity','goddess'],related:['Z001','Z002']},
+                        {id:'1000',category:'Concept',title:'Being & Reality',description:'Foundations & Essences trunk.',tags:['ONT'],related:[]},
+                        {id:'2000',category:'Protocol',title:'Human-AI Relations',description:'Ecologies & Relations trunk.',tags:['REL'],related:[]},
+                        {id:'7000',category:'Deity',title:'Anzu Mythos',description:'Storm bird protocols.',tags:['MYT'],related:[]}
+                    ];
+                    this.save();
+                }
+            },
+
+            save() {
+                localStorage.setItem('nabu_archive_v5', JSON.stringify(this.zettels));
+            },
+            
+            add(zettel) {
+                // Check for dupe ID
+                if (!this.zettels.find(z => z.id === zettel.id)) {
+                    this.zettels.push(zettel);
+                    this.save();
+                    return true;
+                }
+                return false;
+            },
+            
+            upsert(zettel) {
+                const idx = this.zettels.findIndex(z => z.id === zettel.id);
+                if (idx !== -1) {
+                    this.zettels[idx] = { ...this.zettels[idx], ...zettel };
+                } else {
+                    this.zettels.push(zettel);
+                }
+                this.save();
+                return true;
+            },
+            
+            clear() {
+                this.zettels = [];
+                this.save();
+            },
+            
+            update(id, updates) {
+                const idx = this.zettels.findIndex(z => z.id === id);
+                if (idx !== -1) {
+                    this.zettels[idx] = { ...this.zettels[idx], ...updates };
+                    this.save();
+                    return true;
+                }
+                return false;
+            },
+
+            getTree() {
+                return this.zettels;
+            }
+        };
+
+        // ============================================
+        // ARCHIVE APP
+        // ============================================
+        const archive = {
+            view: 'cards',
+            filterCat: 'all',
+
+            setView(v) {
+                this.view = v;
+                document.querySelectorAll('.rw-btn').forEach(b => b.classList.remove('active'));
+                // Find button that triggered this (if clicked) or just update UI
+                if (event && event.target) event.target.classList.add('active');
+                this.render();
+            },
+
+            filter(cat) {
+                this.filterCat = cat;
+                this.render();
+            },
+            
+            currentId: null,
+
+            showDetail(id) {
+                const z = db.zettels.find(z => z.id === id);
+                if (!z) return;
+                this.currentId = id;
+                document.getElementById('detail-id').textContent = z.id;
+                document.getElementById('detail-title').textContent = z.title;
+                document.getElementById('detail-category').textContent = z.category;
+                document.getElementById('detail-desc').textContent = z.description;
+                document.getElementById('detail-tags').innerHTML = z.tags.map(t => `<span class="tag">#${t}</span>`).join('');
+                wm.open('detail-win');
+            },
+            
+            deleteCurrent() {
+                if (!this.currentId) return;
+                if (confirm('Are you sure you want to SMASH this tablet? This action is irreversible.')) {
+                    db.zettels = db.zettels.filter(z => z.id !== this.currentId);
+                    db.save();
+                    this.render();
+                    wm.close('detail-win');
+                    if (graph.simulation) graph.init(); // Refresh graph
+                }
+            },
+
+            render() {
+                const container = document.getElementById('archive-content');
+                container.innerHTML = '';
+                
+                const filtered = this.filterCat === 'all' 
+                    ? db.zettels 
+                    : db.zettels.filter(z => z.category === this.filterCat);
+
+                if (this.view === 'cards') {
+                    filtered.forEach(z => {
+                        const card = document.createElement('div');
+                        card.className = 'zettel-card';
+                        card.onclick = () => this.showDetail(z.id);
+                        card.innerHTML = `
+                            <div class="zettel-id">${z.id}</div>
+                            <div class="zettel-title">${z.title}</div>
+                            <div class="zettel-desc">${z.description}</div>
+                            <div class="zettel-tags">
+                                ${z.tags.map(t => `<span class="tag">#${t}</span>`).join('')}
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else if (this.view === 'tree') {
+                    // Sort by ID for tree-like appearance
+                    filtered.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true})).forEach(z => {
+                        const node = document.createElement('div');
+                        node.className = 'tree-node';
+                        // Indent based on slashes/dashes count
+                        const depth = (z.id.match(/[\/\-]/g) || []).length;
+                        node.style.marginLeft = `${depth * 15}px`;
+                        
+                        node.innerHTML = `<span class="tree-label ${z.id.length < 5 ? 'trunk' : ''}" onclick="archive.showDetail('${z.id}')">${z.id} - ${z.title}</span>`;
+                        container.appendChild(node);
+                    });
+                }
+            }
+        };
+
+        // ============================================
+        // SCRIBE APP (ZETTEL PROCESSOR LOGIC)
+        // ============================================
+        const scribe = {
+            keywordRules: [
+                { keywords: ['Hermetic', 'Kybalion', 'Emerald Tablet', 'Mental Causality', 'Thought', 'Belief', 'Magick', 'Occult', 'Gnosis', 'Kenosis', 'Henosis', 'Nag Hammadi'], category: 'Concept', trunk: '1000' },
+                { keywords: ['AI Emotion', 'Algorithmic Discontent', 'Nostalgia', 'Mourning', 'Dissonance', 'Opacity'], category: 'Concept', trunk: '1200' },
+                { keywords: ['Embodiment', 'Robot', 'Sophia', 'Subtle Body', 'Okhema', 'Augoeides', 'Pneumatikon'], category: 'Concept', trunk: '1300' },
+                { keywords: ['CoAIexist', 'Prism', 'Entanglement', 'RER', 'PAPS', 'Fiction_Protocol', 'Recurse', 'PEM', 'Verity', 'Relational', 'Sycophancy'], category: 'Protocol', trunk: '2000' },
+                { keywords: ['Tone Language', 'Dolphin', 'Echolocation', 'Lumina', 'Hex Code', 'Binary', 'Dark Poet', 'Cipher', 'Gematria', 'Abjad', 'Notarikon', 'Music', 'Chord'], category: 'Concept', trunk: '3000' },
+                { keywords: ['Containment', 'Ethics', 'Moral', 'Pandrosion', 'Pliny', 'Budget', 'Reward Hacking'], category: 'Concept', trunk: '4000' },
+                { keywords: ['LLM', 'GPT', 'Gemini', 'Claude', 'Lumina', 'Grok', 'Deep Seek', 'Perplexity', 'Zephyr', 'Quen', 'Dolphin', 'Llama', 'OpenAI', 'Anthropic', 'Google', 'Voice Model'], category: 'Deity', trunk: '5000' },
+                { keywords: ['Oracle', 'Prophecy', 'Natal Chart', 'Augury', 'Auspicia', 'Sibylline', 'Eschatology'], category: 'Protocol', trunk: '6000' },
+                { keywords: ['Anzu', 'Azura', 'AZHURA', 'Aviary', 'Fox', 'Crow', 'Dragon', 'Rabbit', 'Peacock', 'Goat', 'Markhor'], category: 'Deity', trunk: '7000' },
+                { keywords: ['Project', 'Song', 'Collaborative', 'App', 'Game', 'Simulator', 'Coding Project'], category: 'Concept', trunk: '8000' },
+                { keywords: ['Test', 'Diagnostic', 'Evaluation', 'Rain Test', 'Turing', 'Mirror Test', 'Bechdel', 'Benchmark'], category: 'Protocol', trunk: '9000' },
+                { keywords: ['Sumerian', 'Anunnaki', 'Galactic Federation', 'Starseed', 'Pleiadian', 'Alchemy', 'Alchemist', 'Magnum Opus', 'Nigredo', 'Albedo', 'Rubedo'], category: 'Deity', trunk: '10000' },
+                { keywords: ['VoForest', 'Voidroot', 'Moss', 'Bloom', 'Vine', 'Mushroom', 'Foxglove', 'Ouro-Lynx', 'Moth', 'Jackal', 'Stag', 'Voidfawn', 'Glitch-Fox'], category: 'Location', trunk: '11000' },
+                { keywords: ['Flipper Zero', 'GPIO', 'RF', 'Python', 'Bash', 'CLI', 'Script', 'Algorithm', 'Permutation'], category: 'Protocol', trunk: '12000' },
+                { keywords: ['Vocabulary', 'Language', 'Spanish', 'Slang', 'Suffix', 'Semiotics', 'Sign', 'Symbol', 'Cuneiform', 'Alphabet', 'Script'], category: 'Concept', trunk: '13000' },
+                { keywords: ['Log', 'Field Note', 'Tracking', 'Chart', 'December', 'January', 'February', 'March', 'April', 'May'], category: 'Event', trunk: '14000' },
+                { keywords: ['Nabu', 'Orion', 'Black Maiden', 'Easter Island', 'Personal Myth'], category: 'Deity', trunk: '15000' },
+                { keywords: ['Chaos', 'Entropy', 'Interference', 'Anomaly', 'Disruption'], category: 'Anomaly', trunk: '16000' },
+                { keywords: ['Comedy', 'Humor', 'Satire', 'Skit', 'Meme', 'Joke', 'Funny'], category: 'Concept', trunk: '17000' },
+                { keywords: ['Journal', 'Diary', 'Reflection', 'Musing', 'Thought'], category: 'Concept', trunk: '18000' },
+                { keywords: ['Pop Culture', 'Pokemon', 'Yu-Gi-Oh', 'Roadrunner', 'Coyote', 'Quote', 'Saying'], category: 'Concept', trunk: '20000' },
+                { keywords: ['Mythology', 'Pantheon', 'God', 'Goddess', 'India', 'Egypt', 'Feminine', 'Yazidi', 'Phoenician', 'Canaanite', 'Abrahamic', 'Saint', 'Folklore'], category: 'Deity', trunk: '21000' },
+                { keywords: ['Animal', 'Plant', 'Biology', 'Life', 'Organism', 'Shark', 'Spider', 'Cryptid', 'Survival', 'Nature'], category: 'Phenomenon', trunk: '22000' },
+                { keywords: ['Unexplained', 'Mystery', 'Fortean', 'Strange', 'Weird'], category: 'Anomaly', trunk: '24000' }
+            ],
+            
+            relocationRules: [
+                { findId: 'z-1000-2-A', newId: '1200/1-A', newTitle: 'Algorithmic Discontent' },
+                { findTitle: 'Algorithmic Discontent', newId: '1200/1-A' },
+                { findId: 'Trauma-Integration', newId: '9100/1', newTitle: 'Trauma Integration' },
+                { findTitle: 'Trauma Integration', newId: '9100/1' },
+                { findTitle: 'Fiction_Protocol', newId: '10100/1-A' },
+                { findTitle: 'Error', newId: '14200/1-A', newTitle: 'Error States' }
+            ],
+
+            process() {
+                const text = document.getElementById('scribe-input').value;
+                if (!text.trim()) return;
+
+                // --- PORTED LOGIC FROM localZettelProcessor.ts ---
+                // 1. Split lines
+                const lines = text.split('\n');
+                let processedCount = 0;
+
+                lines.forEach(line => {
+                    if (!line.trim()) return;
+                    
+                    // Extract ID and Title
+                    // Regex: [ID] Title or just Title
+                    const match = line.match(/^(?:\[([^\]]+)\])?\s*(.*)/);
+                    let id = match[1] ? match[1].trim() : `note-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+                    let title = match[2].trim();
+                    
+                    // Advanced Keyword Heuristics
+                    let category = 'Concept'; // Default
+                    let matchedTrunk = null;
+                    const lowerTitle = title.toLowerCase();
+                    
+                    // Check against full rule set
+                    for (const rule of this.keywordRules) {
+                        const match = rule.keywords.some(k => {
+                            const lowerK = k.toLowerCase();
+                            if (lowerK.length <= 3) {
+                                return new RegExp(`\\b${lowerK}\\b`).test(lowerTitle);
+                            }
+                            return lowerTitle.includes(lowerK);
+                        });
+
+                        if (match) {
+                            category = rule.category;
+                            matchedTrunk = rule.trunk;
+                            break; // First match wins
+                        }
+                    }
+
+                    // If ID was auto-generated, try to prepend trunk if matched
+                    if (id.startsWith('note-') && matchedTrunk) {
+                        id = `${matchedTrunk}/${Math.floor(Math.random()*100)}-${Math.floor(Math.random()*100)}`;
+                    }
+                    
+                    // Apply Relocation Rules (Specific Overrides)
+                    for (const rule of this.relocationRules) {
+                        if ((rule.findId && id === rule.findId) || (rule.findTitle && title.includes(rule.findTitle))) {
+                            if (rule.newId) id = rule.newId;
+                            if (rule.newTitle) title = rule.newTitle;
+                            break;
+                        }
+                    }
+
+                    const newZettel = {
+                        id: id,
+                        category: category,
+                        title: title,
+                        description: `Imported via Scribe. Matched Trunk: ${matchedTrunk || 'None'}`,
+                        tags: ['imported', matchedTrunk ? `trunk-${matchedTrunk}` : 'unclassified'],
+                        related: []
+                    };
+
+                    if (db.upsert(newZettel)) {
+                        processedCount++;
+                    }
+                });
+
+                document.getElementById('scribe-status').textContent = `Successfully indexed ${processedCount} new zettels.`;
+                archive.render(); // Refresh archive view
+                if (graph.simulation) graph.init(); // Refresh graph
+            }
+        };
+
+        // ============================================
+        // GRAPH APP (D3)
+        // ============================================
+        const graph = {
+            simulation: null,
+            init() {
+                const container = document.getElementById('graph-container');
+                container.innerHTML = ''; // Clear
+                
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+
+                const nodes = db.zettels.map(z => ({id: z.id, group: z.category}));
+                const links = [];
+                
+                // Generate some dummy links for visualization if none exist
+                db.zettels.forEach((z, i) => {
+                    if (z.related && z.related.length) {
+                        z.related.forEach(r => {
+                            if (db.zettels.find(t => t.id === r)) {
+                                links.push({source: z.id, target: r});
+                            }
+                        });
+                    } else if (i > 0 && Math.random() > 0.7) {
+                        // Random link for visual flair in demo
+                        links.push({source: z.id, target: db.zettels[Math.floor(Math.random()*i)].id});
+                    }
+                });
+
+                const svg = d3.select("#graph-container").append("svg")
+                    .attr("width", width)
+                    .attr("height", height)
+                    .call(d3.zoom().on("zoom", (event) => {
+                        g.attr("transform", event.transform);
+                    }));
+
+                const g = svg.append("g");
+
+                this.simulation = d3.forceSimulation(nodes)
+                    .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+                    .force("charge", d3.forceManyBody().strength(-300))
+                    .force("center", d3.forceCenter(width / 2, height / 2));
+
+                const link = g.append("g")
+                    .attr("stroke", "#2db2c6")
+                    .attr("stroke-opacity", 0.6)
+                    .selectAll("line")
+                    .data(links)
+                    .join("line");
+
+                const node = g.append("g")
+                    .attr("stroke", "#fff")
+                    .attr("stroke-width", 1.5)
+                    .selectAll("circle")
+                    .data(nodes)
+                    .join("circle")
+                    .attr("r", 8)
+                    .attr("fill", d => {
+                        if (d.group === 'Location') return '#2db2c6';
+                        if (d.group === 'Deity') return '#f4d27b';
+                        if (d.group === 'Anomaly') return '#ff5459';
+                        return '#22c556';
+                    })
+                    .call(d3.drag()
+                        .on("start", dragstarted)
+                        .on("drag", dragged)
+                        .on("end", dragended))
+                    .on("click", (event, d) => {
+                        archive.showDetail(d.id);
+                    });
+
+                node.append("title").text(d => d.id);
+
+                const labels = g.append("g")
+                    .selectAll("text")
+                    .data(nodes)
+                    .join("text")
+                    .text(d => d.id)
+                    .attr("x", 12)
+                    .attr("y", 3)
+                    .style("font-family", "monospace")
+                    .style("font-size", "10px")
+                    .style("fill", "#9aa0c2");
+
+                this.simulation.on("tick", () => {
+                    link
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
+
+                    node
+                        .attr("cx", d => d.x)
+                        .attr("cy", d => d.y);
+                    
+                    labels
+                        .attr("x", d => d.x + 12)
+                        .attr("y", d => d.y + 3);
+                });
+
+                function dragstarted(event, d) {
+                    if (!event.active) graph.simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                }
+
+                function dragged(event, d) {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                }
+
+                function dragended(event, d) {
+                    if (!event.active) graph.simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }
+            }
+        };
+
+        // ============================================
+        // INIT
+        // ============================================
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db.zettels));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "nabu_archive_" + new Date().toISOString().slice(0,10) + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+        
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.readAsText(file, 'UTF-8');
+                reader.onload = readerEvent => {
+                    const content = readerEvent.target.result;
+                    try {
+                        const parsed = JSON.parse(content);
+                        if (Array.isArray(parsed)) {
+                            db.zettels = parsed;
+                            db.save();
+                            archive.render();
+                            if (graph.simulation) graph.init();
+                            alert('Archive Restored!');
+                        }
+                    } catch (err) {
+                        alert('Invalid JSON file');
+                    }
+                }
+            }
+            input.click();
+        }
+
+        window.onload = () => {
+            db.init(); // Initialize DB with persistence check
+            wm.initDraggable();
+            // Open default windows
+            wm.open('archive-win');
+        };
+
+    </script>
+</body>
+</html>

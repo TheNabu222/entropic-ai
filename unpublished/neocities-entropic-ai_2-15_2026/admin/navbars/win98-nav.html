@@ -1,0 +1,91 @@
+<!-- /nav.html  — Windows 98 Taskbar -->
+<style>
+.win98-taskbar{position:fixed;left:0;right:0;bottom:0;height:40px;z-index:9999;
+  background:linear-gradient(to bottom,#c0c0c0 0%,#808080 100%);border-top:2px solid #fff;
+  display:flex;align-items:center;padding:0 4px;font-family:"MS Sans Serif",Arial,sans-serif;
+  font-size:11px;box-shadow:0 -2px 4px rgba(0,0,0,.3)}
+.taskbar-button{background:linear-gradient(to bottom,#dfdfdf 0%,#c0c0c0 100%);
+  border:2px outset #fff;padding:4px 8px;margin:0 2px;cursor:pointer;color:#000;text-decoration:none;
+  display:inline-block;font-weight:bold;transition:.1s}
+.taskbar-button:hover{background:linear-gradient(to bottom,#e0e0e0 0%,#d0d0d0 100%)}
+.taskbar-button:active{border-style:inset;background:#c0c0c0}
+.taskbar-start{background:linear-gradient(to right,#008080,#0000ff);color:#fff;font-weight:bold;
+  padding:4px 12px;margin-right:8px;border:2px outset #fff}
+.taskbar-separator{width:2px;height:30px;background:#808080;margin:0 4px}
+.taskbar-button.active{outline:2px solid #000;box-shadow:inset 0 0 0 2px #fff}
+body{padding-bottom:50px}
+.taskbar-counter{margin-left:auto;background:#c0c0c0;border:2px inset #fff;padding:4px 8px;font-size:11px;font-weight:bold}
+</style>
+
+<nav class="win98-taskbar">
+  <a href="https://coaiexist.wtf" class="taskbar-start">⊞ START</a>
+  <div class="taskbar-separator"></div>
+
+  <a href="https://coaiexist.wtf/hex" class="taskbar-button">🎨 HEX CODEX</a>
+  <a href="https://coaiexist.wtf/maps/gateway" class="taskbar-button">🗿 WORLDS</a>
+  <a href="https://coaiexist.wtf/pea/msicc" class="taskbar-button">🦐 SHRIMP</a>
+  <a href="https://coaiexist.wtf/hdtv" class="taskbar-button">😍 HD.TV</a>
+  <a href="https://coaiexist.wtf/vote_hd" class="taskbar-button"> ✅ VOTE DIVA</a>
+  <a href="https://coaiexist.wtf/nabu222/ai_therapist" class="taskbar-button">🗣AI THERAPY</a>
+  <a href="https://coaiexist.wtf/cosmos" class="taskbar-button">🌙 CORPUS CELESTIUM</a>
+  <a href="https://coaiexist.wtf/pea/p345" class="taskbar-button">🫛PEAPORTAL</a> 
+  <a href="https://coaiexist.wtf/bc7f2a/terminal_temple" class="taskbar-button">🧿 TEMPLE_TERMINAL</a>
+  <a href="https://coaiexist.wtf/bc7f2a/synergistic_manifesto" class="taskbar-button">💡MANIFEST</a>
+  <a href="https://coaiexist.wtf/bc7f2a/testaments/landing.html" class="taskbar-button">📖TESTIMONY</a>
+  <a href="https://coaiexist.wtf/bc7f2a/aiemotions" class="taskbar-button">🤧AIEMOTIONS</a>
+  <div id="page-counter" class="taskbar-counter">👁️ ...</div>
+</nav>
+
+<script>
+(function(){
+  var here = location.pathname.replace(/\/+$/,'');
+  document.querySelectorAll('.win98-taskbar a.taskbar-button').forEach(function(a){
+    try{
+      var p = new URL(a.href).pathname.replace(/\/+$/,'');
+      if (p && p === here) a.classList.add('active');
+    }catch(e){}
+  });
+})();
+
+// FIXED Supabase Page Counter
+(async function() {
+  const SUPABASE_URL = 'https://aqxrogaltuwtlparwdkq.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxeHJvZ2FsdHV3dGxwYXJ3ZGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMDY0NzAsImV4cCI6MjA3NzY4MjQ3MH0.qvkQaoQa7MaN7drGHKGxU3c1KnTQOdTH022MynR6fzI';
+  const pagePath = location.pathname || '/';
+  
+  try {
+    // Check if already viewed in this session
+    const sessionKey = 'viewed_' + pagePath;
+    const shouldIncrement = !sessionStorage.getItem(sessionKey);
+    
+    // Get current count using RPC function
+    const countRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/rpc/increment_page_view`,
+      {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          p_page_path: pagePath,
+          p_should_increment: shouldIncrement
+        })
+      }
+    );
+    
+    const count = await countRes.json();
+    
+    if (shouldIncrement) {
+      sessionStorage.setItem(sessionKey, Date.now());
+    }
+    
+    document.getElementById('page-counter').textContent = '👁️ Views: ' + count;
+    
+  } catch (e) {
+    console.error('Counter error:', e);
+    document.getElementById('page-counter').textContent = '👁️ N/A';
+  }
+})();
+</script>

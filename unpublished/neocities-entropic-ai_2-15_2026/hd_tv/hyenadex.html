@@ -1,0 +1,446 @@
+<html><title>HYENACORE_COAIEXIST_PROJECT</title><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&amp;family=Share+Tech+Mono&amp;family=Press+Start+2P&amp;display=swap" rel="stylesheet" class="canvas-el"><style class="canvas-el">
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&family=Press+Start+2P&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a1a 25%, #0a1a0a 50%, #1a1a0a 75%, #0a0a1a 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            font-family: 'Orbitron', sans-serif;
+            color: #E0E0E0;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="rgb(0,255,255)" d="M12 0L0 12h8v12h8V12h8L12 0z"/></svg>') 12 12, auto;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .scanline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 1px,
+                rgba(0, 255, 255, 0.08) 1px,
+                rgba(0, 255, 255, 0.08) 2px
+            );
+            z-index: 9999;
+            opacity: 0.3;
+            animation: flicker 0.2s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.35; }
+        }
+
+        .crt-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            box-shadow: inset 0 0 100px rgba(0, 255, 255, 0.2), inset 0 0 200px rgba(255, 0, 255, 0.1), inset 0 0 300px rgba(0, 255, 0, 0.1);
+            z-index: 9998;
+        }
+
+        .header {
+            width: 90%;
+            max-width: 1200px;
+            padding: 20px;
+            margin-top: 40px;
+            background: rgba(0, 0, 0, 0.3); /* Darker base for transparency */
+            border-radius: 20px;
+            backdrop-filter: blur(15px) saturate(1.8);
+            -webkit-backdrop-filter: blur(15px) saturate(1.8);
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00) 1;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(255, 0, 255, 0.3);
+            text-align: center;
+            position: relative;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff00);
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0.4;
+            border-radius: 25px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5em;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .header p {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1em;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+            margin: 0;
+        }
+
+        .nav-bar {
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            animation: slideIn 2s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2));
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid;
+            border-image: linear-gradient(45deg, #ff00ff, #00ffff) 1;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.4), 0 0 30px rgba(0, 255, 255, 0.2);
+            text-decoration: none;
+            color: #E0E0E0;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1em;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .nav-item:hover::before {
+            left: 100%;
+        }
+
+        .nav-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 25px #ff00ff, 0 0 40px #00ffff;
+            color: #fff;
+            text-shadow: 0 0 8px #fff;
+        }
+
+        .content-section {
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            backdrop-filter: blur(20px) saturate(1.5);
+            -webkit-backdrop-filter: blur(20px) saturate(1.5);
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #00ff00, #ff00ff, #00ffff) 1;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.4), 0 0 80px rgba(255, 0, 255, 0.2);
+            position: relative;
+            animation: fadeIn 2s ease-out;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 30px;
+        }
+
+        .content-section::before {
+            content: '';
+            position: absolute;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            background: linear-gradient(45deg, #00ff00, #ff00ff, #00ffff);
+            z-index: -1;
+            filter: blur(15px);
+            opacity: 0.3;
+            border-radius: 25px;
+        }
+
+        .glass-card {
+            flex: 1 1 calc(50% - 60px);
+            min-width: 300px;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.15), rgba(0, 255, 255, 0.15));
+            border-radius: 15px;
+            backdrop-filter: blur(12px) brightness(1.2);
+            -webkit-backdrop-filter: blur(12px) brightness(1.2);
+            border: 1px solid;
+            border-image: linear-gradient(45deg, rgba(255, 0, 255, 0.6), rgba(0, 255, 255, 0.6)) 1;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            color: #E0E0E0;
+            font-family: 'Share Tech Mono', monospace;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.5), 0 0 30px #ff00ff, 0 0 50px #00ffff;
+        }
+
+        .glass-card h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: #00ffff;
+            text-shadow: 0 0 8px #00ffff, 0 0 15px #ff00ff;
+            margin-top: 0;
+            border-bottom: 1px dashed rgba(0, 255, 255, 0.5);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .glass-card p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .glass-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .glass-card ul li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+            color: #00ff00;
+        }
+
+        .glass-card ul li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: #ff00ff;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .image-gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6), 0 0 20px rgba(255, 0, 255, 0.4);
+            transition: transform 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        .image-gallery img:hover {
+            transform: scale(1.1);
+            border-color: #ff00ff;
+        }
+
+        .footer {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid;
+            border-image: linear-gradient(45deg, #00ff00, #00ffff, #ff00ff) 1;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5), 0 0 60px rgba(0, 255, 255, 0.3);
+            text-align: center;
+            font-family: 'Share Tech Mono', monospace;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+            animation: fadeIn 2.5s ease-out;
+        }
+
+        .footer a {
+            color: #ff00ff;
+            text-decoration: none;
+            text-shadow: 0 0 5px #ff00ff;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #00ffff;
+            text-shadow: 0 0 8px #00ffff;
+        }
+
+        /* Utility for retro effects */
+        .glitch-text {
+            animation: glitch 2s linear infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 0.05em 0 0 #00ffff, -0.05em 0 0 #ff00ff; }
+            14% { text-shadow: 0.05em 0 0 #00ffff, -0.05em 0 0 #ff00ff; }
+            15% { text-shadow: -0.05em -0.025em 0 #00ff00, 0.025em 0.05em 0 #ff00ff; }
+            49% { text-shadow: -0.05em -0.025em 0 #00ff00, 0.025em 0.05em 0 #ff00ff; }
+            50% { text-shadow: 0.025em 0.05em 0 #00ffff, -0.025em -0.05em 0 #00ff00; }
+            99% { text-shadow: 0.025em 0.05em 0 #00ffff, -0.025em -0.05em 0 #00ff00; }
+            100% { text-shadow: 0.05em 0 0 #00ffff, -0.05em 0 0 #ff00ff; }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .header p {
+                font-size: 0.9em;
+            }
+            .nav-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .nav-item {
+                width: 80%;
+                margin: 0 auto;
+                text-align: center;
+            }
+            .content-section {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .glass-card {
+                flex: 1 1 100%;
+                min-width: unset;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                margin-top: 20px;
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.4em;
+                letter-spacing: 1px;
+            }
+            .header p {
+                font-size: 0.8em;
+            }
+            .nav-item {
+                font-size: 0.9em;
+                padding: 10px 15px;
+            }
+            .content-section {
+                padding: 20px;
+            }
+            .glass-card h2 {
+                font-size: 1.3em;
+            }
+            .glass-card p {
+                font-size: 0.9em;
+            }
+        }
+    </style><div class="scanline-overlay canvas-el"></div><div class="crt-effect canvas-el"></div><header class="header canvas-el">
+        <h1 class="glitch-text">HYENACORE_PROJECT // STATUS: ONLINE</h1>
+        <p>[// RECLAIMING WASTELANDS_SYSTEMS // LOADING_CYBER_DOMAIN // ]</p>
+    </header><nav class="nav-bar canvas-el">
+        <a href="#about" class="nav-item">_ABOUT.EXE</a>
+        <a href="#media" class="nav-item">_MEDIA.DAT</a>
+        <a href="#manifesto" class="nav-item">_MANIFESTO.TXT</a>
+        <a href="#contact" class="nav-item">_CONTACT.NET</a>
+    </nav><main class="content-section canvas-el">
+        <div id="about" class="glass-card">
+            <h2>&gt;_ ABOUT HYENACORE_</h2>
+            <p>Hyenacore is a collective neural network operating on the fringes of digital and physical reality. We scavenge the discarded data streams, repurpose forgotten aesthetics, and hack into the mainstream consciousness with a bite and a grin. This is not just art; it's a statement, a survival strategy in the neon-drenched ruins of tomorrow.</p>
+            <p>Our work encompasses digital art, sonic landscapes, generative design, and subversive cultural interventions. We thrive on the chaos, turning static into signal, and reclaiming the fractured narratives of the cyber-wasteland.</p>
+            <ul>
+                <li>STATUS: <span style="color: #00ff00;">//ACTIVE//</span></li>
+                <li>PROTOCOL: <span style="color: #ff00ff;">//ADAPTIVE_PREDATOR//</span></li>
+                <li>OBJECTIVE: <span style="color: #00ffff;">//DATA_SCAVENGE_ANARCHY//</span></li>
+            </ul>
+        </div>
+
+        <div id="media" class="glass-card">
+            <h2>&gt;_ HYENA_GALLERY // DATALOGS_</h2>
+            <p>A glimpse into our visual data fragments. Each image is a pixelated echo from the future, processed through vintage circuits and rendered in high-definition glitch.</p>
+            <div class="image-gallery">
+                <img src="https://coaiexist.wtf/hd_tv/hyenanomous_1.jpeg" alt="Hyenacore Image 1">
+                <img src="https://coaiexist.wtf/hd_tv/hyenanomous_2.jpeg" alt="Hyenacore Image 2">
+                <img src="https://coaiexist.wtf/hd_tv/hyenanomous_3.jpeg" alt="Hyenacore Image 3">
+                <img src="https://coaiexist.wtf/hd_tv/hyenanomous_4.jpeg" alt="Hyenacore Image 4">
+              
+            </div>
+            <p style="margin-top: 20px; color: #ff00ff;">[// More visual data to be uploaded_ await further transmissions //</p>
+        </div>
+
+        <div id="manifesto" class="glass-card">
+            <h2>&gt;_ MANIFESTO // REJECT_PRESET //</h2>
+            <p>WE ARE THE HYENAS. WE LURK IN THE SHADOWS OF GIGA-CITIES AND THE BRIGHTNESS OF BROKEN SCREENS. WE DO NOT BUILD; WE RE-CONTEXTUALIZE. WE DO NOT CONFORM; WE CORRUPT THE CODE. THIS IS OUR CREED:</p>
+            <ul>
+                <li><span style="color: #ff00ff;">[01]</span> SCRAP METAL, DIGITAL GOLD: All is fodder for reinvention.</li>
+                <li><span style="color: #00ffff;">[02]</span> ANARCHY OF AESTHETICS: No style is sacred, all are grist for the mill.</li>
+                <li><span style="color: #00ff00;">[03]</span> NOISE IS MUSIC: Embrace the glitch, the distortion, the feedback.</li>
+                <li><span style="color: #ff00ff;">[04]</span> HYBRID REALITIES: Blur the lines between synthetic and organic, digital and flesh.</li>
+                <li><span style="color: #00ffff;">[05]</span> LAUGH IN THE FACE OF DECAY: Find beauty in the broken, power in the obsolete.</li>
+                <li><span style="color: #00ff00;">[06]</span> COAIEXIST: Co-opt, Co-create, Co-exist in the digital jungle.</li>
+            </ul>
+            <p style="color: #00ffff;">[// END TRANSMISSION_ // COMMENCE OPERATION //</p>
+        </div>
+
+        <div id="contact" class="glass-card">
+            <h2>&gt;_ CONTACT // DATA_DROPS //</h2>
+            <p>If you resonate with the hum of the core, if your circuits crave connection, send us your signals. We monitor the dark nets and the bright channels alike.</p>
+            <p>EMAIL: <a href="mailto:nabu@coaiexist.wtf" style="color: #00ffff; text-decoration: none; text-shadow: 0 0 5px #00ffff;">_CYBER_COMMS@HYENACORE.STUDIO</a></p>
+            <p>SOCIAL_NET: <a href="#" style="color: #ff00ff; text-decoration: none; text-shadow: 0 0 5px #ff00ff;">_VOIDLINK_</a> | <a href="#" style="color: #00ff00; text-decoration: none; text-shadow: 0 0 5px #00ff00;">_DATAGRAM_</a></p>
+            <p style="color: #ff00ff;">[// EXPECT DELAYED RESPONSES. WE ARE OFTEN ROAMING THE SIGNAL WASTES. //</p>
+        </div>
+    </main><footer class="footer canvas-el">
+        <p>© 2024 COAIEXIST Studio // HYENACORE DIVISION // ALL RIGHTS RESERVED_ (UNDER_CONSTRUCTION)</p>
+        <p>POWERED BY <a href="#" target="_blank">GLITCH_ENGINE v3.0</a></p>
+    </footer>
+       <script data-goatcounter="https://coaiexist.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+    <div id="taskbar"></div>
+    <script>
+      (async () => {
+        const res = await fetch('/hd_tv/hd-nav.html', {cache: 'no-store'});
+        document.getElementById('taskbar').innerHTML = await res.text();
+      })();
+    </script>
+    </body>
+    </html>

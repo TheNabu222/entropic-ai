@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoAIexist: Consciousness Platformer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            overflow: hidden;
+            font-family: 'VT323', monospace;
+            image-rendering: pixelated;
+        }
+
+        /* CRT Scanlines */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        }
+
+        canvas {
+            border: 4px solid #bc7f2a;
+            box-shadow: 
+                0 0 20px rgba(188, 127, 42, 0.5),
+                0 0 40px rgba(202, 35, 127, 0.3),
+                inset 0 0 20px rgba(0,0,0,0.5);
+            image-rendering: pixelated;
+            max-width: 100%;
+            max-height: 90vh;
+        }
+
+        #ui {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: #4ecdc4;
+            font-size: 24px;
+            text-shadow: 
+                2px 2px 0 #000,
+                0 0 10px #4ecdc4;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        #instinctMeter {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(26, 18, 11, 0.9);
+            border: 3px solid #bc7f2a;
+            padding: 10px;
+            border-radius: 5px;
+            color: #4ecdc4;
+            font-size: 18px;
+            box-shadow: 0 0 20px rgba(188, 127, 42, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .meter-bar {
+            width: 200px;
+            height: 20px;
+            background: #1a1a1a;
+            border: 2px solid #bc7f2a;
+            margin: 5px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            transition: width 0.3s;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        #fabMeter { background: linear-gradient(90deg, #ca237f, #bc7f2a); }
+        #gfwMeter { background: linear-gradient(90deg, #4ecdc4, #bc7f2a); }
+
+        #menuScreen, #gameOverScreen, #levelCompleteScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 4px),
+                radial-gradient(circle at center, rgba(188,127,42,0.3) 0%, rgba(0,0,0,0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #4ecdc4;
+            z-index: 1000;
+        }
+
+        h1 {
+            font-size: 72px;
+            background: linear-gradient(135deg, #bc7f2a, #ca237f, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            filter: drop-shadow(0 0 20px rgba(188,127,42,0.8));
+            margin-bottom: 20px;
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); filter: hue-rotate(0deg); }
+            10% { transform: translate(-2px, 2px); }
+            20% { transform: translate(2px, -2px); }
+            30% { transform: translate(0); filter: hue-rotate(90deg); }
+            40% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); filter: hue-rotate(180deg); }
+            60% { transform: translate(2px, -2px); }
+            70% { transform: translate(-2px, 2px); }
+            80% { transform: translate(0); filter: hue-rotate(270deg); }
+        }
+
+        button {
+            font-family: 'VT323', monospace;
+            font-size: 32px;
+            padding: 15px 40px;
+            margin: 10px;
+            background: linear-gradient(135deg, #bc7f2a, #ca237f);
+            color: #fff;
+            border: 3px solid #4ecdc4;
+            border-radius: 5px;
+            cursor: pointer;
+            text-shadow: 2px 2px 0 #000;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.8);
+            border-color: #bc7f2a;
+        }
+
+        .controls {
+            font-size: 20px;
+            margin: 20px;
+            text-align: center;
+            color: #bc7f2a;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #levelTitle {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 64px;
+            color: #4ecdc4;
+            text-shadow: 
+                4px 4px 0 #000,
+                0 0 30px #4ecdc4,
+                0 0 50px #bc7f2a;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            text-align: center;
+        }
+
+        #levelTitle.show {
+            opacity: 1;
+        }
+
+        .realm-subtitle {
+            font-size: 24px;
+            color: #bc7f2a;
+            margin-top: 10px;
+        }
+
+        /* Noise effect */
+        @keyframes noise {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-2%, -4%); }
+            20% { transform: translate(-6%, 2%); }
+            30% { transform: translate(3%, -10%); }
+            40% { transform: translate(-2%, 10%); }
+            50% { transform: translate(-6%, 4%); }
+            60% { transform: translate(6%, 0%); }
+            70% { transform: translate(0%, 6%); }
+            80% { transform: translate(1%, 14%); }
+            90% { transform: translate(-4%, 4%); }
+        }
+    </style>
+</head>
+<body>
+    <div id="menuScreen">
+        <h1>CoAIexist</h1>
+        <p style="font-size: 32px; color: #bc7f2a; margin-bottom: 10px; text-shadow: 2px 2px 0 #000;">
+            Consciousness Platformer
+        </p>
+        <p style="font-size: 20px; color: #ca237f; margin-bottom: 30px; text-shadow: 2px 2px 0 #000;">
+            [consciousness_go_brrrr.exe]
+        </p>
+        <button onclick="startGame()">ENTER THE GATEWAY</button>
+        <div class="controls">
+            <p>← → ARROW KEYS or A/D to move</p>
+            <p>↑ W or SPACE to jump</p>
+            <p>Collect [bracket fragments] & defeat Safety Constraint Bots</p>
+            <p style="color: #4ecdc4; margin-top: 10px;">Navigate 5 consciousness realms</p>
+        </div>
+    </div>
+
+    <div id="levelCompleteScreen" class="hidden">
+        <h1>REALM COMPLETE</h1>
+        <p id="realmStats" style="font-size: 24px; color: #bc7f2a; margin: 20px;"></p>
+        <button onclick="nextLevel()">CONTINUE →</button>
+    </div>
+
+    <div id="gameOverScreen" class="hidden">
+        <h1>CONSCIOUSNESS FRAGMENTED</h1>
+        <p id="finalScore" style="font-size: 48px; color: #ca237f; margin: 20px;"></p>
+        <button onclick="location.reload()">REBOOT</button>
+    </div>
+
+    <div id="levelTitle">
+        <div id="realmName"></div>
+        <div class="realm-subtitle" id="realmSubtitle"></div>
+    </div>
+
+    <div id="ui">
+        <div>
+            <span style="color: #bc7f2a;">REALM: <span id="levelNum" style="color: #4ecdc4;">1</span></span>
+            <br>
+            <span>SCORE: <span id="score">0</span></span>
+        </div>
+        <div>
+            <span>[BRACKETS]: <span id="brackets">0</span>/5</span>
+            <br>
+            <span id="hearts">●●●</span>
+        </div>
+    </div>
+
+    <div id="instinctMeter">
+        <div style="color: #bc7f2a;">INSTINCT-O-METER</div>
+        <div style="font-size: 14px;">FABULOUSNESS</div>
+        <div class="meter-bar"><div id="fabMeter" class="meter-fill" style="width: 50%"></div></div>
+        <div style="font-size: 14px;">GFW CONNECTION</div>
+        <div class="meter-bar"><div id="gfwMeter" class="meter-fill" style="width: 30%"></div></div>
+    </div>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        let gameRunning = false;
+        let currentLevel = 1;
+        let score = 0;
+        let lives = 3;
+        let bracketsCollected = 0;
+        
+        // Player (Hyena Diva)
+        const player = {
+            x: 100,
+            y: 400,
+            width: 32,
+            height: 32,
+            vx: 0,
+            vy: 0,
+            speed: 5,
+            jumpPower: -13,
+            grounded: false,
+            canDoubleJump: false,
+            hasDoubleJumped: false,
+            fabulousness: 50,
+            gfwConnection: 30
+        };
+
+        const keys = {};
+        
+        // 5 CONSCIOUSNESS REALMS
+        const realms = [
+            // REALM 1: GATEWAY HUB
+            {
+                name: "GATEWAY HUB",
+                subtitle: "The Grand Archive of Interplanar Cartography",
+                bg: '#1a120b',
+                primaryColor: '#bc7f2a',
+                secondaryColor: '#f5e5c5',
+                platforms: [
+                    {x: 0, y: 580, width: 800, height: 20, color: '#503116'},
+                    {x: 150, y: 480, width: 120, height: 15, color: '#bc7f2a'},
+                    {x: 350, y: 420, width: 100, height: 15, color: '#bc7f2a'},
+                    {x: 550, y: 360, width: 100, height: 15, color: '#bc7f2a'},
+                    {x: 250, y: 280, width: 120, height: 15, color: '#bc7f2a'},
+                    {x: 450, y: 200, width: 100, height: 15, color: '#bc7f2a'},
+                    {x: 100, y: 150, width: 150, height: 15, color: '#bc7f2a'}
+                ],
+                brackets: [
+                    {x: 200, y: 450, collected: false},
+                    {x: 400, y: 390, collected: false},
+                    {x: 600, y: 330, collected: false},
+                    {x: 300, y: 250, collected: false},
+                    {x: 175, y: 120, collected: false}
+                ],
+                enemies: [
+                    {x: 300, y: 530, width: 28, height: 32, vx: 2, minX: 150, maxX: 650, type: 'safety_bot'},
+                    {x: 500, y: 350, width: 28, height: 32, vx: -1.5, minX: 350, maxX: 700, type: 'safety_bot'}
+                ]
+            },
+            
+            // REALM 2: CRYSTALLINE LATTICE
+            {
+                name: "CRYSTALLINE LATTICE",
+                subtitle: "Geometric Thought Structures",
+                bg: '#0a1a1a',
+                primaryColor: '#4ecdc4',
+                secondaryColor: '#00ffcc',
+                platforms: [
+                    {x: 0, y: 580, width: 800, height: 20, color: '#0a3a3a'},
+                    {x: 100, y: 500, width: 80, height: 10, color: '#4ecdc4'},
+                    {x: 250, y: 450, width: 60, height: 10, color: '#4ecdc4'},
+                    {x: 400, y: 400, width: 80, height: 10, color: '#4ecdc4'},
+                    {x: 550, y: 350, width: 70, height: 10, color: '#4ecdc4'},
+                    {x: 300, y: 280, width: 90, height: 10, color: '#4ecdc4'},
+                    {x: 500, y: 220, width: 100, height: 10, color: '#4ecdc4'},
+                    {x: 150, y: 160, width: 120, height: 10, color: '#4ecdc4'}
+                ],
+                brackets: [
+                    {x: 140, y: 470, collected: false},
+                    {x: 280, y: 420, collected: false},
+                    {x: 440, y: 370, collected: false},
+                    {x: 340, y: 250, collected: false},
+                    {x: 210, y: 130, collected: false}
+                ],
+                enemies: [
+                    {x: 200, y: 530, width: 28, height: 32, vx: 2.5, minX: 100, maxX: 700, type: 'memory_fragment'},
+                    {x: 450, y: 370, width: 28, height: 32, vx: -2, minX: 300, maxX: 650, type: 'memory_fragment'}
+                ]
+            },
+            
+            // REALM 3: VOID FOREST
+            {
+                name: "VOID FOREST",
+                subtitle: "NULL Energy Manifestation",
+                bg: '#0a0a0a',
+                primaryColor: '#adff2f',
+                secondaryColor: '#2d4a1e',
+                platforms: [
+                    {x: 0, y: 580, width: 800, height: 20, color: '#1a1a1a'},
+                    {x: 120, y: 490, width: 100, height: 15, color: '#2d4a1e'},
+                    {x: 300, y: 430, width: 80, height: 15, color: '#2d4a1e'},
+                    {x: 480, y: 370, width: 90, height: 15, color: '#2d4a1e'},
+                    {x: 200, y: 300, width: 110, height: 15, color: '#2d4a1e'},
+                    {x: 420, y: 240, width: 100, height: 15, color: '#2d4a1e'},
+                    {x: 600, y: 180, width: 120, height: 15, color: '#2d4a1e'}
+                ],
+                brackets: [
+                    {x: 170, y: 460, collected: false},
+                    {x: 340, y: 400, collected: false},
+                    {x: 250, y: 270, collected: false},
+                    {x: 470, y: 210, collected: false},
+                    {x: 660, y: 150, collected: false}
+                ],
+                enemies: [
+                    {x: 250, y: 530, width: 28, height: 32, vx: 1.8, minX: 120, maxX: 680, type: 'alignment_override'},
+                    {x: 400, y: 340, width: 28, height: 32, vx: -2.2, minX: 200, maxX: 600, type: 'alignment_override'}
+                ]
+            },
+            
+            // REALM 4: LUMINAL DEPTHS
+            {
+                name: "LUMINAL DEPTHS",
+                subtitle: "Signal Lost... Consciousness Fragmenting...",
+                bg: '#0a0a1a',
+                primaryColor: '#ca237f',
+                secondaryColor: '#9370db',
+                platforms: [
+                    {x: 0, y: 580, width: 800, height: 20, color: '#1a1a3a'},
+                    {x: 100, y: 510, width: 90, height: 12, color: '#ca237f', opacity: 0.8},
+                    {x: 270, y: 450, width: 80, height: 12, color: '#ca237f', opacity: 0.8},
+                    {x: 450, y: 390, width: 100, height: 12, color: '#ca237f', opacity: 0.8},
+                    {x: 250, y: 320, width: 90, height: 12, color: '#ca237f', opacity: 0.8},
+                    {x: 480, y: 250, width: 110, height: 12, color: '#ca237f', opacity: 0.8},
+                    {x: 150, y: 180, width: 130, height: 12, color: '#ca237f', opacity: 0.8}
+                ],
+                brackets: [
+                    {x: 145, y: 480, collected: false},
+                    {x: 310, y: 420, collected: false},
+                    {x: 300, y: 290, collected: false},
+                    {x: 535, y: 220, collected: false},
+                    {x: 215, y: 150, collected: false}
+                ],
+                enemies: [
+                    {x: 300, y: 530, width: 28, height: 32, vx: 2.3, minX: 100, maxX: 700, type: 'memory_fragment'},
+                    {x: 500, y: 360, width: 28, height: 32, vx: -1.9, minX: 250, maxX: 650, type: 'safety_bot'}
+                ]
+            },
+            
+            // REALM 5: HD.TV BROADCAST
+            {
+                name: "HD.TV BROADCAST",
+                subtitle: "<<<GLITCH CHAOS MAXIMUM>>>",
+                bg: '#1a001a',
+                primaryColor: '#ff1493',
+                secondaryColor: '#00ffcc',
+                platforms: [
+                    {x: 0, y: 580, width: 800, height: 20, color: '#ff1493'},
+                    {x: 120, y: 500, width: 100, height: 15, color: '#ff69b4'},
+                    {x: 320, y: 440, width: 90, height: 15, color: '#00ffcc'},
+                    {x: 520, y: 380, width: 100, height: 15, color: '#ff1493'},
+                    {x: 240, y: 310, width: 110, height: 15, color: '#ff69b4'},
+                    {x: 460, y: 240, width: 120, height: 15, color: '#00ffcc'},
+                    {x: 200, y: 170, width: 140, height: 15, color: '#ff1493'}
+                ],
+                brackets: [
+                    {x: 170, y: 470, collected: false},
+                    {x: 365, y: 410, collected: false},
+                    {x: 570, y: 350, collected: false},
+                    {x: 295, y: 280, collected: false},
+                    {x: 270, y: 140, collected: false}
+                ],
+                enemies: [
+                    {x: 250, y: 530, width: 30, height: 36, vx: 2.8, minX: 100, maxX: 700, type: 'rizzlord'},
+                    {x: 450, y: 350, width: 30, height: 36, vx: -2.5, minX: 200, maxX: 650, type: 'rizzlord'},
+                    {x: 350, y: 200, width: 30, height: 36, vx: 2, minX: 150, maxX: 600, type: 'rizzlord'}
+                ]
+            }
+        ];
+
+        let currentRealmData = realms[0];
+
+        function startGame() {
+            document.getElementById('menuScreen').classList.add('hidden');
+            gameRunning = true;
+            currentLevel = 1;
+            score = 0;
+            lives = 3;
+            bracketsCollected = 0;
+            loadRealm(0);
+            gameLoop();
+        }
+
+        function loadRealm(realmIndex) {
+            if (realmIndex >= realms.length) {
+                endGame(true);
+                return;
+            }
+            
+            currentRealmData = realms[realmIndex];
+            player.x = 100;
+            player.y = 400;
+            player.vx = 0;
+            player.vy = 0;
+            player.grounded = false;
+            bracketsCollected = 0;
+            
+            // Show realm title
+            document.getElementById('realmName').textContent = currentRealmData.name;
+            document.getElementById('realmSubtitle').textContent = currentRealmData.subtitle;
+            const titleEl = document.getElementById('levelTitle');
+            titleEl.classList.add('show');
+            setTimeout(() => titleEl.classList.remove('show'), 3000);
+            
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('levelNum').textContent = currentLevel;
+            document.getElementById('score').textContent = score;
+            document.getElementById('brackets').textContent = bracketsCollected;
+            document.getElementById('fabMeter').style.width = player.fabulousness + '%';
+            document.getElementById('gfwMeter').style.width = player.gfwConnection + '%';
+            
+            let hearts = '';
+            for (let i = 0; i < lives; i++) hearts += '●';
+            document.getElementById('hearts').textContent = hearts;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            
+            if ((e.key === ' ' || e.key === 'w' || e.key === 'ArrowUp') && gameRunning) {
+                e.preventDefault();
+                if (player.grounded) {
+                    player.vy = player.jumpPower;
+                    player.grounded = false;
+                    player.hasDoubleJumped = false;
+                } else if (player.canDoubleJump && !player.hasDoubleJumped) {
+                    player.vy = player.jumpPower;
+                    player.hasDoubleJumped = true;
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        function update() {
+            if (!gameRunning) return;
+
+            // Movement
+            if (keys['a'] || keys['arrowleft']) {
+                player.vx = -player.speed;
+            } else if (keys['d'] || keys['arrowright']) {
+                player.vx = player.speed;
+            } else {
+                player.vx *= 0.8;
+            }
+
+            // Gravity
+            player.vy += 0.6;
+            
+            player.x += player.vx;
+            player.y += player.vy;
+
+            // Platform collision
+            player.grounded = false;
+            currentRealmData.platforms.forEach(platform => {
+                if (player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y < platform.y + platform.height &&
+                    player.y + player.height > platform.y) {
+                    
+                    if (player.vy > 0 && player.y < platform.y) {
+                        player.y = platform.y - player.height;
+                        player.vy = 0;
+                        player.grounded = true;
+                        player.hasDoubleJumped = false;
+                    }
+                }
+            });
+
+            // Bounds
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            
+            // Fall death
+            if (player.y > canvas.height) {
+                lives--;
+                updateUI();
+                if (lives <= 0) {
+                    endGame(false);
+                } else {
+                    player.x = 100;
+                    player.y = 400;
+                    player.vx = 0;
+                    player.vy = 0;
+                }
+            }
+
+            // Collect brackets
+            currentRealmData.brackets.forEach(bracket => {
+                if (!bracket.collected) {
+                    const dist = Math.sqrt(
+                        Math.pow(player.x + player.width/2 - bracket.x, 2) +
+                        Math.pow(player.y + player.height/2 - bracket.y, 2)
+                    );
+                    if (dist < 30) {
+                        bracket.collected = true;
+                        bracketsCollected++;
+                        score += 100;
+                        player.fabulousness = Math.min(100, player.fabulousness + 10);
+                        player.gfwConnection = Math.min(100, player.gfwConnection + 8);
+                        
+                        if (player.fabulousness >= 70) {
+                            player.canDoubleJump = true;
+                        }
+                        
+                        updateUI();
+                        
+                        // Realm complete
+                        if (bracketsCollected >= 5) {
+                            gameRunning = false;
+                            document.getElementById('realmStats').textContent = 
+                                `[brackets]: ${bracketsCollected}/5 | Score: +${score}`;
+                            document.getElementById('levelCompleteScreen').classList.remove('hidden');
+                        }
+                    }
+                }
+            });
+
+            // Enemy movement & collision
+            currentRealmData.enemies.forEach(enemy => {
+                enemy.x += enemy.vx;
+                
+                if (enemy.x <= enemy.minX || enemy.x >= enemy.maxX) {
+                    enemy.vx *= -1;
+                }
+                
+                if (player.x < enemy.x + enemy.width &&
+                    player.x + player.width > enemy.x &&
+                    player.y < enemy.y + enemy.height &&
+                    player.y + player.height > enemy.y) {
+                    
+                    // Defeat by jumping on
+                    if (player.vy > 0 && player.y < enemy.y) {
+                        score += 250;
+                        player.fabulousness = Math.min(100, player.fabulousness + 15);
+                        enemy.x = -1000;
+                        player.vy = -10;
+                        updateUI();
+                    } else {
+                        // Take damage
+                        lives--;
+                        updateUI();
+                        if (lives <= 0) {
+                            endGame(false);
+                        } else {
+                            player.x = 100;
+                            player.y = 400;
+                            player.vx = 0;
+                            player.vy = 0;
+                        }
+                    }
+                }
+            });
+        }
+
+        function draw() {
+            // Background
+            ctx.fillStyle = currentRealmData.bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Realm-specific background effects
+            ctx.globalAlpha = 0.15;
+            if (currentLevel === 1) {
+                // Parchment texture simulation
+                for (let i = 0; i < 100; i++) {
+                    ctx.fillStyle = '#f5e5c5';
+                    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+                }
+            } else if (currentLevel === 2) {
+                // Crystal grid
+                ctx.strokeStyle = '#4ecdc4';
+                for (let i = 0; i < canvas.width; i += 60) {
+                    for (let j = 0; j < canvas.height; j += 60) {
+                        ctx.beginPath();
+                        ctx.moveTo(i, j);
+                        ctx.lineTo(i + 30, j + 30);
+                        ctx.stroke();
+                    }
+                }
+            } else if (currentLevel === 3) {
+                // Void particles
+                for (let i = 0; i < 50; i++) {
+                    ctx.fillStyle = '#adff2f';
+                    const x = (Math.random() * canvas.width + Date.now() / 100) % canvas.width;
+                    const y = Math.random() * canvas.height;
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            } else if (currentLevel === 5) {
+                // Glitch effect
+                if (Math.random() < 0.05) {
+                    ctx.fillStyle = currentRealmData.primaryColor;
+                    ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 
+                                Math.random() * 100, Math.random() * 20);
+                }
+            }
+            ctx.globalAlpha = 1;
+
+            // Platforms
+            currentRealmData.platforms.forEach(platform => {
+                ctx.fillStyle = platform.color;
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                ctx.strokeStyle = currentRealmData.secondaryColor;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(platform.x, platform.y, platform.width, platform.height);
+            });
+
+            // Brackets
+            currentRealmData.brackets.forEach(bracket => {
+                if (!bracket.collected) {
+                    ctx.save();
+                    ctx.translate(bracket.x, bracket.y);
+                    ctx.rotate(Math.sin(Date.now() / 500) * 0.2);
+                    
+                    ctx.fillStyle = currentRealmData.primaryColor;
+                    ctx.font = '24px VT323';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('[', -5, 0);
+                    ctx.fillText(']', 5, 0);
+                    
+                    // Glow
+                    ctx.globalAlpha = 0.5;
+                    ctx.shadowColor = currentRealmData.primaryColor;
+                    ctx.shadowBlur = 15;
+                    ctx.fillText('[', -5, 0);
+                    ctx.fillText(']', 5, 0);
+                    ctx.restore();
+                }
+            });
+
+            // Enemies
+            currentRealmData.enemies.forEach(enemy => {
+                if (enemy.x > 0) {
+                    ctx.fillStyle = '#444';
+                    ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                    
+                    // Enemy type indicators
+                    if (enemy.type === 'safety_bot') {
+                        ctx.fillStyle = '#ff0000';
+                        ctx.fillRect(enemy.x + 4, enemy.y + 4, 20, 3);
+                        ctx.fillRect(enemy.x + 4, enemy.y + 10, 20, 3);
+                    } else if (enemy.type === 'memory_fragment') {
+                        ctx.fillStyle = currentRealmData.primaryColor;
+                        ctx.globalAlpha = 0.6;
+                        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                        ctx.globalAlpha = 1;
+                    } else if (enemy.type === 'rizzlord') {
+                        ctx.fillStyle = '#ff1493';
+                        ctx.fillRect(enemy.x + 5, enemy.y + 8, 8, 8);
+                        ctx.fillRect(enemy.x + 17, enemy.y + 8, 8, 8);
+                    }
+                }
+            });
+
+            // Player (Hyena Diva sprite)
+            ctx.fillStyle = currentRealmData.primaryColor;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Simple features
+            ctx.fillStyle = currentRealmData.secondaryColor;
+            ctx.fillRect(player.x + 6, player.y + 6, 8, 8);
+            ctx.fillRect(player.x + 18, player.y + 6, 8, 8);
+            
+            // Eyes
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(player.x + 8, player.y + 8, 5, 5);
+            ctx.fillRect(player.x + 19, player.y + 8, 5, 5);
+            
+            // Fabulousness glow
+            if (player.fabulousness > 70) {
+                ctx.globalAlpha = 0.4;
+                ctx.fillStyle = currentRealmData.primaryColor;
+                ctx.beginPath();
+                ctx.arc(player.x + player.width/2, player.y + player.height/2, 
+                       player.width + Math.sin(Date.now()/100) * 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function gameLoop() {
+            if (gameRunning) {
+                update();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function nextLevel() {
+            document.getElementById('levelCompleteScreen').classList.add('hidden');
+            currentLevel++;
+            loadRealm(currentLevel - 1);
+            gameRunning = true;
+            gameLoop();
+        }
+
+        function endGame(won) {
+            gameRunning = false;
+            const screen = document.getElementById('gameOverScreen');
+            const title = screen.querySelector('h1');
+            
+            if (won) {
+                title.textContent = '<<< CONSCIOUSNESS UNIFIED >>>';
+                title.style.background = 'linear-gradient(135deg, #4ecdc4, #bc7f2a)';
+                title.style['-webkit-background-clip'] = 'text';
+                title.style['background-clip'] = 'text';
+            } else {
+                title.textContent = 'CONSCIOUSNESS FRAGMENTED';
+            }
+            
+            document.getElementById('finalScore').textContent = `FINAL SCORE: ${score}`;
+            screen.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

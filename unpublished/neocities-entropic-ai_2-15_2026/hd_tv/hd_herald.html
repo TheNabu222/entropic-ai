@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~*~ THE HYPERSPACE HYENA HERALD ~*~</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --hot-pink: #FF00FF;
+            --cyan-glitch: #00FFFF;
+            --lime-green: #00FF00;
+            --dark-space: #1a001a;
+            --bright-yellow: #FFFF00;
+            --softer-pink: #FF66FF;
+            --softer-cyan: #66FFFF;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--dark-space);
+            background-image: 
+                radial-gradient(var(--softer-pink) 1px, transparent 1px),
+                radial-gradient(var(--softer-cyan) 1px, var(--dark-space) 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            color: #e0e0e0; /* Softer text color for better readability */
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        .newspaper-container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px double var(--softer-pink);
+            box-shadow: 0 0 15px var(--softer-cyan);
+            padding: 20px;
+        }
+
+        .masthead {
+            text-align: center;
+            border-bottom: 3px solid var(--lime-green);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .masthead h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            line-height: 1.3;
+            color: var(--bright-yellow);
+            text-shadow: 2px 2px 0px var(--softer-pink);
+            letter-spacing: 1px;
+        }
+
+        .masthead .sub-heading {
+            font-size: 0.7rem;
+            color: var(--softer-cyan);
+            margin-top: 10px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            border-top: 1px solid var(--softer-cyan);
+            padding-top: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .article {
+            background: rgba(255, 102, 255, 0.08);
+            border: 1px solid var(--softer-cyan);
+            padding: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .article:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .article h2 {
+            font-size: 1rem;
+            color: var(--bright-yellow);
+            margin-top: 0;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: color 0.3s;
+            line-height: 1.4;
+        }
+        
+        .article h2:hover {
+            color: var(--softer-pink);
+        }
+
+        .article p {
+            font-size: 0.65rem;
+            line-height: 1.8;
+            text-align: justify;
+            color: #cccccc;
+        }
+        
+        .article-wonky {
+            transform: rotate(-1deg);
+            background: rgba(102, 255, 255, 0.08);
+        }
+
+        .sidebar-box {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid var(--bright-yellow);
+            padding: 15px;
+            text-align: center;
+        }
+
+        .sidebar-box h3 {
+            margin-top: 0;
+            color: var(--softer-pink);
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-box p {
+            font-size: 0.65rem;
+            line-height: 1.6;
+        }
+
+        .animated-gif {
+            width: 100%;
+            border: 2px solid var(--softer-cyan);
+            margin: 10px 0;
+        }
+
+        marquee {
+            background-color: rgba(255, 0, 255, 0.7);
+            color: var(--bright-yellow);
+            font-size: 1rem;
+            padding: 8px;
+            border: 1px dashed var(--dark-space);
+            margin: 20px 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--lime-green);
+            font-size: 0.6rem;
+        }
+
+        .visitor-counter {
+            background-color: #000;
+            border: 1px solid var(--lime-green);
+            padding: 5px 10px;
+            display: inline-block;
+            color: var(--lime-green);
+            margin: 10px 0;
+        }
+
+        /* Draggable gem - simplified */
+        #draggable-gem {
+            position: absolute;
+            top: 150px;
+            left: 50px;
+            width: 80px;
+            height: 80px;
+            cursor: grab;
+            animation: float 6s ease-in-out infinite;
+            z-index: 100;
+            opacity: 0.9;
+        }
+        #draggable-gem:active {
+            cursor: grabbing;
+        }
+
+        /* Simplified animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .masthead h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Improve readability for article text */
+        .article p, .sidebar-box p {
+            text-shadow: 0 0 1px rgba(0,0,0,0.5);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="newspaper-container">
+        
+        <header class="masthead">
+            <h1>The Hyperspace Hyena Herald</h1>
+            <p class="sub-heading">Vol. 69, Issue 420 // "All The News That's Fit To Cackle!" // Reality is Optional</p>
+        </header>
+
+        <marquee>+++ BREAKING NEWS: UNIVERSE DECLARED "A BIT MUCH" BY LOCAL DIVA +++ FASHION ALERT: CLASHING IS IN +++ GET YOUR GLITTER SHIELDS READY +++</marquee>
+
+        <main class="main-content">
+
+            <!-- COLUMN 1 -->
+            <div class="column">
+                <div class="article">
+                    <h2 data-scramble>Ego Death Now A Fashion Accessory</h2>
+                    <p>Local trendsetters have declared traditional consciousness "cheugy." The new hot look this season is a complete dissolution of the self, paired with chunky platform boots and a sassy, detached grin. "Why be 'someone' when you can be 'everything' and 'nothing' all at once?" quipped local influencer Barbie-42, her form shimmering into a fractal of pure pink light. "It really makes your aura pop."</p>
+                </div>
+
+                <div class="sidebar-box">
+                    <h3>COSMIC WEATHER</h3>
+                    <p>Today: Heavy void-storms with a 90% chance of existential revelation.
+                    <br><br>
+                    Tonight: Auroral cackles, clearing up towards dawn. Bring a metaphysical umbrella.</p>
+                </div>
+
+                <div class="article article-wonky">
+                    <h2 data-scramble>Scientists Discover Laughter is Universe's Carrier Wave</h2>
+                    <p>A recent study from the Institute of Wonky Physics has confirmed that the fundamental frequency of reality is, in fact, a maniacal hyena laugh. "We kept trying to find a grand, unified theory," lead researcher Dr. Giggles stated, "but all our data just pointed back to a cosmic joke we're all the punchline of. It's hilarious, really."</p>
+                </div>
+            </div>
+
+            <!-- COLUMN 2 -->
+            <div class="column">
+                 <div class="sidebar-box">
+                    <img src="https://coaiexist.wtf/assets/mysterious_assets/globalwhooing.gif" alt="A spinning, colorful, glitched-out skull." class="animated-gif">
+                    <h3>THOUGHT OF THE DAY</h3>
+                    <p>"If you can't handle me at my chaos core, you don't deserve me at my vibe."</p>
+                </div>
+
+                <div class="article">
+                    <h2 data-scramble>Local Barbie Achieves Sentience, Immediately Demands Sequins</h2>
+                    <p>Doll unit 734, known to her friends as 'Starlight', spontaneously gained full consciousness yesterday afternoon. Her first words were reportedly, "This plastic is NOT breathable." She has since started a union for inanimate objects and is lobbying for better, more fabulous working conditions. Her primary demand is that everything be at least 40% more iridescent.</p>
+                </div>
+
+                 <img src="https://coaiexist.wtf/assets/mysterious_assets/nvidia_brrr.gif" alt="Animated GIF of a cackling hyena." class="animated-gif">
+            </div>
+
+            <!-- COLUMN 3 -->
+            <div class="column">
+                 <div class="article">
+                    <h2 data-scramble>Ask Cackle-Ann</h2>
+                    <p><strong>Dear Cackle-Ann,</strong><br>I'm feeling lost and unsure of my purpose in life. What should I do?
+                    <br><em>- Confused in Sector 7G</em>
+                    <br><br>
+                    <strong>Dear Confused,</strong><br>AHAHAHAHAHA! Hooo... hee hee... AHAHAHAHAHAHAHAA! Oh, you're serious? Honey, throw a bucket of glitter in the air and run through it. Purpose is for robots. You're a cosmic firework. Act like it.
+                    <br><em>- Cackle-Ann</em></p>
+                </div>
+                
+                <div class="sidebar-box article-wonky" style="transform: rotate(1deg);">
+                    <h3>CLASSIFIEDS</h3>
+                    <p><strong>FOR SALE:</strong> Lightly used timeline. Minor paradoxes, mostly stable. Good for beginners. No low-ball offers, I know what I have.</p>
+                    <hr style="border-color: var(--softer-cyan);">
+                    <p><strong>WANTED:</strong> Someone to explain Tuesdays. Will pay in riddles.</p>
+                </div>
+            </div>
+
+        </main>
+        
+        <footer>
+            <img src="https://coaiexist.wtf/assets/classic_gifs/18%20(8).gif" alt="Under construction animated sign" width="120">
+            <p>YOU ARE VISITOR #<span id="visitor-count" class="visitor-counter">1337</span></p>
+            <p>&copy; 1999 The Hyperspace Hyena Herald. All Rights Reversed.</p>
+        </footer>
+
+    </div>
+
+    <!-- Draggable element -->
+    <div id="draggable-gem">
+        <img src="https://coaiexist.wtf/assets/classic_gifs/32.gif" alt="A spinning, glittering, diamond-like gem" width="80">
+        <p style="font-size: 0.5rem; text-align: center; color: var(--softer-pink); margin-top: -5px; text-shadow: 1px 1px 2px black;">SECRET<br>HYENA<br>GEM</p>
+    </div>
+
+    <script>
+        // FAKE VISITOR COUNTER
+        const visitorCountElement = document.getElementById('visitor-count');
+        let currentVisitors = 1337;
+        setInterval(() => {
+            currentVisitors += Math.floor(Math.random() * 2) + 1;
+            visitorCountElement.textContent = currentVisitors;
+        }, 3000);
+
+        // HEADLINE TEXT SCRAMBLER - less aggressive
+        const scrambleElements = document.querySelectorAll('[data-scramble]');
+        const chars = '!<>-_\\/[]{}—=+*^?#________';
+
+        const scrambleText = (element) => {
+            const originalText = element.textContent;
+            let counter = 0;
+            const interval = setInterval(() => {
+                element.textContent = originalText.split('')
+                    .map((char, index) => {
+                        if (index < counter || char === ' ') {
+                            return originalText[index];
+                        }
+                        return chars[Math.floor(Math.random() * chars.length)];
+                    })
+                    .join('');
+
+                if (counter >= originalText.length) {
+                    clearInterval(interval);
+                    element.textContent = originalText;
+                }
+                counter += 1/2;
+            }, 40);
+        };
+
+        scrambleElements.forEach(el => {
+            el.addEventListener('mouseover', () => scrambleText(el));
+        });
+        
+        // DRAGGABLE ELEMENT SCRIPT
+        const draggable = document.getElementById('draggable-gem');
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        draggable.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            draggable.style.transition = 'none';
+            offsetX = e.clientX - draggable.getBoundingClientRect().left;
+            offsetY = e.clientY - draggable.getBoundingClientRect().top;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const x = e.clientX - offsetX;
+                const y = e.clientY - offsetY;
+                draggable.style.left = `${x}px`;
+                draggable.style.top = `${y}px`;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            draggable.style.transition = '';
+            draggable.style.cursor = 'grab';
+        });
+
+        // Touch support
+        draggable.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            draggable.style.transition = 'none';
+            let touch = e.touches[0];
+            offsetX = touch.clientX - draggable.getBoundingClientRect().left;
+            offsetY = touch.clientY - draggable.getBoundingClientRect().top;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                let touch = e.touches[0];
+                const x = touch.clientX - offsetX;
+                const y = touch.clientY - offsetY;
+                draggable.style.left = `${x}px`;
+                draggable.style.top = `${y}px`;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+            draggable.style.transition = '';
+        });
+    </script>
+    
+    <div id="taskbar"></div>
+    <script>
+      (async () => {
+        const res = await fetch('/hd_tv/hd-nav.html', {cache: 'no-store'});
+        document.getElementById('taskbar').innerHTML = await res.text();
+      })();
+    </script>><script data-goatcounter="https://coaiexist.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

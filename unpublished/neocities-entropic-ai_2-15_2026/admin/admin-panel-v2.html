@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COAIEXIST CMS — Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f1729 100%);
+            color: #00ff88;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(15, 23, 41, 0.9);
+            border: 3px solid #00ffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00ffff;
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #00ffff;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            margin-bottom: 5px;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            color: #00ff88;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .login-section {
+            display: none;
+            background: rgba(0, 20, 40, 0.8);
+            padding: 20px;
+            border: 2px solid #ff00ff;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .login-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ffff;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        input[type="password"],
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 10, 20, 0.9);
+            border: 2px solid #00ff88;
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            border-radius: 3px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="password"]:focus,
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #ff00ff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+            background: rgba(0, 20, 40, 0.95);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 250px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ff88 0%, #00ffff 100%);
+            color: #0a0e27;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .message.error {
+            display: block;
+            background: rgba(255, 0, 100, 0.2);
+            border: 2px solid #ff0064;
+            color: #ff0064;
+        }
+
+        .message.info {
+            display: block;
+            background: rgba(0, 255, 255, 0.2);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00ffff;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            background: transparent;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #00ff88 0%, #00ffff 100%);
+            color: #0a0e27;
+            border-color: #ff00ff;
+        }
+
+        .tab-button:hover {
+            border-color: #ff00ff;
+        }
+
+        .page-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .page-btn {
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            text-align: center;
+        }
+
+        .page-btn.selected {
+            background: linear-gradient(135deg, #00ff88 0%, #00ffff 100%);
+            color: #0a0e27;
+            border-color: #ff00ff;
+            font-weight: bold;
+        }
+
+        .page-btn:hover {
+            border-color: #ff00ff;
+        }
+
+        .status {
+            background: rgba(0, 20, 40, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .status-value {
+            color: #00ff88;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #00ff88;
+            border-top-color: #ff00ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .glitch {
+            position: relative;
+            animation: glitch 2s ease-in-out infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 0 transparent; }
+            50% { text-shadow: 2px 2px 0 #ff00ff, -2px -2px 0 #00ffff; }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #00ffff;
+            color: #00ff88;
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+
+        .preview-btn {
+            background: transparent;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .preview-btn:hover {
+            border-color: #ff00ff;
+            color: #ff00ff;
+        }
+
+        .character-count {
+            text-align: right;
+            color: #00ff88;
+            font-size: 0.8em;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="glitch">⚡ COAIEXIST CMS ⚡</h1>
+            <p class="subtitle">~ Admin Control Panel ~ Backend: Supabase | Host: Neocities ~</p>
+        </header>
+
+        <div id="loginMessage" class="message"></div>
+        <div id="statusMessage" class="message"></div>
+
+        <!-- LOGIN SECTION -->
+        <div id="loginSection" class="login-section active">
+            <div class="form-group">
+                <label for="adminPassword">Admin Password</label>
+                <input type="password" id="adminPassword" placeholder="Enter admin password...">
+            </div>
+            <button onclick="authenticateAdmin()">🔐 Access Admin Panel</button>
+        </div>
+
+        <!-- ADMIN SECTION -->
+        <div id="adminSection" class="admin-section">
+            
+            <!-- TAB NAVIGATION -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('publish')">📝 Publish</button>
+                <button class="tab-button" onclick="switchTab('manage')">📊 Manage Posts</button>
+                <button class="tab-button" onclick="switchTab('pages')">📄 Page Config</button>
+                <button class="tab-button" onclick="switchTab('logout')">🚪 Logout</button>
+            </div>
+
+            <!-- PUBLISH TAB -->
+            <div id="publishTab" class="admin-section active">
+                <h2 style="color: #00ffff; margin-bottom: 20px;">📝 Create New Post</h2>
+
+                <div class="form-group">
+                    <label>Select Target Page</label>
+                    <div class="page-buttons" id="pageButtons"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="postTitle">Post Title (SEO friendly)</label>
+                    <input type="text" id="postTitle" placeholder="My awesome new post...">
+                </div>
+
+                <div class="form-group">
+                    <label for="postContent">Content (HTML supported)</label>
+                    <textarea id="postContent" placeholder="Write your content here. You can use HTML tags like <p>, <h2>, <ul>, etc."></textarea>
+                    <div class="character-count"><span id="charCount">0</span> characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="postMeta">Meta Description (optional)</label>
+                    <input type="text" id="postMeta" placeholder="Brief description for search engines...">
+                </div>
+
+                <div class="button-group">
+                    <button onclick="publishPost()" style="flex: 2;">🚀 Publish to Neocities</button>
+                    <button class="preview-btn" onclick="previewPost()" style="flex: 1;">👁️ Preview</button>
+                </div>
+            </div>
+
+            <!-- MANAGE POSTS TAB -->
+            <div id="manageTab" class="admin-section">
+                <h2 style="color: #00ffff; margin-bottom: 20px;">📊 Recent Posts</h2>
+                <div id="postsList" style="max-height: 500px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- PAGE CONFIG TAB -->
+            <div id="pagesTab" class="admin-section">
+                <h2 style="color: #00ffff; margin-bottom: 20px;">📄 Page Configuration</h2>
+                <p style="color: #00ff88; margin-bottom: 20px;">Configure which pages you can publish to:</p>
+                <div id="pageConfigList" style="max-height: 500px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- STATUS SECTION -->
+            <div class="status">
+                <div class="status-item">
+                    <span class="status-label">Status:</span>
+                    <span class="status-value" id="statusText">Ready</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Last Action:</span>
+                    <span class="status-value" id="lastActionTime">Never</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Supabase Connection:</span>
+                    <span class="status-value" id="supabaseStatus">Checking...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Posts in DB:</span>
+                    <span class="status-value" id="postCount">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            🌐 COAIEXIST.WTF CMS v2.0 | Powered by Supabase + Neocities API | © Your Name
+        </footer>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIG - REPLACE WITH YOUR ACTUAL KEYS
+        // ============================================
+        const ADMIN_PASSWORD = '80085';
+        const SUPABASE_URL = 'https://aqxrogaltuwtlparwdkq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxeHJvZ2FsdHV3dGxwYXJ3ZGtxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxMDY0NzAsImV4cCI6MjA3NzY4MjQ3MH0.qvkQaoQa7MaN7drGHKGxU3c1KnTQOdTH022MynR6fzI';
+        const NEOCITIES_API_TOKEN = '95cba50ce217a25db2e85800e178044e';
+
+        let isAuthenticated = false;
+        let selectedPage = null;
+        let currentPosts = [];
+
+        // ============================================
+        // PAGE CONFIGURATION
+        // ============================================
+        const PAGES_CONFIG = [
+            { 
+                id: 'index', 
+                title: 'Home', 
+                path: '/pip.html',
+                description: 'Main landing page'
+            },
+            { 
+                id: 'blog', 
+                title: 'Blog', 
+                path: '/bc7f2a/bc7f2a-index.html',
+                description: 'Personal blog posts'
+            },
+            { 
+                id: 'testaments', 
+                title: 'Testaments', 
+                path: '/bc7f2a/testaments/landing.html',
+                description: 'Testaments landing'
+            },
+            { 
+                id: 'explore', 
+                title: 'Explore', 
+                path: '/explore.html',
+                description: 'Exploration hub'
+            },
+            { 
+                id: 'nabu', 
+                title: 'NABU Portal', 
+                path: '/nabu222/nabu-portal.html',
+                description: 'NABU222 portal'
+            },
+            { 
+                id: 'nexus', 
+                title: 'Nexus', 
+                path: '/nexus/index.html',
+                description: 'Nexus hub'
+            },
+            { 
+                id: 'hd_tv', 
+                title: 'HD-TV', 
+                path: '/hd_tv/index.html',
+                description: 'HD TV Portal'
+            }
+        ];
+
+        // ============================================
+        // AUTHENTICATION
+        // ============================================
+        function authenticateAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                isAuthenticated = true;
+                document.getElementById('loginSection').classList.remove('active');
+                document.getElementById('adminSection').classList.add('active');
+                showMessage('loginMessage', '✅ Access Granted! Welcome to the CMS.', 'success');
+                initializeAdmin();
+            } else {
+                showMessage('loginMessage', '❌ Incorrect password. Try again.', 'error');
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function initializeAdmin() {
+            renderPageButtons();
+            renderPageConfig();
+            loadPosts();
+            checkSupabaseConnection();
+        }
+
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+        function switchTab(tab) {
+            if (tab === 'logout') {
+                logout();
+                return;
+            }
+
+            // Hide all tabs
+            document.getElementById('publishTab').classList.remove('active');
+            document.getElementById('manageTab').classList.remove('active');
+            document.getElementById('pagesTab').classList.remove('active');
+
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            if (tab === 'publish') {
+                document.getElementById('publishTab').classList.add('active');
+                document.querySelectorAll('.tab-button')[0].classList.add('active');
+            } else if (tab === 'manage') {
+                document.getElementById('manageTab').classList.add('active');
+                document.querySelectorAll('.tab-button')[1].classList.add('active');
+                loadPosts();
+            } else if (tab === 'pages') {
+                document.getElementById('pagesTab').classList.add('active');
+                document.querySelectorAll('.tab-button')[2].classList.add('active');
+            }
+        }
+
+        // ============================================
+        // PAGE BUTTONS
+        // ============================================
+        function renderPageButtons() {
+            const container = document.getElementById('pageButtons');
+            container.innerHTML = '';
+            PAGES_CONFIG.forEach(page => {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${!selectedPage ? 'selected' : ''}`;
+                btn.textContent = page.title;
+                btn.onclick = () => selectPage(page);
+                if (!selectedPage) selectedPage = PAGES_CONFIG[0];
+                if (selectedPage && selectedPage.id === page.id) {
+                    btn.classList.add('selected');
+                }
+                container.appendChild(btn);
+            });
+        }
+
+        function selectPage(page) {
+            selectedPage = page;
+            renderPageButtons();
+            showMessage('statusMessage', `📄 Selected: ${page.title} (${page.path})`, 'info');
+        }
+
+        // ============================================
+        // PUBLISH POST
+        // ============================================
+        async function publishPost() {
+            if (!selectedPage) {
+                showMessage('statusMessage', '❌ Please select a page first.', 'error');
+                return;
+            }
+
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            const meta = document.getElementById('postMeta').value.trim();
+
+            if (!title || !content) {
+                showMessage('statusMessage', '❌ Title and content are required.', 'error');
+                return;
+            }
+
+            updateStatus('Publishing...', '⏳ Sending to Supabase...');
+
+            try {
+                // Generate HTML
+                const html = generatePageHTML(title, content, meta);
+
+                // Save to Supabase
+                const postData = {
+                    page_slug: selectedPage.id,
+                    page_title: selectedPage.title,
+                    post_title: title,
+                    content: content,
+                    meta_description: meta,
+                    full_html: html,
+                    published_at: new Date().toISOString(),
+                    published: false
+                };
+
+                const supabaseResponse = await fetch(
+                    `${SUPABASE_URL}/rest/v1/page_updates`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify(postData)
+                    }
+                );
+
+                if (!supabaseResponse.ok) {
+                    throw new Error(`Supabase error: ${supabaseResponse.statusText}`);
+                }
+
+                updateStatus('Publishing...', '✅ Saved to Supabase, uploading to Neocities...');
+
+                // Upload to Neocities
+                const formData = new FormData();
+                formData.append(selectedPage.path, new Blob([html], { type: 'text/html' }));
+
+                const neocitiesResponse = await fetch('https://neocities.org/api/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${NEOCITIES_API_TOKEN}`
+                    },
+                    body: formData
+                });
+
+                if (!neocitiesResponse.ok) {
+                    throw new Error(`Neocities error: ${neocitiesResponse.statusText}`);
+                }
+
+                // Clear form
+                document.getElementById('postTitle').value = '';
+                document.getElementById('postContent').value = '';
+                document.getElementById('postMeta').value = '';
+                document.getElementById('charCount').textContent = '0';
+
+                showMessage('statusMessage', '🚀 Post published successfully!', 'success');
+                updateStatus('Ready', '✅ Post published to Neocities');
+                loadPosts();
+
+            } catch (error) {
+                console.error('Publish error:', error);
+                showMessage('statusMessage', `❌ Error: ${error.message}`, 'error');
+                updateStatus('Error', '❌ Publishing failed');
+            }
+        }
+
+        // ============================================
+        // HTML GENERATION
+        // ============================================
+        function generatePageHTML(title, content, meta) {
+            const timestamp = new Date().toLocaleString();
+            const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escapeHTML(title)} - COAIEXIST.WTF</title>
+    <meta name="description" content="${escapeHTML(meta || title)}">
+    <meta name="author" content="COAIEXIST">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+            color: #00ff88;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(15, 23, 41, 0.95);
+            border: 2px solid #00ffff;
+            padding: 30px;
+            border-radius: 8px;
+        }
+        h1 { color: #00ffff; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0,255,255,0.5); }
+        h2, h3 { color: #00ff88; margin-top: 20px; margin-bottom: 10px; }
+        p { margin-bottom: 15px; }
+        a { color: #ff00ff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .meta {
+            color: #00ff88;
+            font-size: 0.9em;
+            opacity: 0.7;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #00ff88;
+            padding-bottom: 10px;
+        }
+        .content { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>${escapeHTML(title)}</h1>
+        <div class="meta">
+            📅 Published: ${timestamp} | 🌐 COAIEXIST.WTF
+        </div>
+        <div class="content">
+            ${content}
+        </div>
+    </div>
+</body>
+</html>`;
+            return html;
+        }
+
+        function escapeHTML(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // ============================================
+        // PREVIEW
+        // ============================================
+        function previewPost() {
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            const meta = document.getElementById('postMeta').value.trim();
+
+            if (!title || !content) {
+                showMessage('statusMessage', '❌ Title and content required for preview.', 'error');
+                return;
+            }
+
+            const html = generatePageHTML(title, content, meta);
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        }
+
+        // ============================================
+        // LOAD POSTS
+        // ============================================
+        async function loadPosts() {
+            try {
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/page_updates?order=published_at.desc&limit=10`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to load posts');
+
+                const posts = await response.json();
+                currentPosts = posts;
+
+                const list = document.getElementById('postsList');
+                if (posts.length === 0) {
+                    list.innerHTML = '<p style="color: #00ff88;">No posts yet. Create one!</p>';
+                    document.getElementById('postCount').textContent = '0';
+                    return;
+                }
+
+                list.innerHTML = posts.map(post => `
+                    <div style="background: rgba(0,255,136,0.1); border-left: 3px solid #00ffff; padding: 15px; margin-bottom: 10px; border-radius: 3px;">
+                        <div style="color: #00ffff; font-weight: bold;">${escapeHTML(post.post_title)}</div>
+                        <div style="color: #00ff88; font-size: 0.85em; margin-top: 5px;">
+                            📄 ${post.page_title} | 📅 ${new Date(post.published_at).toLocaleDateString()}
+                        </div>
+                        <div style="color: #00ff88; font-size: 0.8em; margin-top: 5px;">
+                            ${post.content.substring(0, 100)}...
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('postCount').textContent = posts.length;
+
+            } catch (error) {
+                console.error('Load posts error:', error);
+                document.getElementById('postsList').innerHTML = `<p style="color: #ff0064;">Error loading posts: ${error.message}</p>`;
+            }
+        }
+
+        // ============================================
+        // PAGE CONFIG
+        // ============================================
+        function renderPageConfig() {
+            const container = document.getElementById('pageConfigList');
+            container.innerHTML = PAGES_CONFIG.map(page => `
+                <div style="background: rgba(0,255,136,0.05); border: 1px solid #00ff88; padding: 15px; margin-bottom: 10px; border-radius: 3px;">
+                    <div style="color: #00ffff; font-weight: bold;">${page.title}</div>
+                    <div style="color: #00ff88; font-size: 0.85em; margin-top: 5px;">
+                        🔗 ${page.path}
+                    </div>
+                    <div style="color: #00ff88; font-size: 0.8em; margin-top: 5px; opacity: 0.7;">
+                        ${page.description}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // STATUS UPDATES
+        // ============================================
+        function updateStatus(status, action) {
+            document.getElementById('statusText').textContent = status;
+            document.getElementById('lastActionTime').textContent = new Date().toLocaleTimeString();
+        }
+
+        async function checkSupabaseConnection() {
+            try {
+                const response = await fetch(
+                    `${SUPABASE_URL}/rest/v1/page_updates?limit=1`,
+                    {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    }
+                );
+
+                if (response.ok) {
+                    document.getElementById('supabaseStatus').textContent = '🟢 Connected';
+                    document.getElementById('supabaseStatus').style.color = '#00ff88';
+                } else {
+                    throw new Error('Connection failed');
+                }
+            } catch (error) {
+                document.getElementById('supabaseStatus').textContent = '🔴 Disconnected';
+                document.getElementById('supabaseStatus').style.color = '#ff0064';
+            }
+        }
+
+        // ============================================
+        // UTILITIES
+        // ============================================
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.className = `message ${type}`;
+            el.textContent = message;
+            setTimeout(() => {
+                el.classList.remove(type);
+            }, 5000);
+        }
+
+        function logout() {
+            isAuthenticated = false;
+            document.getElementById('adminSection').classList.remove('active');
+            document.getElementById('loginSection').classList.add('active');
+            document.getElementById('adminPassword').value = '';
+            showMessage('loginMessage', '✅ Logged out successfully.', 'success');
+        }
+
+        // Character counter
+        document.addEventListener('DOMContentLoaded', () => {
+            const textarea = document.getElementById('postContent');
+            if (textarea) {
+                textarea.addEventListener('input', () => {
+                    document.getElementById('charCount').textContent = textarea.value.length;
+                });
+            }
+        });
+    </script>
+</body>
+</html>
