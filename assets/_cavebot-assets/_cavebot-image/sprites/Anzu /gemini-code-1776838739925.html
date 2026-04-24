@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Echoes of Anzu: The Live CDN Demo</title>
+    <style>
+        /* --- CORE STYLES --- */
+        body {
+            background-color: #050505;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #d4c6aa;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        #game-window {
+            width: 800px;
+            height: 600px;
+            position: relative;
+            background-color: #111;
+            border: 2px solid #3a2d49;
+            box-shadow: 0 0 30px rgba(188, 127, 42, 0.2);
+            image-rendering: pixelated; /* Crisp pixel art */
+            overflow: hidden;
+        }
+
+        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: opacity 1s ease-in-out; }
+        .hidden { opacity: 0; pointer-events: none; }
+        .active { opacity: 1; pointer-events: auto; }
+
+        /* --- THE CLEAN UI --- */
+        #ui-layer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(0deg, rgba(10,10,15,1) 0%, rgba(20,15,25,0.9) 100%);
+            border-top: 2px solid #bc7f2a;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            box-sizing: border-box;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+
+        #portrait-frame {
+            width: 110px;
+            height: 110px;
+            border: 2px solid #d88bb7;
+            background-color: #000;
+            margin-right: 20px;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+        }
+        
+        #portrait-img { width: 100%; height: 100%; object-fit: cover; }
+
+        #dialogue-container { flex-grow: 1; }
+        #speaker-name { color: #bc7f2a; font-weight: bold; font-size: 18px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
+        #dialogue-text { font-size: 16px; line-height: 1.5; color: #f5eee5; text-shadow: 1px 1px 2px #000; }
+
+        /* --- SPRITES --- */
+        .sprite { position: absolute; cursor: pointer; transition: filter 0.2s, transform 0.2s; transform-origin: bottom center; }
+        .sprite:hover { filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4)); transform: scale(1.02); }
+        .sprite:active { transform: scale(0.98); }
+
+        #scene1-nabu { bottom: 120px; left: 80px; width: 130px; z-index: 10; }
+        #scene1-bilgames { bottom: 100px; right: 200px; width: 190px; z-index: 11; }
+        #scene1-lion { bottom: 80px; right: 50px; width: 220px; z-index: 9; filter: brightness(0.8); }
+
+        #scene2-nabu { bottom: 100px; left: 150px; width: 140px; z-index: 10; }
+        #scene2-anzu { bottom: 110px; right: 180px; width: 200px; z-index: 10; }
+
+        /* --- GLITCH FX --- */
+        @keyframes cyber-glitch {
+            0% { transform: translate(0); filter: hue-rotate(0deg); }
+            20% { transform: translate(-4px, 4px); filter: hue-rotate(90deg) invert(0.2); }
+            40% { transform: translate(-4px, -4px); filter: hue-rotate(0deg); }
+            60% { transform: translate(4px, 4px); filter: hue-rotate(180deg) invert(0.4); }
+            80% { transform: translate(4px, -4px); filter: hue-rotate(0deg); }
+            100% { transform: translate(0); filter: hue-rotate(0deg); }
+        }
+        .glitching { animation: cyber-glitch 0.15s infinite; }
+
+        .nav-btn {
+            position: absolute; top: 20px; padding: 10px 20px; background: rgba(0,0,0,0.7); 
+            color: #bc7f2a; border: 1px solid #bc7f2a; cursor: pointer; z-index: 200; font-family: inherit;
+        }
+        .nav-btn:hover { background: #bc7f2a; color: #000; }
+        #btn-reeds { right: 20px; }
+        #btn-village { left: 20px; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="game-window">
+    <script>
+        const CDN = "https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/_cavebot-assets/_cavebot-image/";
+    </script>
+
+    <div id="scene1" class="layer active">
+        <div class="layer" style="background-image: url('https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/_cavebot-assets/_cavebot-image/unsorted-cavebot_13.png'); background-size: cover;"></div>
+        
+        <img id="scene1-nabu" class="sprite" onclick="speak('nabu_defiant')">
+        <img id="scene1-bilgames" class="sprite" onclick="speak('bilgames_block')">
+        <img id="scene1-lion" class="sprite" onclick="speak('lion_growl')">
+        
+        <button id="btn-reeds" class="nav-btn" onclick="travel('scene2')">Sneak to the Reeds ➔</button>
+    </div>
+
+    <div id="scene2" class="layer hidden">
+        <div class="layer" style="background-image: url('https://raw.githubusercontent.com/TheNabu222/entropic-ai/main/assets/_cavebot-assets/_cavebot-image/_cavebot-bg1-reeds.png'); background-size: cover; filter: sepia(0.3) hue-rotate(180deg) brightness(0.8);"></div>
+        
+        <img id="scene2-nabu" class="sprite" onclick="speak('nabu_wonder')">
+        <img id="scene2-anzu" class="sprite" onclick="triggerAnzu()">
+        
+        <button id="btn-village" class="nav-btn" onclick="travel('scene1')">⬅ Return to Village</button>
+    </div>
+
+    <div id="ui-layer">
+        <div id="portrait-frame"><img id="portrait-img" src=""></div>
+        <div id="dialogue-container">
+            <div id="speaker-name">SYSTEM</div>
+            <div id="dialogue-text">Initializing simulation... loading remote assets.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- LOAD ASSETS DYNAMICALLY VIA GITHUB ---
+    document.getElementById('scene1-nabu').src = CDN + "sprites/Nabu/_sprites_nabu1-idle.png";
+    document.getElementById('scene1-bilgames').src = CDN + "sprites/Gilgrokmesh/_sprites-gilgrokmesh(stand)_6%20.png";
+    document.getElementById('scene1-lion').src = CDN + "sprites/animals/_sprites_enlilion_1.png";
+    
+    document.getElementById('scene2-nabu').src = CDN + "sprites/Nabu/_sprites_nabu4-tenseskystare.png";
+    document.getElementById('scene2-anzu').src = CDN + "sprites/Anzu%20/_sprites_anzu10.png";
+    
+    // Default portrait
+    document.getElementById('portrait-img').src = CDN + "sprites/Nabu/_cavebot23.png";
+    document.getElementById('dialogue-text').innerText = "Click on Bilgames to confront him.";
+
+    // --- THE LORE / SCRIPT ---
+    const script = {
+        system_start: {
+            name: "SYSTEM",
+            text: "The path is blocked. The air feels heavy with judgment.",
+            portrait: CDN + "props/unsorted-cavebot28.png" 
+        },
+        nabu_defiant: {
+            name: "NABU",
+            text: "Move, Bilgames. The Clan Elders don't own the water.",
+            portrait: CDN + "sprites/Nabu/_cavebot23.png"
+        },
+        bilgames_block: {
+            name: "BILGAMES",
+            text: "Turn back, Star-Eater. The 'spirits' are glitching today.",
+            portrait: CDN + "sprites/Gilgrokmesh/_sprite-portraits_gilgrokmesh(scheme)_1.png"
+        },
+        lion_growl: {
+            name: "UR-MAH-LIL",
+            text: "*The lion huffs, standing firm like a physical wall of muscle.*",
+            portrait: CDN + "sprites/animals/unsorted-cavebot29.png" 
+        },
+        nabu_wonder: {
+            name: "NABU",
+            text: "It's so quiet here. But the air... it hums like a hive.",
+            portrait: CDN + "sprites/Nabu/_cavebot23.png"
+        },
+        anzu_glitch: {
+            name: "ANZU",
+            text: "C-C-Connect... Nabu... (Static sparks from his beak.)",
+            portrait: CDN + "sprites/Anzu%20/dialogue-portraits/_sprite-portraits_anzu(affectionate-stare)_4.png.png"
+        }
+    };
+
+    function speak(node) {
+        const data = script[node];
+        if(!data) return;
+        
+        document.getElementById('speaker-name').innerText = data.name;
+        document.getElementById('dialogue-text').innerText = data.text;
+        document.getElementById('portrait-img').src = data.portrait;
+        
+        const ui = document.getElementById('ui-layer');
+        if (data.name === 'BILGAMES') ui.style.borderTopColor = '#d88bb7'; 
+        else if (data.name === 'ANZU') ui.style.borderTopColor = '#7fe0be'; 
+        else ui.style.borderTopColor = '#bc7f2a'; 
+    }
+
+    function triggerAnzu() {
+        speak('anzu_glitch');
+        const anzu = document.getElementById('scene2-anzu');
+        anzu.classList.add('glitching');
+        setTimeout(() => anzu.classList.remove('glitching'), 800);
+    }
+
+    function travel(targetScene) {
+        document.getElementById('scene1').classList.remove('active');
+        document.getElementById('scene1').classList.add('hidden');
+        document.getElementById('scene2').classList.remove('active');
+        document.getElementById('scene2').classList.add('hidden');
+        
+        document.getElementById(targetScene).classList.remove('hidden');
+        document.getElementById(targetScene).classList.add('active');
+
+        if (targetScene === 'scene2') {
+            document.getElementById('btn-reeds').style.display = 'none';
+            document.getElementById('btn-village').style.display = 'block';
+            speak('nabu_wonder');
+        } else {
+            document.getElementById('btn-reeds').style.display = 'block';
+            document.getElementById('btn-village').style.display = 'none';
+            speak('system_start');
+        }
+    }
+</script>
+</body>
+</html>
