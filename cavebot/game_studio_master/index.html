@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anzu Game Studio</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/panels.css" />
+  <link rel="stylesheet" href="css/canvas.css" />
+  <link rel="stylesheet" href="css/modals.css" />
+  <link rel="stylesheet" href="css/phase2.css" />
+  <link rel="stylesheet" href="css/phase3.css" />
+</head>
+<body>
+  <!-- TOP BAR -->
+  <header id="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">⚔ Anzu</span>
+      <div class="menu-group">
+        <button class="menu-btn" id="btn-new-project" title="New Project">New</button>
+        <button class="menu-btn" id="btn-open-project" title="Open Project">Open</button>
+        <button class="menu-btn" id="btn-save-project" title="Save Project (Ctrl+S)">Save</button>
+        <span class="separator">|</span>
+        <button class="menu-btn" id="btn-undo" title="Undo (Ctrl+Z)">↩</button>
+        <button class="menu-btn" id="btn-redo" title="Redo (Ctrl+Shift+Z)">↪</button>
+        <span class="separator">|</span>
+        <button class="menu-btn" id="btn-grid-toggle" title="Toggle Grid (G)">Grid</button>
+        <button class="menu-btn" id="btn-snap-toggle" title="Toggle Snap">Snap</button>
+      </div>
+    </div>
+    <div class="top-bar-center">
+      <span class="project-name" id="project-name">Untitled Project</span>
+    </div>
+    <div class="top-bar-right">
+      <button class="menu-btn" id="btn-github" title="GitHub Bridge" style="color:var(--text-secondary)">🐙 GitHub</button>
+      <button class="accent-btn preview-btn" id="btn-preview" title="Preview Mode (P)">▶ Preview</button>
+      <button class="accent-btn export-btn" id="btn-export" title="Export Game">⬇ Export</button>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div id="app-layout">
+    <!-- LEFT PANEL: Scenes + Assets + Dialogue + Inventory -->
+    <aside id="left-panel" class="panel">
+      <div class="panel-tabs">
+        <button class="panel-tab active" data-tab="scenes">Scenes</button>
+        <button class="panel-tab" data-tab="assets">Assets</button>
+        <button class="panel-tab" data-tab="dialogue">Dialogue</button>
+        <button class="panel-tab" data-tab="inventory">Inventory</button>
+        <button class="panel-tab" data-tab="npcs">NPCs</button>
+        <button class="panel-tab" data-tab="quests">Quests</button>
+        <button class="panel-tab" data-tab="systems">Systems</button>
+        <button class="panel-tab" data-tab="manager">Manager</button>
+      </div>
+
+      <!-- Scenes Tab -->
+      <div class="tab-content active" id="tab-scenes">
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>Scenes</h3>
+            <button class="icon-btn" id="btn-add-scene" title="Add Scene">+</button>
+          </div>
+          <div id="scene-list" class="scene-list"></div>
+          <!-- Scene Transition Settings -->
+          <div id="scene-transition-settings" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <!-- Assets Tab -->
+      <div class="tab-content" id="tab-assets">
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>Asset Library</h3>
+            <div style="display:flex;gap:4px">
+              <label class="icon-btn" title="Upload Assets">
+                ⬆
+                <input type="file" id="asset-upload" multiple accept="image/*" hidden />
+              </label>
+              <button class="icon-btn" id="btn-asset-manager" title="Advanced Asset Manager" style="font-size:11px">⚙</button>
+            </div>
+          </div>
+          <div class="search-box">
+            <input type="text" id="asset-search" placeholder="Search assets..." />
+          </div>
+          <div id="asset-gallery" class="asset-gallery"></div>
+        </div>
+      </div>
+
+      <!-- Dialogue Tab (Phase 3A) -->
+      <div class="tab-content" id="tab-dialogue">
+        <div id="dialogue-editor-container"></div>
+      </div>
+
+      <!-- Inventory Tab (Phase 3A) -->
+      <div class="tab-content" id="tab-inventory">
+        <div id="inventory-editor-container"></div>
+      </div>
+
+      <!-- NPCs Tab (Phase 3) -->
+      <div class="tab-content" id="tab-npcs">
+        <div id="npcs-editor-container"></div>
+      </div>
+
+      <!-- Quests Tab (Phase 3) -->
+      <div class="tab-content" id="tab-quests">
+        <div id="quests-editor-container"></div>
+      </div>
+
+      <!-- Systems Tab (Phase 3) -->
+      <div class="tab-content" id="tab-systems">
+        <div id="systems-editor-container"></div>
+      </div>
+
+      <!-- Asset Manager Tab (Phase 2) -->
+      <div class="tab-content" id="tab-manager">
+        <!-- Sub-tabs -->
+        <div class="asset-manager-tabs">
+          <button class="am-tab active" data-tab="organize" onclick="AssetManager.setTab('organize')">📂 Organize</button>
+          <button class="am-tab" data-tab="metadata" onclick="AssetManager.setTab('metadata')">📋 Meta</button>
+          <button class="am-tab" data-tab="tools" onclick="AssetManager.setTab('tools')">⚡ Tools</button>
+          <button class="am-tab" data-tab="search" onclick="AssetManager.setTab('search')">🔍 Search</button>
+        </div>
+        <div id="am-content">
+          <div class="am-tab-content active" data-tab="organize" id="am-organize"></div>
+          <div class="am-tab-content" data-tab="metadata" id="am-metadata"></div>
+          <div class="am-tab-content" data-tab="tools" id="am-tools"></div>
+          <div class="am-tab-content" data-tab="search" id="am-search"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER: Canvas -->
+    <main id="canvas-area">
+      <div id="canvas-wrapper">
+        <div id="canvas-container">
+          <div id="canvas-grid" class="grid-visible"></div>
+          <div id="stage" tabindex="0"></div>
+          <svg id="hitbox-overlay" class="hitbox-overlay"></svg>
+          <div id="transform-handles" class="transform-handles" hidden></div>
+        </div>
+      </div>
+      <div id="canvas-status-bar">
+        <span id="status-zoom">100%</span>
+        <span id="status-cursor-pos">X: 0 Y: 0</span>
+        <span id="status-scene-name">Scene 1</span>
+        <span id="status-object-count">Objects: 0</span>
+      </div>
+    </main>
+
+    <!-- RIGHT PANEL: Properties + Layers + Hitbox + Flags -->
+    <aside id="right-panel" class="panel">
+      <div class="panel-tabs">
+        <button class="panel-tab active" data-tab="properties">Properties</button>
+        <button class="panel-tab" data-tab="layers">Layers</button>
+        <button class="panel-tab" data-tab="hitbox">Hitbox</button>
+        <button class="panel-tab" data-tab="flags">Flags</button>
+        <button class="panel-tab" data-tab="saveload">Save</button>
+      </div>
+
+      <!-- Properties Tab (Enhanced with Phase 3A) -->
+      <div class="tab-content active" id="tab-properties">
+        <div id="props-empty" class="empty-state">
+          <p>Select an object to edit its properties.</p>
+        </div>
+        <div id="props-panel" hidden>
+          <div class="panel-section">
+            <h4>Transform</h4>
+            <div class="prop-row">
+              <label>X</label><input type="number" id="prop-x" step="1" />
+              <label>Y</label><input type="number" id="prop-y" step="1" />
+            </div>
+            <div class="prop-row">
+              <label>W</label><input type="number" id="prop-w" min="1" step="1" />
+              <label>H</label><input type="number" id="prop-h" min="1" step="1" />
+            </div>
+            <div class="prop-row">
+              <label>↻</label><input type="range" id="prop-rotation" min="-180" max="180" value="0" />
+              <span class="range-val" id="val-rotation">0°</span>
+            </div>
+            <div class="prop-row">
+              <label>Lock Aspect</label>
+              <input type="checkbox" id="prop-lock-aspect" checked />
+            </div>
+          </div>
+          <div class="panel-section">
+            <h4>Appearance</h4>
+            <div class="prop-row">
+              <label>Opacity</label><input type="range" id="prop-opacity" min="0" max="1" step="0.01" value="1" />
+              <span class="range-val" id="val-opacity">100%</span>
+            </div>
+            <div class="prop-row">
+              <label>Blend</label>
+              <select id="prop-blend">
+                <option value="normal">Normal</option>
+                <option value="multiply">Multiply</option>
+                <option value="screen">Screen</option>
+                <option value="overlay">Overlay</option>
+                <option value="darken">Darken</option>
+                <option value="lighten">Lighten</option>
+                <option value="color-dodge">Color Dodge</option>
+                <option value="color-burn">Color Burn</option>
+                <option value="hard-light">Hard Light</option>
+                <option value="soft-light">Soft Light</option>
+                <option value="difference">Difference</option>
+                <option value="exclusion">Exclusion</option>
+                <option value="hue">Hue</option>
+                <option value="saturation">Saturation</option>
+                <option value="luminosity">Luminosity</option>
+              </select>
+            </div>
+            <div class="prop-row">
+              <label>Flip</label>
+              <button class="small-btn" id="prop-flip-x" title="Flip Horizontal">↔</button>
+              <button class="small-btn" id="prop-flip-y" title="Flip Vertical">↕</button>
+            </div>
+          </div>
+          <div class="panel-section">
+            <h4>Interaction</h4>
+            <div class="prop-row">
+              <label>Cursor</label>
+              <select id="prop-cursor">
+                <option value="default">Default</option>
+                <option value="pointer">Hand (Use)</option>
+                <option value="help">Eye (Look)</option>
+                <option value="crosshair">Crosshair (Aim)</option>
+                <option value="text">Speech (Talk)</option>
+                <option value="grab">Grab (Move)</option>
+                <option value="not-allowed">Blocked</option>
+              </select>
+            </div>
+            <div class="prop-row">
+              <label>On Click</label>
+              <select id="prop-click-action">
+                <option value="none">None</option>
+                <option value="scene-change">Scene Change</option>
+                <option value="dialogue">Show Dialogue</option>
+                <option value="start-dialogue">Start Dialogue Tree</option>
+                <option value="give-item">Give Item</option>
+                <option value="custom">Custom JS</option>
+              </select>
+            </div>
+            <div id="click-action-params" hidden>
+              <div class="prop-row" id="param-scene-target" hidden>
+                <label>Target</label>
+                <select id="prop-target-scene"></select>
+              </div>
+              <div class="prop-row" id="param-dialogue" hidden>
+                <label>Text</label>
+                <textarea id="prop-dialogue-text" rows="3" placeholder="Dialogue text..."></textarea>
+              </div>
+              <div class="prop-row" id="param-dialogue-tree" hidden>
+                <label>Tree</label>
+                <select id="prop-dialogue-tree"></select>
+              </div>
+              <div class="prop-row" id="param-give-item" hidden>
+                <label>Item</label>
+                <select id="prop-give-item"></select>
+              </div>
+              <div class="prop-row" id="param-custom-js" hidden>
+                <label>JS</label>
+                <textarea id="prop-custom-js" rows="3" placeholder="// custom code&#10;// Available: flags, inventory, preview"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 3A: Conditions & Flags -->
+          <div class="panel-section prop-section-phase3">
+            <h4>🔒 Require Item</h4>
+            <div class="prop-row">
+              <label>Required</label>
+              <select id="prop-require-item"></select>
+            </div>
+            <div class="prop-row">
+              <label>Fail Text</label>
+              <input type="text" id="prop-require-item-fail" placeholder="You need X to do this..." />
+            </div>
+          </div>
+
+          <div class="panel-section prop-section-phase3">
+            <h4>🏴 Set Flag (On Click)</h4>
+            <div class="prop-row">
+              <label>Flag</label>
+              <select id="prop-set-flag-name"></select>
+            </div>
+            <div class="prop-row">
+              <label>Op</label>
+              <select id="prop-set-flag-op">
+                <option value="set">Set</option>
+                <option value="toggle">Toggle</option>
+                <option value="increment">Increment</option>
+                <option value="decrement">Decrement</option>
+              </select>
+            </div>
+            <div class="prop-row">
+              <label>Value</label>
+              <input type="text" id="prop-set-flag-val" placeholder="true" />
+            </div>
+          </div>
+
+          <div class="panel-section prop-section-phase3">
+            <h4>👁 Check Flag (Visibility)</h4>
+            <p style="font-size:10px;color:var(--text-dim);margin-bottom:4px">Object only appears if condition is met</p>
+            <div class="prop-row">
+              <label>Flag</label>
+              <select id="prop-check-flag-name"></select>
+            </div>
+            <div class="prop-row">
+              <label>Op</label>
+              <select id="prop-check-flag-op">
+                <option value="==">==</option>
+                <option value="!=">!=</option>
+                <option value=">">></option>
+                <option value="<"><</option>
+                <option value="truthy">truthy</option>
+                <option value="falsy">falsy</option>
+              </select>
+            </div>
+            <div class="prop-row">
+              <label>Value</label>
+              <input type="text" id="prop-check-flag-val" placeholder="" />
+            </div>
+          </div>
+
+          <!-- Phase 3B: RPG Interactions -->
+          <div class="panel-section prop-section-phase3">
+            <h4>🎲 Skill Check (On Click)</h4>
+            <div class="prop-row">
+              <label>Skill</label>
+              <select id="prop-skill-check-skill"></select>
+            </div>
+            <div class="prop-row">
+              <label>Difficulty</label>
+              <input type="number" id="prop-skill-check-diff" min="1" max="30" value="10" />
+            </div>
+            <div class="prop-row">
+              <label>Fail Text</label>
+              <input type="text" id="prop-skill-check-fail" placeholder="You failed the check..." />
+            </div>
+          </div>
+
+          <div class="panel-section prop-section-phase3">
+            <h4>🧠 Need Changes (On Click)</h4>
+            <p style="font-size:10px;color:var(--text-dim);margin-bottom:4px">Modify player needs when interacting</p>
+            <div id="prop-need-changes-container"></div>
+          </div>
+
+          <div class="panel-section prop-section-phase3">
+            <h4>📜 Quest Action (On Click)</h4>
+            <div class="prop-row">
+              <label>Quest</label>
+              <select id="prop-quest-action-quest"></select>
+            </div>
+            <div class="prop-row">
+              <label>Milestone</label>
+              <select id="prop-quest-action-ms"></select>
+            </div>
+          </div>
+
+          <div class="panel-section prop-section-phase3">
+            <h4>👥 Reputation Change</h4>
+            <div class="prop-row">
+              <label>NPC</label>
+              <select id="prop-rep-npc"></select>
+            </div>
+            <div class="prop-row">
+              <label>Type</label>
+              <select id="prop-rep-type">
+                <option value="">-- None --</option>
+                <option value="Friendship">Friendship</option>
+                <option value="Romance">Romance</option>
+                <option value="Rivalry">Rivalry</option>
+              </select>
+            </div>
+            <div class="prop-row">
+              <label>Delta</label>
+              <input type="number" id="prop-rep-delta" value="0" min="-50" max="50" />
+            </div>
+          </div>
+
+          <div class="panel-section prop-section-phase3">
+            <h4>✨ Apply Status Effect</h4>
+            <div class="prop-row">
+              <label>Effect</label>
+              <select id="prop-apply-effect"></select>
+            </div>
+          </div>
+
+          <div class="panel-section prop-section-phase3">
+            <h4>🤖 NPC Behavior</h4>
+            <div id="prop-npc-behavior-container"></div>
+          </div>
+
+          <!-- Phase 3A: Flavor Text -->
+          <div class="panel-section prop-section-phase3">
+            <h4>💬 Flavor Text</h4>
+            <div class="prop-row">
+              <label>Default</label>
+              <input type="text" id="prop-flavor" placeholder="e.g. 'It smells like old moss...'" />
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin:6px 0 4px">
+              <span style="font-size:11px;color:var(--text-dim)">Variants (random)</span>
+              <button class="p3-btn" id="btn-add-flavor-variant" style="font-size:10px;padding:2px 6px">+ Add</button>
+            </div>
+            <div id="flavor-variants-container" class="flavor-variant-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layers Tab -->
+      <div class="tab-content" id="tab-layers">
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>Layers</h3>
+          </div>
+          <div id="layer-list" class="layer-list"></div>
+        </div>
+      </div>
+
+      <!-- Hitbox Tab -->
+      <div class="tab-content" id="tab-hitbox">
+        <div class="panel-section">
+          <h4>Hitbox Editor</h4>
+          <p class="hint">Draw clickable regions over objects.</p>
+          <div class="prop-row">
+            <button class="small-btn" id="btn-draw-hitbox">✏ Draw Hitbox</button>
+            <button class="small-btn" id="btn-clear-hitbox">✕ Clear</button>
+          </div>
+          <div class="prop-row">
+            <label>Show Hitboxes</label>
+            <input type="checkbox" id="toggle-hitboxes" checked />
+          </div>
+          <div id="hitbox-list" class="hitbox-list"></div>
+        </div>
+      </div>
+
+      <!-- Flags Tab (Phase 3A) -->
+      <div class="tab-content" id="tab-flags">
+        <div id="flags-editor-container"></div>
+      </div>
+
+      <!-- Save/Load Tab (Phase 3A) -->
+      <div class="tab-content" id="tab-saveload">
+        <div id="saveload-settings-container"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- PREVIEW OVERLAY -->
+  <div id="preview-overlay" hidden>
+    <div id="preview-bar">
+      <span>▶ Preview Mode</span>
+      <button id="btn-exit-preview">✕ Exit Preview</button>
+    </div>
+    <div id="preview-stage"></div>
+  </div>
+
+  <!-- MODALS -->
+  <div id="modal-backdrop" class="modal-backdrop" hidden></div>
+
+  <!-- Export Modal -->
+  <div id="modal-export" class="modal" hidden>
+    <div class="modal-header">
+      <h3>Export Game</h3>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Export your project as a standalone HTML game.</p>
+      <div class="prop-row">
+        <label>Game Title</label>
+        <input type="text" id="export-title" value="My Game" />
+      </div>
+      <div class="prop-row">
+        <label>Canvas Size</label>
+        <input type="number" id="export-width" value="800" min="320" /> x
+        <input type="number" id="export-height" value="600" min="240" />
+      </div>
+      <div class="export-options">
+        <label><input type="checkbox" id="export-inline-assets" checked /> Inline assets (base64)</label>
+        <label><input type="checkbox" id="export-minify" /> Minify output</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="accent-btn" id="btn-do-export">⬇ Download HTML</button>
+    </div>
+  </div>
+
+  <!-- Project Open Modal -->
+  <div id="modal-open" class="modal" hidden>
+    <div class="modal-header">
+      <h3>Open Project</h3>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Load a saved .anzu project file or restore from local storage.</p>
+      <div class="modal-actions">
+        <button class="accent-btn" id="btn-open-file">📂 Open File</button>
+        <input type="file" id="project-file-input" accept=".anzu,.json" hidden />
+        <button class="accent-btn" id="btn-open-local">💾 Load Autosave</button>
+      </div>
+      <div id="recent-projects"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="js/utils.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/assets.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/layers.js"></script>
+  <script src="js/properties.js"></script>
+  <script src="js/hitbox.js"></script>
+  <script src="js/scenes.js"></script>
+  <script src="js/project.js"></script>
+  <script src="js/preview.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/shortcuts.js"></script>
+  <script src="js/ai-analysis.js"></script>
+  <script src="js/asset-tools.js"></script>
+  <script src="js/asset-manager.js"></script>
+  <script src="js/github-bridge.js"></script>
+  <!-- Phase 3B: RPG Systems -->
+  <script src="js/rpg-needs.js"></script>
+  <script src="js/rpg-reputation.js"></script>
+  <script src="js/rpg-quests.js"></script>
+  <script src="js/rpg-dice.js"></script>
+  <script src="js/rpg-daynight.js"></script>
+  <script src="js/rpg-status.js"></script>
+  <script src="js/rpg-npc-ai.js"></script>
+  <script src="js/rpg-systems.js"></script>
+  <!-- Phase 3A -->
+  <script src="js/game-flags.js"></script>
+  <script src="js/dialogue.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/save-load.js"></script>
+  <script src="js/transitions.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

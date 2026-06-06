@@ -1,0 +1,170 @@
+/* ===== CANVAS AREA ===== */
+#canvas-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-primary);
+  position: relative;
+}
+
+#canvas-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#canvas-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+#stage {
+  position: relative;
+  width: 800px;
+  height: 600px;
+  background: transparent;
+  outline: none;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--border);
+  z-index: 1;
+}
+
+/* Transparency grid */
+#canvas-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+#canvas-grid.grid-visible {
+  background-image:
+    linear-gradient(45deg, #1e2030 25%, transparent 25%),
+    linear-gradient(-45deg, #1e2030 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1e2030 75%),
+    linear-gradient(-45deg, transparent 75%, #1e2030 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  background-color: #16182a;
+}
+
+#canvas-grid.snap-grid {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(124,92,252,0.08) 0, rgba(124,92,252,0.08) 1px, transparent 1px, transparent 32px),
+    repeating-linear-gradient(90deg, rgba(124,92,252,0.08) 0, rgba(124,92,252,0.08) 1px, transparent 1px, transparent 32px);
+  background-size: 32px 32px;
+  background-color: var(--bg-primary);
+}
+
+/* Stage objects */
+.stage-object {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  transform-origin: center center;
+}
+.stage-object:active { cursor: grabbing; }
+.stage-object.locked { cursor: default; pointer-events: none; }
+
+.stage-object img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+.stage-object.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 16px rgba(124, 92, 252, 0.4);
+}
+
+/* Transform handles */
+.transform-handles {
+  position: absolute;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.transform-handle {
+  position: absolute;
+  width: 10px; height: 10px;
+  background: white;
+  border: 2px solid var(--accent);
+  border-radius: 2px;
+  pointer-events: all;
+  cursor: nwse-resize;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.transform-handle[data-dir="n"],
+.transform-handle[data-dir="s"] { cursor: ns-resize; }
+.transform-handle[data-dir="e"],
+.transform-handle[data-dir="w"] { cursor: ew-resize; }
+.transform-handle[data-dir="nw"] { cursor: nwse-resize; }
+.transform-handle[data-dir="ne"] { cursor: nesw-resize; }
+.transform-handle[data-dir="sw"] { cursor: nesw-resize; }
+.transform-handle[data-dir="se"] { cursor: nwse-resize; }
+
+.rotate-handle {
+  position: absolute;
+  width: 14px; height: 14px;
+  background: var(--gold);
+  border: 2px solid white;
+  border-radius: 50%;
+  pointer-events: all;
+  cursor: crosshair;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+/* Hitbox overlay */
+.hitbox-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hitbox-overlay .hitbox-rect {
+  fill: rgba(124, 92, 252, 0.2);
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 3;
+  pointer-events: none;
+}
+
+.hitbox-overlay.drawing { pointer-events: all; cursor: crosshair; }
+
+/* Status bar */
+#canvas-status-bar {
+  height: 24px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 16px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+/* Drag ghost */
+.drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.7;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+.drag-ghost img {
+  max-width: 80px;
+  max-height: 80px;
+  image-rendering: pixelated;
+}
