@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nabu Sprite Review</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: #0c0911;
+      color: #f8edf9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #281630 0, transparent 38rem), #0c0911;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 18px 24px;
+      background: rgb(18 13 24 / 92%);
+      border-bottom: 1px solid #5c3c67;
+      backdrop-filter: blur(16px);
+    }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 8px; font-size: 24px; }
+    h2 { margin-bottom: 6px; color: #ffbaf2; }
+    p { color: #cbbbcf; line-height: 1.5; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    button, select {
+      padding: 8px 11px;
+      border: 1px solid #765781;
+      border-radius: 8px;
+      background: #21152a;
+      color: inherit;
+      cursor: pointer;
+    }
+    button:hover { background: #382143; }
+    main { width: min(1600px, 100%); margin: 0 auto; padding: 24px; }
+    section { margin-bottom: 42px; scroll-margin-top: 130px; }
+    .section-note { max-width: 900px; margin-bottom: 16px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+      gap: 14px;
+    }
+    article {
+      display: grid;
+      grid-template-rows: 260px auto auto;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid #44334c;
+      border-radius: 12px;
+      background: #15101b;
+    }
+    article[data-decision="keep"] { border-color: #55dc9a; }
+    article[data-decision="maybe"] { border-color: #ffc857; }
+    article[data-decision="reject"] { border-color: #ff667d; opacity: .55; }
+    .preview {
+      display: grid;
+      place-items: center;
+      padding: 10px;
+      overflow: hidden;
+      background:
+        linear-gradient(45deg, #17121d 25%, transparent 25%),
+        linear-gradient(-45deg, #17121d 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #17121d 75%),
+        linear-gradient(-45deg, transparent 75%, #17121d 75%),
+        #211927;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      background-size: 16px 16px;
+    }
+    img { display: block; max-width: 100%; max-height: 240px; object-fit: contain; }
+    .meta { padding: 11px 12px 4px; min-width: 0; }
+    .name { display: block; overflow-wrap: anywhere; color: #fff; font-size: 12px; }
+    .decision {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      padding: 8px 10px 11px;
+    }
+    .decision button { padding: 6px 4px; font-size: 11px; }
+    .summary { font-size: 12px; color: #bfaec4; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Nabu Sprite Review</h1>
+    <p>Nothing shown here has been relocated. Choose keep, maybe, or reject; decisions stay in this browser.</p>
+    <div class="toolbar">
+      <select id="filter" aria-label="Filter decisions">
+        <option value="all">Show all</option>
+        <option value="unreviewed">Unreviewed</option>
+        <option value="keep">Keep</option>
+        <option value="maybe">Maybe</option>
+        <option value="reject">Reject</option>
+      </select>
+      <button id="export">Download decisions</button>
+      <button id="clear">Clear decisions</button>
+      <span class="summary" id="summary"></span>
+    </div>
+  </header>
+  <main id="review"></main>
+  <script>
+    const groups = [
+      {
+        title: "A — Cohesive Dark-Cloak Sprite Sheets",
+        note: "The most internally consistent field-sprite family. These sheets cover standing, movement, gathering, resting, reactions, and directional views.",
+        files: Array.from({ length: 10 }, (_, index) => `nabu_tru-${index + 1}.png`)
+      },
+      {
+        title: "B — Blue Outfit Sprite-Sheet Experiments",
+        note: "Larger generated sheets exploring a brighter blue/purple canonical outfit. Similar character, but proportions, face, ornamentation, and rendering vary between sheets.",
+        files: ["nabu-blu_1.png", "nabu-blu_2.png", "nabu-blu_3.png", "nabu-blu_4.png", "nabu-blu_5.png", "nabu-blu_6.png", "nabu-blu_7.png"]
+      },
+      {
+        title: "C — Individual Blue Outfit Poses",
+        note: "Crops and isolated poses useful for comparison, dialogue staging, or extracting a final field-sprite model.",
+        files: [
+          "nabu-blu_9.png", "nabu-blu_10.png", "nabu-blu_11.png",
+          "special-ocassion/Screenshot 2026-05-01 at 6.57.02 AM.png",
+          "special-ocassion/Screenshot 2026-05-01 at 6.57.11 AM.png",
+          ...Array.from({ length: 8 }, (_, index) => `special-ocassion/new-nabu_13 copy ${index + 2}.png`)
+        ]
+      },
+      {
+        title: "D — Near-Duplicate Blue Sheet Iterations",
+        note: "These are not byte-identical. They reuse almost the same layouts with small face, costume, pose, color, or rendering changes. Review before deleting.",
+        files: [
+          "special-ocassion/new-nabu_8.png", "special-ocassion/new-nabu_9 2.png",
+          "special-ocassion/new-nabu_10.png", "special-ocassion/new-nabu_11.png",
+          "special-ocassion/new-nabu_12.png", "untitled folder/2.png",
+          "untitled folder/3.png", "untitled folder/4.png",
+          "untitled folder/ChatGPT Image Apr 26, 2026, 09_52_15 AM.png",
+          "untitled folder/Gemini_Generated_Image_ (1).png",
+          "untitled folder/Gemini_Generated_Image_.png",
+          "untitled folder/Gemini_Generated_Image_iwo0eriwo0eriwo0.png"
+        ]
+      },
+      {
+        title: "E — Pixel Dialogue Portraits",
+        note: "A coherent eleven-expression portrait system with stable costume, face, scale, and pixel treatment.",
+        files: ["afraid", "embarrased", "mad", "mischief", "neutral", "pleased", "sad", "shock", "shy", "skeptical", "tired"]
+          .map((name) => `dialogue-portraits/nabu_dialouge-${name}.png`)
+      },
+      {
+        title: "F — Newer Dialogue-Portrait Experiments",
+        note: "Higher-detail portrait sheets with a softer rendering style. One exact duplicate from this group was removed.",
+        files: [
+          "dialogue-portraits/new-nabu_3 copy.png",
+          "dialogue-portraits/new-nabu_dialogue-1.png",
+          "dialogue-portraits/new-nabu_dialogue-2.png",
+          "dialogue-portraits/new-nabu_dialogue-2 copy.png"
+        ]
+      },
+      {
+        title: "G — Brown Legacy Nabu",
+        note: "An older, more naturalistic hunting outfit. This is a useful archive and alternate-costume family, but it contains several different face and proportion models.",
+        files: Array.from({ length: 27 }, (_, index) => `misc-sprites/old-nabu/nabu-brwn_${index + 2}.png`)
+      },
+      {
+        title: "H — Miscellaneous Generated Poses",
+        note: "Loose experiments that do not yet belong to a complete production family.",
+        files: [
+          "special-ocassion/new-nabu_13 copy.png", "special-ocassion/new-nabu_14.png",
+          "untitled folder/Gemini_Generated_Image_ copy.png",
+          "untitled folder/Screenshot 2026-05-10 at 1.26.55 AM.png",
+          "untitled folder/new-nabu_1.png", "untitled folder/new-nabu_8 copy.png",
+          "untitled folder/new-nabu_8 copy 2.png"
+        ]
+      }
+    ];
+    const storageKey = "cavebot-nabu-sprite-review-v1";
+    const decisions = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    const review = document.querySelector("#review");
+    const filter = document.querySelector("#filter");
+    const summary = document.querySelector("#summary");
+
+    function save() {
+      localStorage.setItem(storageKey, JSON.stringify(decisions));
+      update();
+    }
+    function setDecision(file, decision) {
+      if (decisions[file] === decision) delete decisions[file];
+      else decisions[file] = decision;
+      save();
+    }
+    function render() {
+      groups.forEach((group) => {
+        const section = document.createElement("section");
+        section.innerHTML = `<h2>${group.title}</h2><p class="section-note">${group.note}</p><div class="grid"></div>`;
+        const grid = section.querySelector(".grid");
+        group.files.forEach((file) => {
+          const card = document.createElement("article");
+          card.dataset.file = file;
+          card.innerHTML = `
+            <a class="preview" href="${encodeURI(file)}" target="_blank">
+              <img loading="lazy" src="${encodeURI(file)}" alt="${file}">
+            </a>
+            <div class="meta"><span class="name">${file}</span></div>
+            <div class="decision">
+              <button data-value="keep">Keep</button>
+              <button data-value="maybe">Maybe</button>
+              <button data-value="reject">Reject</button>
+            </div>`;
+          card.querySelectorAll("button").forEach((button) => {
+            button.addEventListener("click", () => setDecision(file, button.dataset.value));
+          });
+          grid.append(card);
+        });
+        review.append(section);
+      });
+      update();
+    }
+    function update() {
+      const selected = filter.value;
+      const cards = [...document.querySelectorAll("article")];
+      cards.forEach((card) => {
+        const decision = decisions[card.dataset.file] || "";
+        card.dataset.decision = decision;
+        card.classList.toggle("hidden", selected !== "all" && (selected === "unreviewed" ? decision !== "" : decision !== selected));
+      });
+      const counts = cards.reduce((result, card) => {
+        const value = decisions[card.dataset.file] || "unreviewed";
+        result[value] = (result[value] || 0) + 1;
+        return result;
+      }, {});
+      summary.textContent = `${counts.keep || 0} keep · ${counts.maybe || 0} maybe · ${counts.reject || 0} reject · ${counts.unreviewed || 0} unreviewed`;
+    }
+    filter.addEventListener("change", update);
+    document.querySelector("#export").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(decisions, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "nabu-sprite-decisions.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+    document.querySelector("#clear").addEventListener("click", () => {
+      if (confirm("Clear every Nabu review decision?")) {
+        Object.keys(decisions).forEach((key) => delete decisions[key]);
+        save();
+      }
+    });
+    render();
+  </script>
+</body>
+</html>
