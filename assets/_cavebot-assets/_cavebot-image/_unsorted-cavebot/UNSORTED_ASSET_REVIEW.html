@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cavebot Unsorted Asset Review</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: #08070c;
+      color: #f7eefb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 20% 0, #25365b 0, transparent 28rem),
+        radial-gradient(circle at 80% 0, #54244f 0, transparent 30rem),
+        #08070c;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 14px 20px;
+      border-bottom: 1px solid #594962;
+      background: rgb(11 9 15 / 94%);
+      backdrop-filter: blur(16px);
+    }
+    h1 { margin: 0 0 6px; font-size: 23px; }
+    p { color: #c4b8ca; line-height: 1.45; }
+    header p { margin: 0 0 10px; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) repeat(3, minmax(140px, auto)) auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+    input, select, button {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid #6d5975;
+      border-radius: 8px;
+      background: #1a1420;
+      color: inherit;
+    }
+    button { cursor: pointer; }
+    button:hover { background: #33213d; }
+    .stats { margin-top: 8px; color: #bcaec3; font-size: 12px; }
+    main {
+      width: min(1800px, 100%);
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .batch {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(180px, 260px)) auto;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 12px;
+      border: 1px solid #403449;
+      border-radius: 10px;
+      background: #100d15;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 13px;
+    }
+    article {
+      display: grid;
+      grid-template-rows: 220px auto auto;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid #403649;
+      border-radius: 11px;
+      background: #111017;
+    }
+    article[data-fate="production"] { border-color: #48d897; }
+    article[data-fate="archive"] { border-color: #ffc857; }
+    article[data-fate="delete"] { border-color: #ff5f78; opacity: .56; }
+    article[data-duplicate="true"] { box-shadow: 0 0 0 2px #e57cff inset; }
+    .preview {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-width: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(45deg, #17131c 25%, transparent 25%),
+        linear-gradient(-45deg, #17131c 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #17131c 75%),
+        linear-gradient(-45deg, transparent 75%, #17131c 75%),
+        #211a27;
+      background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+      background-size: 18px 18px;
+    }
+    img, video {
+      display: block;
+      max-width: 100%;
+      max-height: 215px;
+      object-fit: contain;
+    }
+    .badge {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      padding: 4px 6px;
+      border-radius: 5px;
+      background: rgb(0 0 0 / 76%);
+      font-size: 10px;
+    }
+    .meta { min-width: 0; padding: 9px 10px 5px; }
+    .filename { overflow-wrap: anywhere; font-size: 11px; }
+    .dimensions { margin-top: 5px; color: #a999af; font-size: 10px; }
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 7px 9px 10px;
+    }
+    .choices select { min-width: 0; font-size: 11px; }
+    .hidden { display: none; }
+    @media (max-width: 900px) {
+      .toolbar, .batch { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Unsorted Cavebot Review</h1>
+    <p>Assign one primary destination and one fate. Your decisions stay in this browser until exported.</p>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Search filename or ID">
+      <select id="category-filter"><option value="">All categories</option></select>
+      <select id="fate-filter">
+        <option value="">All fates</option>
+        <option value="unreviewed">Unreviewed</option>
+        <option value="production">Production</option>
+        <option value="archive">Archive</option>
+        <option value="delete">Delete</option>
+      </select>
+      <select id="type-filter">
+        <option value="">All formats</option>
+        <option value="png">PNG</option>
+        <option value="mov">MOV</option>
+      </select>
+      <button id="export">Export JSON</button>
+      <button id="clear">Clear</button>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+  <main>
+    <div class="batch">
+      <select id="batch-category"><option value="">Set visible category…</option></select>
+      <select id="batch-fate">
+        <option value="">Set visible fate…</option>
+        <option value="production">Production</option>
+        <option value="archive">Archive</option>
+        <option value="delete">Delete</option>
+      </select>
+      <button id="apply-visible">Apply to visible cards</button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </main>
+  <script src="UNSORTED_MANIFEST.js"></script>
+  <script>
+    const categories = [
+      ["characters-npcs", "Characters & NPCs"],
+      ["anzu-birds", "Anzu & Birds"],
+      ["animals-creatures", "Animals & Creatures"],
+      ["environments", "Environments"],
+      ["scene-composites", "Completed Scenes & Composites"],
+      ["ui-frames-hud", "UI Frames & HUD"],
+      ["props-items", "Props & Inventory Items"],
+      ["symbols-icons", "Symbols & Icons"],
+      ["maps-diagrams", "Maps & Diagrams"],
+      ["lore-documents", "Lore, Text & Documents"],
+      ["cards-deck", "Cards & Deck Assets"],
+      ["glitch-tech", "Glitch, Technology & Containment"],
+      ["future-backrooms", "Future Act & Backrooms"],
+      ["reference", "Reference & Inspiration"],
+      ["duplicate-review", "Duplicate Review"],
+      ["uncertain", "Still Uncertain"]
+    ];
+    const storageKey = "cavebot-unsorted-review-v1";
+    const decisions = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    const grid = document.querySelector("#grid");
+    const search = document.querySelector("#search");
+    const categoryFilter = document.querySelector("#category-filter");
+    const fateFilter = document.querySelector("#fate-filter");
+    const typeFilter = document.querySelector("#type-filter");
+    const batchCategory = document.querySelector("#batch-category");
+    const batchFate = document.querySelector("#batch-fate");
+    const stats = document.querySelector("#stats");
+
+    function addCategoryOptions(select, blankLabel) {
+      if (blankLabel) select.innerHTML = `<option value="">${blankLabel}</option>`;
+      categories.forEach(([value, label]) => select.add(new Option(label, value)));
+    }
+    addCategoryOptions(categoryFilter, "All categories");
+    addCategoryOptions(batchCategory, "Set visible category…");
+
+    function save() {
+      localStorage.setItem(storageKey, JSON.stringify(decisions));
+      update();
+    }
+    function setValue(file, key, value) {
+      decisions[file] ||= {};
+      if (value) decisions[file][key] = value;
+      else delete decisions[file][key];
+      if (!Object.keys(decisions[file]).length) delete decisions[file];
+      save();
+    }
+    function media(asset) {
+      const path = encodeURI(asset.file);
+      if (asset.type === "mov") return `<video src="${path}" controls muted preload="metadata"></video>`;
+      return `<img loading="lazy" src="${path}" alt="${asset.file}">`;
+    }
+    function render() {
+      window.UNSORTED_ASSETS.forEach((asset) => {
+        const card = document.createElement("article");
+        card.dataset.file = asset.file;
+        card.dataset.id = asset.id;
+        card.dataset.type = asset.type;
+        card.dataset.duplicate = asset.exactDuplicates ? "true" : "false";
+        const categoryOptions = categories.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+        const duplicateText = asset.exactDuplicates ? ` · exact duplicate group` : "";
+        card.innerHTML = `
+          <a class="preview" href="${encodeURI(asset.file)}" target="_blank">
+            ${media(asset)}
+            <span class="badge">#${String(asset.id).padStart(3, "0")}${duplicateText}</span>
+          </a>
+          <div class="meta">
+            <div class="filename">${asset.file}</div>
+            <div class="dimensions">${asset.width || "?"}×${asset.height || "?"} · ${asset.type.toUpperCase()} · ${(asset.bytes / 1048576).toFixed(2)} MB</div>
+          </div>
+          <div class="choices">
+            <select class="category"><option value="">Choose category…</option>${categoryOptions}</select>
+            <select class="fate">
+              <option value="">Choose fate…</option>
+              <option value="production">Production</option>
+              <option value="archive">Archive</option>
+              <option value="delete">Delete</option>
+            </select>
+          </div>`;
+        const category = card.querySelector(".category");
+        const fate = card.querySelector(".fate");
+        category.addEventListener("change", () => setValue(asset.file, "category", category.value));
+        fate.addEventListener("change", () => setValue(asset.file, "fate", fate.value));
+        grid.append(card);
+      });
+      update();
+    }
+    function update() {
+      const query = search.value.trim().toLowerCase();
+      const selectedCategory = categoryFilter.value;
+      const selectedFate = fateFilter.value;
+      const selectedType = typeFilter.value;
+      let visible = 0;
+      let production = 0;
+      let archive = 0;
+      let remove = 0;
+      [...grid.children].forEach((card) => {
+        const decision = decisions[card.dataset.file] || {};
+        card.querySelector(".category").value = decision.category || "";
+        card.querySelector(".fate").value = decision.fate || "";
+        card.dataset.fate = decision.fate || "";
+        if (decision.fate === "production") production++;
+        if (decision.fate === "archive") archive++;
+        if (decision.fate === "delete") remove++;
+        const matchesSearch = !query || card.dataset.file.toLowerCase().includes(query) || card.dataset.id.includes(query);
+        const matchesCategory = !selectedCategory || decision.category === selectedCategory;
+        const matchesFate = !selectedFate || (selectedFate === "unreviewed" ? !decision.fate : decision.fate === selectedFate);
+        const matchesType = !selectedType || card.dataset.type === selectedType;
+        const show = matchesSearch && matchesCategory && matchesFate && matchesType;
+        card.classList.toggle("hidden", !show);
+        if (show) visible++;
+      });
+      stats.textContent = `${visible} visible / ${window.UNSORTED_ASSETS.length} total · ${production} production · ${archive} archive · ${remove} delete · ${window.UNSORTED_ASSETS.length - production - archive - remove} without fate`;
+    }
+    [search, categoryFilter, fateFilter, typeFilter].forEach((control) => control.addEventListener("input", update));
+    document.querySelector("#apply-visible").addEventListener("click", () => {
+      [...grid.children].filter((card) => !card.classList.contains("hidden")).forEach((card) => {
+        decisions[card.dataset.file] ||= {};
+        if (batchCategory.value) decisions[card.dataset.file].category = batchCategory.value;
+        if (batchFate.value) decisions[card.dataset.file].fate = batchFate.value;
+      });
+      batchCategory.value = "";
+      batchFate.value = "";
+      save();
+    });
+    document.querySelector("#export").addEventListener("click", () => {
+      const output = {
+        version: 1,
+        root: "assets/_cavebot-assets/_cavebot-image/_unsorted-cavebot",
+        decisions
+      };
+      const blob = new Blob([JSON.stringify(output, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "cavebot-unsorted-decisions.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    });
+    document.querySelector("#clear").addEventListener("click", () => {
+      if (confirm("Clear all unsorted asset decisions?")) {
+        Object.keys(decisions).forEach((key) => delete decisions[key]);
+        save();
+      }
+    });
+    render();
+  </script>
+</body>
+</html>
