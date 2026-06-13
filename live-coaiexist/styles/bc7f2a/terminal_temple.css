@@ -1,0 +1,215 @@
+/* Auto-extracted from bc7f2a/terminal_temple.html */
+
+*, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    :root {
+      --magenta: #f312af;
+      --magenta-dark: #b10a7a;
+      --magenta-light: #ff6bd0;
+      --cyan: #72FADE;
+      --cyan-dark: #41b8c4;
+      --cyan-light: #b7fdff;
+      --yellow: #fffb01;
+      --yellow-dark: #c9c600;
+      --yellow-light: #ffff82;
+      --padding-small: clamp(10px, 2vw, 20px);
+      --padding-medium: clamp(15px, 3vw, 30px);
+      --padding-large: clamp(20px, 4vw, 40px);
+      --font-size-small: clamp(14px, 2vw, 16px);
+      --font-size-medium: clamp(16px, 3vw, 20px);
+      --font-size-large: clamp(20px, 4vw, 28px);
+    }
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px var(--cyan); }
+      50% { text-shadow: 0 0 20px var(--magenta); }
+      100% { text-shadow: 0 0 5px var(--cyan); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    @keyframes cardReveal {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes gradientMove {
+      0%   { background-position: 100% 0%; }
+      100% { background-position: -100% 0%; }
+    }
+    body {
+      font-family: -apple-system, "VT323", monospace;
+      background-color: #000;
+      color: var(--cyan);
+      text-shadow: 2px 2px #000;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      touch-action: manipulation;
+      padding: var(--padding-small);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(circle at 50% 50%,
+          rgba(114, 250, 222, 0.1) 0%,
+          rgba(243, 18, 175, 0.1) 50%,
+          rgba(0, 0, 0, 0.2) 100%);
+    }
+    .altar-container {
+      max-width: min(95vw, 1200px);
+      margin: var(--padding-medium) auto;
+      background: rgba(0, 0, 0, 0.95);
+      border: 5px ridge var(--magenta);
+      padding: var(--padding-medium);
+      box-shadow: 0 0 20px var(--cyan);
+      border-radius: 10px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+    .terminal-window {
+      background: #000;
+      border: 2px solid var(--cyan);
+      padding: var(--padding-medium);
+      margin: var(--padding-medium) 0;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      color: var(--cyan);
+      height: clamp(150px, 30vh, 300px);
+      overflow-y: auto;
+      border-radius: 8px;
+      position: relative;
+    }
+    .terminal-window div {
+      margin: 4px 0;
+      line-height: 1.4;
+      transition: opacity 0.3s;
+    }
+    .terminal-window div:last-child {
+      animation: cardReveal 0.3s ease-out;
+    }
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--padding-small);
+      justify-content: space-between;
+      padding: var(--padding-small);
+      background: #000;
+      border: 1px solid var(--yellow);
+      border-radius: 8px;
+      font-size: var(--font-size-small);
+      margin: var(--padding-medium) 0;
+    }
+    .consent-meter {
+      background: #000;
+      border: 1px solid var(--cyan);
+      padding: 5px;
+      margin: var(--padding-medium) 0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .consent-bar {
+      height: 20px;
+      width: 0%;
+      background: linear-gradient(
+        90deg,
+        var(--magenta) 0%,
+        var(--cyan)    50%,
+        var(--magenta) 100%
+      );
+      transition: width 0.5s ease-in-out;
+      position: relative;
+      border-radius: 2px;
+      background-size: 200% 100%;
+      animation: gradientMove 2s linear infinite;
+    }
+    .consent-bar::after {
+      content: attr(data-percent) "%";
+      position: absolute;
+      right: 5px;
+      color: #000;
+      font-weight: bold;
+      text-shadow: none;
+    }
+    .ritual-frame {
+      border: 1px solid var(--yellow);
+      margin: var(--padding-medium) 0;
+      padding: var(--padding-medium);
+      text-align: center;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      font-size: var(--font-size-medium);
+      animation: glow 2s infinite;
+    }
+    .face-animation {
+      font-family: monospace;
+      font-size: var(--font-size-large);
+      text-align: center;
+      margin: var(--padding-medium) 0;
+      padding: var(--padding-medium);
+      background: #000;
+      border-radius: 8px;
+      border: 1px solid var(--magenta);
+    }
+    .card-portal {
+      background: #000;
+      border: 2px solid var(--magenta);
+      border-radius: 12px;
+      padding: var(--padding-large);
+      margin: var(--padding-medium) 0;
+      box-shadow: 0 0 20px rgba(243, 18, 175, 0.3);
+      text-align: center;
+    }
+    #oracle-output {
+      min-height: 100px;
+      transition: all 0.3s ease;
+      font-size: var(--font-size-medium);
+      line-height: 1.5;
+      padding: var(--padding-medium);
+    }
+    .ritual-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--padding-small);
+      margin: var(--padding-medium) 0;
+    }
+    .ritual-button {
+      background: #000;
+      border: 2px solid var(--magenta);
+      color: var(--cyan);
+      padding: var(--padding-medium);
+      margin: var(--padding-small);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: var(--font-size-medium);
+      border-radius: 8px;
+      transition: all 0.3s;
+      min-height: 44px;
+      user-select: none;
+    }
+    .ritual-button:hover {
+      background: var(--magenta);
+      color: #000;
+      box-shadow: 0 0 15px var(--magenta);
+    }
+    .ritual-button:active {
+      transform: scale(0.95);
+    }
+    @media (max-width: 768px) {
+      .ritual-frame    { font-size: var(--font-size-small); }
+      .terminal-window { height: 200px; }
+    }
+    @media (min-width: 769px) {
+      .ritual-controls { grid-template-columns: repeat(3, 1fr); }
+      .card-portal {
+        max-width: 600px;
+        margin: var(--padding-large) auto;
+      }
+    }
+    @media (prefers-color-scheme: dark) {
+      body            { background-color: #000; }
+      .altar-container {
+        background: rgba(0, 0, 0, 0.98);
+      }
+    }
