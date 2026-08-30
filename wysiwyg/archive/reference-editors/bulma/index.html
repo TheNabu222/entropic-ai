@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Repo Page Editor · Bulma</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <section class="hero is-dark is-bold">
+    <div class="hero-body">
+      <p class="title">Repo Page Editor</p>
+      <p class="subtitle">Bulma-powered bespoke editor for this site's pages</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-one-third">
+          <div class="box has-background-light">
+            <h2 class="title is-5">Repo Pages</h2>
+            <p class="mb-3">Curated pages from the repository, ready to load and edit.</p>
+            <div class="field">
+              <p class="control has-icons-left">
+                <input id="pageFilter" class="input" type="text" placeholder="Filter pages...">
+                <span class="icon is-left"><i class="fas fa-search"></i></span>
+              </p>
+            </div>
+            <div id="pageList" class="menu"></div>
+          </div>
+          <div class="box is-size-7 has-text-grey">
+            <p class="mb-2"><strong>Workflow</strong></p>
+            <ol class="pl-4">
+              <li>Pick a page to load its HTML.</li>
+              <li>Edit the design view or source.</li>
+              <li>Sync the body into the full document.</li>
+              <li>Preview and download the updated HTML.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="box">
+            <div class="level">
+              <div class="level-left">
+                <div>
+                  <p class="title is-4">Editor Workspace</p>
+                  <p class="subtitle is-6" id="activePageLabel">No page loaded</p>
+                </div>
+              </div>
+              <div class="level-right buttons are-small">
+                <button id="refreshFromSource" class="button is-light" title="Refresh design view from source">
+                  <span class="icon"><i class="fas fa-rotate"></i></span><span>Refresh design</span>
+                </button>
+                <button id="syncToSource" class="button is-info" title="Push design changes into the HTML document">
+                  <span class="icon"><i class="fas fa-clone"></i></span><span>Sync body to source</span>
+                </button>
+                <button id="downloadHtml" class="button is-primary" title="Download the updated HTML">
+                  <span class="icon"><i class="fas fa-download"></i></span><span>Download</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="tabs is-boxed">
+              <ul>
+                <li class="is-active" data-tab="design"><a><span class="icon"><i class="fas fa-pen"></i></span><span>Design</span></a></li>
+                <li data-tab="source"><a><span class="icon"><i class="fas fa-code"></i></span><span>Source</span></a></li>
+                <li data-tab="preview"><a><span class="icon"><i class="fas fa-eye"></i></span><span>Preview</span></a></li>
+              </ul>
+            </div>
+
+            <div id="designPanel" class="panel">
+              <div class="toolbar buttons are-small mb-3">
+                <button class="button" data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
+                <button class="button" data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
+                <button class="button" data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
+                <button class="button" data-command="insertUnorderedList" title="Bullet list"><i class="fas fa-list-ul"></i></button>
+                <button class="button" data-command="insertOrderedList" title="Numbered list"><i class="fas fa-list-ol"></i></button>
+                <button class="button" data-command="formatBlock" data-value="<h2>" title="Heading"><i class="fas fa-heading"></i></button>
+                <button class="button" data-command="createLink" title="Insert link"><i class="fas fa-link"></i></button>
+                <button class="button" data-command="removeFormat" title="Clear formatting"><i class="fas fa-eraser"></i></button>
+              </div>
+              <div id="designEditor" class="content box" contenteditable="true" aria-label="Design editor"></div>
+            </div>
+
+            <div id="sourcePanel" class="panel is-hidden">
+              <textarea id="sourceEditor" class="textarea is-family-monospace" rows="16" spellcheck="false"></textarea>
+            </div>
+
+            <div id="previewPanel" class="panel is-hidden">
+              <iframe id="previewFrame" title="Preview" class="preview-frame"></iframe>
+            </div>
+          </div>
+
+          <div class="box">
+            <p class="title is-6">Page notes</p>
+            <div id="pageNotes" class="content is-size-7"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="./editor.js"></script>
+</body>
+</html>
